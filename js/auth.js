@@ -25,14 +25,30 @@ function authHataTemizle() {
 async function oturumuKontrolEt() {
     if (!supabaseClient) return;
     try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        let user = null;
+        let session = null;
+
+        // Sayfa açılışında veya F5 ile yenilendiğinde oturumu doğrudan sunucuya doğrulat (zombi oturumları temizler)
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+
+        if (!userError && userData?.user) {
+            user = userData.user;
+            const { data: sessionData } = await supabaseClient.auth.getSession();
+            session = sessionData?.session || null;
+        } else if (userError && userError.name !== 'AuthSessionMissingError') {
+            // Sunucu oturumu geçersiz kıldıysa (401, kullanıcı silinmiş, token süresi dolmuş vb.)
+            // LocalStorage'daki geçersiz oturum verilerini temizle
+            console.warn("Geçersiz oturum tespit edildi, oturum temizleniyor:", userError.message);
+            await supabaseClient.auth.signOut().catch(() => {});
+        }
+
         aktifKullaniciOturumu = session;
 
-        if (session?.user) {
+        if (user) {
             const { data } = await supabaseClient
                 .from('profiles')
                 .select('kullanici_adi, auth_id')
-                .eq('auth_id', session.user.id)
+                .eq('auth_id', user.id)
                 .single();
 
             if (data) {
@@ -51,15 +67,18 @@ async function oturumuKontrolEt() {
 
         authButonMetniniGuncelle();
 
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-            aktifKullaniciOturumu = session;
-            if (event === 'SIGNED_OUT') {
-                aktifKullaniciAdi = null;
-                isOwner = false;
-                document.body.classList.remove('is-owner');
-                authButonMetniniGuncelle();
-            }
-        });
+        if (!window._authStateListenerRegistered) {
+            window._authStateListenerRegistered = true;
+            supabaseClient.auth.onAuthStateChange((event, newSession) => {
+                aktifKullaniciOturumu = newSession;
+                if (event === 'SIGNED_OUT') {
+                    aktifKullaniciAdi = null;
+                    isOwner = false;
+                    document.body.classList.remove('is-owner');
+                    authButonMetniniGuncelle();
+                }
+            });
+        }
     } catch (err) {
         console.error("Oturum denetlenirken hata:", err);
     }
