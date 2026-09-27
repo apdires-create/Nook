@@ -839,22 +839,23 @@ EditManager.Media = {
                 .getPublicUrl(dosyaYolu);
 
             const publicUrl = publicUrlData.publicUrl;
-            const yeniUrl = `${publicUrlData.publicUrl}?v=${Date.now()}`;
+            const yeniUrl = `${publicUrl}?v=${Date.now()}`;
 
             if (!kartVerisi.front_data) kartVerisi.front_data = {};
 
             if (tur === 'pfp') {
-                kartVerisi.front_data.pfp_url = publicUrl;
+                kartVerisi.front_data.pfp_url = yeniUrl;
                 const avatarImg = document.getElementById('avatarImg');
-                if (avatarImg) avatarImg.src = publicUrl;
+                if (avatarImg) avatarImg.src = yeniUrl;
             } else {
-                kartVerisi.front_data.banner_url = publicUrl;
+                kartVerisi.front_data.banner_url = yeniUrl;
                 const bannerImg = document.getElementById('bannerImg');
-                if (bannerImg) bannerImg.src = publicUrl;
+                if (bannerImg) bannerImg.src = yeniUrl;
             }
 
-            EditManager.Global.degisiklikYapildi();
-            EditManager.Global.toastGoster("Görsel güncellendi!");
+            EditManager.state.hasUnsavedChanges = true;
+            document.body.classList.add('has-unsaved-changes');
+            EditManager.Global.toastGoster("Görsel hazırlandı. Kaydetmek için 'Kaydet' butonuna basın.");
         } catch (err) {
             console.error("Görsel yükleme hatası:", err);
             alert("Görsel yüklenemedi: " + err.message);
