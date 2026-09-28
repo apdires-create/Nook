@@ -165,14 +165,23 @@ async function sistemeKayitOl(email, password, username) {
         .from('profiles')
         .select('kullanici_adi')
         .eq('kullanici_adi', temizKullaniciAdi)
-        .single();
+        .maybeSingle();
 
     if (existingUser) {
         authHataGoster("Bu kullanıcı adı zaten alınmış! Lütfen başka bir isim dene.");
         return false;
     }
 
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+            data: {
+                kullanici_adi: temizKullaniciAdi // Trigger bunu alıp profiles tablosuna yazacak
+            },
+            emailRedirectTo: `${window.location.origin}${window.location.pathname}?user=${encodeURIComponent(temizKullaniciAdi)}`
+        }
+    });
 
     if (error) {
         let hataMesaji = "Kayıt Hatası: " + error.message;
@@ -182,34 +191,12 @@ async function sistemeKayitOl(email, password, username) {
     }
 
     if (data?.user) {
-        const { error: dbError } = await supabaseClient
-            .from('profiles')
-            .insert([{
-                auth_id: data.user.id,
-                kullanici_adi: temizKullaniciAdi,
-                front_data: {
-                    tags: [],
-                    unvan: "Nook Üyesi",
-                    aciklama: "Kendi dijital köşesini inşa ediyor.",
-                    pfp_url: "https://i.ibb.co/8gvf4SNF/pfp-placeholder.png",
-                    banner_url: "https://i.ibb.co/RTNFJZXT/banner-placeholder.png"
-                },
-                links: [],
-                tops: {},
-                trophies: [],
-                widgets: [],
-                working_on: { metin: "Nook profilimi düzenliyorum." },
-                theme_config: { font: "inter", preset: "default", primary_color: "#3b82f6" }
-            }]);
-
-        if (dbError) {
-            authHataGoster("Profil oluşturulurken hata: " + dbError.message);
-            return false;
-        }
+        alert("Kayıt başarılı! Lütfen gelen kutunu kontrol edip e-posta adresini onayla.");
+        return true;
     }
 
-    window.location.href = `?user=${encodeURIComponent(temizKullaniciAdi)}`;
-    return true;
+    authHataGoster("Kayıt işlemi tamamlanamadı. Lütfen tekrar deneyin.");
+    return false;
 }
 
 
