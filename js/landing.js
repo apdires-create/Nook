@@ -176,10 +176,6 @@ function landingEkraniniBaslat() {
             isLandingLoginMode = !isLandingLoginMode;
             if (typeof authHataTemizle === 'function') authHataTemizle();
 
-            if (typeof turnstileSifirla === 'function') {
-                turnstileSifirla('landing-turnstile');
-            }
-
             if (isLandingLoginMode) {
                 if (landingBox) landingBox.classList.remove('register-mode');
                 if (mainTitle) mainTitle.textContent = rastgeleBaslikSec(loginBasliklari);

@@ -6,20 +6,27 @@ let turnstileToken = null;
 
 function turnstileTokenAlindi(token) {
     turnstileToken = token;
+    // Onay alındığında kutuyu gizle
+    document.querySelectorAll('.cf-turnstile').forEach(el => {
+        el.classList.remove('is-active');
+    });
 }
 
 function turnstileHata() {
     turnstileToken = null;
+    document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
 }
 
 function turnstileSuresiDoldu() {
     turnstileToken = null;
+    document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
 }
 
 const turnstileWidgetIds = {};
 
 function turnstileSifirla(hedefId = null) {
     turnstileToken = null;
+    document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
     if (!window.turnstile) return;
     try {
         if (hedefId && turnstileWidgetIds[hedefId] !== undefined) {
@@ -40,8 +47,11 @@ function turnstileWidgetiHazirla(hedefId = 'auth-turnstile') {
         if (!window.turnstile) return;
         try {
             if (turnstileWidgetIds[hedefId] !== undefined) {
-                window.turnstile.reset(turnstileWidgetIds[hedefId]);
-                turnstileToken = null;
+                // Halihazırda geçerli bir token varsa modu değiştirince sıfırlama yapma
+                if (!turnstileToken) {
+                    window.turnstile.reset(turnstileWidgetIds[hedefId]);
+                }
+                widget.classList.remove('is-active');
                 return;
             }
 
@@ -50,6 +60,14 @@ function turnstileWidgetiHazirla(hedefId = 'auth-turnstile') {
                 callback: turnstileTokenAlindi,
                 'error-callback': turnstileHata,
                 'expired-callback': turnstileSuresiDoldu,
+                'before-interactive-callback': () => {
+                    // Yalnızca kullanıcıdan manuel etkileşim (tıklama/doğrulama) istendiğinde kutuyu görünür yap
+                    widget.classList.add('is-active');
+                },
+                'after-interactive-callback': () => {
+                    // Etkileşim biter bitmez kutuyu tekrar zarifçe kapat
+                    setTimeout(() => widget.classList.remove('is-active'), 400);
+                },
                 theme: 'dark'
             });
 
@@ -403,7 +421,6 @@ function authModaliniBaslat() {
         switchBtn.addEventListener('click', () => {
             isLoginMode = !isLoginMode;
             authHataTemizle();
-            turnstileSifirla('auth-turnstile');
             if (isLoginMode) {
                 if (title) title.textContent = 'Giriş Yap';
                 if (usernameGroup) usernameGroup.style.display = 'none';
