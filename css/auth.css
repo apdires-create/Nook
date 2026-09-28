@@ -285,6 +285,12 @@
     box-sizing: border-box;
 }
 
+.auth-success-box {
+    background: rgba(16, 185, 129, 0.14);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #4ade80;
+}
+
 .auth-submit-btn {
     width: 100%;
     height: 46px;
@@ -414,6 +420,23 @@
     20%, 80% { transform: translateX(2px); }
     30%, 50%, 70% { transform: translateX(-3px); }
     40%, 60% { transform: translateX(3px); }
+}
+
+.success-box-animation {
+    animation: successPop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes successPop {
+    0% { transform: scale(0.96); opacity: 0.8; }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.cf-turnstile {
+    display: flex;
+    justify-content: center;
+    margin: 8px 0;
+    min-height: 65px;
 }
 /* #endregion */
 

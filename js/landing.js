@@ -84,7 +84,14 @@ function landingFlipEtkilesiminiBaslat() {
 
     const toggleFlip = (e) => {
         if (e) e.stopPropagation();
-        if (flipCardInner) flipCardInner.classList.toggle('is-flipped');
+        if (flipCardInner) {
+            flipCardInner.classList.toggle('is-flipped');
+            if (flipCardInner.classList.contains('is-flipped')) {
+                if (typeof turnstileWidgetiHazirla === 'function') {
+                    requestAnimationFrame(() => turnstileWidgetiHazirla('landing-turnstile'));
+                }
+            }
+        }
         if (visualWrapper) visualWrapper.classList.toggle('is-flat');
     };
 
@@ -168,6 +175,10 @@ function landingEkraniniBaslat() {
         switchBtn.addEventListener('click', () => {
             isLandingLoginMode = !isLandingLoginMode;
             if (typeof authHataTemizle === 'function') authHataTemizle();
+
+            if (typeof turnstileSifirla === 'function') {
+                turnstileSifirla('landing-turnstile');
+            }
 
             if (isLandingLoginMode) {
                 if (landingBox) landingBox.classList.remove('register-mode');

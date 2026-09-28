@@ -2,21 +2,108 @@
 let isLoginMode = true;
 let hataliGirisDenemesi = 0;
 let girisKilitliMi = false;
+let turnstileToken = null;
 
-function authHataGoster(mesaj) {
+function turnstileTokenAlindi(token) {
+    turnstileToken = token;
+}
+
+function turnstileHata() {
+    turnstileToken = null;
+}
+
+function turnstileSuresiDoldu() {
+    turnstileToken = null;
+}
+
+const turnstileWidgetIds = {};
+
+function turnstileSifirla(hedefId = null) {
+    turnstileToken = null;
+    if (!window.turnstile) return;
+    try {
+        if (hedefId && turnstileWidgetIds[hedefId] !== undefined) {
+            window.turnstile.reset(turnstileWidgetIds[hedefId]);
+        } else {
+            window.turnstile.reset();
+        }
+    } catch (err) {
+        console.warn('Turnstile reset sırasında hata:', err);
+    }
+}
+
+function turnstileWidgetiHazirla(hedefId = 'auth-turnstile') {
+    const widget = document.getElementById(hedefId);
+    if (!widget) return;
+
+    const renderEt = () => {
+        if (!window.turnstile) return;
+        try {
+            if (turnstileWidgetIds[hedefId] !== undefined) {
+                window.turnstile.reset(turnstileWidgetIds[hedefId]);
+                turnstileToken = null;
+                return;
+            }
+
+            const widgetId = window.turnstile.render('#' + hedefId, {
+                sitekey: '0x4AAAAAAFGojYtbrPQuD8-O',
+                callback: turnstileTokenAlindi,
+                'error-callback': turnstileHata,
+                'expired-callback': turnstileSuresiDoldu,
+                theme: 'dark'
+            });
+
+            turnstileWidgetIds[hedefId] = widgetId;
+        } catch (err) {
+            console.warn('Turnstile render hatası:', err);
+        }
+    };
+
+    if (window.turnstile) {
+        renderEt();
+    } else {
+        const timer = setInterval(() => {
+            if (window.turnstile) {
+                clearInterval(timer);
+                renderEt();
+            }
+        }, 100);
+        setTimeout(() => clearInterval(timer), 4000);
+    }
+}
+
+function authMesajGoster(mesaj, tur = 'error') {
     document.querySelectorAll('.auth-error-box').forEach(box => {
         box.textContent = mesaj;
         box.style.display = 'block';
-        box.classList.add('is-visible', 'shake-box-animation');
-        setTimeout(() => box.classList.remove('shake-box-animation'), 400);
+        box.classList.toggle('auth-success-box', tur === 'success');
+        box.classList.toggle('is-visible', true);
+
+        if (tur === 'success') {
+            box.classList.remove('shake-box-animation');
+            box.classList.add('success-box-animation');
+            setTimeout(() => box.classList.remove('success-box-animation'), 400);
+        } else {
+            box.classList.remove('success-box-animation');
+            box.classList.add('shake-box-animation');
+            setTimeout(() => box.classList.remove('shake-box-animation'), 400);
+        }
     });
+}
+
+function authHataGoster(mesaj) {
+    authMesajGoster(mesaj, 'error');
+}
+
+function authBasariGoster(mesaj) {
+    authMesajGoster(mesaj, 'success');
 }
 
 function authHataTemizle() {
     document.querySelectorAll('.auth-error-box').forEach(box => {
         box.textContent = '';
         box.style.display = 'none';
-        box.classList.remove('is-visible');
+        box.classList.remove('is-visible', 'auth-success-box', 'shake-box-animation', 'success-box-animation');
     });
 }
 // #endregion
@@ -27,6 +114,16 @@ async function oturumuKontrolEt() {
     try {
         let user = null;
         let session = null;
+
+        // 1. URL'de onay bağlantısı hatası var mı kontrol et (#error=access_denied&error_description=...)
+        if (window.location.hash && window.location.hash.includes('error=')) {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const errorDesc = hashParams.get('error_description') || "Doğrulama bağlantısı geçersiz veya süresi dolmuş.";
+            const temizMesaj = decodeURIComponent(errorDesc.replace(/\+/g, ' '));
+            console.warn("Auth URL hatası:", temizMesaj);
+            authHataGoster(temizMesaj);
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
 
         // Sayfa açılışında veya F5 ile yenilendiğinde oturumu doğrudan sunucuya doğrulat (zombi oturumları temizler)
         const { data: userData, error: userError } = await supabaseClient.auth.getUser();
@@ -66,6 +163,11 @@ async function oturumuKontrolEt() {
         }
 
         authButonMetniniGuncelle();
+
+        // 2. URL'de Supabase onay/oturum hash'i varsa adresi temizle (#access_token=... vb.)
+        if (window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('type='))) {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
 
         if (!window._authStateListenerRegistered) {
             window._authStateListenerRegistered = true;
@@ -107,13 +209,21 @@ async function sistemeGirisYap(email, password) {
         authHataGoster("Lütfen e-posta ve şifrenizi girin.");
         return false;
     }
-    if (password.length < 6) {
-        authHataGoster("Şifre en az 6 karakter olmalıdır.");
+    if (password.length < 8) {
+        authHataGoster("Şifre en az 8 karakter olmalıdır.");
+        return false;
+    }
+    if (!turnstileToken) {
+        authHataGoster("Lütfen doğrulamayı tamamlayın.");
         return false;
     }
 
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password,
+        options: { captchaToken: turnstileToken }
+    });
+    turnstileSifirla();
     if (error) {
         hataliGirisDenemesi++;
         if (hataliGirisDenemesi >= 5) {
@@ -156,8 +266,12 @@ async function sistemeKayitOl(email, password, username) {
         authHataGoster("Kullanıcı adı 3-20 karakter olmalı, harf, rakam veya alt çizgi (_) içermelidir.");
         return false;
     }
-    if (password.length < 6) {
-        authHataGoster("Şifreniz en az 6 karakter olmalıdır.");
+    if (password.length < 8) {
+        authHataGoster("Şifreniz en az 8 karakter olmalıdır.");
+        return false;
+    }
+    if (!turnstileToken) {
+        authHataGoster("Lütfen doğrulamayı tamamlayın.");
         return false;
     }
 
@@ -176,12 +290,12 @@ async function sistemeKayitOl(email, password, username) {
         email,
         password,
         options: {
-            data: {
-                kullanici_adi: temizKullaniciAdi // Trigger bunu alıp profiles tablosuna yazacak
-            },
-            emailRedirectTo: `${window.location.origin}${window.location.pathname}?user=${encodeURIComponent(temizKullaniciAdi)}`
+            data: { kullanici_adi: temizKullaniciAdi },
+            emailRedirectTo: `${window.location.origin}${window.location.pathname}?user=${encodeURIComponent(temizKullaniciAdi)}`,
+            captchaToken: turnstileToken
         }
     });
+    turnstileSifirla();
 
     if (error) {
         let hataMesaji = "Kayıt Hatası: " + error.message;
@@ -191,7 +305,17 @@ async function sistemeKayitOl(email, password, username) {
     }
 
     if (data?.user) {
-        alert("Kayıt başarılı! Lütfen gelen kutunu kontrol edip e-posta adresini onayla.");
+        if (data.user.identities && data.user.identities.length === 0) {
+            authHataGoster("Bu e-posta adresi zaten kayıtlı! Lütfen giriş yapın.");
+            return false;
+        }
+
+        const regPass = document.getElementById('auth-password');
+        const landPass = document.getElementById('landing-password');
+        if (regPass) regPass.value = '';
+        if (landPass) landPass.value = '';
+
+        authBasariGoster("Kayıt başarılı! Lütfen gelen kutunu kontrol edip e-posta adresini onayla.");
         return true;
     }
 
@@ -230,6 +354,19 @@ function authModaliniBaslat() {
 
     const modaliAc = () => {
         modal.classList.add('is-open');
+
+        requestAnimationFrame(() => {
+            if (!window.turnstile) return;
+            const widget = document.getElementById('auth-turnstile');
+            if (!widget) return;
+
+            if (widget.dataset.turnstileRendered !== 'true') {
+                turnstileWidgetiHazirla();
+            } else {
+                turnstileSifirla();
+            }
+        });
+
         if (aktifKullaniciOturumu) {
             if (formContainer) formContainer.style.display = 'none';
             if (loggedInView) loggedInView.style.display = 'flex';
@@ -266,6 +403,7 @@ function authModaliniBaslat() {
         switchBtn.addEventListener('click', () => {
             isLoginMode = !isLoginMode;
             authHataTemizle();
+            turnstileSifirla('auth-turnstile');
             if (isLoginMode) {
                 if (title) title.textContent = 'Giriş Yap';
                 if (usernameGroup) usernameGroup.style.display = 'none';

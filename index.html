@@ -121,6 +121,8 @@
                                     </div>
                                     <div class="auth-error-box" style="display: none;"></div>
                                     
+                                    <div id="landing-turnstile" class="cf-turnstile"></div>
+
                                     <button id="landing-submit-btn" class="landing-submit-btn">Giriş Yap</button>
                                     
                                     <div class="landing-auth-switch">
@@ -289,6 +291,8 @@
                 
                 <div id="auth-error-box" class="auth-error-box" style="display: none;"></div>
 
+                <div id="auth-turnstile" class="cf-turnstile"></div>
+
                 <button type="button" id="auth-submit-btn" class="auth-submit-btn">Giriş Yap</button>
 
                 <div class="auth-switch">
@@ -310,6 +314,7 @@
 
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1/dist/umd/supabase.js" integrity="sha384-Tgoms7a53eyQOCcKXlBrA1X967mm3BHK43f3979dACl74tZlLW+O85pmfCuhfUtx" crossorigin="anonymous"></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 
     <!-- Modüler JS Katmanları -->
     <script src="js/config.js"></script>
