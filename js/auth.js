@@ -192,15 +192,59 @@ async function oturumuKontrolEt() {
             supabaseClient.auth.onAuthStateChange((event, newSession) => {
                 aktifKullaniciOturumu = newSession;
                 if (event === 'SIGNED_OUT') {
+                    const oncekiSahip = isOwner;
                     aktifKullaniciAdi = null;
                     isOwner = false;
                     document.body.classList.remove('is-owner');
                     authButonMetniniGuncelle();
+
+                    if (oncekiSahip) {
+                        oturumSuresiDolduUyarisi("Oturum süreniz doldu veya oturum sonlandırıldı. Lütfen tekrar giriş yapın.");
+                    }
+                } else if (event === 'TOKEN_REFRESHED') {
+                    console.log("Supabase oturum token'ı başarıyla yenilendi.");
+                }
+            });
+
+            // Sekmeye geri dönüldüğünde arka planda sessiz oturum geçerlilik denetimi
+            document.addEventListener('visibilitychange', async () => {
+                if (document.visibilityState === 'visible' && isOwner && supabaseClient) {
+                    try {
+                        const { data: vData, error: vErr } = await supabaseClient.auth.getUser();
+                        if (vErr || !vData?.user) {
+                            console.warn("Sekmeye dönüşte oturumun geçersiz olduğu anlaşıldı:", vErr?.message);
+                            await supabaseClient.auth.signOut().catch(() => {});
+                            oturumSuresiDolduUyarisi("Oturum süreniz doldu. Değişiklikleri kaydetmek için lütfen tekrar giriş yapın.");
+                        }
+                    } catch (e) {
+                        console.warn("Visibility auth check hatası:", e);
+                    }
                 }
             });
         }
     } catch (err) {
         console.error("Oturum denetlenirken hata:", err);
+    }
+}
+
+function oturumSuresiDolduUyarisi(mesaj = "Oturum süreniz doldu. Lütfen tekrar giriş yapın.") {
+    isOwner = false;
+    document.body.classList.remove('is-owner');
+    authButonMetniniGuncelle();
+
+    // Varsa global toast ile haber ver
+    const toast = document.getElementById('nook-toast');
+    if (toast) {
+        toast.textContent = mesaj;
+        toast.classList.add('is-visible');
+        setTimeout(() => toast.classList.remove('is-visible'), 5000);
+    } else {
+        alert(mesaj);
+    }
+
+    // Auth modalını giriş modunda otomatik aç
+    if (typeof window.authModaliniAc === 'function') {
+        window.authModaliniAc();
     }
 }
 
@@ -395,6 +439,7 @@ function authModaliniBaslat() {
             if (emailInput) setTimeout(() => emailInput.focus(), 50);
         }
     };
+    window.authModaliniAc = modaliAc;
 
     const modaliKapat = () => {
         modal.classList.remove('is-open');

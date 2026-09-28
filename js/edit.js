@@ -660,7 +660,16 @@ EditManager.Global = {
             this.toastGoster("Değişiklikler başarıyla kaydedildi!");
         } catch (err) {
             console.error("Kaydetme hatası:", err);
-            alert("Kaydedilirken bir hata oluştu: " + err.message);
+            const errStr = (err.message || '').toLowerCase();
+            if (errStr.includes('jwt') || errStr.includes('expired') || errStr.includes('unauthorized') || err.status === 401 || err.statusCode === 401) {
+                if (typeof oturumSuresiDolduUyarisi === 'function') {
+                    oturumSuresiDolduUyarisi("Oturum süreniz dolduğu için değişiklikler kaydedilemedi. Lütfen tekrar giriş yapın; formdaki değişiklikleriniz korunuyor.");
+                } else {
+                    alert("Oturum süreniz doldu. Lütfen sayfayı yenilemeden tekrar giriş yapın.");
+                }
+            } else {
+                alert("Kaydedilirken bir hata oluştu: " + err.message);
+            }
         } finally {
             if (saveBtn) {
                 saveBtn.disabled = false;
@@ -858,7 +867,16 @@ EditManager.Media = {
             EditManager.Global.toastGoster("Görsel hazırlandı. Kaydetmek için 'Kaydet' butonuna basın.");
         } catch (err) {
             console.error("Görsel yükleme hatası:", err);
-            alert("Görsel yüklenemedi: " + err.message);
+            const errStr = (err.message || '').toLowerCase();
+            if (errStr.includes('jwt') || errStr.includes('expired') || errStr.includes('unauthorized') || err.status === 401 || err.statusCode === 401) {
+                if (typeof oturumSuresiDolduUyarisi === 'function') {
+                    oturumSuresiDolduUyarisi("Oturum süreniz dolduğu için görsel yüklenemedi. Lütfen tekrar giriş yapın.");
+                } else {
+                    alert("Oturum süreniz doldu. Lütfen tekrar giriş yapın.");
+                }
+            } else {
+                alert("Görsel yüklenemedi: " + err.message);
+            }
         }
     }
 };
