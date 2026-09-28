@@ -1,6 +1,11 @@
 // #region 1: UYGULAMA YÖNLENDİRME VE BAŞLATICI (BOOTSTRAP & ROUTER)
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Oturum kontrolünü ilk önce gerçekleştir
+    // 1. Auth modalını tüm sayfalarda ve kurtarma akışlarında global olarak hazırla
+    if (typeof authModaliniBaslat === 'function') {
+        authModaliniBaslat();
+    }
+
+    // 2. Oturum ve şifre kurtarma kontrolünü gerçekleştir
     if (typeof oturumuKontrolEt === 'function') {
         await oturumuKontrolEt();
     }
@@ -49,10 +54,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (typeof TiltEngine !== 'undefined') {
         TiltEngine.init();
-    }
-
-    if (typeof authModaliniBaslat === 'function') {
-        authModaliniBaslat();
     }
 
     // 3. Veri Çekimi ve Akıcı Bekleme Süresi (FOUC Önleyici)

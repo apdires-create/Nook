@@ -59,8 +59,8 @@
     --radius-modal: 20px;
     --radius-input: 12px;
     
-    --z-nav: 50;
-    --z-modal: 100;
+    --z-nav: 1000;
+    --z-modal: 10000;
 }
 /* #endregion */
 

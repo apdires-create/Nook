@@ -205,7 +205,9 @@
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    width: 160px;
+    min-width: 140px;
+    width: max-content;
+    max-width: 260px;
     background: var(--landing-bg-panel);
     border: 1px solid var(--landing-border-soft-2);
     border-radius: var(--landing-radius-btn);

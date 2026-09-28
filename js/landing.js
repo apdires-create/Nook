@@ -122,6 +122,8 @@ function landingEkraniniBaslat() {
     const navUserName = document.getElementById('landing-user-name');
     const navUserPfp = document.getElementById('landing-user-pfp');
     const navGoProfile = document.getElementById('landing-go-profile');
+    const navAccountBtn = document.getElementById('landing-account-btn');
+    const navCopyLinkBtn = document.getElementById('landing-copy-link-btn');
     const navLogoutBtn = document.getElementById('landing-logout-btn');
     const heroLoginBtn = document.getElementById('hero-login-btn');
 
@@ -154,6 +156,14 @@ function landingEkraniniBaslat() {
     let isLandingLoginMode = true;
     if (!submitBtn) return;
 
+    const mainForm = document.getElementById('landing-main-form');
+    const forgotForm = document.getElementById('landing-forgot-form');
+    const forgotTrigger = document.getElementById('landing-forgot-trigger');
+    const forgotEmail = document.getElementById('landing-forgot-email');
+    const forgotSubmitBtn = document.getElementById('landing-forgot-submit-btn');
+    const forgotBackBtn = document.getElementById('landing-forgot-back-btn');
+    const auxLinks = document.getElementById('landing-aux-links');
+
     const loginBasliklari = [
         "Nook'a Dön",
         "Kendi Köşene Geç",
@@ -183,13 +193,51 @@ function landingEkraniniBaslat() {
                 if (switchText) switchText.textContent = 'Hesabın yok mu?';
                 switchBtn.textContent = 'Kayıt Ol';
                 if (usernameInput) usernameInput.value = '';
+                if (auxLinks) auxLinks.style.display = 'flex';
             } else {
                 if (landingBox) landingBox.classList.add('register-mode');
                 if (mainTitle) mainTitle.textContent = rastgeleBaslikSec(registerBasliklari);
                 submitBtn.textContent = 'Kayıt Ol';
                 if (switchText) switchText.textContent = 'Zaten hesabın var mı?';
                 switchBtn.textContent = 'Giriş Yap';
+                if (auxLinks) auxLinks.style.display = 'none';
             }
+        });
+    }
+
+    // Şifremi Unuttum Formu Geçişleri
+    if (forgotTrigger && mainForm && forgotForm) {
+        forgotTrigger.addEventListener('click', () => {
+            if (typeof authHataTemizle === 'function') authHataTemizle();
+            mainForm.style.display = 'none';
+            forgotForm.style.display = 'flex';
+            if (mainTitle) mainTitle.textContent = 'Şifre Sıfırlama';
+            if (emailInput?.value && forgotEmail) forgotEmail.value = emailInput.value;
+            if (typeof turnstileWidgetiHazirla === 'function') {
+                requestAnimationFrame(() => turnstileWidgetiHazirla('landing-forgot-turnstile'));
+            }
+        });
+    }
+
+    if (forgotBackBtn && mainForm && forgotForm) {
+        forgotBackBtn.addEventListener('click', () => {
+            if (typeof authHataTemizle === 'function') authHataTemizle();
+            forgotForm.style.display = 'none';
+            mainForm.style.display = 'flex';
+            if (mainTitle) mainTitle.textContent = rastgeleBaslikSec(loginBasliklari);
+        });
+    }
+
+    if (forgotSubmitBtn) {
+        forgotSubmitBtn.addEventListener('click', async () => {
+            const email = forgotEmail?.value.trim();
+            forgotSubmitBtn.disabled = true;
+            forgotSubmitBtn.textContent = 'Gönderiliyor...';
+            if (typeof sistemeSifreSifirlamaGonder === 'function') {
+                await sistemeSifreSifirlamaGonder(email, '#landing-forgot-error-box');
+            }
+            forgotSubmitBtn.disabled = false;
+            forgotSubmitBtn.textContent = 'Sıfırlama Bağlantısı Gönder';
         });
     }
 

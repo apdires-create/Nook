@@ -109,7 +109,7 @@
                                 <button class="landing-box-close" id="flip-back-btn">&times;</button>
                                 <h2 id="landing-main-title" class="landing-title">Nook</h2>
                                 
-                                <div class="landing-form-container">
+                                <div class="landing-form-container" id="landing-main-form">
                                     <div id="landing-username-group">
                                         <input type="text" id="landing-username" class="landing-auth-input" placeholder="Kullanıcı Adı (Örn: apdi)" autocomplete="off">
                                     </div>
@@ -119,7 +119,10 @@
                                     <div>
                                         <input type="password" id="landing-password" class="landing-auth-input" placeholder="Şifre">
                                     </div>
-                                    <div class="auth-error-box" style="display: none;"></div>
+                                    <div class="landing-aux-links" id="landing-aux-links">
+                                        <button type="button" class="auth-link-btn" id="landing-forgot-trigger">Şifremi unuttum</button>
+                                    </div>
+                                    <div class="auth-error-box" id="landing-error-box" style="display: none;"></div>
                                     
                                     <div id="landing-turnstile" class="cf-turnstile"></div>
 
@@ -128,6 +131,19 @@
                                     <div class="landing-auth-switch">
                                         <span id="landing-switch-text">Hesabın yok mu?</span>
                                         <button type="button" id="landing-switch-action" class="landing-auth-switch-btn">Kayıt Ol</button>
+                                    </div>
+                                </div>
+
+                                <div class="landing-form-container" id="landing-forgot-form" style="display: none;">
+                                    <p class="auth-info-desc">Hesabına kayıtlı e-posta adresini gir, sana şifre sıfırlama bağlantısı gönderelim.</p>
+                                    <div>
+                                        <input type="email" id="landing-forgot-email" class="landing-auth-input" placeholder="E-posta" autocomplete="email">
+                                    </div>
+                                    <div class="auth-error-box" id="landing-forgot-error-box" style="display: none;"></div>
+                                    <div id="landing-forgot-turnstile" class="cf-turnstile"></div>
+                                    <button id="landing-forgot-submit-btn" class="landing-submit-btn">Sıfırlama Bağlantısı Gönder</button>
+                                    <div class="landing-auth-switch">
+                                        <button type="button" id="landing-forgot-back-btn" class="landing-auth-switch-btn">← Giriş Yap'a Dön</button>
                                     </div>
                                 </div>
                             </div>
@@ -145,13 +161,45 @@
             <span class="nav-brand-text">Nook</span>
         </a>
         <div class="top-nav-actions">
-            <button class="top-nav-btn" id="auth-trigger-btn" title="Giriş / Ayarlar">
+            <!-- Giriş yapılmadığında görünen buton -->
+            <button class="top-nav-btn" id="auth-login-trigger" title="Giriş Yap">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                 </svg>
-                <span class="login-text" id="auth-trigger-text">Giriş Yap</span>
+                <span class="login-text" id="auth-login-text">Giriş Yap</span>
             </button>
+
+            <!-- Giriş yapıldığında görünen profil dropdown menüsü -->
+            <div class="user-dropdown-wrapper" id="profile-user-menu" style="display: none;">
+                <button class="top-nav-btn" id="profile-user-trigger" title="Kullanıcı Menüsü">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span class="login-text" id="profile-user-name">Kullanıcı</span>
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px; opacity: 0.7;">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="user-dropdown-panel" id="profile-user-dropdown">
+                    <button type="button" class="user-dropdown-item" id="nav-item-account">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        Hesabım
+                    </button>
+                    <button type="button" class="user-dropdown-item text-danger" id="nav-item-logout">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        Çıkış Yap
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -289,6 +337,10 @@
                     <input type="password" id="auth-password" class="auth-input" placeholder="Şifre">
                 </div>
                 
+                <div class="auth-aux-links" id="auth-aux-links">
+                    <button type="button" class="auth-link-btn" id="auth-forgot-trigger">Şifremi unuttum</button>
+                </div>
+
                 <div id="auth-error-box" class="auth-error-box" style="display: none;"></div>
 
                 <div id="auth-turnstile" class="cf-turnstile"></div>
@@ -301,11 +353,80 @@
                 </div>
             </div>
 
+            <!-- ŞİFREMİ UNUTTUM GÖRÜNÜMÜ -->
+            <div id="auth-forgot-container" class="auth-form-container" style="display: none;">
+                <p class="auth-info-desc">Hesabına kayıtlı e-posta adresini gir, sana şifre sıfırlama bağlantısı gönderelim.</p>
+                <div class="auth-input-group">
+                    <input type="email" id="auth-forgot-email" class="auth-input" placeholder="E-posta Adresi">
+                </div>
+                
+                <div id="auth-forgot-error-box" class="auth-error-box" style="display: none;"></div>
+                <div id="auth-forgot-turnstile" class="cf-turnstile"></div>
+
+                <button type="button" id="auth-forgot-submit-btn" class="auth-submit-btn">Sıfırlama Bağlantısı Gönder</button>
+
+                <div class="auth-switch">
+                    <button type="button" id="auth-forgot-back-btn" class="auth-switch-btn">← Giriş Yap'a Dön</button>
+                </div>
+            </div>
+
+            <!-- ŞİFRE KURTARMA (RECOVERY / YENİ ŞİFRE) GÖRÜNÜMÜ -->
+            <div id="auth-recovery-container" class="auth-form-container" style="display: none;">
+                <p class="auth-info-desc">Lütfen hesabın için yeni ve güçlü bir şifre belirle.</p>
+                <div class="auth-input-group">
+                    <input type="password" id="auth-recovery-password" class="auth-input" placeholder="Yeni Şifre (En az 8 karakter)">
+                </div>
+                <div class="auth-input-group">
+                    <input type="password" id="auth-recovery-password-confirm" class="auth-input" placeholder="Yeni Şifre (Tekrar)">
+                </div>
+
+                <div id="auth-recovery-error-box" class="auth-error-box" style="display: none;"></div>
+
+                <button type="button" id="auth-recovery-submit-btn" class="auth-submit-btn">Şifreyi Güncelle ve Giriş Yap</button>
+            </div>
+
+            <!-- HESABIM GÖRÜNÜMÜ -->
             <div id="auth-logged-in-view" class="auth-logged-in-view" style="display: none;">
-                <p class="auth-status-text">Şu anda <strong><span id="auth-current-user"></span></strong> olarak giriş yapmış durumdasın.</p>
-                <div class="auth-logged-in-actions">
-                    <button id="auth-logout-btn" class="auth-submit-btn logout-btn">Güvenli Çıkış Yap</button>
-                    <button id="auth-delete-account-btn" class="auth-submit-btn danger-action">Hesabımı Kalıcı Olarak Sil</button>
+                <div class="account-card-header">
+                    <div class="account-user-badge">
+                        <div class="account-avatar-placeholder" id="account-avatar-initial">@</div>
+                        <div class="account-user-info">
+                            <span class="account-username" id="account-display-username">@kullanici</span>
+                            <span class="account-email" id="account-display-email">email@ornek.com</span>
+                        </div>
+                    </div>
+                    <a href="#" id="account-page-link" class="account-profile-link" target="_self" style="display: none;">Sayfama Git ↗</a>
+                </div>
+
+                <!-- ŞİFRE DEĞİŞTİRME BUTONU VE AÇILIR ALANI -->
+                <div class="account-actions-group">
+                    <button type="button" id="account-toggle-pass-btn" class="account-toggle-btn">
+                        <span class="account-toggle-label">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            Şifre Değiştir
+                        </span>
+                        <svg class="account-toggle-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="account-password-section" class="account-password-section" style="display: none;">
+                        <div class="auth-input-group">
+                            <input type="password" id="account-new-password" class="auth-input" placeholder="Yeni Şifre (En az 8 karakter)">
+                        </div>
+                        <div class="auth-input-group">
+                            <input type="password" id="account-confirm-password" class="auth-input" placeholder="Yeni Şifre (Tekrar)">
+                        </div>
+                        <div id="account-password-msg" class="auth-error-box" style="display: none;"></div>
+                        <button type="button" id="account-change-password-btn" class="auth-submit-btn secondary-submit">Şifreyi Güncelle</button>
+                    </div>
+                </div>
+
+                <!-- DİP ALAN: GÖZE BATMAYAN HESAP SİLME BAĞLANTISI -->
+                <div class="account-footer-danger">
+                    <button type="button" id="auth-delete-account-btn" class="account-delete-link">Hesabımı kalıcı olarak sil</button>
                 </div>
             </div>
         </div>
