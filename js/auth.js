@@ -326,7 +326,7 @@ async function oturumuKontrolEt() {
     }
 }
 
-function toastBildirimiGoster(mesaj, sure = 3000) {
+function toastBildirimiGoster(mesaj, sure = 3000, tur = 'success') {
     let toast = document.getElementById('nook-toast');
     if (!toast) {
         toast = document.createElement('div');
@@ -335,6 +335,7 @@ function toastBildirimiGoster(mesaj, sure = 3000) {
         document.body.appendChild(toast);
     }
     toast.textContent = mesaj;
+    toast.className = `nook-toast nook-toast-${tur}`;
     toast.classList.add('is-visible');
     clearTimeout(toast._timeout);
     toast._timeout = setTimeout(() => {
@@ -644,6 +645,10 @@ function authModaliniBaslat() {
     const accountConfirmPassword = document.getElementById('account-confirm-password');
     const accountChangePassBtn = document.getElementById('account-change-password-btn');
     const deleteAccountBtn = document.getElementById('auth-delete-account-btn');
+    const deleteConfirmBox = document.getElementById('account-delete-confirm-box');
+    const deletePasswordInput = document.getElementById('account-delete-password');
+    const deleteConfirmBtn = document.getElementById('account-delete-confirm-btn');
+    const deleteCancelBtn = document.getElementById('account-delete-cancel-btn');
 
     if (!modal) return;
 
@@ -675,6 +680,11 @@ function authModaliniBaslat() {
             if (accountTogglePassBtn) accountTogglePassBtn.classList.remove('is-active');
             if (accountNewPassword) accountNewPassword.value = '';
             if (accountConfirmPassword) accountConfirmPassword.value = '';
+
+            // Hesap silme panelini sıfırla
+            if (deleteConfirmBox) deleteConfirmBox.style.display = 'none';
+            if (deleteAccountBtn) deleteAccountBtn.style.display = 'inline-block';
+            if (deletePasswordInput) deletePasswordInput.value = '';
         } else if (mode === 'recovery') {
             if (recoveryContainer) recoveryContainer.style.display = 'flex';
             if (title) title.textContent = 'Yeni Şifre Belirle';
@@ -900,37 +910,109 @@ function authModaliniBaslat() {
         });
     }
 
-    // Hesabı Sil
-    if (deleteAccountBtn) {
-        deleteAccountBtn.addEventListener('click', async () => {
-            const onay = window.confirm("Tüm arşivini ve hesabını kalıcı olarak silmek istediğine emin misin? Bu işlem geri alınamaz.");
-            if (!onay) return;
+    // Hesabı Silme Akışı: Butona basıldığında onay ve şifre giriş panelini aç
+    if (deleteAccountBtn && deleteConfirmBox) {
+        deleteAccountBtn.addEventListener('click', () => {
+            deleteAccountBtn.style.display = 'none';
+            deleteConfirmBox.style.display = 'flex';
+            if (deletePasswordInput) {
+                deletePasswordInput.value = '';
+                setTimeout(() => deletePasswordInput.focus(), 60);
+            }
+        });
+    }
 
-            deleteAccountBtn.disabled = true;
-            deleteAccountBtn.textContent = 'Siliniyor...';
+    if (deleteCancelBtn && deleteConfirmBox && deleteAccountBtn) {
+        deleteCancelBtn.addEventListener('click', () => {
+            deleteConfirmBox.style.display = 'none';
+            deleteAccountBtn.style.display = 'inline-block';
+            if (deletePasswordInput) deletePasswordInput.value = '';
+        });
+    }
 
-            try {
-                const authId = aktifKullaniciOturumu.user.id;
-                const { data: dosyalar, error: listError } = await supabaseClient.storage
-                    .from('avatars-and-banners')
-                    .list(authId);
+    // Hesabı Şifre Doğrulamasıyla Kalıcı Olarak Sil
+    if (deleteConfirmBtn) {
+        deleteConfirmBtn.addEventListener('click', async () => {
+            const girilenSifre = (deletePasswordInput?.value || '').trim();
 
-                if (!listError && dosyalar && dosyalar.length > 0) {
-                    const silinecekYollar = dosyalar.map(d => `${authId}/${d.name}`);
-                    await supabaseClient.storage.from('avatars-and-banners').remove(silinecekYollar);
-                }
-            } catch (storageErr) {
-                console.error('Storage temizliği sırasında hata:', storageErr);
+            if (!girilenSifre) {
+                toastBildirimiGoster("Hesabınızı silmek için lütfen şifrenizi girin.", 3500, 'warning');
+                deletePasswordInput?.focus();
+                return;
             }
 
-            const { error } = await supabaseClient.rpc('delete_user_account');
+            const currentUserEmail = aktifKullaniciOturumu?.user?.email;
+            if (!currentUserEmail) {
+                toastBildirimiGoster("Oturum bilgisine ulaşılamadı. Lütfen tekrar giriş yapın.", 3500, 'error');
+                return;
+            }
 
-            if (error) {
-                authHataGoster("Hesap silinirken bir hata oluştu: " + error.message);
-                deleteAccountBtn.disabled = false;
-                deleteAccountBtn.textContent = 'Hesabımı Kalıcı Olarak Sil';
-            } else {
-                await sistemdenCikisYap();
+            deleteConfirmBtn.disabled = true;
+            if (deleteCancelBtn) deleteCancelBtn.disabled = true;
+            deleteConfirmBtn.textContent = 'Doğrulanıyor...';
+
+            try {
+                // 1. Şifre Doğrulaması: Kullanıcının girdiği şifreyi signInWithPassword ile doğrula
+                const { error: authErr } = await supabaseClient.auth.signInWithPassword({
+                    email: currentUserEmail,
+                    password: girilenSifre
+                });
+
+                if (authErr) {
+                    deleteConfirmBtn.disabled = false;
+                    if (deleteCancelBtn) deleteCancelBtn.disabled = false;
+                    deleteConfirmBtn.textContent = 'Evet, Hesabımı Sil';
+                    toastBildirimiGoster("Girdiğiniz şifre hatalı. Hesap silinmedi.", 4000, 'error');
+                    deletePasswordInput?.focus();
+                    return;
+                }
+
+                // 2. Şifre doğru, silme işlemini başlat
+                deleteConfirmBtn.textContent = 'Siliniyor...';
+
+                try {
+                    const authId = aktifKullaniciOturumu.user.id;
+                    const { data: dosyalar, error: listError } = await supabaseClient.storage
+                        .from('avatars-and-banners')
+                        .list(authId);
+
+                    if (!listError && dosyalar && dosyalar.length > 0) {
+                        const silinecekYollar = dosyalar.map(d => `${authId}/${d.name}`);
+                        await supabaseClient.storage.from('avatars-and-banners').remove(silinecekYollar);
+                    }
+                } catch (storageErr) {
+                    console.error('Storage temizliği sırasında hata:', storageErr);
+                }
+
+                const { error: rpcErr } = await supabaseClient.rpc('delete_user_account');
+
+                if (rpcErr) {
+                    deleteConfirmBtn.disabled = false;
+                    if (deleteCancelBtn) deleteCancelBtn.disabled = false;
+                    deleteConfirmBtn.textContent = 'Evet, Hesabımı Sil';
+                    toastBildirimiGoster("Hesap silinirken bir hata oluştu: " + rpcErr.message, 4500, 'error');
+                } else {
+                    toastBildirimiGoster("Hesabınız kalıcı olarak silindi. Hoşça kalın.", 4000, 'success');
+                    modaliKapat();
+                    setTimeout(async () => {
+                        await sistemdenCikisYap();
+                    }, 1200);
+                }
+            } catch (genelErr) {
+                console.error("Hesap silme işleminde beklenmedik hata:", genelErr);
+                deleteConfirmBtn.disabled = false;
+                if (deleteCancelBtn) deleteCancelBtn.disabled = false;
+                deleteConfirmBtn.textContent = 'Evet, Hesabımı Sil';
+                toastBildirimiGoster("İşlem gerçekleştirilemedi: " + (genelErr.message || genelErr), 4000, 'error');
+            }
+        });
+    }
+
+    if (deletePasswordInput && deleteConfirmBtn) {
+        deletePasswordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                deleteConfirmBtn.click();
             }
         });
     }

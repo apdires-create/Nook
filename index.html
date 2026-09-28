@@ -424,9 +424,20 @@
                     </div>
                 </div>
 
-                <!-- DİP ALAN: GÖZE BATMAYAN HESAP SİLME BAĞLANTISI -->
+                <!-- DİP ALAN: GÖZE BATMAYAN HESAP SİLME BAĞLANTISI VE ONAY FORMU -->
                 <div class="account-footer-danger">
                     <button type="button" id="auth-delete-account-btn" class="account-delete-link">Hesabımı kalıcı olarak sil</button>
+                    
+                    <div id="account-delete-confirm-box" class="account-delete-confirm-box" style="display: none;">
+                        <p class="account-delete-warning-text">Bu işlem geri alınamaz. Hesabını ve tüm içeriklerini silmek için şifreni gir:</p>
+                        <div class="auth-input-group">
+                            <input type="password" id="account-delete-password" class="auth-input" placeholder="Mevcut Hesap Şifresi">
+                        </div>
+                        <div class="account-delete-btn-group">
+                            <button type="button" id="account-delete-cancel-btn" class="account-delete-cancel-btn">Vazgeç</button>
+                            <button type="button" id="account-delete-confirm-btn" class="account-delete-confirm-btn">Evet, Hesabımı Sil</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
