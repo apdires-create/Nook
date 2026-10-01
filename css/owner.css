@@ -1319,13 +1319,13 @@ body.has-unsaved-changes .edit-action-bar {
 /* Tür Seçici Butonları (Grid) */
 .tops-type-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     width: 100%;
     box-sizing: border-box;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 400px) {
     .tops-type-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 8px;

@@ -438,6 +438,14 @@ const EditManager = {
                                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
                                 <span>Anime</span>
                             </button>
+                            <button type="button" class="tops-type-btn" data-type="karakter">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <span>Karakter</span>
+                            </button>
+                            <button type="button" class="tops-type-btn" data-type="kitap">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                <span>Kitap</span>
+                            </button>
                         </div>
                     </div>
 
@@ -2232,12 +2240,14 @@ EditManager.TopsModal = {
 
                     // Eğer başlık boşsa veya varsayılansa, türe uygun dinamik isim öner
                     const nameInput = document.getElementById('tops-name-input');
-                    if (nameInput && (!nameInput.value.trim() || ['Favori Filmlerim', 'Favori Dizilerim', 'Favori Oyunlarım', 'Favori Animelerim', 'Tops'].includes(nameInput.value.trim()))) {
+                    if (nameInput && (!nameInput.value.trim() || ['Favori Filmlerim', 'Favori Dizilerim', 'Favori Oyunlarım', 'Favori Animelerim', 'Favori Karakterlerim', 'Favori Kitaplarım', 'Tops'].includes(nameInput.value.trim()))) {
                         const ornekler = {
                             film: 'Favori Filmlerim',
                             dizi: 'Favori Dizilerim',
                             oyun: 'Favori Oyunlarım',
-                            anime: 'Favori Animelerim'
+                            anime: 'Favori Animelerim',
+                            karakter: 'Favori Karakterlerim',
+                            kitap: 'Favori Kitaplarım'
                         };
                         nameInput.value = ornekler[this.seciliTur] || 'Vitrin';
                     }
@@ -2413,7 +2423,9 @@ EditManager.MediaSearchModal = {
             film: { baslik: 'Film Ara', placeholder: 'Film adı yazın (Örn: Inception, Interstellar)...' },
             dizi: { baslik: 'Dizi Ara', placeholder: 'Dizi adı yazın (Örn: Breaking Bad, Dark)...' },
             oyun: { baslik: 'Oyun Ara', placeholder: 'Oyun adı yazın (Örn: Cyberpunk 2077, Elden Ring)...' },
-            anime: { baslik: 'Anime Ara', placeholder: 'Anime adı yazın (Örn: Death Note, Attack on Titan)...' }
+            anime: { baslik: 'Anime Ara', placeholder: 'Anime adı yazın (Örn: Death Note, Attack on Titan)...' },
+            karakter: { baslik: 'Karakter Ara', placeholder: 'Karakter adı yazın (Örn: Tyler Durden, Levi, Walter White)...' },
+            kitap: { baslik: 'Kitap Ara', placeholder: 'Kitap adı yazın (Örn: Dune, 1984, Yüzüklerin Efendisi)...' }
         };
 
         const config = turBasliklari[this.aramaTuru] || turBasliklari.film;

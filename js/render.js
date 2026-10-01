@@ -373,7 +373,9 @@ const RenderEngine = {
                     film: 'Film',
                     dizi: 'Dizi',
                     oyun: 'Oyun',
-                    anime: 'Anime'
+                    anime: 'Anime',
+                    karakter: 'Karakter',
+                    kitap: 'Kitap'
                 };
                 const turEtiketi = turAdlari[aktifListe.tur] || (aktifListe.tur ? aktifListe.tur.toUpperCase() : 'VİTRİN');
 
@@ -449,7 +451,7 @@ const RenderEngine = {
                 companionBody.innerHTML = `
                     <div class="companion-empty-state">
                         <div class="companion-empty-title">Henüz kürasyon listesi oluşturulmamış</div>
-                        <div class="companion-empty-desc">Favori film, dizi, oyun veya animelerinizi sergilemek için hemen ilk listenizi oluşturun.</div>
+                        <div class="companion-empty-desc">Favori film, dizi, oyun, anime, karakter veya kitaplarınızı sergilemek için hemen ilk listenizi oluşturun.</div>
                         <button type="button" class="add-section-big-btn" id="companionCreateFirstListBtn">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                             <span>İlk Listeyi Oluştur</span>
@@ -470,7 +472,7 @@ const RenderEngine = {
                     },
                     {
                         baslik: "Koleksiyon Henüz Başlamadı",
-                        aciklama: "Bu vitrin şimdilik boş bırakılmış. Yakında film, dizi veya oyun önerileriyle dolabilir."
+                        aciklama: "Bu vitrin şimdilik boş bırakılmış. Yakında film, kitap veya karakter seçkileriyle dolabilir."
                     },
                     {
                         baslik: "Gizemini Koruyor",
