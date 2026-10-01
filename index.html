@@ -190,6 +190,13 @@
                         </svg>
                         Hesabım
                     </button>
+                    <button type="button" class="user-dropdown-item" id="nav-item-copy-link">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Sayfa Linkini Kopyala
+                    </button>
                     <button type="button" class="user-dropdown-item text-danger" id="nav-item-logout">
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -221,8 +228,8 @@
                         </svg>
                     </button>
 
-                    <!-- Sağ Üst: Tops (Showcase Wing) Tetikleyici Buton -->
-                    <button class="showcase-trigger-btn" id="topsTriggerBtn" aria-label="Kürasyon Vitrinini Aç" title="Tops & Kürasyon">
+                    <!-- Sağ Üst: Showcase Tetikleyici Buton -->
+                    <button class="showcase-trigger-btn" id="topsTriggerBtn" aria-label="Showcase Vitrinini Aç" title="Showcase">
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M8 21h8"></path>
                             <path d="M12 17v4"></path>
@@ -398,8 +405,19 @@
                     <a href="#" id="account-page-link" class="account-profile-link" target="_self" style="display: none;">Sayfama Git ↗</a>
                 </div>
 
-                <!-- ŞİFRE DEĞİŞTİRME BUTONU VE AÇILIR ALANI -->
+                <!-- HESAP EYLEMLERİ: BAĞLANTI KOPYALA & ŞİFRE DEĞİŞTİR -->
                 <div class="account-actions-group">
+                    <button type="button" id="account-copy-link-btn" class="account-toggle-btn account-copy-btn">
+                        <span class="account-toggle-label">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            Profil Bağlantısını Kopyala
+                        </span>
+                        <span class="account-copy-badge" id="account-copy-badge">Kopyala</span>
+                    </button>
+
                     <button type="button" id="account-toggle-pass-btn" class="account-toggle-btn">
                         <span class="account-toggle-label">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

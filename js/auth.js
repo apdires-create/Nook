@@ -452,7 +452,7 @@ async function sistemeKayitOl(email, password, username) {
     const { data: existingUser } = await supabaseClient
         .from('profiles')
         .select('kullanici_adi')
-        .eq('kullanici_adi', temizKullaniciAdi)
+        .ilike('kullanici_adi', temizKullaniciAdi)
         .maybeSingle();
 
     if (existingUser) {
@@ -600,6 +600,7 @@ function authModaliniBaslat() {
     const userTriggerBtn = document.getElementById('profile-user-trigger');
     const userDropdown = document.getElementById('profile-user-dropdown');
     const navAccountBtn = document.getElementById('nav-item-account');
+    const navCopyLinkBtn = document.getElementById('nav-item-copy-link');
     const navLogoutBtn = document.getElementById('nav-item-logout');
 
     const modal = document.getElementById('auth-modal');
@@ -639,6 +640,8 @@ function authModaliniBaslat() {
     const accountDisplayEmail = document.getElementById('account-display-email');
     const accountAvatarInitial = document.getElementById('account-avatar-initial');
     const accountPageLink = document.getElementById('account-page-link');
+    const accountCopyLinkBtn = document.getElementById('account-copy-link-btn');
+    const accountCopyBadge = document.getElementById('account-copy-badge');
     const accountTogglePassBtn = document.getElementById('account-toggle-pass-btn');
     const accountPassSection = document.getElementById('account-password-section');
     const accountNewPassword = document.getElementById('account-new-password');
@@ -763,6 +766,41 @@ function authModaliniBaslat() {
                 userDropdown.classList.remove('is-open');
             }
         });
+    }
+
+    const profilLinkiniKopyala = async () => {
+        const hedefUser = aktifKullaniciAdi || (typeof KULLANICI_ADI !== 'undefined' ? KULLANICI_ADI : null);
+        if (!hedefUser) {
+            toastBildirimiGoster("Kopyalanacak profil bulunamadı.", 3000, 'warning');
+            return;
+        }
+        const url = `${window.location.origin}${window.location.pathname}?user=${encodeURIComponent(hedefUser)}`;
+        try {
+            await navigator.clipboard.writeText(url);
+            toastBildirimiGoster("Profil bağlantısı panoya kopyalandı!", 3000, 'success');
+            if (accountCopyBadge) {
+                accountCopyBadge.textContent = "Kopyalandı!";
+                accountCopyBadge.classList.add('is-copied');
+                setTimeout(() => {
+                    accountCopyBadge.textContent = "Kopyala";
+                    accountCopyBadge.classList.remove('is-copied');
+                }, 2000);
+            }
+        } catch (e) {
+            console.warn("Clipboard kopyalama hatası:", e);
+            toastBildirimiGoster("Bağlantı kopyalanamadı, lütfen tarayıcı adres çubuğunu kullanın.", 3000, 'warning');
+        }
+    };
+
+    if (navCopyLinkBtn) {
+        navCopyLinkBtn.addEventListener('click', () => {
+            if (userDropdown) userDropdown.classList.remove('is-open');
+            profilLinkiniKopyala();
+        });
+    }
+
+    if (accountCopyLinkBtn) {
+        accountCopyLinkBtn.addEventListener('click', profilLinkiniKopyala);
     }
 
     if (navAccountBtn) {

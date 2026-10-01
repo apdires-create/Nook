@@ -35,6 +35,11 @@ const RenderEngine = {
         if (profileBio) profileBio.textContent = front.aciklama || defaultBio;
         if (menuOwnerName) menuOwnerName.textContent = isim;
 
+        const sekmeNick = data.kullanici_adi || (typeof KULLANICI_ADI !== 'undefined' ? KULLANICI_ADI : null);
+        if (sekmeNick) {
+            document.title = `Nook - @${sekmeNick}`;
+        }
+
         if (tagsGrid) {
             const tags = Array.isArray(front.tags) ? front.tags.filter(t => t && String(t).trim() !== '') : [];
             tagsGrid.innerHTML = tags
@@ -311,7 +316,7 @@ const RenderEngine = {
         if (tabsBar) {
             let tabsHtml = '';
             if (listeler.length === 0) {
-                tabsHtml = `<span class="placeholder-text" style="padding: 2px 8px; font-size: 0.75rem;">Liste yok</span>`;
+                tabsHtml = isUserOwner ? `<span class="placeholder-text" style="padding: 2px 8px; font-size: 0.75rem;">Liste yok</span>` : '';
             } else {
                 tabsHtml = listeler.map(l => {
                     const isActive = (aktifListe && l.id === aktifListe.id);
@@ -437,6 +442,9 @@ const RenderEngine = {
 
         // 3. VİTRİN İÇERİĞİ (3'LÜ AFİŞLER VE EKLEME SLOTU)
         if (!aktifListe || listeler.length === 0) {
+            if (tabsBar && !isUserOwner) tabsBar.innerHTML = '';
+            if (listMeta && !isUserOwner) listMeta.innerHTML = '';
+
             if (isUserOwner) {
                 companionBody.innerHTML = `
                     <div class="companion-empty-state">
@@ -455,10 +463,29 @@ const RenderEngine = {
                     };
                 }
             } else {
+                const samimiMesajlar = [
+                    {
+                        baslik: "Burası Şimdilik Sessiz",
+                        aciklama: "Kullanıcı bu alanda henüz bir şey sergilemek istememiş gibi görünüyor. Belki de favorilerini kendine saklıyordur :)"
+                    },
+                    {
+                        baslik: "Koleksiyon Henüz Başlamadı",
+                        aciklama: "Bu vitrin şimdilik boş bırakılmış. Yakında film, dizi veya oyun önerileriyle dolabilir."
+                    },
+                    {
+                        baslik: "Gizemini Koruyor",
+                        aciklama: "Bu köşede sergilenen bir favori bulunmuyor. Şimdilik kartın diğer detaylarına göz atabilirsin."
+                    },
+                    {
+                        baslik: "Henüz Bir Seçki Yok",
+                        aciklama: "Kullanıcı burayı henüz düzenlememiş. Biraz zaman verelim, harika şeyler seçiyor olabilir."
+                    }
+                ];
+                const secilen = samimiMesajlar[Math.floor(Math.random() * samimiMesajlar.length)];
                 companionBody.innerHTML = `
                     <div class="companion-empty-state">
-                        <div class="companion-empty-title">Kürasyon Listesi Bulunmuyor</div>
-                        <div class="companion-empty-desc">Kullanıcı henüz bir vitrin listesi eklememiş.</div>
+                        <div class="companion-empty-title">${this.escapeHtml(secilen.baslik)}</div>
+                        <div class="companion-empty-desc">${this.escapeHtml(secilen.aciklama)}</div>
                     </div>
                 `;
             }

@@ -120,10 +120,7 @@ function landingEkraniniBaslat() {
     const navUserTrigger = document.getElementById('landing-user-trigger');
     const navDropdown = document.getElementById('landing-nav-dropdown');
     const navUserName = document.getElementById('landing-user-name');
-    const navUserPfp = document.getElementById('landing-user-pfp');
     const navGoProfile = document.getElementById('landing-go-profile');
-    const navAccountBtn = document.getElementById('landing-account-btn');
-    const navCopyLinkBtn = document.getElementById('landing-copy-link-btn');
     const navLogoutBtn = document.getElementById('landing-logout-btn');
     const heroLoginBtn = document.getElementById('hero-login-btn');
 

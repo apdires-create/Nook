@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // SENARYO A: URL PARAMETRESİ YOKSA -> LANDING PAGE
     // ========================================================
     if (!KULLANICI_ADI) {
+        document.title = 'Nook';
         document.documentElement.classList.remove('is-profile-loading');
         if (profileStage) profileStage.style.display = 'none';
         if (profileTopNav) profileTopNav.style.display = 'none';
@@ -37,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ========================================================
     // SENARYO B: URL PARAMETRESİ VARSA -> 5:7 PROFİL KARTI
     // ========================================================
+    document.title = `Nook - @${KULLANICI_ADI}`;
     if (landingScreen) landingScreen.style.display = 'none';
     if (profileStage) profileStage.style.display = 'none';
     if (profileTopNav) profileTopNav.style.display = 'none';
