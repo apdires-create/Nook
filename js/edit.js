@@ -355,7 +355,7 @@ const EditManager = {
                     <div class="tag-picker-header">
                         <div>
                             <h3 class="tag-picker-title">Etiket Seç</h3>
-                            <p class="tag-picker-desc">Profiline eklemek istediğin etiketi havuzdan seçebilirsin.</p>
+                            <p class="tag-picker-desc">Profiline eklemek istediğin etiketi havuzdan seç veya yenisini yaz.</p>
                         </div>
                         <button type="button" class="tag-picker-close" id="tag-picker-close">&times;</button>
                     </div>
@@ -366,7 +366,7 @@ const EditManager = {
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
                         </span>
-                        <input type="text" id="tag-search-input" class="tag-search-input" placeholder="Etiket ara..." autocomplete="off">
+                        <input type="text" id="tag-search-input" class="tag-search-input" placeholder="Etiket ara veya yeni etiket yaz..." maxlength="20" autocomplete="off">
                     </div>
                     <div class="tag-pool-wrap" id="tagPoolWrap"></div>
                 </div>
@@ -2037,6 +2037,15 @@ EditManager.TagPicker = {
             searchInput.oninput = (e) => {
                 this.filtrele(e.target.value);
             };
+            searchInput.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const temiz = searchInput.value.replace(/\s+/g, ' ').trim();
+                    if (temiz) {
+                        this.etiketSec(temiz);
+                    }
+                }
+            };
         }
     },
 
@@ -2076,16 +2085,25 @@ EditManager.TagPicker = {
             "Minimalist", "Writer", "Artist", "Cyberpunk", "Photographer", "Reader", "Coffee", "Tech"
         ];
 
-        const filtreMetni = arama.trim().toLowerCase();
+        const temizArama = arama.replace(/\s+/g, ' ').trim();
+        const filtreMetni = temizArama.toLowerCase();
         const filtrelenmis = havuz.filter(tag => tag.toLowerCase().includes(filtreMetni));
 
-        if (filtrelenmis.length === 0) {
-            wrap.innerHTML = `<div class="tag-pool-empty">Eşleşen etiket bulunamadı.</div>`;
-            return;
+        const tamHavuzEslesmesi = havuz.some(tag => tag.toLowerCase() === filtreMetni);
+        const zatenSeciliMi = mevcutTags.some(tag => tag.toLowerCase() === filtreMetni);
+
+        let createItemHtml = '';
+        if (temizArama && !tamHavuzEslesmesi && !zatenSeciliMi && temizArama.length <= 20) {
+            createItemHtml = `
+                <div class="tag-pool-item tag-pool-create" data-tag="${EditManager.escapeHtml(temizArama)}">
+                    <span>+</span>
+                    <span>"${EditManager.escapeHtml(temizArama)}" etiketini oluştur ve ekle</span>
+                </div>
+            `;
         }
 
-        wrap.innerHTML = filtrelenmis.map(tag => {
-            const secili = mevcutTags.includes(tag);
+        let havuzItemsHtml = filtrelenmis.map(tag => {
+            const secili = mevcutTags.some(t => t.toLowerCase() === tag.toLowerCase());
             return `
                 <div class="tag-pool-item ${secili ? 'is-already-selected' : ''}" data-tag="${EditManager.escapeHtml(tag)}">
                     <span>${secili ? '✓' : '+'}</span>
@@ -2093,6 +2111,13 @@ EditManager.TagPicker = {
                 </div>
             `;
         }).join('');
+
+        if (!createItemHtml && filtrelenmis.length === 0) {
+            wrap.innerHTML = `<div class="tag-pool-empty">Eşleşen etiket bulunamadı.</div>`;
+            return;
+        }
+
+        wrap.innerHTML = createItemHtml + havuzItemsHtml;
 
         wrap.querySelectorAll('.tag-pool-item').forEach(item => {
             if (item.classList.contains('is-already-selected')) return;
@@ -2105,6 +2130,14 @@ EditManager.TagPicker = {
 
     etiketSec(tag) {
         if (!tag) return;
+        const temizTag = tag.replace(/\s+/g, ' ').trim();
+        if (!temizTag) return;
+
+        if (temizTag.length > 20) {
+            alert("Etiket en fazla 20 karakter olabilir!");
+            return;
+        }
+
         if (!kartVerisi.front_data) kartVerisi.front_data = {};
         if (!Array.isArray(kartVerisi.front_data.tags)) kartVerisi.front_data.tags = [];
 
@@ -2114,11 +2147,12 @@ EditManager.TagPicker = {
             return;
         }
 
-        if (kartVerisi.front_data.tags.includes(tag)) {
+        if (kartVerisi.front_data.tags.some(t => t.toLowerCase() === temizTag.toLowerCase())) {
+            this.kapat();
             return;
         }
 
-        kartVerisi.front_data.tags.push(tag);
+        kartVerisi.front_data.tags.push(temizTag);
         this.kapat();
 
         RenderEngine.vitrinCiz(kartVerisi);

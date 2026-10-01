@@ -1186,6 +1186,24 @@ body.has-unsaved-changes .edit-action-bar {
     border-style: dashed;
 }
 
+.tag-pool-item.tag-pool-create {
+    background: rgba(59, 91, 219, 0.18);
+    border-color: rgba(59, 91, 219, 0.45);
+    color: #93c5fd;
+    font-weight: 600;
+    width: 100%;
+    justify-content: center;
+    padding: 8px 16px;
+    margin-bottom: 4px;
+}
+
+.tag-pool-item.tag-pool-create:hover {
+    background: rgba(59, 91, 219, 0.35);
+    border-color: #3b82f6;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
 .tag-pool-empty {
     width: 100%;
     text-align: center;
