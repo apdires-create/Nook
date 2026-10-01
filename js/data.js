@@ -236,7 +236,12 @@ async function icerikAra(aramaMetni, aramaTuru) {
                 afis_url: item.afis_url || item.gorsel_url || null,
                 skor: item.skor || null,
                 yil: item.yil || null,
-                aciklama: item.aciklama || ''
+                aciklama: item.aciklama || item.seri || item.yazar || '',
+                yonetmen: item.yonetmen || null,
+                yayinci: item.yayinci || null,
+                studyo: item.studyo || null,
+                seri: item.seri || null,
+                yazar: item.yazar || null
             }));
         }
     } catch (err) {
