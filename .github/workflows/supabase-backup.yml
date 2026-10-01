@@ -1,0 +1,71 @@
+name: Supabase Yedekleme
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'   # her Pazar 03:00 UTC
+  workflow_dispatch: {}     # manuel tetikleme için
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tarih değişkeni oluştur
+        id: tarih
+        run: echo "gun=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Veritabanı dökümü al
+        run: |
+          mkdir -p backup/db
+          docker run --rm -e PGPASSWORD_UNUSED=1 \
+            postgres:17-bookworm \
+            pg_dump "${{ secrets.SUPABASE_DB_URL }}" \
+            --schema=public --no-owner --no-privileges --format=plain \
+            > backup/db/dump.sql
+        shell: bash
+
+      - name: Storage dosyalarını indir
+        env:
+          SB_URL: ${{ secrets.SUPABASE_URL }}
+          SB_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BUCKET: avatars-and-banners
+        run: |
+          mkdir -p backup/storage
+          klasorler=$(curl -s -X POST "$SB_URL/storage/v1/object/list/$BUCKET" \
+            -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"prefix":"","limit":1000}' | jq -r '.[].name')
+
+          for klasor in $klasorler; do
+            dosyalar=$(curl -s -X POST "$SB_URL/storage/v1/object/list/$BUCKET" \
+              -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+              -H "Content-Type: application/json" \
+              -d "{\"prefix\":\"$klasor/\",\"limit\":1000}" | jq -r '.[].name')
+
+            mkdir -p "backup/storage/$klasor"
+            for dosya in $dosyalar; do
+              curl -s -o "backup/storage/$klasor/$dosya" \
+                -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+                "$SB_URL/storage/v1/object/$BUCKET/$klasor/$dosya"
+            done
+          done
+        shell: bash
+
+      - name: Private repoya gönder
+        env:
+          GUN: ${{ steps.tarih.outputs.gun }}
+        run: |
+          git clone "https://x-access-token:${{ secrets.BACKUP_REPO_PAT }}@github.com/${{ secrets.BACKUP_REPO }}.git" yedek-repo
+          mkdir -p "yedek-repo/$GUN"
+          cp -r backup/db "yedek-repo/$GUN/"
+          cp -r backup/storage "yedek-repo/$GUN/"
+
+          # 8 haftadan eski yedekleri sil
+          cd yedek-repo
+          find . -maxdepth 1 -type d -name "20*" -mtime +56 -exec rm -rf {} \;
+
+          git config user.name "yedekleme-bot"
+          git config user.email "yedekleme-bot@users.noreply.github.com"
+          git add -A
+          git commit -m "Yedek: $GUN" || echo "Değişiklik yok, commit atlanıyor"
+          git push
+        shell: bash
