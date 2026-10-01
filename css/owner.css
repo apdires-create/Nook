@@ -1009,6 +1009,32 @@ body.has-unsaved-changes .edit-action-bar {
     border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
+.picker-soon-badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: var(--radius-pill);
+    background: rgba(245, 158, 11, 0.16);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.section-picker-item.is-coming-soon {
+    opacity: 0.72;
+    cursor: pointer;
+}
+
+.section-picker-item.is-coming-soon:hover {
+    background: rgba(245, 158, 11, 0.08);
+    border-color: rgba(245, 158, 11, 0.4);
+    transform: translateX(2px);
+}
+
+.section-picker-item.is-coming-soon:hover .picker-item-icon {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
 .picker-item-desc {
     font-size: 0.76rem;
     color: rgba(255, 255, 255, 0.48);

@@ -1947,44 +1947,78 @@ EditManager.SectionPicker = {
                 baslik: 'Bağlantılar (Links)',
                 alt: 'Sosyal medya, GitHub ve web bağlantılarını listele',
                 ikon: RenderEngine.getCategoryIcon('links', 20),
-                varMi: hasLinks
+                varMi: hasLinks,
+                comingSoon: false
             },
             {
                 id: 'widgets',
                 baslik: 'Monkeytype Skoru (Widgets)',
                 alt: 'Canlı klavye yazma hızı ve doğruluk widgetı',
                 ikon: RenderEngine.getCategoryIcon('widgets', 20),
-                varMi: hasWidgets
+                varMi: hasWidgets,
+                comingSoon: false
             },
             {
                 id: 'working-on',
                 baslik: 'Şu Anda Ne Yapıyorum (Working on)',
                 alt: 'Üzerinde çalıştığın proje veya anlık durum bildirimi',
                 ikon: RenderEngine.getCategoryIcon('working-on', 20),
-                varMi: hasWorking
+                varMi: hasWorking,
+                comingSoon: false
+            },
+            {
+                id: 'trophies',
+                baslik: 'Trophies (Kupalar & Koleksiyon)',
+                alt: 'Karakterler, kitaplar ve dijital başarımlar',
+                ikon: RenderEngine.getCategoryIcon('trophies', 20),
+                varMi: false,
+                comingSoon: true
             }
         ];
 
-        list.innerHTML = kategoriler.map(k => `
-            <div class="section-picker-item ${k.varMi ? 'is-already-added' : ''}" data-cat="${k.id}">
-                <div class="picker-item-icon">${k.ikon}</div>
-                <div class="picker-item-info">
-                    <div class="picker-item-title-row">
-                        <span class="picker-item-title">${k.baslik}</span>
-                        ${k.varMi ? '<span class="picker-added-badge">Mevcut</span>' : ''}
+        list.innerHTML = kategoriler.map(k => {
+            const itemClasses = ['section-picker-item'];
+            if (k.varMi) itemClasses.push('is-already-added');
+            if (k.comingSoon) itemClasses.push('is-coming-soon');
+
+            let badgeHtml = '';
+            if (k.varMi) {
+                badgeHtml = '<span class="picker-added-badge">Mevcut</span>';
+            } else if (k.comingSoon) {
+                badgeHtml = '<span class="picker-soon-badge">Yakında</span>';
+            }
+
+            return `
+                <div class="${itemClasses.join(' ')}" data-cat="${k.id}" ${k.comingSoon ? 'data-coming-soon="true"' : ''}>
+                    <div class="picker-item-icon">${k.ikon}</div>
+                    <div class="picker-item-info">
+                        <div class="picker-item-title-row">
+                            <span class="picker-item-title">${k.baslik}</span>
+                            ${badgeHtml}
+                        </div>
+                        <span class="picker-item-desc">${k.alt}</span>
                     </div>
-                    <span class="picker-item-desc">${k.alt}</span>
+                    <div class="picker-item-action">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
                 </div>
-                <div class="picker-item-action">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         list.querySelectorAll('.section-picker-item').forEach(item => {
             item.onclick = () => {
+                const isSoon = item.dataset.comingSoon === 'true';
+                if (isSoon) {
+                    if (typeof toastBildirimiGoster === 'function') {
+                        toastBildirimiGoster("Trophies & Koleksiyon bölümü çok yakında geliyor!", 3000, 'warning');
+                    } else if (typeof EditManager.Global?.toastGoster === 'function') {
+                        EditManager.Global.toastGoster("Trophies bölümü yakında kullanıma açılacak!");
+                    }
+                    this.kapat();
+                    return;
+                }
                 const catId = item.dataset.cat;
                 this.kategoriSecildi(catId);
             };
