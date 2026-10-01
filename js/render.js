@@ -21,12 +21,12 @@ const RenderEngine = {
         const defaultBio = "Kendi dijital köşesini inşa ediyor.";
 
         if (bannerImg) {
-            const safeBanner = this.safeUrl(front.banner_url);
+            const safeBanner = this.getGorselUrl(front.banner_url);
             bannerImg.src = (safeBanner && safeBanner !== '#') ? safeBanner : defaultBanner;
             bannerImg.onerror = () => { bannerImg.src = defaultBanner; };
         }
         if (avatarImg) {
-            const safeAvatar = this.safeUrl(front.pfp_url);
+            const safeAvatar = this.getGorselUrl(front.pfp_url || front.avatar_url);
             avatarImg.src = (safeAvatar && safeAvatar !== '#') ? safeAvatar : defaultAvatar;
             avatarImg.onerror = () => { avatarImg.src = defaultAvatar; };
         }
@@ -499,11 +499,38 @@ const RenderEngine = {
         // Afiş Kartları (Maksimum 3 adet)
         const kartlarHtml = ogeler.slice(0, 3).map((item, idx) => {
             const rawAfis = item.afis_url || item.gorsel_url;
-            const safeAfis = this.safeUrl(rawAfis);
+            const safeAfis = this.getGorselUrl(rawAfis);
             const itemId = item.id || item.kimlik || ('top_' + (idx + 1));
             const thumbHtml = (safeAfis && safeAfis !== '#')
-                ? `<img class="top-item-thumb" src="${safeAfis}" alt="${this.escapeHtml(item.baslik || '')}" loading="lazy" draggable="false" onerror="this.style.display='none'">`
+                ? `<img class="top-item-thumb" src="${safeAfis}" alt="${this.escapeHtml(item.baslik || '')}" decoding="async" draggable="false" onerror="this.style.display='none'">`
                 : `<div class="top-item-thumb"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></div>`;
+
+            const metaBadges = [];
+            if (item.skor) {
+                metaBadges.push(`<span class="top-meta-badge is-score">★ ${this.escapeHtml(item.skor)}</span>`);
+            }
+            if (item.yil) {
+                metaBadges.push(`<span class="top-meta-badge is-year">${this.escapeHtml(item.yil)}</span>`);
+            }
+            if (item.yonetmen) {
+                metaBadges.push(`<span class="top-meta-badge is-extra" title="Yönetmen">Yön: ${this.escapeHtml(item.yonetmen)}</span>`);
+            }
+            if (item.yayinci) {
+                metaBadges.push(`<span class="top-meta-badge is-extra" title="Yayıncı Firma">${this.escapeHtml(item.yayinci)}</span>`);
+            }
+            if (item.studyo) {
+                metaBadges.push(`<span class="top-meta-badge is-extra" title="Stüdyo">${this.escapeHtml(item.studyo)}</span>`);
+            }
+            if (item.yazar) {
+                metaBadges.push(`<span class="top-meta-badge is-extra" title="Yazar">${this.escapeHtml(item.yazar)}</span>`);
+            }
+            if (item.seri) {
+                metaBadges.push(`<span class="top-meta-badge is-series" title="Seri / Evren">${this.escapeHtml(item.seri)}</span>`);
+            }
+
+            const metaRowHtml = metaBadges.length > 0
+                ? `<div class="top-item-meta-row">${metaBadges.join('')}</div>`
+                : '';
 
             return `
                 <div class="top-item-card" data-index="${idx}" data-id="${this.escapeHtml(itemId)}">
@@ -513,6 +540,7 @@ const RenderEngine = {
                             <span class="top-item-rank">#${idx + 1}</span>
                             <h4 class="top-item-title">${this.escapeHtml(item.baslik)}</h4>
                         </div>
+                        ${metaRowHtml}
                         <p class="top-item-desc">${this.escapeHtml(item.aciklama || '')}</p>
                     </div>
                 </div>
@@ -684,6 +712,21 @@ const RenderEngine = {
             temiz = 'https://' + temiz;
         }
         return /^https?:\/\/[^"'\s<>]+$/i.test(temiz) ? this.escapeHtml(temiz) : '#';
+    },
+
+    getGorselUrl(url) {
+        if (!url || typeof url !== 'string') return null;
+        const temiz = url.trim();
+        if (temiz.startsWith('data:image/') || temiz.startsWith('blob:')) {
+            return temiz;
+        }
+        try {
+            const cached = localStorage.getItem('nook_img_' + temiz);
+            if (cached && (cached.startsWith('data:image/') || cached.startsWith('blob:'))) {
+                return cached;
+            }
+        } catch (e) {}
+        return this.safeUrl(temiz);
     },
 
     getLinkIcon(url) {

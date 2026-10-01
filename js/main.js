@@ -59,7 +59,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 3. Veri Çekimi ve Akıcı Bekleme Süresi (FOUC Önleyici)
-    const MIN_BEKLEME_MS = 600;
+    const onbellekVar = typeof yerelOnbellekVarMi === 'function' && yerelOnbellekVarMi();
+    const MIN_BEKLEME_MS = onbellekVar ? 120 : 600;
     const baslangic = Date.now();
 
     const basarili = await tumVerileriCek();

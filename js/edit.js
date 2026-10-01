@@ -545,7 +545,12 @@ EditManager.Global = {
                         aciklama: item.aciklama || '',
                         afis_url: item.afis_url || item.gorsel_url || null,
                         yil: item.yil || null,
-                        skor: item.skor || null
+                        skor: item.skor || null,
+                        yonetmen: item.yonetmen || null,
+                        yayinci: item.yayinci || null,
+                        studyo: item.studyo || null,
+                        seri: item.seri || null,
+                        yazar: item.yazar || null
                     }))
                 };
             });
@@ -664,6 +669,13 @@ EditManager.Global = {
             EditManager.state.orijinalVeri = JSON.parse(JSON.stringify(kartVerisi));
             EditManager.state.hasUnsavedChanges = false;
             document.body.classList.remove('has-unsaved-changes');
+
+            if (typeof yerelOnbellekKaydet === 'function') {
+                yerelOnbellekKaydet(kartVerisi);
+            }
+            if (typeof tumGorselleriPreloadEt === 'function') {
+                tumGorselleriPreloadEt(kartVerisi);
+            }
 
             this.toastGoster("Değişiklikler başarıyla kaydedildi!");
         } catch (err) {
@@ -2551,20 +2563,31 @@ EditManager.MediaSearchModal = {
             return;
         }
 
-        aktifListe.ogeler.push({
+        const oge = {
             id: secilen.id || secilen.kimlik || ('top_' + Date.now()),
             baslik: secilen.baslik || 'Bilinmeyen Yapım',
             aciklama: secilen.aciklama || '',
             afis_url: secilen.afis_url || secilen.gorsel_url || null,
             yil: secilen.yil || null,
             skor: secilen.skor || null
-        });
+        };
+        if (secilen.yonetmen) oge.yonetmen = secilen.yonetmen;
+        if (secilen.yayinci) oge.yayinci = secilen.yayinci;
+        if (secilen.studyo) oge.studyo = secilen.studyo;
+        if (secilen.seri) oge.seri = secilen.seri;
+        if (secilen.yazar) oge.yazar = secilen.yazar;
+
+        aktifListe.ogeler.push(oge);
 
         this.kapat();
 
         RenderEngine.companionCiz(kartVerisi.tops);
         EditManager.CompanionViews?.init();
         EditManager.Global.degisiklikYapildi();
+
+        if (typeof tumGorselleriPreloadEt === 'function') {
+            tumGorselleriPreloadEt(kartVerisi);
+        }
     }
 };
 // #endregion

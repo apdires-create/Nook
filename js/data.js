@@ -5,6 +5,9 @@ async function tumVerileriCek() {
         return false;
     }
 
+    // 1. Yerel önbellekte veri varsa ekrana anında yansıt (0ms bekleme)
+    const onbellektenGeldi = yerelOnbellekYukle();
+
     try {
         const { data: profil, error } = await supabaseClient
             .from('profiles')
@@ -13,9 +16,13 @@ async function tumVerileriCek() {
             .single();
 
         if (error || !profil) {
-            console.warn("Profil bulunamadı:", error?.message);
-            yuklemeHataDurumunuGoster("Aradığınız kullanıcı bulunamadı veya profil henüz oluşturulmamış.");
-            return false;
+            if (!onbellektenGeldi) {
+                console.warn("Profil bulunamadı:", error?.message);
+                yuklemeHataDurumunuGoster("Aradığınız kullanıcı bulunamadı veya profil henüz oluşturulmamış.");
+                return false;
+            }
+            console.warn("Ağdan profil güncellenemedi, mevcut yerel önbellek gösteriliyor:", error?.message);
+            return true;
         }
 
         const guvenliObje = (v) => {
@@ -65,7 +72,12 @@ async function tumVerileriCek() {
                     aciklama: item.aciklama || '',
                     afis_url: item.afis_url || item.gorsel_url || null,
                     yil: item.yil || null,
-                    skor: item.skor || null
+                    skor: item.skor || null,
+                    yonetmen: item.yonetmen || null,
+                    yayinci: item.yayinci || null,
+                    studyo: item.studyo || null,
+                    seri: item.seri || null,
+                    yazar: item.yazar || null
                 })) : []
             }));
             normalizeTops.aktifListeId = rawTops.aktifListeId || normalizeTops.listeler[0]?.id || null;
@@ -113,6 +125,10 @@ async function tumVerileriCek() {
         if (loadingUserEl) {
             loadingUserEl.classList.add('is-loaded');
         }
+
+        // Yerel önbelleği güncelle ve görselleri önceden yükle
+        yerelOnbellekKaydet(kartVerisi);
+        tumGorselleriPreloadEt(kartVerisi);
 
         // Arayüzü yeni verilerle çiz
         if (typeof RenderEngine !== 'undefined') {
@@ -249,5 +265,164 @@ async function icerikAra(aramaMetni, aramaTuru) {
     }
 
     return [];
+}
+// #endregion
+
+// #region 5: YEREL ÖNBELLEK VE GÖRSEL PRELOAD MOTORU (LOCALSTORAGE & PRELOAD ENGINE)
+window._nookImagePreloadCache = window._nookImagePreloadCache || new Map();
+
+function yerelOnbellekVarMi() {
+    if (!KULLANICI_ADI) return false;
+    try {
+        const raw = localStorage.getItem('nook_profile_' + KULLANICI_ADI);
+        return !!raw;
+    } catch {
+        return false;
+    }
+}
+
+function yerelOnbellekYukle() {
+    if (!KULLANICI_ADI) return false;
+    try {
+        const raw = localStorage.getItem('nook_profile_' + KULLANICI_ADI);
+        if (!raw) return false;
+        const profil = JSON.parse(raw);
+        if (!profil || typeof profil !== 'object') return false;
+
+        // kartVerisi nesnesini yerel verilerle doldur
+        Object.assign(kartVerisi, profil);
+
+        // Sahip kontrolü
+        if (typeof aktifKullaniciOturumu !== 'undefined' && aktifKullaniciOturumu && profil.auth_id === aktifKullaniciOturumu.user.id) {
+            isOwner = true;
+            document.body.classList.add('is-owner');
+        } else {
+            isOwner = false;
+            document.body.classList.remove('is-owner');
+        }
+
+        // Tema rengini uygula (varsa)
+        if (kartVerisi.theme_config?.primary_color) {
+            document.documentElement.style.setProperty('--accent-color', kartVerisi.theme_config.primary_color);
+        }
+
+        const loadingUserEl = document.getElementById('app-loading-user');
+        if (loadingUserEl) {
+            loadingUserEl.classList.add('is-loaded');
+        }
+
+        // Arayüzü önbellekten hemen çiz
+        if (typeof RenderEngine !== 'undefined') {
+            RenderEngine.vitrinCiz(kartVerisi);
+            RenderEngine.menuCiz(kartVerisi);
+            RenderEngine.altEkranlariCiz(kartVerisi);
+            if (kartVerisi.tops) {
+                RenderEngine.companionCiz(kartVerisi.tops);
+            }
+        }
+
+        // Görselleri arka planda yüklemeye başla (non-blocking)
+        tumGorselleriPreloadEt(kartVerisi);
+
+        return true;
+    } catch (err) {
+        console.warn("Yerel önbellek okunurken hata:", err);
+        return false;
+    }
+}
+
+function yerelOnbellekKaydet(veri) {
+    if (!KULLANICI_ADI || !veri) return;
+    try {
+        localStorage.setItem('nook_profile_' + KULLANICI_ADI, JSON.stringify(veri));
+    } catch (err) {
+        console.warn("Yerel önbelleğe kaydedilemedi:", err);
+    }
+}
+
+function guvenliGorselOnbellegeKaydet(key, value) {
+    try {
+        localStorage.setItem(key, value);
+    } catch {
+        // LocalStorage kota aşımı durumunda eski görsel kayıtlarını temizle ve tekrar dene
+        try {
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k && k.startsWith('nook_img_')) {
+                    keysToRemove.push(k);
+                }
+            }
+            keysToRemove.slice(0, Math.ceil(keysToRemove.length / 2)).forEach(k => localStorage.removeItem(k));
+            localStorage.setItem(key, value);
+        } catch {
+            // Depolama tamamen doluysa sessizce devam et
+        }
+    }
+}
+
+function gorseliOnbellegeAl(url) {
+    if (!url || typeof url !== 'string') return;
+    const temizUrl = url.trim();
+    if (!temizUrl.startsWith('http://') && !temizUrl.startsWith('https://')) return;
+
+    // 1. Tarayıcı Bellek Ön Yüklemesi (RAM Texture Cache)
+    if (!window._nookImagePreloadCache.has(temizUrl)) {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = temizUrl;
+        window._nookImagePreloadCache.set(temizUrl, img);
+    }
+
+    // 2. LocalStorage Base64 Kalıcı Önbellek (Non-blocking arka plan)
+    const storageKey = 'nook_img_' + temizUrl;
+    try {
+        if (localStorage.getItem(storageKey)) return;
+    } catch {}
+
+    fetch(temizUrl, { mode: 'cors' })
+        .then(res => {
+            if (!res.ok) throw new Error('Ağ yanıtı başarısız');
+            return res.blob();
+        })
+        .then(blob => {
+            // 1.5MB'den büyük görselleri localStorage kotasını korumak için atla
+            if (blob.size > 1500000) return;
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                if (reader.result && typeof reader.result === 'string') {
+                    guvenliGorselOnbellegeKaydet(storageKey, reader.result);
+                }
+            };
+            reader.readAsDataURL(blob);
+        })
+        .catch(() => {
+            // CORS kısıtı olan görseller Image() nesnesiyle tarayıcı HTTP önbelleğinde zaten tutulur
+        });
+}
+
+function tumGorselleriPreloadEt(veri) {
+    if (!veri || typeof veri !== 'object') return;
+    const urls = new Set();
+
+    // Vitrin görselleri (Avatar & Banner)
+    if (veri.front_data?.banner_url) urls.add(veri.front_data.banner_url);
+    if (veri.front_data?.pfp_url) urls.add(veri.front_data.pfp_url);
+    if (veri.front_data?.avatar_url) urls.add(veri.front_data.avatar_url);
+
+    // Tops kürasyon afişleri (Tüm listeler)
+    if (veri.tops && Array.isArray(veri.tops.listeler)) {
+        veri.tops.listeler.forEach(l => {
+            if (Array.isArray(l.ogeler)) {
+                l.ogeler.forEach(item => {
+                    const afis = item.afis_url || item.gorsel_url;
+                    if (afis) urls.add(afis);
+                });
+            }
+        });
+    }
+
+    // Asenkron ve paralel olarak tüm görselleri önceden yükle
+    urls.forEach(url => gorseliOnbellegeAl(url));
 }
 // #endregion
