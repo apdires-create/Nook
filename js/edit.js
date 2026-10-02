@@ -412,64 +412,32 @@ const EditManager = {
                 <div class="tops-modal-backdrop" id="tops-setup-backdrop"></div>
                 <div class="tops-modal-panel">
                     <div class="tops-modal-header">
-                        <div>
-                            <h3 class="tops-modal-title" id="tops-setup-title">Vitrin (Tops) Ayarları</h3>
-                            <p class="tops-modal-desc" id="tops-setup-desc">Listenizin bağlantısını belirleyin veya listeyi yönetin.</p>
-                        </div>
+                        <h3 class="tops-modal-title" id="tops-setup-title">Listeyi Düzenle</h3>
                         <button type="button" class="tops-modal-close" id="tops-setup-close">&times;</button>
                     </div>
 
-                    <div class="tops-form-group" id="tops-type-group">
-                        <label class="tops-form-label">Kategori Türü</label>
-                        <div class="tops-type-grid" id="tops-type-grid">
-                            <button type="button" class="tops-type-btn is-active" data-type="film">
-                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
-                                <span>Film</span>
-                            </button>
-                            <button type="button" class="tops-type-btn" data-type="dizi">
-                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
-                                <span>Dizi</span>
-                            </button>
-                            <button type="button" class="tops-type-btn" data-type="oyun">
-                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line><rect x="2" y="6" width="20" height="12" rx="2"></rect></svg>
-                                <span>Oyun</span>
-                            </button>
-                            <button type="button" class="tops-type-btn" data-type="anime">
-                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
-                                <span>Anime</span>
-                            </button>
-                            <button type="button" class="tops-type-btn" data-type="karakter">
-                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                <span>Karakter</span>
-                            </button>
-                            <button type="button" class="tops-type-btn" data-type="kitap">
-                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                                <span>Kitap</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="tops-form-group" id="tops-name-group">
-                        <label class="tops-form-label" for="tops-name-input">Kategori Başlığı</label>
-                        <input type="text" id="tops-name-input" class="tops-form-input" placeholder="Örn: Favori Filmlerim, Tüm Zamanların En İyileri">
+                    <div class="tops-form-group">
+                        <label class="tops-form-label" for="tops-name-input">Liste İsmi</label>
+                        <input type="text" id="tops-name-input" class="tops-form-input" placeholder="Örn: Favori Filmlerim, En İyiler" maxlength="32">
                     </div>
 
                     <div class="tops-form-group">
-                        <label class="tops-form-label">Harici Profil Bağlantısı (URL)</label>
-                        <input type="url" id="tops-link-url-input" class="tops-form-input" placeholder="https://letterboxd.com/kullanici, steamcommunity.com vb.">
-                    </div>
-
-                    <!-- Düzenleme Modunda Liste Silme Seçeneği -->
-                    <div id="tops-delete-section" style="display: none; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 4px;">
-                        <button type="button" id="tops-delete-btn" style="background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; border-radius: 8px; padding: 7px 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                            <span>Bu Listeyi Sil</span>
-                        </button>
+                        <label class="tops-form-label" for="tops-link-url-input">Harici Bağlantı (URL)</label>
+                        <input type="url" id="tops-link-url-input" class="tops-form-input" placeholder="https://letterboxd.com/kullanici, steam vb.">
                     </div>
 
                     <div class="tops-form-footer">
-                        <button type="button" class="form-btn-sm form-btn-cancel" id="tops-setup-cancel">İptal</button>
-                        <button type="button" class="form-btn-sm form-btn-submit" id="tops-setup-save">Kaydet</button>
+                        <button type="button" class="tops-modal-delete-btn" id="tops-delete-btn" title="Bu listeyi kaldır">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            <span>Listeyi Sil</span>
+                        </button>
+                        <div class="tops-form-footer-right">
+                            <button type="button" class="form-btn-sm form-btn-cancel" id="tops-setup-cancel">İptal</button>
+                            <button type="button" class="form-btn-sm form-btn-submit" id="tops-setup-save">Kaydet</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -2245,7 +2213,6 @@ EditManager.TopsModal = {
         const cancelBtn = document.getElementById('tops-setup-cancel');
         const saveBtn = document.getElementById('tops-setup-save');
         const deleteBtn = document.getElementById('tops-delete-btn');
-        const typeGrid = document.getElementById('tops-type-grid');
 
         if (closeBtn) closeBtn.onclick = () => this.kapat();
         if (backdrop) backdrop.onclick = () => this.kapat();
@@ -2286,30 +2253,6 @@ EditManager.TopsModal = {
             };
         }
 
-        if (typeGrid) {
-            typeGrid.querySelectorAll('.tops-type-btn').forEach(btn => {
-                btn.onclick = () => {
-                    typeGrid.querySelectorAll('.tops-type-btn').forEach(b => b.classList.remove('is-active'));
-                    btn.classList.add('is-active');
-                    this.seciliTur = btn.dataset.type;
-
-                    // Eğer başlık boşsa veya varsayılansa, türe uygun dinamik isim öner
-                    const nameInput = document.getElementById('tops-name-input');
-                    if (nameInput && (!nameInput.value.trim() || ['Favori Filmlerim', 'Favori Dizilerim', 'Favori Oyunlarım', 'Favori Animelerim', 'Favori Karakterlerim', 'Favori Kitaplarım', 'Tops'].includes(nameInput.value.trim()))) {
-                        const ornekler = {
-                            film: 'Favori Filmlerim',
-                            dizi: 'Favori Dizilerim',
-                            oyun: 'Favori Oyunlarım',
-                            anime: 'Favori Animelerim',
-                            karakter: 'Favori Karakterlerim',
-                            kitap: 'Favori Kitaplarım'
-                        };
-                        nameInput.value = ornekler[this.seciliTur] || 'Vitrin';
-                    }
-                };
-            });
-        }
-
         if (saveBtn) {
             saveBtn.onclick = () => this.kaydet();
         }
@@ -2318,13 +2261,9 @@ EditManager.TopsModal = {
     ac(targetListId = null) {
         const modal = document.getElementById('tops-setup-modal');
         const titleEl = document.getElementById('tops-setup-title');
-        const descEl = document.getElementById('tops-setup-desc');
-        const typeGroup = document.getElementById('tops-type-group');
-        const nameGroup = document.getElementById('tops-name-group');
         const nameInput = document.getElementById('tops-name-input');
         const linkUrlInput = document.getElementById('tops-link-url-input');
-        const deleteSection = document.getElementById('tops-delete-section');
-        const typeGrid = document.getElementById('tops-type-grid');
+        const deleteBtn = document.getElementById('tops-delete-btn');
         if (!modal) return;
 
         if (!kartVerisi.tops || !Array.isArray(kartVerisi.tops.listeler)) {
@@ -2334,23 +2273,18 @@ EditManager.TopsModal = {
         this.targetListId = targetListId;
 
         if (targetListId) {
-            // DÜZENLEME MODU: Sadece Link Ekleme/Düzenleme ve Liste Silme
+            // DÜZENLEME MODU: Liste İsmi Değiştirme, Link Ekleme/Düzenleme ve Liste Silme
             const targetList = kartVerisi.tops.listeler.find(l => l.id === targetListId);
             if (!targetList) return;
 
-            if (titleEl) titleEl.textContent = `"${targetList.kategori || 'Liste'}" Bağlantısını Düzenle`;
-            if (descEl) descEl.textContent = 'Bu liste için harici profil bağlantısı ekleyin veya listeyi kaldırın.';
+            if (titleEl) titleEl.textContent = 'Listeyi Düzenle';
+            if (deleteBtn) deleteBtn.style.display = 'inline-flex';
 
-            // Kategori türü ve isim girişini gizle
-            if (typeGroup) typeGroup.style.display = 'none';
-            if (nameGroup) nameGroup.style.display = 'none';
-            if (deleteSection) deleteSection.style.display = 'block';
-
-            if (linkUrlInput) {
-                linkUrlInput.value = targetList.harici_link?.url || '';
-            }
             if (nameInput) {
                 nameInput.value = targetList.kategori || 'Favorilerim';
+            }
+            if (linkUrlInput) {
+                linkUrlInput.value = targetList.harici_link?.url || '';
             }
         } else {
             // YENİ LİSTE OLUŞTURMA MODU
@@ -2359,35 +2293,19 @@ EditManager.TopsModal = {
                 return;
             }
 
-            if (titleEl) titleEl.textContent = 'Yeni Kürasyon Listesi Oluştur';
-            if (descEl) descEl.textContent = 'Yeni bir kategori türü seçip başlık ve isteğe bağlı profil bağlantısı belirleyin.';
-
-            if (typeGroup) typeGroup.style.display = 'flex';
-            if (nameGroup) nameGroup.style.display = 'flex';
-            if (deleteSection) deleteSection.style.display = 'none';
-
-            this.seciliTur = 'film';
+            if (titleEl) titleEl.textContent = 'Yeni Liste Oluştur';
+            if (deleteBtn) deleteBtn.style.display = 'none';
 
             if (nameInput) {
-                nameInput.value = 'Favori Filmlerim';
+                nameInput.value = 'Favorilerim';
             }
             if (linkUrlInput) {
                 linkUrlInput.value = '';
             }
         }
 
-        if (typeGrid) {
-            typeGrid.querySelectorAll('.tops-type-btn').forEach(btn => {
-                btn.classList.toggle('is-active', btn.dataset.type === this.seciliTur);
-            });
-        }
-
         modal.classList.add('is-open');
-        if (targetListId && linkUrlInput) {
-            setTimeout(() => linkUrlInput.focus(), 60);
-        } else if (nameInput) {
-            setTimeout(() => nameInput.focus(), 60);
-        }
+        if (nameInput) setTimeout(() => nameInput.focus(), 60);
     },
 
     kapat() {
@@ -2401,8 +2319,8 @@ EditManager.TopsModal = {
         const linkUrlInput = document.getElementById('tops-link-url-input');
 
         const yeniBaslik = nameInput ? nameInput.value.trim() : '';
-        if (!this.targetListId && !yeniBaslik) {
-            alert("Lütfen bir kategori başlığı girin!");
+        if (!yeniBaslik) {
+            alert("Lütfen bir liste ismi girin!");
             return;
         }
 
@@ -2429,6 +2347,7 @@ EditManager.TopsModal = {
         if (this.targetListId) {
             const targetList = kartVerisi.tops.listeler.find(l => l.id === this.targetListId);
             if (targetList) {
+                targetList.kategori = yeniBaslik;
                 targetList.harici_link = harici_link;
             }
         } else {
@@ -2439,8 +2358,8 @@ EditManager.TopsModal = {
             const yeniId = 'list_' + Date.now();
             kartVerisi.tops.listeler.push({
                 id: yeniId,
-                kategori: yeniBaslik || 'Favorilerim',
-                tur: this.seciliTur,
+                kategori: yeniBaslik,
+                tur: 'film',
                 harici_link: harici_link,
                 ogeler: []
             });

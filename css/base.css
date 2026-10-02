@@ -644,10 +644,10 @@ html.is-profile-loading #landing-screen {
 /* Companion Card Header */
 .companion-header {
     flex-shrink: 0;
-    padding: 3.5cqw 4cqw 2cqw 4cqw;
+    padding: 3cqw 4cqw 1.8cqw 4cqw;
     display: flex;
     flex-direction: column;
-    gap: 2cqh;
+    gap: 1.6cqh;
     border-bottom: 1px solid var(--border-soft);
     background: rgba(255, 255, 255, 0.015);
 }
@@ -707,54 +707,44 @@ html.is-profile-loading #landing-screen {
     transform: scale(1.08);
 }
 
-/* Çoklu Liste Sekmeleri (Tabs Bar) */
+/* Çoklu Liste Sekmeleri (3x2 Grid Izgarası) */
 .companion-tabs-container {
     width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-x;
-    cursor: grab;
-}
-
-.companion-tabs-container:active {
-    cursor: grabbing;
-}
-
-.companion-tabs-container::-webkit-scrollbar {
-    display: none;
+    box-sizing: border-box;
 }
 
 .companion-tabs-bar {
-    display: flex;
-    align-items: center;
-    gap: 2cqw;
-    width: max-content;
-    padding-bottom: 2px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5cqw;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .companion-tab-btn {
-    display: inline-flex;
+    position: relative;
+    display: flex;
     align-items: center;
-    gap: 1.5cqw;
-    padding: 1.6cqw 3.2cqw;
+    justify-content: center;
+    padding: 1cqh 2cqw;
+    min-height: 4cqh;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-btn, 8px);
     color: var(--text-secondary);
     font-size: var(--cq-fs-desc);
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     user-select: none;
+    box-sizing: border-box;
+    text-align: center;
+    width: 100%;
 }
 
 .companion-tab-btn:hover {
     background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.18);
     color: #ffffff;
 }
 
@@ -765,28 +755,85 @@ html.is-profile-loading #landing-screen {
     box-shadow: 0 0 12px rgba(59, 91, 219, 0.25);
 }
 
-.companion-tab-add-btn {
-    display: inline-flex;
+.companion-tab-title {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.2;
+    padding: 0 2px;
+}
+
+/* Liste Butonu Sağ Üst Köşe Düzenleme İkonu */
+.companion-tab-edit-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-tertiary);
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 6.5cqw;
-    height: 6.5cqw;
-    min-width: 24px;
-    min-height: 24px;
-    border-radius: var(--radius-circle);
-    background: transparent;
-    border: 1px dashed var(--border-highlight);
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.18s ease;
+    z-index: 2;
+    padding: 0;
+}
+
+body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
+    opacity: 1;
+}
+
+.companion-tab-edit-btn:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #ffffff;
+    transform: scale(1.15);
+}
+
+.companion-tab-edit-btn svg {
+    width: 9px;
+    height: 9px;
+    pointer-events: none;
+}
+
+/* Yeni Liste Ekle Slotu (Grid Parçası) */
+.companion-tab-add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5cqw;
+    width: 100%;
+    min-height: 4cqh;
+    padding: 1cqh 2cqw;
+    box-sizing: border-box;
+    border-radius: var(--radius-btn, 8px);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1.5px dashed var(--border-highlight);
     color: var(--text-tertiary);
     cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    font-size: var(--cq-fs-desc);
+    font-weight: 600;
 }
 
 .companion-tab-add-btn:hover {
     border-color: var(--accent-color);
     color: #ffffff;
-    background: rgba(59, 91, 219, 0.15);
-    transform: scale(1.1);
+    background: rgba(59, 91, 219, 0.14);
+    box-shadow: 0 0 10px rgba(59, 91, 219, 0.2);
+}
+
+.companion-tab-add-btn svg {
+    width: 13px;
+    height: 13px;
+    stroke-width: 2.5;
 }
 
 /* Liste Meta (Başlık, Tür, Harici Link, Liste Silme/Düzenleme) */
