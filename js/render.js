@@ -337,7 +337,17 @@ const RenderEngine = {
                 `;
             }
 
-            tabsBar.innerHTML = tabsHtml;
+            // Sekmeler için fare tekerleğiyle (wheel) yatay kaydırma desteği
+            const tabsContainer = tabsBar.closest('.companion-tabs-container');
+            if (tabsContainer && !tabsContainer._wheelBound) {
+                tabsContainer._wheelBound = true;
+                tabsContainer.addEventListener('wheel', (e) => {
+                    if (e.deltaY !== 0) {
+                        e.preventDefault();
+                        tabsContainer.scrollLeft += e.deltaY;
+                    }
+                }, { passive: false });
+            }
 
             // Sekme tıklama olayları
             tabsBar.querySelectorAll('.companion-tab-btn').forEach(btn => {
@@ -369,30 +379,21 @@ const RenderEngine = {
             if (!aktifListe) {
                 listMeta.innerHTML = '';
             } else {
-                const turAdlari = {
-                    film: 'Film',
-                    dizi: 'Dizi',
-                    oyun: 'Oyun',
-                    anime: 'Anime',
-                    karakter: 'Karakter',
-                    kitap: 'Kitap'
-                };
-                const turEtiketi = turAdlari[aktifListe.tur] || (aktifListe.tur ? aktifListe.tur.toUpperCase() : 'VİTRİN');
+                const linkDomain = (aktifListe.harici_link && aktifListe.harici_link.url)
+                    ? this.getCleanDomain(aktifListe.harici_link.url)
+                    : '';
 
                 const linkHtml = (aktifListe.harici_link && aktifListe.harici_link.url) ? `
                     <a href="${this.safeUrl(aktifListe.harici_link.url)}" target="_blank" rel="noopener noreferrer" class="companion-meta-link">
-                        <span>${this.escapeHtml(aktifListe.harici_link.baslik || 'Harici Profil')}</span>
+                        <span>${this.escapeHtml(linkDomain || 'Harici Profil')}</span>
                         <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                     </a>
                 ` : '';
 
                 const ownerActionsHtml = isUserOwner ? `
                     <div class="companion-meta-actions">
-                        <button type="button" class="companion-action-icon-btn is-edit" id="companionEditMetaBtn" title="Listeyi Düzenle (İsim, Tür, Link)">
+                        <button type="button" class="companion-action-icon-btn is-edit" id="companionEditMetaBtn" title="Listeyi ve Bağlantıyı Düzenle">
                             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        </button>
-                        <button type="button" class="companion-action-icon-btn is-delete" id="companionDeleteListBtn" title="Bu Listeyi Sil">
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                     </div>
                 ` : '';
@@ -401,7 +402,6 @@ const RenderEngine = {
                     <div class="companion-meta-left">
                         <div class="companion-meta-title-row">
                             <h4 class="companion-meta-title ${isUserOwner ? 'editable-hover' : ''}" id="companionMetaTitle">${this.escapeHtml(aktifListe.kategori || 'Liste')}</h4>
-                            <span class="companion-meta-type-badge">${this.escapeHtml(turEtiketi)}</span>
                         </div>
                         ${linkHtml}
                     </div>
@@ -411,7 +411,6 @@ const RenderEngine = {
                 if (isUserOwner) {
                     const editBtn = listMeta.querySelector('#companionEditMetaBtn');
                     const titleClick = listMeta.querySelector('#companionMetaTitle');
-                    const deleteBtn = listMeta.querySelector('#companionDeleteListBtn');
 
                     const acDuzenleme = () => {
                         if (typeof EditManager !== 'undefined') {
@@ -421,23 +420,6 @@ const RenderEngine = {
 
                     if (editBtn) editBtn.onclick = acDuzenleme;
                     if (titleClick) titleClick.onclick = acDuzenleme;
-
-                    if (deleteBtn) {
-                        deleteBtn.onclick = () => {
-                            if (confirm(`"${aktifListe.kategori}" listesini silmek istediğinize emin misiniz?`)) {
-                                const idx = listeler.findIndex(l => l.id === aktifListe.id);
-                                if (idx > -1) {
-                                    listeler.splice(idx, 1);
-                                    tops.aktifListeId = listeler[0]?.id || null;
-                                    this.companionCiz(tops);
-                                    if (typeof EditManager !== 'undefined') {
-                                        EditManager.Global.degisiklikYapildi();
-                                        EditManager.CompanionViews?.init();
-                                    }
-                                }
-                            }
-                        };
-                    }
                 }
             }
         }

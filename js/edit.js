@@ -414,12 +414,12 @@ const EditManager = {
                     <div class="tops-modal-header">
                         <div>
                             <h3 class="tops-modal-title" id="tops-setup-title">Vitrin (Tops) Ayarları</h3>
-                            <p class="tops-modal-desc">Kategorinin türünü, başlığını ve varsa harici profil bağlantısını belirleyin.</p>
+                            <p class="tops-modal-desc" id="tops-setup-desc">Listenizin bağlantısını belirleyin veya listeyi yönetin.</p>
                         </div>
                         <button type="button" class="tops-modal-close" id="tops-setup-close">&times;</button>
                     </div>
 
-                    <div class="tops-form-group">
+                    <div class="tops-form-group" id="tops-type-group">
                         <label class="tops-form-label">Kategori Türü</label>
                         <div class="tops-type-grid" id="tops-type-grid">
                             <button type="button" class="tops-type-btn is-active" data-type="film">
@@ -449,15 +449,22 @@ const EditManager = {
                         </div>
                     </div>
 
-                    <div class="tops-form-group">
+                    <div class="tops-form-group" id="tops-name-group">
                         <label class="tops-form-label" for="tops-name-input">Kategori Başlığı</label>
                         <input type="text" id="tops-name-input" class="tops-form-input" placeholder="Örn: Favori Filmlerim, Tüm Zamanların En İyileri">
                     </div>
 
                     <div class="tops-form-group">
-                        <label class="tops-form-label">Harici Bağlantı (İsteğe Bağlı)</label>
-                        <input type="text" id="tops-link-title-input" class="tops-form-input" placeholder="Bağlantı Metni (Örn: Letterboxd Profilim →)" style="margin-bottom: 6px;">
-                        <input type="url" id="tops-link-url-input" class="tops-form-input" placeholder="URL (https://letterboxd.com/kullanici)">
+                        <label class="tops-form-label">Harici Profil Bağlantısı (URL)</label>
+                        <input type="url" id="tops-link-url-input" class="tops-form-input" placeholder="https://letterboxd.com/kullanici, steamcommunity.com vb.">
+                    </div>
+
+                    <!-- Düzenleme Modunda Liste Silme Seçeneği -->
+                    <div id="tops-delete-section" style="display: none; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 4px;">
+                        <button type="button" id="tops-delete-btn" style="background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; border-radius: 8px; padding: 7px 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            <span>Bu Listeyi Sil</span>
+                        </button>
                     </div>
 
                     <div class="tops-form-footer">
@@ -2237,11 +2244,47 @@ EditManager.TopsModal = {
         const backdrop = document.getElementById('tops-setup-backdrop');
         const cancelBtn = document.getElementById('tops-setup-cancel');
         const saveBtn = document.getElementById('tops-setup-save');
+        const deleteBtn = document.getElementById('tops-delete-btn');
         const typeGrid = document.getElementById('tops-type-grid');
 
         if (closeBtn) closeBtn.onclick = () => this.kapat();
         if (backdrop) backdrop.onclick = () => this.kapat();
         if (cancelBtn) cancelBtn.onclick = () => this.kapat();
+
+        if (deleteBtn) {
+            deleteBtn.onclick = () => {
+                const targetId = this.targetListId;
+                if (!targetId || !kartVerisi.tops?.listeler) return;
+                const targetList = kartVerisi.tops.listeler.find(l => l.id === targetId);
+                const listName = targetList?.kategori || 'Liste';
+
+                this.kapat();
+
+                // Özel Onay Modalı (block-delete-modal) ile sor
+                const blockModal = document.getElementById('block-delete-modal');
+                const blockTitle = document.getElementById('block-delete-title');
+                const blockDesc = document.getElementById('block-delete-desc');
+                const confirmBtn = document.getElementById('block-delete-confirm');
+
+                if (blockModal && blockTitle && blockDesc && confirmBtn) {
+                    blockTitle.textContent = `"${listName}" Listesini Sil`;
+                    blockDesc.textContent = "Bu kürasyon listesini ve içindeki tüm afişleri kaldırmak istediğinizden emin misiniz?";
+                    blockModal.classList.add('is-open');
+
+                    confirmBtn.onclick = () => {
+                        blockModal.classList.remove('is-open');
+                        const idx = kartVerisi.tops.listeler.findIndex(l => l.id === targetId);
+                        if (idx > -1) {
+                            kartVerisi.tops.listeler.splice(idx, 1);
+                            kartVerisi.tops.aktifListeId = kartVerisi.tops.listeler[0]?.id || null;
+                            RenderEngine.companionCiz(kartVerisi.tops);
+                            EditManager.CompanionViews?.init();
+                            EditManager.Global.degisiklikYapildi();
+                        }
+                    };
+                }
+            };
+        }
 
         if (typeGrid) {
             typeGrid.querySelectorAll('.tops-type-btn').forEach(btn => {
@@ -2275,9 +2318,12 @@ EditManager.TopsModal = {
     ac(targetListId = null) {
         const modal = document.getElementById('tops-setup-modal');
         const titleEl = document.getElementById('tops-setup-title');
+        const descEl = document.getElementById('tops-setup-desc');
+        const typeGroup = document.getElementById('tops-type-group');
+        const nameGroup = document.getElementById('tops-name-group');
         const nameInput = document.getElementById('tops-name-input');
-        const linkTitleInput = document.getElementById('tops-link-title-input');
         const linkUrlInput = document.getElementById('tops-link-url-input');
+        const deleteSection = document.getElementById('tops-delete-section');
         const typeGrid = document.getElementById('tops-type-grid');
         if (!modal) return;
 
@@ -2288,35 +2334,42 @@ EditManager.TopsModal = {
         this.targetListId = targetListId;
 
         if (targetListId) {
+            // DÜZENLEME MODU: Sadece Link Ekleme/Düzenleme ve Liste Silme
             const targetList = kartVerisi.tops.listeler.find(l => l.id === targetListId);
             if (!targetList) return;
 
-            if (titleEl) titleEl.textContent = 'Listeyi Düzenle';
-            this.seciliTur = (targetList.tur || 'film').toLowerCase();
+            if (titleEl) titleEl.textContent = `"${targetList.kategori || 'Liste'}" Bağlantısını Düzenle`;
+            if (descEl) descEl.textContent = 'Bu liste için harici profil bağlantısı ekleyin veya listeyi kaldırın.';
 
-            if (nameInput) {
-                nameInput.value = targetList.kategori || 'Favorilerim';
-            }
-            if (linkTitleInput) {
-                linkTitleInput.value = targetList.harici_link?.baslik || '';
-            }
+            // Kategori türü ve isim girişini gizle
+            if (typeGroup) typeGroup.style.display = 'none';
+            if (nameGroup) nameGroup.style.display = 'none';
+            if (deleteSection) deleteSection.style.display = 'block';
+
             if (linkUrlInput) {
                 linkUrlInput.value = targetList.harici_link?.url || '';
             }
+            if (nameInput) {
+                nameInput.value = targetList.kategori || 'Favorilerim';
+            }
         } else {
+            // YENİ LİSTE OLUŞTURMA MODU
             if (kartVerisi.tops.listeler.length >= 6) {
                 alert("En fazla 6 adet kürasyon listesi oluşturabilirsiniz!");
                 return;
             }
 
             if (titleEl) titleEl.textContent = 'Yeni Kürasyon Listesi Oluştur';
+            if (descEl) descEl.textContent = 'Yeni bir kategori türü seçip başlık ve isteğe bağlı profil bağlantısı belirleyin.';
+
+            if (typeGroup) typeGroup.style.display = 'flex';
+            if (nameGroup) nameGroup.style.display = 'flex';
+            if (deleteSection) deleteSection.style.display = 'none';
+
             this.seciliTur = 'film';
 
             if (nameInput) {
                 nameInput.value = 'Favori Filmlerim';
-            }
-            if (linkTitleInput) {
-                linkTitleInput.value = '';
             }
             if (linkUrlInput) {
                 linkUrlInput.value = '';
@@ -2330,7 +2383,11 @@ EditManager.TopsModal = {
         }
 
         modal.classList.add('is-open');
-        if (nameInput) setTimeout(() => nameInput.focus(), 50);
+        if (targetListId && linkUrlInput) {
+            setTimeout(() => linkUrlInput.focus(), 60);
+        } else if (nameInput) {
+            setTimeout(() => nameInput.focus(), 60);
+        }
     },
 
     kapat() {
@@ -2341,21 +2398,29 @@ EditManager.TopsModal = {
 
     kaydet() {
         const nameInput = document.getElementById('tops-name-input');
-        const linkTitleInput = document.getElementById('tops-link-title-input');
         const linkUrlInput = document.getElementById('tops-link-url-input');
 
         const yeniBaslik = nameInput ? nameInput.value.trim() : '';
-        if (!yeniBaslik) {
+        if (!this.targetListId && !yeniBaslik) {
             alert("Lütfen bir kategori başlığı girin!");
             return;
         }
 
-        const linkTitle = linkTitleInput ? linkTitleInput.value.trim() : '';
         const linkUrl = linkUrlInput ? linkUrlInput.value.trim() : '';
-        const harici_link = linkUrl ? {
-            baslik: linkTitle || 'Harici Profil →',
-            url: linkUrl
-        } : null;
+        let harici_link = null;
+        if (linkUrl) {
+            let domain = '';
+            try {
+                const u = new URL(linkUrl.startsWith('http') ? linkUrl : 'https://' + linkUrl);
+                domain = u.hostname.replace(/^www\./i, '');
+            } catch {
+                domain = 'Bağlantı';
+            }
+            harici_link = {
+                baslik: domain || 'Harici Profil',
+                url: linkUrl
+            };
+        }
 
         if (!kartVerisi.tops || !Array.isArray(kartVerisi.tops.listeler)) {
             kartVerisi.tops = { aktifListeId: null, listeler: [] };
@@ -2364,8 +2429,6 @@ EditManager.TopsModal = {
         if (this.targetListId) {
             const targetList = kartVerisi.tops.listeler.find(l => l.id === this.targetListId);
             if (targetList) {
-                targetList.kategori = yeniBaslik;
-                targetList.tur = this.seciliTur;
                 targetList.harici_link = harici_link;
             }
         } else {
@@ -2376,7 +2439,7 @@ EditManager.TopsModal = {
             const yeniId = 'list_' + Date.now();
             kartVerisi.tops.listeler.push({
                 id: yeniId,
-                kategori: yeniBaslik,
+                kategori: yeniBaslik || 'Favorilerim',
                 tur: this.seciliTur,
                 harici_link: harici_link,
                 ogeler: []
@@ -2503,12 +2566,15 @@ EditManager.MediaSearchModal = {
 
             const skorHtml = item.skor ? `<span class="tops-search-score">★ ${EditManager.escapeHtml(item.skor)}</span>` : '';
             const yilHtml = item.yil ? `<span class="tops-search-year">(${EditManager.escapeHtml(item.yil)})</span>` : '';
+            const altBilgi = item.seri || item.yazar || item.yonetmen || item.yayinci || item.studyo || (item.aciklama ? item.aciklama.slice(0, 60) : '');
+            const altBilgiHtml = altBilgi ? `<span class="tops-search-sub" style="font-size: 0.75rem; color: rgba(255,255,255,0.6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${EditManager.escapeHtml(altBilgi)}</span>` : '';
 
             return `
                 <div class="tops-search-item" data-index="${idx}">
                     ${posterHtml}
                     <div class="tops-search-info">
                         <div class="tops-search-title">${EditManager.escapeHtml(item.baslik)} ${yilHtml}</div>
+                        ${altBilgiHtml}
                         <div class="tops-search-meta">
                             ${skorHtml}
                             <span class="tops-search-type">${this.aramaTuru.toUpperCase()}</span>
@@ -2681,8 +2747,15 @@ EditManager.CompanionViews = {
                     if (JSON.stringify(yeniOgeler) !== JSON.stringify(aktifListe.ogeler)) {
                         aktifListe.ogeler = yeniOgeler;
                         EditManager.Global.degisiklikYapildi();
+
+                        const compCard = document.querySelector('.tops-companion-card');
+                        if (compCard) compCard.classList.add('is-reordered');
+
                         RenderEngine.companionCiz(kartVerisi.tops);
                         EditManager.CompanionViews.init();
+
+                        const newCompCard = document.querySelector('.tops-companion-card');
+                        if (newCompCard) newCompCard.classList.add('is-reordered');
                     }
                 }
             }

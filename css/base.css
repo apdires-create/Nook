@@ -598,20 +598,25 @@ html.is-profile-loading #landing-screen {
     animation: companionSubFadeIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both;
 }
 
-.tops-companion-card .top-item-card:nth-child(1) {
+.tops-companion-card:not(.is-reordered) .top-item-card:nth-child(1) {
     animation: companionItemSlideIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
 }
 
-.tops-companion-card .top-item-card:nth-child(2) {
+.tops-companion-card:not(.is-reordered) .top-item-card:nth-child(2) {
     animation: companionItemSlideIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.21s both;
 }
 
-.tops-companion-card .top-item-card:nth-child(3) {
+.tops-companion-card:not(.is-reordered) .top-item-card:nth-child(3) {
     animation: companionItemSlideIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both;
 }
 
-.tops-companion-card .top-add-poster-card {
+.tops-companion-card:not(.is-reordered) .top-add-poster-card {
     animation: companionItemSlideIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both;
+}
+
+.tops-companion-card.is-reordered .top-item-card,
+.tops-companion-card.is-reordered .top-add-poster-card {
+    animation: none !important;
 }
 
 @keyframes companionSubFadeIn {
@@ -706,8 +711,17 @@ html.is-profile-loading #landing-screen {
 .companion-tabs-container {
     width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    cursor: grab;
+}
+
+.companion-tabs-container:active {
+    cursor: grabbing;
 }
 
 .companion-tabs-container::-webkit-scrollbar {
