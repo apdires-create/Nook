@@ -707,27 +707,30 @@ html.is-profile-loading #landing-screen {
     transform: scale(1.08);
 }
 
-/* Çoklu Liste Sekmeleri (3x2 Grid Izgarası) */
+/* Çoklu Liste Sekmeleri (Dinamik Esnek Düzen) */
 .companion-tabs-container {
     width: 100%;
     box-sizing: border-box;
+    padding: 6px 6px 2px 2px;
 }
 
 .companion-tabs-bar {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5cqw;
+    --tabs-gap: 1.5cqw;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--tabs-gap);
     width: 100%;
     box-sizing: border-box;
+    align-items: center;
 }
 
 .companion-tab-btn {
     position: relative;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 1cqh 2cqw;
-    min-height: 4cqh;
+    padding: 0.8cqh 2cqw;
+    min-height: 3.6cqh;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: var(--radius-btn, 8px);
@@ -739,7 +742,11 @@ html.is-profile-loading #landing-screen {
     user-select: none;
     box-sizing: border-box;
     text-align: center;
-    width: 100%;
+    width: auto;
+    flex: 0 1 auto;
+    max-width: calc((100% - (var(--tabs-gap) * 2)) / 3);
+    min-width: 0;
+    overflow: visible;
 }
 
 .companion-tab-btn:hover {
@@ -765,53 +772,62 @@ html.is-profile-loading #landing-screen {
     padding: 0 2px;
 }
 
-/* Liste Butonu Sağ Üst Köşe Düzenleme İkonu */
+/* Liste Butonu Sağ Üst Köşe Düzenleme Kalem İkonu (Tag butonu stili) */
 .companion-tab-edit-btn {
     position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: var(--text-tertiary);
-    display: flex;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radius-circle, 50%);
+    background: #161926;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.85);
+    display: none;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    opacity: 0;
-    transition: all 0.18s ease;
-    z-index: 2;
     padding: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+    z-index: 10;
 }
 
 body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
-    opacity: 1;
+    display: flex;
+}
+
+@media (hover: none) {
+    body.is-owner .companion-tab-btn.is-active .companion-tab-edit-btn {
+        display: flex;
+    }
 }
 
 .companion-tab-edit-btn:hover {
-    background: var(--accent-color);
-    border-color: var(--accent-color);
+    background: var(--accent-color, #3b5bdb);
+    border-color: var(--accent-color, #3b5bdb);
     color: #ffffff;
-    transform: scale(1.15);
+    transform: scale(1.2);
 }
 
 .companion-tab-edit-btn svg {
-    width: 9px;
-    height: 9px;
+    width: 10px;
+    height: 10px;
     pointer-events: none;
 }
 
-/* Yeni Liste Ekle Slotu (Grid Parçası) */
+/* Yeni Liste Ekle Butonu */
 .companion-tab-add-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 1.5cqw;
-    width: 100%;
-    min-height: 4cqh;
-    padding: 1cqh 2cqw;
+    gap: 1.2cqw;
+    width: auto;
+    flex: 0 1 auto;
+    max-width: calc((100% - (var(--tabs-gap) * 2)) / 3);
+    min-width: 0;
+    min-height: 3.6cqh;
+    padding: 0.8cqh 2cqw;
     box-sizing: border-box;
     border-radius: var(--radius-btn, 8px);
     background: rgba(255, 255, 255, 0.02);
@@ -821,6 +837,7 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     font-size: var(--cq-fs-desc);
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .companion-tab-add-btn:hover {
@@ -831,8 +848,8 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
 }
 
 .companion-tab-add-btn svg {
-    width: 13px;
-    height: 13px;
+    width: 12px;
+    height: 12px;
     stroke-width: 2.5;
 }
 
