@@ -34,7 +34,7 @@ const TiltEngine = {
         this.currentTiltY += (targetTiltY - this.currentTiltY) * this.lerpSpeed;
 
         if (this.cardContainer) {
-            if (typeof Router !== 'undefined' && Router._companionTransitioning) {
+            if (typeof Router !== 'undefined' && (Router._companionTransitioning || Router.isFlipping)) {
                 requestAnimationFrame(() => this.loop());
                 return;
             }

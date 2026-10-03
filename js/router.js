@@ -211,9 +211,10 @@ const Router = {
         // Önceki flip'in bekleyen bitiş işlemlerini iptal et
         this._cancelPending?.();
 
-        // Hedef yüzün erişimini hemen aç
-        if (flipped && back) back.inert = false;
-        if (!flipped && front) front.inert = false;
+        // Hedef yüzü ANINDA aktif et, terk edilen yüzü ANINDA kapat
+        // Böylece kart dönerken arkadaki içerik anında tıklanabilir olur, eski yüz tıklamaları yutmaz!
+        if (front) front.inert = flipped;
+        if (back) back.inert = !flipped;
 
         this.isFlipping = true;
         container.classList.add('is-flipping');
@@ -223,10 +224,6 @@ const Router = {
             this._cancelPending?.();
             this.isFlipping = false;
             container.classList.remove('is-flipping');
-
-            // Gizlenen yüzü klavye/ekran okuyucudan çıkar
-            if (front) front.inert = flipped;
-            if (back) back.inert = !flipped;
 
             if (!flipped) this.resetToMainMenu();
         };
