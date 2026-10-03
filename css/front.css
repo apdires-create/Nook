@@ -1,7 +1,7 @@
 /* #region 1: ÖN YÜZ VİTRİN KAPSAYICISI */
 .card-front {
     padding: 0 4.5cqw 4.5cqw 4.5cqw;
-    transform: rotateY(0deg);
+    transform: translateZ(1px);
 }
 
 /* Sol Üst: Menüyü Gör Butonu */

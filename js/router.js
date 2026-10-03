@@ -1,17 +1,24 @@
 // #region 1: NAVİGASYON VE DRILL-DOWN ROUTER
 const Router = {
     cardContainer: null,
+    cardElement: null,
     viewMenu: null,
     viewsWrapper: null,
     isFlipped: false,
     isFlipping: false,
     _flipTimeout: null,
+    _cancelPending: null,
     activeDetailView: null,
 
     init() {
         this.cardContainer = document.getElementById('cardContainer');
+        this.cardElement = document.getElementById('nookCard') || this.cardContainer?.querySelector('.nook-card');
         this.viewMenu = document.getElementById('viewMenu');
         this.viewsWrapper = document.getElementById('viewsWrapper');
+
+        // Başlangıçta arka yüzü inert yap (klavye ve ekran okuyucu erişimini kapat)
+        const back = this.cardElement?.querySelector('.card-back');
+        if (back) back.inert = true;
 
         const flipToBackBtn = document.getElementById('flipToBackBtn');
         const flipToFrontBtn = document.getElementById('flipToFrontBtn');
@@ -141,10 +148,10 @@ const Router = {
                 if (selection && selection.toString().trim().length > 0) return;
                 if (window._suruklemeBitti && Date.now() - window._suruklemeBitti < 300) return;
 
-                // 4. HİYERARŞİK GEZİNME (Boş alana tıklama):
-                // Kart dönerken boş alana tıklamayı yoksay (çift dönüşü engelle)
-                if (this.isFlipping) return;
+                // Animasyon sürerken, buton/link/input olmayan boş alan tıklamasını yok say
+                if (this.isFlipping && !e.target.closest('button, a, input, textarea, select')) return;
 
+                // 4. HİYERARŞİK GEZİNME (Boş alana tıklama):
                 // A. ÖN YÜZ: Ön yüzdeyken boş alana tıklandığında arka yüze git
                 if (!this.isFlipped) {
                     this.setFlipped(true);
@@ -182,30 +189,51 @@ const Router = {
     },
 
     setFlipped(flipped) {
-        // Eğer dönüş animasyonu sürüyorsa yeni bir dönüşü engelle (çift tıklamayı kitle)
-        if (this.isFlipping) return;
+        if (this.isFlipped === flipped) return;
 
         this.isFlipped = flipped;
-        if (!this.cardContainer) return;
+        const container = this.cardContainer;
+        const card = this.cardElement;
+        if (!container || !card) return;
 
-        // Kart dönüş durumu bayrağı (animasyon bitene kadar - 600ms - kilitli kalır)
+        const front = card.querySelector('.card-front');
+        const back = card.querySelector('.card-back');
+
+        // Önceki flip'in bekleyen bitiş işlemlerini iptal et
+        this._cancelPending?.();
+
+        // Hedef yüzün erişimini hemen aç
+        if (flipped && back) back.inert = false;
+        if (!flipped && front) front.inert = false;
+
         this.isFlipping = true;
-        this.cardContainer.classList.add('is-flipping');
+        container.classList.add('is-flipping');
+        container.classList.toggle('is-flipped', flipped);
 
-        clearTimeout(this._flipTimeout);
-        this._flipTimeout = setTimeout(() => {
+        const finish = () => {
+            this._cancelPending?.();
             this.isFlipping = false;
-            if (this.cardContainer) {
-                this.cardContainer.classList.remove('is-flipping');
-            }
-        }, 600);
+            container.classList.remove('is-flipping');
 
-        if (this.isFlipped) {
-            this.cardContainer.classList.add('is-flipped');
-        } else {
-            this.cardContainer.classList.remove('is-flipped');
-            this.resetToMainMenu();
-        }
+            // Gizlenen yüzü klavye/ekran okuyucudan çıkar
+            if (front) front.inert = flipped;
+            if (back) back.inert = !flipped;
+
+            if (!flipped) this.resetToMainMenu();
+        };
+
+        const onEnd = (e) => {
+            if (e.target === card && e.propertyName === 'transform') finish();
+        };
+
+        card.addEventListener('transitionend', onEnd);
+        const timeoutId = setTimeout(finish, 1000); // Güvenlik ağı fallback
+
+        this._cancelPending = () => {
+            card.removeEventListener('transitionend', onEnd);
+            clearTimeout(timeoutId);
+            this._cancelPending = null;
+        };
     },
 
     openDetailView(targetId) {

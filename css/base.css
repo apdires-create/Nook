@@ -142,26 +142,12 @@ body.is-pointer-dragging * {
     flex-direction: column;
 }
 
-/* Ön yüz varsayılan olarak üstte ve aktif, arka yüz altta ve pasif */
-.card-container:not(.is-flipped) .card-front {
-    z-index: 2;
-    pointer-events: auto;
+.card-front {
+    transform: translateZ(1px);
 }
 
-.card-container:not(.is-flipped) .card-back {
-    z-index: 1;
-    pointer-events: none;
-}
-
-/* Kart çevrildiğinde (is-flipped): Arka yüz üste geçer ve anında aktifleşir, ön yüz alta geçer ve kilitlenir */
-.card-container.is-flipped .card-front {
-    z-index: 1;
-    pointer-events: none;
-}
-
-.card-container.is-flipped .card-back {
-    z-index: 2;
-    pointer-events: auto;
+.card-back {
+    transform: rotateY(180deg) translateZ(1px);
 }
 /* #endregion */
 

@@ -1,6 +1,6 @@
 /* #region 1: ARKA YÜZ GÖVDESİ VE GEÇİŞ PANELLERİ */
 .card-back {
-    transform: rotateY(180deg);
+    transform: rotateY(180deg) translateZ(1px);
     background: var(--bg-card);
     padding: 4.5cqw;
 }
