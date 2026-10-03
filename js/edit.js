@@ -598,7 +598,16 @@ EditManager.Global = {
     sifirla() {
         if (!EditManager.state.orijinalVeri) return;
 
+        // O an kullanıcının görüntülediği aktif showcase sekmesini koru
+        const suAnkiAktifListeId = kartVerisi.tops?.aktifListeId;
+
         kartVerisi = JSON.parse(JSON.stringify(EditManager.state.orijinalVeri));
+
+        // Eğer o an görüntülenen liste orijinal veride de mevcutsa, kullanıcının bulunduğu sekmede kal
+        if (suAnkiAktifListeId && kartVerisi.tops?.listeler?.some(l => l.id === suAnkiAktifListeId)) {
+            kartVerisi.tops.aktifListeId = suAnkiAktifListeId;
+        }
+
         EditManager.state.hasUnsavedChanges = false;
         document.body.classList.remove('has-unsaved-changes');
 
