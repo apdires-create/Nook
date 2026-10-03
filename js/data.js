@@ -369,6 +369,7 @@ function gorseliOnbellegeAl(url) {
     // 1. Tarayıcı Bellek Ön Yüklemesi (RAM Texture Cache)
     if (!window._nookImagePreloadCache.has(temizUrl)) {
         const img = new Image();
+        img.referrerPolicy = 'no-referrer';
         img.decoding = 'async';
         img.src = temizUrl;
         window._nookImagePreloadCache.set(temizUrl, img);

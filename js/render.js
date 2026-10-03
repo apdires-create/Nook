@@ -381,28 +381,16 @@ const RenderEngine = {
             }
         }
 
-        // 2. LİSTE META (BAŞLIK & LİNK & DÜZENLEME BUTONLARI)
+        // 2. LİSTE BAŞLIĞI BÖLGESİ
         if (listMeta) {
             if (!aktifListe) {
                 listMeta.innerHTML = '';
             } else {
-                const linkDomain = (aktifListe.harici_link && aktifListe.harici_link.url)
-                    ? this.getCleanDomain(aktifListe.harici_link.url)
-                    : '';
-
-                const linkHtml = (aktifListe.harici_link && aktifListe.harici_link.url) ? `
-                    <a href="${this.safeUrl(aktifListe.harici_link.url)}" target="_blank" rel="noopener noreferrer" class="companion-meta-link">
-                        <span>${this.escapeHtml(linkDomain || 'Harici Profil')}</span>
-                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                    </a>
-                ` : '';
-
                 listMeta.innerHTML = `
                     <div class="companion-meta-left">
                         <div class="companion-meta-title-row">
                             <h4 class="companion-meta-title" id="companionMetaTitle">${this.escapeHtml(aktifListe.kategori || 'Liste')}</h4>
                         </div>
-                        ${linkHtml}
                     </div>
                 `;
             }
@@ -468,7 +456,7 @@ const RenderEngine = {
             const safeAfis = this.getGorselUrl(rawAfis);
             const itemId = item.id || item.kimlik || ('top_' + (idx + 1));
             const thumbHtml = (safeAfis && safeAfis !== '#')
-                ? `<img class="top-item-thumb" src="${safeAfis}" alt="${this.escapeHtml(item.baslik || '')}" decoding="async" draggable="false" onerror="this.style.display='none'">`
+                ? `<img class="top-item-thumb" src="${safeAfis}" alt="${this.escapeHtml(item.baslik || '')}" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.style.display='none'">`
                 : `<div class="top-item-thumb"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></div>`;
 
             const metaBadges = [];
@@ -542,6 +530,35 @@ const RenderEngine = {
                 ${addPosterSlotHtml}
             </div>
         `;
+
+        // 4. BLOĞUN EN ALTINDAKİ ŞIK HARİCİ LİNK
+        const footerEl = document.getElementById('companionFooter');
+        if (footerEl) {
+            if (aktifListe && aktifListe.harici_link && aktifListe.harici_link.url) {
+                const linkDomain = this.getCleanDomain(aktifListe.harici_link.url);
+                footerEl.innerHTML = `
+                    <a href="${this.safeUrl(aktifListe.harici_link.url)}" target="_blank" rel="noopener noreferrer" class="companion-footer-link" title="${this.escapeHtml(linkDomain)}">
+                        <div class="companion-footer-link-content">
+                            <svg class="companion-link-globe-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                            <span class="companion-link-domain">${this.escapeHtml(linkDomain)}</span>
+                            <span class="companion-link-label">Listeyi İncele</span>
+                        </div>
+                        <svg class="companion-link-arrow-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                            <polyline points="7 7 17 7 17 17"></polyline>
+                        </svg>
+                    </a>
+                `;
+                footerEl.style.display = 'block';
+            } else {
+                footerEl.innerHTML = '';
+                footerEl.style.display = 'none';
+            }
+        }
     },
 
     trophiesIcerikHTML(trophies) {
@@ -678,6 +695,19 @@ const RenderEngine = {
             temiz = 'https://' + temiz;
         }
         return /^https?:\/\/[^"'\s<>]+$/i.test(temiz) ? this.escapeHtml(temiz) : '#';
+    },
+
+    getCleanDomain(url) {
+        if (!url) return '';
+        try {
+            let parsed = String(url).trim();
+            if (!parsed.startsWith('http://') && !parsed.startsWith('https://')) {
+                parsed = 'https://' + parsed;
+            }
+            return new URL(parsed).hostname.replace(/^www\./i, '');
+        } catch {
+            return 'Harici Bağlantı';
+        }
     },
 
     getGorselUrl(url) {

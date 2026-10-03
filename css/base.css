@@ -978,6 +978,79 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
     line-height: 1.4;
     max-width: 80%;
 }
+
+/* Companion Footer (Bloğun En Altındaki Şık Harici Link) */
+.companion-footer {
+    flex-shrink: 0;
+    padding: 0.8cqh 4.5cqw 3cqw 4.5cqw;
+    box-sizing: border-box;
+}
+
+.companion-footer-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2cqh 3cqw;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-btn, 8px);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: var(--cq-fs-desc);
+    font-weight: 600;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+
+.companion-footer-link:hover {
+    background: rgba(59, 91, 219, 0.15);
+    border-color: var(--accent-color);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(59, 91, 219, 0.2);
+    transform: translateY(-1px);
+}
+
+.companion-footer-link-content {
+    display: flex;
+    align-items: center;
+    gap: 1.8cqw;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.companion-link-domain {
+    color: #ffffff;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.companion-link-label {
+    color: var(--text-tertiary);
+    font-size: 0.72rem;
+    white-space: nowrap;
+}
+
+.companion-footer-link:hover .companion-link-label {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.companion-link-globe-icon {
+    flex-shrink: 0;
+    color: var(--accent-color);
+}
+
+.companion-link-arrow-icon {
+    flex-shrink: 0;
+    color: var(--text-tertiary);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.companion-footer-link:hover .companion-link-arrow-icon {
+    color: #ffffff;
+    transform: translate(2px, -2px);
+}
 /* #endregion */
 
 /* Global Toast Bildirimi */

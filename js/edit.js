@@ -2549,7 +2549,7 @@ EditManager.MediaSearchModal = {
         resultsWrap.innerHTML = sonuclar.map((item, idx) => {
             const rawAfis = item.afis_url || item.gorsel_url;
             const posterHtml = rawAfis
-                ? `<img class="tops-search-poster" src="${EditManager.escapeHtml(rawAfis)}" alt="${EditManager.escapeHtml(item.baslik)}" onerror="this.style.display='none'">`
+                ? `<img class="tops-search-poster" src="${EditManager.escapeHtml(rawAfis)}" alt="${EditManager.escapeHtml(item.baslik)}" referrerpolicy="no-referrer" onerror="this.style.display='none'">`
                 : `<div class="tops-search-poster"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2"></rect></svg></div>`;
 
             const skorHtml = item.skor ? `<span class="tops-search-score">★ ${EditManager.escapeHtml(item.skor)}</span>` : '';
