@@ -348,6 +348,10 @@ const RenderEngine = {
             // Sekme tıklama ve sekme içi düzenleme ikonu olayları
             tabsBar.querySelectorAll('.companion-tab-btn').forEach(btn => {
                 btn.onclick = (e) => {
+                    if (window._suruklemeBitti && Date.now() - window._suruklemeBitti < 250) {
+                        return;
+                    }
+
                     const editTrigger = e.target.closest('.companion-tab-edit-btn');
                     if (editTrigger) {
                         e.stopPropagation();

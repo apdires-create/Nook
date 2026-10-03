@@ -2743,11 +2743,42 @@ EditManager.CompanionViews = {
                         EditManager.CompanionViews.init();
 
                         const newCompCard = document.querySelector('.tops-companion-card');
-                        if (newCompCard) newCompCard.classList.add('is-reordered');
                     }
                 }
             }
         });
+
+        // 4. Liste Sekmeleri Sürükle-Bırak Sistemi (Pointer Sortable)
+        const tabsBar = document.getElementById('companionTabsBar');
+        if (tabsBar) {
+            EditManager.initPointerSortable(tabsBar, {
+                itemSelector: '.companion-tab-btn',
+                axis: 'all',
+                excludedDragSelectors: '.companion-tab-edit-btn, #companionAddListBtn, input, button:not(.companion-tab-btn)',
+                onMove: () => {
+                    const addBtn = tabsBar.querySelector('#companionAddListBtn');
+                    if (addBtn) tabsBar.appendChild(addBtn);
+                },
+                onDrop: () => {
+                    const addBtn = tabsBar.querySelector('#companionAddListBtn');
+                    if (addBtn) tabsBar.appendChild(addBtn);
+
+                    const currentBtns = [...tabsBar.querySelectorAll('.companion-tab-btn')];
+                    const yeniListeler = currentBtns.map(btn => {
+                        const lid = btn.dataset.listId;
+                        return listeler.find(l => l.id === lid);
+                    }).filter(Boolean);
+
+                    if (yeniListeler.length === listeler.length && JSON.stringify(yeniListeler.map(l => l.id)) !== JSON.stringify(listeler.map(l => l.id))) {
+                        kartVerisi.tops.listeler = yeniListeler;
+                        EditManager.Global.degisiklikYapildi();
+
+                        RenderEngine.companionCiz(kartVerisi.tops);
+                        EditManager.CompanionViews.init();
+                    }
+                }
+            });
+        }
     }
 };
 // #endregion
