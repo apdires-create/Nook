@@ -61,6 +61,7 @@ const Router = {
                 // Menü butonuna tıklandıysa
                 const navBtn = e.target.closest('.nav-item-btn');
                 if (navBtn) {
+                    e.stopPropagation();
                     if (window._suruklemeBitti && Date.now() - window._suruklemeBitti < 250) return;
                     const target = navBtn.getAttribute('data-target');
                     if (target) this.openDetailView(target);
@@ -70,6 +71,7 @@ const Router = {
                 // Geri butonuna tıklandıysa
                 const backBtn = e.target.closest('.back-btn[data-action="back"]');
                 if (backBtn) {
+                    e.stopPropagation();
                     this.resetToMainMenu();
                     return;
                 }
@@ -77,6 +79,7 @@ const Router = {
                 // Ön yüze dön butonuna tıklandıysa (Kök menü geri butonu)
                 const flipBtn = e.target.closest('[data-action="flip-to-front"]');
                 if (flipBtn) {
+                    e.stopPropagation();
                     this.setFlipped(false);
                     return;
                 }
@@ -125,10 +128,13 @@ const Router = {
                     '.profile-edit-banner-wrap'
                 ].join(', ');
 
-                // 1. İnteraktif öğelere veya kart satırlarına tıklandıysa işlemi asla kesme ve gasp etme
+                // 1. Etkileşimli bir elemana tıklandıysa flip mantığına hiç karışma
+                if (e.target.closest('button, a, input, textarea, select, label, [data-no-flip]')) return;
+
+                // 2. Özel bileşenlere veya kart satırlarına tıklandıysa işlemi asla kesme ve gasp etme
                 if (e.target.closest(interactiveSelector)) return;
 
-                // 2. Ön yüzde düzenleme modu açıkken dışarıdaki boş alana tıklandıysa:
+                // 3. Ön yüzde düzenleme modu açıkken dışarıdaki boş alana tıklandıysa:
                 // İlk vuruşta sadece düzenlemeyi kapat, kartı çevirme
                 if (window._frontEditingActive || (window._frontEditJustClosed && Date.now() - window._frontEditJustClosed < 450)) {
                     window._frontEditingActive = false;
@@ -148,10 +154,13 @@ const Router = {
                 if (selection && selection.toString().trim().length > 0) return;
                 if (window._suruklemeBitti && Date.now() - window._suruklemeBitti < 300) return;
 
-                // Animasyon sürerken, buton/link/input olmayan boş alan tıklamasını yok say
-                if (this.isFlipping && !e.target.closest('button, a, input, textarea, select')) return;
+                // 5. Dönüş sürerken boş alana tıklandı: flip'i iptal et, kartı geri çevir
+                if (this.isFlipping) {
+                    this.setFlipped(!this.isFlipped);
+                    return;
+                }
 
-                // 4. HİYERARŞİK GEZİNME (Boş alana tıklama):
+                // 6. Animasyon yokken hiyerarşik gezinme:
                 // A. ÖN YÜZ: Ön yüzdeyken boş alana tıklandığında arka yüze git
                 if (!this.isFlipped) {
                     this.setFlipped(true);

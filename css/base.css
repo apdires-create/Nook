@@ -143,11 +143,11 @@ body.is-pointer-dragging * {
 }
 
 .card-front {
-    transform: translateZ(1px);
+    transform: translateZ(2px);
 }
 
 .card-back {
-    transform: rotateY(180deg) translateZ(1px);
+    transform: rotateY(180deg) translateZ(2px);
 }
 /* #endregion */
 
