@@ -535,25 +535,16 @@ const RenderEngine = {
         const footerEl = document.getElementById('companionFooter');
         if (footerEl) {
             if (aktifListe && aktifListe.harici_link && aktifListe.harici_link.url) {
-                const linkDomain = this.getCleanDomain(aktifListe.harici_link.url);
+                const linkUrl = aktifListe.harici_link.url;
+                const linkDomain = this.getCleanDomain(linkUrl);
+                const faviconHtml = this.getLinkIcon(linkUrl);
                 footerEl.innerHTML = `
-                    <a href="${this.safeUrl(aktifListe.harici_link.url)}" target="_blank" rel="noopener noreferrer" class="companion-footer-link" title="${this.escapeHtml(linkDomain)}">
-                        <div class="companion-footer-link-content">
-                            <svg class="companion-link-globe-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="2" y1="12" x2="22" y2="12"></line>
-                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                            </svg>
-                            <span class="companion-link-domain">${this.escapeHtml(linkDomain)}</span>
-                            <span class="companion-link-label">Listeyi İncele</span>
-                        </div>
-                        <svg class="companion-link-arrow-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="7" y1="17" x2="17" y2="7"></line>
-                            <polyline points="7 7 17 7 17 17"></polyline>
-                        </svg>
+                    <a href="${this.safeUrl(linkUrl)}" target="_blank" rel="noopener noreferrer" class="companion-footer-link" title="${this.escapeHtml(linkDomain)}">
+                        <span class="companion-link-favicon-wrap">${faviconHtml}</span>
+                        <span class="companion-link-domain">${this.escapeHtml(linkDomain)}</span>
                     </a>
                 `;
-                footerEl.style.display = 'block';
+                footerEl.style.display = 'flex';
             } else {
                 footerEl.innerHTML = '';
                 footerEl.style.display = 'none';
