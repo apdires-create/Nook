@@ -769,8 +769,20 @@ body.has-unsaved-changes .edit-action-bar {
 .cropper-footer {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     gap: 10px;
     margin-top: 4px;
+}
+
+.cropper-footer .form-btn-sm {
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    border-radius: var(--radius-btn, 8px);
+    white-space: nowrap;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Toast Bildirimi */

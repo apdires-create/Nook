@@ -289,7 +289,7 @@ const EditManager = {
                     </div>
                     <div class="cropper-footer">
                         <button type="button" class="form-btn-sm form-btn-cancel" id="cropper-cancel-btn">Vazgeç</button>
-                        <button type="button" class="form-btn-sm form-btn-submit" id="cropper-save-btn">Kırp ve Yükle</button>
+                        <button type="button" class="form-btn-sm form-btn-submit" id="cropper-save-btn">Yükle</button>
                     </div>
                 </div>
             `;
