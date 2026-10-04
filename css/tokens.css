@@ -82,3 +82,27 @@
 }
 /* #endregion */
 
+/* #region 5: POP-UP SİSTEMİ */
+:root {
+    /* Katman skalası: z-index sadece buradan verilir */
+    --z-modal-stacked: 10010;   /* Başka modalın üstünden açılanlar */
+    --z-confirm: 10020;         /* Onay / silme penceresi */
+    --z-toast: 10100;           /* Bildirim tostu */
+    --z-drag: 10200;           /* Sürükleme klon portalı */
+
+    /* Ortak görünüm */
+    --modal-pad: 20px;
+    --modal-bg: var(--bg-card);
+    --modal-border: 1px solid var(--border-highlight);
+    --modal-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    --modal-backdrop: rgba(0, 0, 0, 0.8);
+    --modal-blur: 8px;
+    --modal-dur: 0.25s;
+
+    /* Genişlikler */
+    --modal-w-sm: min(360px, 92vw);
+    --modal-w-md: min(460px, 92vw);
+    --modal-w-lg: min(520px, 92vw);
+}
+/* #endregion */
+

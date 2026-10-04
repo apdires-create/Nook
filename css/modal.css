@@ -1,0 +1,101 @@
+/* #region 1: ORTAK MODAL KABUĞU */
+.auth-modal,
+.cropper-modal,
+.add-section-modal,
+.tag-picker-modal,
+.tops-setup-modal,
+.tops-search-modal,
+.block-delete-modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--modal-pad);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity var(--modal-dur) ease, visibility 0s linear var(--modal-dur);
+}
+
+:is(.auth-modal, .cropper-modal, .add-section-modal, .tag-picker-modal,
+    .tops-setup-modal, .tops-search-modal, .block-delete-modal).is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s;
+}
+/* #endregion */
+
+/* #region 2: BACKDROP */
+.auth-modal-backdrop,
+.cropper-backdrop,
+.add-section-backdrop,
+.tag-picker-backdrop,
+.tops-modal-backdrop,
+.block-delete-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--modal-backdrop);
+    backdrop-filter: blur(var(--modal-blur));
+    -webkit-backdrop-filter: blur(var(--modal-blur));
+}
+/* #endregion */
+
+/* #region 3: PANEL */
+.auth-modal-box,
+.cropper-box,
+.section-picker-panel,
+.tag-picker-panel,
+.tops-modal-panel,
+.block-delete-panel {
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    width: var(--modal-w, var(--modal-w-md));
+    max-height: 88vh;
+    max-height: 88dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--modal-bg);
+    border: var(--modal-border);
+    border-radius: var(--radius-modal);
+    box-shadow: var(--modal-shadow);
+    transform: scale(0.95) translateY(10px);
+    transition: transform var(--modal-dur) var(--ease-spring);
+    animation: none; /* eski modalScaleIn / modalPop iptal */
+}
+
+/* Cropper modalı boyutlandırma hesaplama hatasını önlemek için ölçek dönüşümünden muaf tutulur */
+.cropper-box {
+    transform: translateY(10px);
+}
+
+:is(.auth-modal, .cropper-modal, .add-section-modal, .tag-picker-modal,
+    .tops-setup-modal, .tops-search-modal, .block-delete-modal).is-open
+:is(.auth-modal-box, .cropper-box, .section-picker-panel,
+    .tag-picker-panel, .tops-modal-panel, .block-delete-panel) {
+    transform: none;
+}
+
+/* Panel Genişlikleri */
+.auth-modal-box       { --modal-w: min(400px, 92vw); }
+.cropper-box          { --modal-w: var(--modal-w-lg); }
+.section-picker-panel { --modal-w: var(--modal-w-lg); }
+.tops-modal-panel     { --modal-w: var(--modal-w-lg); }
+.tag-picker-panel     { --modal-w: var(--modal-w-md); }
+.block-delete-panel   { --modal-w: var(--modal-w-sm); }
+/* #endregion */
+
+/* #region 4: KATMAN İSTİSNALARI + SCROLL KİLİDİ */
+.tops-search-modal { z-index: var(--z-modal-stacked); }
+.block-delete-modal { z-index: var(--z-confirm); }
+.nook-toast         { z-index: var(--z-toast); }
+.is-drag-clone      { z-index: var(--z-drag) !important; }
+
+body:has(:is(.auth-modal, .cropper-modal, .add-section-modal, .tag-picker-modal,
+             .tops-setup-modal, .tops-search-modal, .block-delete-modal).is-open) {
+    overflow: hidden;
+}
+/* #endregion */

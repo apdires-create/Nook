@@ -163,54 +163,12 @@
 /* #endregion */
 
 
-/* #region 2: AUTH MODAL KAPSAYICI VE BACKDROP */
-.auth-modal {
-    position: fixed;
-    inset: 0;
-    z-index: var(--z-modal);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease;
-}
-
-.auth-modal.is-open {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.auth-modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-/* #endregion */
-
 /* #region 3: AUTH MODAL KUTUSU (BOX) */
 .auth-modal-box {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-highlight);
-    border-radius: var(--radius-modal);
-    box-shadow: var(--shadow-card);
     padding: 28px;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    transform: scale(0.95) translateY(10px);
-    transition: transform 0.25s var(--ease-spring);
-    z-index: 1;
-}
-
-.auth-modal.is-open .auth-modal-box {
-    transform: scale(1) translateY(0);
 }
 
 .auth-modal-header {

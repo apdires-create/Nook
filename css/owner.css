@@ -332,7 +332,7 @@ body.is-owner .companion-tab-btn:active {
 
 .is-drag-clone {
     pointer-events: none !important;
-    z-index: 100000 !important;
+    z-index: var(--z-drag) !important;
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.18) !important;
     transform: scale(1.03);
     transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.12s ease;
@@ -388,39 +388,9 @@ body.is-owner .delete-section-btn:hover {
 }
 
 /* Blok Silme Modalı */
-.block-delete-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 100003;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.block-delete-modal.is-open {
-    display: flex;
-}
-
-.block-delete-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
 .block-delete-panel {
-    position: relative;
-    z-index: 1;
-    width: min(90vw, 360px);
-    background: var(--bg-card, #1e1f26);
-    border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.12));
-    border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
     text-align: center;
-    animation: modalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .block-delete-icon-box {
@@ -746,41 +716,11 @@ body.has-unsaved-changes .edit-action-bar {
 /* #endregion */
 
 /* #region 6: CROPPER.JS MODALI VE TOAST BİLDİRİMİ */
-.cropper-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-}
-
-.cropper-modal.is-open {
-    display: flex;
-    opacity: 1;
-}
-
-.cropper-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-}
-
 .cropper-box {
-    position: relative;
-    z-index: 2;
-    width: min(520px, 92vw);
-    background: #141724;
-    border: 1px solid var(--border-highlight);
-    border-radius: 20px;
     padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
 }
 
 .cropper-header {
@@ -846,7 +786,7 @@ body.has-unsaved-changes .edit-action-bar {
     padding: 10px 20px;
     border-radius: var(--radius-pill);
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
-    z-index: 10001;
+    z-index: var(--z-toast);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -861,54 +801,11 @@ body.has-unsaved-changes .edit-action-bar {
 /* #endregion */
 
 /* #region 7: BÖLÜM EKLEME MODALI (SECTION PICKER MODAL) */
-.add-section-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-}
-
-.add-section-modal.is-open {
-    display: flex;
-    opacity: 1;
-}
-
-.add-section-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
 .section-picker-panel {
-    position: relative;
-    z-index: 2;
-    width: min(480px, 92vw);
-    background: #141724;
-    border: 1px solid var(--border-highlight);
-    border-radius: 20px;
     padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 18px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-    animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes modalScaleIn {
-    from {
-        transform: scale(0.94);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
 }
 
 .section-picker-header {
@@ -1070,43 +967,11 @@ body.has-unsaved-changes .edit-action-bar {
 /* #endregion */
 
 /* #region 8: ETİKET SEÇİCİ MODALI (TAG PICKER MODAL) */
-.tag-picker-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-}
-
-.tag-picker-modal.is-open {
-    display: flex;
-    opacity: 1;
-}
-
-.tag-picker-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
 .tag-picker-panel {
-    position: relative;
-    z-index: 2;
-    width: min(460px, 92vw);
-    background: #141724;
-    border: 1px solid var(--border-highlight);
-    border-radius: 20px;
     padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-    animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tag-picker-header {
@@ -1255,45 +1120,11 @@ body.has-unsaved-changes .edit-action-bar {
 /* #endregion */
 
 /* #region 9: TOPS KATEGORİ AYARLARI VE İÇERİK ARAMA MODALLARI */
-.tops-setup-modal,
-.tops-search-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 10001;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-}
-
-.tops-setup-modal.is-open,
-.tops-search-modal.is-open {
-    display: flex;
-    opacity: 1;
-}
-
-.tops-modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.82);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
 .tops-modal-panel {
-    position: relative;
-    z-index: 2;
-    width: min(480px, 92vw);
-    background: #141724;
-    border: 1px solid var(--border-highlight);
-    border-radius: 20px;
     padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 18px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-    animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tops-modal-header {
