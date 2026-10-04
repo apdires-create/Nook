@@ -282,7 +282,29 @@ const EditManager = {
                 <div class="cropper-box">
                     <div class="cropper-header">
                         <h3 class="cropper-title" id="cropper-title">Görseli Kırp</h3>
-                        <button type="button" class="cropper-close-btn" id="cropper-modal-close">&times;</button>
+                        <div class="cropper-header-actions">
+                            <button type="button" class="cropper-tool-btn" id="cropper-rotate-left" title="Sola 90° Döndür">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="1 4 1 10 7 10"></polyline>
+                                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                </svg>
+                            </button>
+                            <button type="button" class="cropper-tool-btn" id="cropper-rotate-right" title="Sağa 90° Döndür">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                </svg>
+                            </button>
+                            <button type="button" class="cropper-tool-btn" id="cropper-flip-x" title="Yatay Aynala">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="8 3 4 7 8 11"></polyline>
+                                    <polyline points="16 3 20 7 16 11"></polyline>
+                                    <line x1="4" y1="7" x2="20" y2="7"></line>
+                                    <line x1="12" y1="2" x2="12" y2="22" stroke-dasharray="2 2"></line>
+                                </svg>
+                            </button>
+                            <button type="button" class="cropper-close-btn" id="cropper-modal-close" title="Kapat">&times;</button>
+                        </div>
                     </div>
                     <div class="cropper-image-wrapper">
                         <img id="cropper-image" src="" alt="Kırpılacak Görsel">
@@ -720,13 +742,21 @@ EditManager.Global = {
         }
     },
 
-    toastGoster(mesaj) {
+    toastGoster(mesaj, tip = 'success') {
         const toast = document.getElementById('nook-toast');
         if (!toast) return;
 
         toast.textContent = mesaj;
+        if (tip === 'error') {
+            toast.classList.add('is-error');
+        } else {
+            toast.classList.remove('is-error');
+        }
         toast.classList.add('is-visible');
-        setTimeout(() => toast.classList.remove('is-visible'), 3000);
+        setTimeout(() => {
+            toast.classList.remove('is-visible');
+            toast.classList.remove('is-error');
+        }, 3500);
     }
 };
 // #endregion
@@ -743,6 +773,12 @@ EditManager.Media = {
         const modalSaveBtn = document.getElementById('cropper-save-btn');
         const backdrop = document.getElementById('cropper-modal-backdrop');
 
+        const rotateLeftBtn = document.getElementById('cropper-rotate-left');
+        const rotateRightBtn = document.getElementById('cropper-rotate-right');
+        const flipXBtn = document.getElementById('cropper-flip-x');
+
+        let isFlippedX = false;
+
         const modaliKapat = () => {
             const modal = document.getElementById('cropper-modal');
             if (modal) modal.classList.remove('is-open');
@@ -750,9 +786,35 @@ EditManager.Media = {
                 EditManager.state.cropperInstance.destroy();
                 EditManager.state.cropperInstance = null;
             }
+            isFlippedX = false;
             if (bannerInput) bannerInput.value = '';
             if (pfpInput) pfpInput.value = '';
         };
+
+        if (rotateLeftBtn) {
+            rotateLeftBtn.addEventListener('click', () => {
+                if (EditManager.state.cropperInstance) {
+                    EditManager.state.cropperInstance.rotate(-90);
+                }
+            });
+        }
+
+        if (rotateRightBtn) {
+            rotateRightBtn.addEventListener('click', () => {
+                if (EditManager.state.cropperInstance) {
+                    EditManager.state.cropperInstance.rotate(90);
+                }
+            });
+        }
+
+        if (flipXBtn) {
+            flipXBtn.addEventListener('click', () => {
+                if (EditManager.state.cropperInstance) {
+                    isFlippedX = !isFlippedX;
+                    EditManager.state.cropperInstance.scaleX(isFlippedX ? -1 : 1);
+                }
+            });
+        }
 
         if (modalCloseBtn) modalCloseBtn.addEventListener('click', modaliKapat);
         if (modalCancelBtn) modalCancelBtn.addEventListener('click', modaliKapat);
@@ -786,11 +848,36 @@ EditManager.Media = {
                     imageSmoothingQuality: 'high'
                 });
 
+                if (!canvas) {
+                    EditManager.Global.toastGoster("Görsel işlenemedi, lütfen tekrar deneyin.", "error");
+                    modalSaveBtn.disabled = false;
+                    modalSaveBtn.textContent = 'Yükle';
+                    return;
+                }
+
+                // Kademeli sıkıştırma: önce 0.85 kalite, eğer 1 MB üzerindeyse 0.65'e indir
                 canvas.toBlob(async (blob) => {
-                    await this.yukleVeGuncelle(blob, EditManager.state.guncelHedefTur);
+                    let sonBlob = blob;
+
+                    if (sonBlob && sonBlob.size > 1024 * 1024) {
+                        // 1 MB'tan büyükse kaliteyi düşürerek optimize et
+                        sonBlob = await new Promise((res) => {
+                            canvas.toBlob((b2) => res(b2 || sonBlob), 'image/webp', 0.65);
+                        });
+                    }
+
+                    // En uç senaryoda optimize görsel hala 2 MB üzerindeyse yüklemeyi durdur ve şık hata göster
+                    if (!sonBlob || sonBlob.size > 2 * 1024 * 1024) {
+                        EditManager.Global.toastGoster("Görsel boyutu optimize edilemedi, lütfen farklı bir görsel seçin.", "error");
+                        modalSaveBtn.disabled = false;
+                        modalSaveBtn.textContent = 'Yükle';
+                        return;
+                    }
+
+                    await this.yukleVeGuncelle(sonBlob, EditManager.state.guncelHedefTur);
                     modaliKapat();
                     modalSaveBtn.disabled = false;
-                    modalSaveBtn.textContent = 'Kırp ve Yükle';
+                    modalSaveBtn.textContent = 'Yükle';
                 }, 'image/webp', 0.85);
             });
         }
@@ -831,8 +918,9 @@ EditManager.Media = {
     },
 
     cropModaliniAc(file, tur) {
-        if (file.size > 3 * 1024 * 1024) {
-            alert("Görsel çok büyük! Lütfen 3 MB'tan küçük bir görsel seçin.");
+        // Tarayıcı çökmesini önlemek için yalnızca aşırı büyük (25 MB+) dosyalar için üst sınır
+        if (file.size > 25 * 1024 * 1024) {
+            EditManager.Global.toastGoster("Görsel çok büyük! Lütfen 25 MB'tan küçük bir dosya seçin.", "error");
             return;
         }
 

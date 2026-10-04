@@ -735,6 +735,34 @@ body.has-unsaved-changes .edit-action-bar {
     color: #ffffff;
 }
 
+.cropper-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cropper-tool-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-btn, 8px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.cropper-tool-btn:hover {
+    background: rgba(59, 91, 219, 0.2);
+    border-color: var(--accent-color);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
 .cropper-close-btn {
     background: transparent;
     border: none;
@@ -743,6 +771,8 @@ body.has-unsaved-changes .edit-action-bar {
     cursor: pointer;
     line-height: 1;
     transition: color 0.15s ease;
+    padding: 4px;
+    margin-left: 4px;
 }
 
 .cropper-close-btn:hover {
@@ -809,6 +839,11 @@ body.has-unsaved-changes .edit-action-bar {
     top: 24px;
     opacity: 1;
     visibility: visible;
+}
+
+.nook-toast.is-error {
+    background: #ef4444;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
 }
 /* #endregion */
 
