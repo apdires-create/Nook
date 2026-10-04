@@ -798,14 +798,29 @@ body.has-unsaved-changes .edit-action-bar {
 
 .cropper-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin-top: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.cropper-footer-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cropper-footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
 }
 
 .cropper-footer .form-btn-sm {
-    padding: 8px 20px;
+    padding: 8px 18px;
     font-size: 0.85rem;
     border-radius: var(--radius-btn, 8px);
     white-space: nowrap;
@@ -813,6 +828,22 @@ body.has-unsaved-changes .edit-action-bar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Profil fotoğrafı kırpma modunda dairesel önizleme maskesi */
+.cropper-modal.is-pfp-crop .cropper-view-box,
+.cropper-modal.is-pfp-crop .cropper-face {
+    border-radius: 50%;
+}
+
+.cropper-modal.is-pfp-crop .cropper-view-box {
+    outline: 2px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+
+.cropper-modal.is-pfp-crop .cropper-dashed,
+.cropper-modal.is-pfp-crop .cropper-center {
+    opacity: 0.4;
 }
 
 /* Toast Bildirimi */

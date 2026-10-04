@@ -282,14 +282,14 @@ const EditManager = {
                 <div class="cropper-box">
                     <div class="cropper-header">
                         <h3 class="cropper-title" id="cropper-title">Görseli Kırp</h3>
-                        <div class="cropper-header-actions">
-                            <button type="button" class="cropper-tool-btn" id="cropper-rotate-left" title="Sola 90° Döndür">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="1 4 1 10 7 10"></polyline>
-                                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-                                </svg>
-                            </button>
-                            <button type="button" class="cropper-tool-btn" id="cropper-rotate-right" title="Sağa 90° Döndür">
+                        <button type="button" class="cropper-close-btn" id="cropper-modal-close" title="Kapat">&times;</button>
+                    </div>
+                    <div class="cropper-image-wrapper">
+                        <img id="cropper-image" src="" alt="Kırpılacak Görsel">
+                    </div>
+                    <div class="cropper-footer">
+                        <div class="cropper-footer-tools">
+                            <button type="button" class="cropper-tool-btn" id="cropper-rotate-btn" title="90° Döndür">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="23 4 23 10 17 10"></polyline>
                                     <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
@@ -303,15 +303,17 @@ const EditManager = {
                                     <line x1="12" y1="2" x2="12" y2="22" stroke-dasharray="2 2"></line>
                                 </svg>
                             </button>
-                            <button type="button" class="cropper-close-btn" id="cropper-modal-close" title="Kapat">&times;</button>
+                            <button type="button" class="cropper-tool-btn" id="cropper-reset-btn" title="Görseli Sıfırla">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                    <path d="M3 3v5h5"></path>
+                                </svg>
+                            </button>
                         </div>
-                    </div>
-                    <div class="cropper-image-wrapper">
-                        <img id="cropper-image" src="" alt="Kırpılacak Görsel">
-                    </div>
-                    <div class="cropper-footer">
-                        <button type="button" class="form-btn-sm form-btn-cancel" id="cropper-cancel-btn">Vazgeç</button>
-                        <button type="button" class="form-btn-sm form-btn-submit" id="cropper-save-btn">Yükle</button>
+                        <div class="cropper-footer-actions">
+                            <button type="button" class="form-btn-sm form-btn-cancel" id="cropper-cancel-btn">Vazgeç</button>
+                            <button type="button" class="form-btn-sm form-btn-submit" id="cropper-save-btn">Yükle</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -773,15 +775,18 @@ EditManager.Media = {
         const modalSaveBtn = document.getElementById('cropper-save-btn');
         const backdrop = document.getElementById('cropper-modal-backdrop');
 
-        const rotateLeftBtn = document.getElementById('cropper-rotate-left');
-        const rotateRightBtn = document.getElementById('cropper-rotate-right');
+        const rotateBtn = document.getElementById('cropper-rotate-btn');
         const flipXBtn = document.getElementById('cropper-flip-x');
+        const resetBtn = document.getElementById('cropper-reset-btn');
 
         let isFlippedX = false;
 
         const modaliKapat = () => {
             const modal = document.getElementById('cropper-modal');
-            if (modal) modal.classList.remove('is-open');
+            if (modal) {
+                modal.classList.remove('is-open');
+                modal.classList.remove('is-pfp-crop');
+            }
             if (EditManager.state.cropperInstance) {
                 EditManager.state.cropperInstance.destroy();
                 EditManager.state.cropperInstance = null;
@@ -791,16 +796,8 @@ EditManager.Media = {
             if (pfpInput) pfpInput.value = '';
         };
 
-        if (rotateLeftBtn) {
-            rotateLeftBtn.addEventListener('click', () => {
-                if (EditManager.state.cropperInstance) {
-                    EditManager.state.cropperInstance.rotate(-90);
-                }
-            });
-        }
-
-        if (rotateRightBtn) {
-            rotateRightBtn.addEventListener('click', () => {
+        if (rotateBtn) {
+            rotateBtn.addEventListener('click', () => {
                 if (EditManager.state.cropperInstance) {
                     EditManager.state.cropperInstance.rotate(90);
                 }
@@ -812,6 +809,15 @@ EditManager.Media = {
                 if (EditManager.state.cropperInstance) {
                     isFlippedX = !isFlippedX;
                     EditManager.state.cropperInstance.scaleX(isFlippedX ? -1 : 1);
+                }
+            });
+        }
+
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                if (EditManager.state.cropperInstance) {
+                    EditManager.state.cropperInstance.reset();
+                    isFlippedX = false;
                 }
             });
         }
@@ -937,6 +943,7 @@ EditManager.Media = {
             image.src = e.target.result;
             if (title) title.textContent = (tur === 'pfp' ? 'Profil Fotoğrafını Kırp' : 'Bannerı Kırp');
 
+            modal.classList.toggle('is-pfp-crop', tur === 'pfp');
             modal.classList.add('is-open');
 
             if (EditManager.state.cropperInstance) {
