@@ -58,6 +58,8 @@
     max-height: 88dvh;
     overflow-y: auto;
     overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
     background: var(--modal-bg);
     border: var(--modal-border);
     border-radius: var(--radius-modal);

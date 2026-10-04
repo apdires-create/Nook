@@ -56,11 +56,8 @@
         inset 0 1px 1px rgba(255, 255, 255, 0.1);
     --shadow-avatar: 0 4px 15px rgba(0, 0, 0, 0.5);
     
-    --radius-modal: 20px;
     --radius-input: 12px;
-    
     --z-nav: 1000;
-    --z-modal: 10000;
 }
 /* #endregion */
 
@@ -85,12 +82,14 @@
 /* #region 5: POP-UP SİSTEMİ */
 :root {
     /* Katman skalası: z-index sadece buradan verilir */
+    --z-modal: 10000;           /* Temel modallar */
     --z-modal-stacked: 10010;   /* Başka modalın üstünden açılanlar */
     --z-confirm: 10020;         /* Onay / silme penceresi */
     --z-toast: 10100;           /* Bildirim tostu */
     --z-drag: 10200;           /* Sürükleme klon portalı */
 
     /* Ortak görünüm */
+    --radius-modal: 20px;
     --modal-pad: 20px;
     --modal-bg: var(--bg-card);
     --modal-border: 1px solid var(--border-highlight);
