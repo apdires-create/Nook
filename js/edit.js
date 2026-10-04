@@ -585,8 +585,16 @@ EditManager.Global = {
 
     degisiklikYapildi() {
         if (EditManager.state.orijinalVeri) {
-            const guncelStr = JSON.stringify(this.getTemizVeri(kartVerisi));
-            const orijStr = JSON.stringify(this.getTemizVeri(EditManager.state.orijinalVeri));
+            const guncelVeri = this.getTemizVeri(kartVerisi);
+            const orijVeri = this.getTemizVeri(EditManager.state.orijinalVeri);
+
+            // aktifListeId sadece görüntülenen sekmedir; içerik karşılaştırmasında fark yaratmasın
+            if (guncelVeri?.tops && orijVeri?.tops) {
+                orijVeri.tops.aktifListeId = guncelVeri.tops.aktifListeId;
+            }
+
+            const guncelStr = JSON.stringify(guncelVeri);
+            const orijStr = JSON.stringify(orijVeri);
             EditManager.state.hasUnsavedChanges = (guncelStr !== orijStr);
         } else {
             EditManager.state.hasUnsavedChanges = false;
@@ -2733,15 +2741,18 @@ EditManager.CompanionViews = {
                 if (aktifListe && Array.isArray(aktifListe.ogeler)) {
                     const cards = [...container.querySelectorAll('.top-item-card')];
                     const yeniOgeler = cards.map(c => {
+                        const origIdx = parseInt(c.dataset.originalIndex, 10);
+                        if (!isNaN(origIdx) && aktifListe.ogeler[origIdx]) {
+                            return aktifListe.ogeler[origIdx];
+                        }
                         const cid = c.dataset.id;
                         if (cid) {
                             return aktifListe.ogeler.find(x => (x.id || x.kimlik) === cid);
                         }
-                        const i = parseInt(c.dataset.index, 10);
-                        return aktifListe.ogeler[i];
+                        return null;
                     }).filter(Boolean);
 
-                    if (JSON.stringify(yeniOgeler) !== JSON.stringify(aktifListe.ogeler)) {
+                    if (yeniOgeler.length === aktifListe.ogeler.length && JSON.stringify(yeniOgeler) !== JSON.stringify(aktifListe.ogeler)) {
                         aktifListe.ogeler = yeniOgeler;
                         EditManager.Global.degisiklikYapildi();
 
@@ -2752,6 +2763,7 @@ EditManager.CompanionViews = {
                         EditManager.CompanionViews.init();
 
                         const newCompCard = document.querySelector('.tops-companion-card');
+                        if (newCompCard) newCompCard.classList.add('is-reordered');
                     }
                 }
             }

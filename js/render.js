@@ -491,7 +491,7 @@ const RenderEngine = {
                 : '';
 
             return `
-                <div class="top-item-card" data-index="${idx}" data-id="${this.escapeHtml(itemId)}">
+                <div class="top-item-card" data-index="${idx}" data-original-index="${idx}" data-id="${this.escapeHtml(itemId)}">
                     ${thumbHtml}
                     <div class="top-item-content">
                         <div class="top-item-header-row">
