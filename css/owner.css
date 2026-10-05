@@ -819,12 +819,14 @@ body.has-unsaved-changes .edit-action-bar {
 /* Cropper.js genel alan stil iyileştirmeleri */
 .cropper-bg {
     background-image: none !important;
-    background-color: #0b0d14 !important;
+    background-color: #08090d !important;
 }
 
-/* Kırpma alanı dışındaki koyu gölge (dışarıyı karart, içeriyi normal bırak) */
-.cropper-modal {
-    background-color: rgba(0, 0, 0, 0.72) !important;
+/* Kırpma alanı dışındaki koyu gölge ve blur (dışarıyı tam karart ve buzla, içeriyi net bırak) */
+.cropper-container .cropper-modal {
+    background-color: rgba(6, 8, 14, 0.86) !important;
+    backdrop-filter: blur(8px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
     opacity: 1 !important;
 }
 
@@ -837,7 +839,7 @@ body.has-unsaved-changes .edit-action-bar {
 /* Kırpma çerçevesi ve tutamaçlar (banner ve genel mod) */
 .cropper-view-box {
     outline: none !important;
-    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.9) !important;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.95) !important;
 }
 
 .cropper-line {
@@ -846,29 +848,29 @@ body.has-unsaved-changes .edit-action-bar {
 
 .cropper-point {
     background-color: #ffffff !important;
-    opacity: 0.9 !important;
-    width: 6px !important;
-    height: 6px !important;
+    opacity: 0.95 !important;
+    width: 7px !important;
+    height: 7px !important;
     border-radius: 50% !important;
 }
 
-/* Profil fotoğrafı kırpma modunda dairesel maske ve temiz kenarlık */
-.cropper-modal.is-pfp-crop .cropper-view-box,
-.cropper-modal.is-pfp-crop .cropper-face {
+/* Profil fotoğrafı kırpma modunda dairesel maske ve kalın, belirgin kenarlık */
+.image-cropper-modal.is-pfp-crop .cropper-view-box,
+.image-cropper-modal.is-pfp-crop .cropper-face {
     border-radius: 50% !important;
 }
 
-.cropper-modal.is-pfp-crop .cropper-view-box {
+.image-cropper-modal.is-pfp-crop .cropper-view-box {
     outline: none !important;
-    /* Dışarı taşmayı tamamen önlemek için kontur içe doğru çizilir */
-    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.95), inset 0 0 12px rgba(0, 0, 0, 0.35) !important;
+    /* Belirgin, kalın ve net beyaz profil maske çizgisi + dışarıya sızmayan iç derinlik */
+    box-shadow: inset 0 0 0 3px #ffffff, inset 0 0 14px rgba(0, 0, 0, 0.45) !important;
 }
 
-/* Dairesel modda köşe tutamaç kalabalığını gizle, sadece köşeleri veya temiz çemberi koru */
-.cropper-modal.is-pfp-crop .cropper-point.point-e,
-.cropper-modal.is-pfp-crop .cropper-point.point-w,
-.cropper-modal.is-pfp-crop .cropper-point.point-s,
-.cropper-modal.is-pfp-crop .cropper-point.point-n {
+/* Dairesel modda köşe tutamaç kalabalığını gizle */
+.image-cropper-modal.is-pfp-crop .cropper-point.point-e,
+.image-cropper-modal.is-pfp-crop .cropper-point.point-w,
+.image-cropper-modal.is-pfp-crop .cropper-point.point-s,
+.image-cropper-modal.is-pfp-crop .cropper-point.point-n {
     display: none !important;
 }
 

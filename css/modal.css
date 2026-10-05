@@ -1,6 +1,6 @@
 /* #region 1: ORTAK MODAL KABUĞU */
 .auth-modal,
-.cropper-modal,
+.image-cropper-modal,
 .add-section-modal,
 .tag-picker-modal,
 .tops-setup-modal,
@@ -19,7 +19,7 @@
     transition: opacity var(--modal-dur-close, 0.14s) ease, visibility 0s linear var(--modal-dur-close, 0.14s);
 }
 
-:is(.auth-modal, .cropper-modal, .add-section-modal, .tag-picker-modal,
+:is(.auth-modal, .image-cropper-modal, .add-section-modal, .tag-picker-modal,
     .tops-setup-modal, .tops-search-modal, .block-delete-modal).is-open {
     opacity: 1;
     visibility: visible;
@@ -74,7 +74,7 @@
     transform: translateY(8px);
 }
 
-:is(.auth-modal, .cropper-modal, .add-section-modal, .tag-picker-modal,
+:is(.auth-modal, .image-cropper-modal, .add-section-modal, .tag-picker-modal,
     .tops-setup-modal, .tops-search-modal, .block-delete-modal).is-open
 :is(.auth-modal-box, .cropper-box, .section-picker-panel,
     .tag-picker-panel, .tops-modal-panel, .block-delete-panel) {
@@ -114,7 +114,7 @@
 .nook-toast         { z-index: var(--z-toast); }
 .is-drag-clone      { z-index: var(--z-drag) !important; }
 
-body:has(:is(.auth-modal, .cropper-modal, .add-section-modal, .tag-picker-modal,
+body:has(:is(.auth-modal, .image-cropper-modal, .add-section-modal, .tag-picker-modal,
              .tops-setup-modal, .tops-search-modal, .block-delete-modal).is-open) {
     overflow: hidden;
 }

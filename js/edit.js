@@ -276,7 +276,7 @@ const EditManager = {
         if (!document.getElementById('cropper-modal')) {
             const modal = document.createElement('div');
             modal.id = 'cropper-modal';
-            modal.className = 'cropper-modal';
+            modal.className = 'image-cropper-modal';
             modal.innerHTML = `
                 <div class="cropper-backdrop" id="cropper-modal-backdrop"></div>
                 <div class="cropper-box">

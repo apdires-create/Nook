@@ -110,6 +110,7 @@ const Router = {
                     '.image-edit-overlay',
                     '.edit-action-bar',
                     '.cropper-modal',
+                    '.image-cropper-modal',
                     '.tag-picker-modal',
                     '.add-section-modal',
                     '.nook-toast',
