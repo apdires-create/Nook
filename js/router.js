@@ -185,6 +185,40 @@ const Router = {
         // Klavye Kısayolları (ESC)
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                // 1. En üstteki açık modalı öncelikle kapat (Z-index hiyerarşisine göre)
+                const activeModals = Array.from(document.querySelectorAll(
+                    '.image-cropper-modal.is-open, .block-delete-modal.is-open, .tops-search-modal.is-open, .tops-setup-modal.is-open, .tag-picker-modal.is-open, .add-section-modal.is-open, .auth-modal.is-open'
+                ));
+                if (activeModals.length > 0) {
+                    // En son / en üstte açılan modalı bul ve kapat
+                    const topModal = activeModals[activeModals.length - 1];
+                    if (topModal.id === 'cropper-modal') {
+                        const cancelBtn = document.getElementById('cropper-cancel-btn');
+                        if (cancelBtn) cancelBtn.click();
+                        else topModal.classList.remove('is-open');
+                    } else if (topModal.id === 'block-delete-modal') {
+                        const cancelBtn = document.getElementById('block-delete-cancel');
+                        if (cancelBtn) cancelBtn.click();
+                        else topModal.classList.remove('is-open');
+                    } else if (topModal.id === 'tops-search-modal') {
+                        if (window.EditManager?.MediaSearchModal) window.EditManager.MediaSearchModal.kapat();
+                        else topModal.classList.remove('is-open');
+                    } else if (topModal.id === 'tops-setup-modal') {
+                        if (window.EditManager?.TopsSetupModal) window.EditManager.TopsSetupModal.kapat();
+                        else topModal.classList.remove('is-open');
+                    } else if (topModal.id === 'tag-picker-modal') {
+                        if (window.EditManager?.TagPicker) window.EditManager.TagPicker.kapat();
+                        else topModal.classList.remove('is-open');
+                    } else if (topModal.id === 'add-section-modal') {
+                        if (window.EditManager?.SectionPicker) window.EditManager.SectionPicker.kapat();
+                        else topModal.classList.remove('is-open');
+                    } else {
+                        topModal.classList.remove('is-open');
+                    }
+                    return;
+                }
+
+                // 2. Modal yoksa sahne hiyerarşisindeki adımları kapat
                 const stage = document.getElementById('profileStage');
                 const companionCard = document.getElementById('topsCompanionCard');
                 if (stage && stage.classList.contains('has-companion-open') && companionCard && !companionCard.classList.contains('is-closing')) {
