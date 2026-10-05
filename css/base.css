@@ -452,30 +452,54 @@ html.is-profile-loading #landing-screen {
     }
 }
 
-/* 2. MOBİL VE DİKEY EKRANLAR (Scroll-Snap Yapışmalı Dikey Sahne) */
+/* 2. MOBİL VE DİKEY EKRANLAR (Scroll-Snap Yapışmalı Dikey Sahne & Akış) */
 @media (max-width: 899px) {
-    .stage.has-companion-open {
-        height: 100vh;
-        max-height: 100vh;
+    html, body {
+        overflow-x: hidden;
         overflow-y: auto;
-        scroll-snap-type: y proximity;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    .stage {
+        width: 100%;
+        height: auto;
+        min-height: calc(100dvh - 56px);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 8px 12px 36px 12px;
+        box-sizing: border-box;
+    }
+
+    .stage .card-container {
+        z-index: 5;
+        margin: auto 0;
+    }
+
+    .stage.has-companion-open {
+        height: auto;
+        max-height: none;
+        overflow-y: visible;
+        scroll-snap-type: none;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
         gap: 28px;
-        padding: 32px 16px 80px 16px;
-    }
-
-    .stage .card-container {
-        z-index: 5;
+        padding: 8px 16px 80px 16px;
     }
 
     .stage.has-companion-open .card-container,
     .stage.has-companion-open .tops-companion-card {
-        scroll-snap-align: center;
+        scroll-snap-align: none;
         flex-shrink: 0;
         width: var(--card-narrow-width);
         aspect-ratio: var(--card-aspect-ratio);

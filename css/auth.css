@@ -749,3 +749,43 @@
 }
 /* #endregion */
 
+/* #region 14: MOBİLDE ÜST MENÜ BAR AKIŞI (NATURAL VERTICAL STACK) */
+@media (max-width: 899px) {
+    .top-nav {
+        position: relative !important;
+        height: auto !important;
+        min-height: 52px;
+        padding: 12px clamp(12px, 4vw, 24px) 8px clamp(12px, 4vw, 24px);
+        flex-shrink: 0;
+        z-index: var(--z-nav);
+        pointer-events: auto;
+    }
+
+    .top-nav-brand,
+    .top-nav-actions {
+        pointer-events: auto;
+    }
+
+    .top-nav-btn {
+        height: 36px;
+        padding: 0 14px;
+        font-size: 12px;
+    }
+
+    .nav-logo {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    .nav-brand-text {
+        font-size: 15px;
+    }
+
+    .user-dropdown-panel {
+        top: calc(100% + 4px);
+        right: 0;
+    }
+}
+/* #endregion */
+
