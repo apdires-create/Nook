@@ -457,6 +457,10 @@ html.is-profile-loading #landing-screen {
     html, body {
         overflow-x: hidden;
         overflow-y: auto;
+        scroll-snap-type: y mandatory;
+        scroll-behavior: smooth;
+        scroll-padding-top: clamp(12px, 3vh, 32px);
+        scroll-padding-bottom: clamp(12px, 3vh, 32px);
     }
 
     body {
@@ -488,24 +492,27 @@ html.is-profile-loading #landing-screen {
         height: auto;
         max-height: min(var(--card-height), calc(100dvh - 90px));
         width: min(var(--card-narrow-width), calc((min(var(--card-height), calc(100dvh - 90px))) * 5 / 7));
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
     }
 
     .stage.has-companion-open {
         height: auto;
         max-height: none;
         overflow-y: visible;
-        scroll-snap-type: none;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        gap: 28px;
-        padding: 8px 16px 80px 16px;
+        gap: clamp(24px, 5vh, 48px);
+        /* Showcase kartının ekranın tam ortasında durabilmesi için cömert taban boşluğu */
+        padding: 8px 16px min(50dvh, 420px) 16px;
     }
 
     .stage.has-companion-open .card-container,
     .stage.has-companion-open .tops-companion-card {
-        scroll-snap-align: none;
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
         flex-shrink: 0;
         margin: 0 auto;
     }

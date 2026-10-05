@@ -363,11 +363,19 @@ const Router = {
                 EditManager.CompanionViews?.init();
             }
 
-            // Mobilde dikey akışta companion card'a yumuşak kaydır
+            // Mobilde dikey akışta companion card'a pürüzsüz ve hedefe kilitli kaydır
             if (!isDesktop) {
-                setTimeout(() => {
-                    companionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 120);
+                // DOM reflow ve animasyon başlangıcının hemen ardından akıcı geçiş
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        const companionRect = companionCard.getBoundingClientRect();
+                        const targetY = window.pageYOffset + companionRect.top - ((window.innerHeight - companionRect.height) / 2);
+                        window.scrollTo({
+                            top: Math.max(0, targetY),
+                            behavior: 'smooth'
+                        });
+                    }, 80);
+                });
             }
 
             setTimeout(() => {
@@ -400,7 +408,14 @@ const Router = {
                     fill: 'forwards'
                 });
             } else {
-                stage.scrollTo({ top: 0, behavior: 'smooth' });
+                // Mobilde kapatırken ana profil kartını tam ortalayacak konuma pürüzsüzce geri dön
+                if (cardContainer) {
+                    const cardRect = cardContainer.getBoundingClientRect();
+                    const targetTop = window.pageYOffset + cardRect.top - ((window.innerHeight - cardRect.height) / 2);
+                    window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             }
 
             // Animasyon tamamlandıktan sonra DOM durumunu temizle
