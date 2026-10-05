@@ -816,20 +816,59 @@ body.has-unsaved-changes .edit-action-bar {
     justify-content: center;
 }
 
-/* Profil fotoğrafı kırpma modunda dairesel önizleme maskesi */
+/* Cropper.js genel alan stil iyileştirmeleri */
+.cropper-bg {
+    background-image: none !important;
+    background-color: #0b0d14 !important;
+}
+
+/* Kırpma alanı dışındaki koyu gölge (dışarıyı karart, içeriyi normal bırak) */
+.cropper-modal {
+    background-color: rgba(0, 0, 0, 0.72) !important;
+    opacity: 1 !important;
+}
+
+/* Çizgili grid ve merkez işaretçilerini temizle (modern minimalist UI) */
+.cropper-dashed,
+.cropper-center {
+    display: none !important;
+}
+
+/* Kırpma çerçevesi ve tutamaçlar (banner ve genel mod) */
+.cropper-view-box {
+    outline: none !important;
+    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.85);
+}
+
+.cropper-line {
+    background-color: transparent !important;
+}
+
+.cropper-point {
+    background-color: #ffffff !important;
+    opacity: 0.9 !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+}
+
+/* Profil fotoğrafı kırpma modunda dairesel maske ve temiz kenarlık */
 .cropper-modal.is-pfp-crop .cropper-view-box,
 .cropper-modal.is-pfp-crop .cropper-face {
-    border-radius: 50%;
+    border-radius: 50% !important;
 }
 
 .cropper-modal.is-pfp-crop .cropper-view-box {
-    outline: 2px solid rgba(255, 255, 255, 0.85);
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.92), 0 0 20px rgba(0, 0, 0, 0.6) !important;
 }
 
-.cropper-modal.is-pfp-crop .cropper-dashed,
-.cropper-modal.is-pfp-crop .cropper-center {
-    opacity: 0.4;
+/* Dairesel modda köşe tutamaç kalabalığını gizle, sadece köşeleri veya temiz çemberi koru */
+.cropper-modal.is-pfp-crop .cropper-point.point-e,
+.cropper-modal.is-pfp-crop .cropper-point.point-w,
+.cropper-modal.is-pfp-crop .cropper-point.point-s,
+.cropper-modal.is-pfp-crop .cropper-point.point-n {
+    display: none !important;
 }
 
 /* Toast Bildirimi */

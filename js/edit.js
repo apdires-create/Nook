@@ -957,7 +957,12 @@ EditManager.Media = {
                     aspectRatio: oran,
                     viewMode: 2,
                     background: false,
-                    autoCropArea: 1
+                    autoCropArea: 0.9,
+                    highlight: false,
+                    guides: false,
+                    center: false,
+                    responsive: true,
+                    restore: false
                 });
             }
         };
