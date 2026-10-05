@@ -16,7 +16,7 @@
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity var(--modal-dur) ease, visibility 0s linear var(--modal-dur);
+    transition: opacity var(--modal-dur-close, 0.14s) ease, visibility 0s linear var(--modal-dur-close, 0.14s);
 }
 
 :is(.auth-modal, .cropper-modal, .add-section-modal, .tag-picker-modal,
@@ -24,7 +24,7 @@
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transition-delay: 0s;
+    transition: opacity var(--modal-dur, 0.2s) ease, visibility 0s linear 0s;
 }
 /* #endregion */
 
@@ -64,14 +64,14 @@
     border: var(--modal-border);
     border-radius: var(--radius-modal);
     box-shadow: var(--modal-shadow);
-    transform: scale(0.95) translateY(10px);
-    transition: transform var(--modal-dur) var(--ease-spring);
+    transform: scale(0.96) translateY(8px);
+    transition: transform var(--modal-dur-close, 0.14s) ease;
     animation: none; /* eski modalScaleIn / modalPop iptal */
 }
 
 /* Cropper modalı boyutlandırma hesaplama hatasını önlemek için ölçek dönüşümünden muaf tutulur */
 .cropper-box {
-    transform: translateY(10px);
+    transform: translateY(8px);
 }
 
 :is(.auth-modal, .cropper-modal, .add-section-modal, .tag-picker-modal,
@@ -79,6 +79,7 @@
 :is(.auth-modal-box, .cropper-box, .section-picker-panel,
     .tag-picker-panel, .tops-modal-panel, .block-delete-panel) {
     transform: none;
+    transition: transform var(--modal-dur, 0.2s) var(--ease-spring);
 }
 
 /* Panel Genişlikleri */
@@ -88,6 +89,23 @@
 .tops-modal-panel     { --modal-w: var(--modal-w-lg); }
 .tag-picker-panel     { --modal-w: var(--modal-w-md); }
 .block-delete-panel   { --modal-w: var(--modal-w-sm); }
+
+@media (max-width: 480px) {
+    :root {
+        --modal-pad: 12px;
+    }
+    
+    .auth-modal-box,
+    .cropper-box,
+    .section-picker-panel,
+    .tag-picker-panel,
+    .tops-modal-panel,
+    .block-delete-panel {
+        max-height: 94vh;
+        max-height: 94dvh;
+        border-radius: 18px;
+    }
+}
 /* #endregion */
 
 /* #region 4: KATMAN İSTİSNALARI + SCROLL KİLİDİ */

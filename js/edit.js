@@ -281,32 +281,32 @@ const EditManager = {
                 <div class="cropper-backdrop" id="cropper-modal-backdrop"></div>
                 <div class="cropper-box">
                     <div class="cropper-header">
-                        <h3 class="cropper-title" id="cropper-title">Görseli Kırp</h3>
-                        <button type="button" class="cropper-close-btn" id="cropper-modal-close" title="Kapat">&times;</button>
+                        <h3 class="cropper-title" id="cropper-title">Görsel Düzenle</h3>
                     </div>
                     <div class="cropper-image-wrapper">
                         <img id="cropper-image" src="" alt="Kırpılacak Görsel">
                     </div>
                     <div class="cropper-footer">
                         <div class="cropper-footer-tools">
-                            <button type="button" class="cropper-tool-btn" id="cropper-rotate-btn" title="90° Döndür">
+                            <button type="button" class="cropper-tool-btn" id="cropper-rotate-btn" title="90° Saat Yönünde Döndür" aria-label="90 Derece Döndür">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="23 4 23 10 17 10"></polyline>
-                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                    <path d="M21.5 2v6h-6"></path>
+                                    <path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.19"></path>
                                 </svg>
                             </button>
-                            <button type="button" class="cropper-tool-btn" id="cropper-flip-x" title="Yatay Aynala">
+                            <button type="button" class="cropper-tool-btn" id="cropper-flip-x" title="Yatay Çevir (Aynala)" aria-label="Yatay Aynala">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="8 3 4 7 8 11"></polyline>
-                                    <polyline points="16 3 20 7 16 11"></polyline>
-                                    <line x1="4" y1="7" x2="20" y2="7"></line>
-                                    <line x1="12" y1="2" x2="12" y2="22" stroke-dasharray="2 2"></line>
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"></path>
+                                    <path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"></path>
+                                    <line x1="12" y1="2" x2="12" y2="22" stroke-dasharray="3 3"></line>
                                 </svg>
                             </button>
-                            <button type="button" class="cropper-tool-btn" id="cropper-reset-btn" title="Görseli Sıfırla">
+                            <button type="button" class="cropper-tool-btn" id="cropper-reset-btn" title="Orijinal Haline Sıfırla" aria-label="Sıfırla">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                                    <path d="M3 3v5h5"></path>
+                                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                                    <path d="M21 3v5h-5"></path>
+                                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                                    <path d="M3 21v-5h5"></path>
                                 </svg>
                             </button>
                         </div>
@@ -941,7 +941,7 @@ EditManager.Media = {
             if (!modal || !image) return;
 
             image.src = e.target.result;
-            if (title) title.textContent = (tur === 'pfp' ? 'Profil Fotoğrafını Kırp' : 'Bannerı Kırp');
+            if (title) title.textContent = (tur === 'pfp' ? 'Profil Fotoğrafı' : 'Kapak Görseli');
 
             modal.classList.toggle('is-pfp-crop', tur === 'pfp');
             modal.classList.add('is-open');
