@@ -479,9 +479,15 @@ html.is-profile-loading #landing-screen {
         box-sizing: border-box;
     }
 
-    .stage .card-container {
+    .stage .card-container,
+    .stage .tops-companion-card {
         z-index: 5;
         margin: auto 0;
+        width: var(--card-narrow-width);
+        aspect-ratio: var(--card-aspect-ratio);
+        height: auto;
+        max-height: min(var(--card-height), calc(100dvh - 90px));
+        width: min(var(--card-narrow-width), calc((min(var(--card-height), calc(100dvh - 90px))) * 5 / 7));
     }
 
     .stage.has-companion-open {
@@ -501,9 +507,6 @@ html.is-profile-loading #landing-screen {
     .stage.has-companion-open .tops-companion-card {
         scroll-snap-align: none;
         flex-shrink: 0;
-        width: var(--card-narrow-width);
-        aspect-ratio: var(--card-aspect-ratio);
-        height: auto;
         margin: 0 auto;
     }
 }
