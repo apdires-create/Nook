@@ -91,8 +91,11 @@ html, body {
 @media (max-aspect-ratio: 5/7) {
     .card-container,
     .tops-companion-card {
-        width: var(--card-narrow-width);
-        height: auto;
+        --ratio-card-max-h: min(var(--card-height), calc(100dvh - 100px));
+        --ratio-card-w: min(var(--card-narrow-width), calc(100vw - 32px), calc(var(--ratio-card-max-h) * 5 / 7));
+        width: var(--ratio-card-w);
+        height: calc(var(--ratio-card-w) * 7 / 5);
+        aspect-ratio: var(--card-aspect-ratio);
     }
 }
 
@@ -452,15 +455,13 @@ html.is-profile-loading #landing-screen {
     }
 }
 
-/* 2. MOBİL VE DİKEY EKRANLAR (Scroll-Snap Yapışmalı Dikey Sahne & Akış) */
+/* 2. MOBİL VE DİKEY EKRANLAR (Akıcı Dikey Sahne) */
 @media (max-width: 899px) {
     html, body {
         overflow-x: hidden;
         overflow-y: auto;
-        scroll-snap-type: y mandatory;
         scroll-behavior: smooth;
-        scroll-padding-top: clamp(12px, 3vh, 32px);
-        scroll-padding-bottom: clamp(12px, 3vh, 32px);
+        -webkit-overflow-scrolling: touch;
     }
 
     body {
@@ -478,22 +479,36 @@ html.is-profile-loading #landing-screen {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
-        padding: 8px 12px 36px 12px;
+        justify-content: center;
+        padding: 8px 12px 32px 12px;
         box-sizing: border-box;
     }
 
+    /* 5:7 Oranını asla bozmayan ve kapanışta sündürülmeyi önleyen sabit mobil kart geometrisi */
     .stage .card-container,
     .stage .tops-companion-card {
-        z-index: 5;
-        margin: auto 0;
-        width: var(--card-narrow-width);
+        --mobile-card-max-h: min(var(--card-height), calc(100dvh - 96px));
+        --mobile-card-w: min(
+            var(--card-narrow-width),
+            calc(100vw - 32px),
+            calc(var(--mobile-card-max-h) * 5 / 7)
+        );
+        width: var(--mobile-card-w);
+        height: calc(var(--mobile-card-w) * 7 / 5);
         aspect-ratio: var(--card-aspect-ratio);
-        height: auto;
-        max-height: min(var(--card-height), calc(100dvh - 90px));
-        width: min(var(--card-narrow-width), calc((min(var(--card-height), calc(100dvh - 90px))) * 5 / 7));
-        scroll-snap-align: center;
-        scroll-snap-stop: always;
+        max-width: 100%;
+        max-height: none;
+        margin: 0 auto;
+        flex-shrink: 0;
+        box-sizing: border-box;
+    }
+
+    .stage .card-container {
+        z-index: 5;
+    }
+
+    .stage .tops-companion-card {
+        z-index: 4;
     }
 
     .stage.has-companion-open {
@@ -504,15 +519,13 @@ html.is-profile-loading #landing-screen {
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        gap: clamp(24px, 5vh, 48px);
-        /* Showcase kartının ekranın tam ortasında durabilmesi için cömert taban boşluğu */
-        padding: 8px 16px min(50dvh, 420px) 16px;
+        gap: 28px;
+        /* Showcase bloğunun altında ferah ve ergonomik boşluk */
+        padding: 12px 16px max(48px, env(safe-area-inset-bottom, 24px)) 16px;
     }
 
     .stage.has-companion-open .card-container,
     .stage.has-companion-open .tops-companion-card {
-        scroll-snap-align: center;
-        scroll-snap-stop: always;
         flex-shrink: 0;
         margin: 0 auto;
     }
@@ -572,25 +585,25 @@ html.is-profile-loading #landing-screen {
     }
 }
 
-/* Mobil & Dikey Ekranlar: Ana kartın arkasından derinlik ve akıcı 3D eğimle süzülerek aşağı iniş ve geri çekiliş */
+/* Mobil & Dikey Ekranlar: Masaüstüne benzer şekilde profil kartının arkasından/altından 3D süzülüş */
 @media (max-width: 899px) {
     .tops-companion-card {
         transform-origin: center top;
-        animation: companionMobile3DEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+        animation: companionMobile3DEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
     .tops-companion-card.is-closing {
-        animation: companionMobile3DExit 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+        animation: companionMobile3DExit 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
     }
 
     @keyframes companionMobile3DEnter {
         0% {
             opacity: 0;
-            transform: translate3d(0, -90px, -80px) rotateX(10deg) scale(0.92);
+            transform: translate3d(0, -60px, -50px) rotateX(8deg) scale(0.94);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
         }
-        35% {
-            opacity: 0.6;
+        40% {
+            opacity: 0.7;
         }
         100% {
             opacity: 1;
@@ -607,7 +620,7 @@ html.is-profile-loading #landing-screen {
         }
         100% {
             opacity: 0;
-            transform: translate3d(0, -75px, -70px) rotateX(9deg) scale(0.93);
+            transform: translate3d(0, -50px, -50px) rotateX(8deg) scale(0.94);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
         }
     }
