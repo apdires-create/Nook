@@ -565,28 +565,30 @@ html.is-profile-loading #landing-screen {
     }
 }
 
-/* Mobil: Ana kartın arkasından derinlik ve hafif 3D eğimle dikey iniş ve geri çekiliş */
+/* Mobil & Dikey Ekranlar: Ana kartın arkasından derinlik ve akıcı 3D eğimle süzülerek aşağı iniş ve geri çekiliş */
 @media (max-width: 899px) {
     .tops-companion-card {
         transform-origin: center top;
-        animation: companionMobile3DEnter 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
+        animation: companionMobile3DEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
     .tops-companion-card.is-closing {
-        animation: companionMobile3DExit 0.34s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+        animation: companionMobile3DExit 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
     }
 
     @keyframes companionMobile3DEnter {
         0% {
             opacity: 0;
-            transform: translate3d(0, -50px, -60px) rotateX(7deg) scale(0.94);
+            transform: translate3d(0, -90px, -80px) rotateX(10deg) scale(0.92);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
         }
-        40% {
-            opacity: 0.7;
+        35% {
+            opacity: 0.6;
         }
         100% {
             opacity: 1;
             transform: translate3d(0, 0, 0) rotateX(0deg) scale(1);
+            box-shadow: var(--card-shadow);
         }
     }
 
@@ -594,10 +596,12 @@ html.is-profile-loading #landing-screen {
         0% {
             opacity: 1;
             transform: translate3d(0, 0, 0) rotateX(0deg) scale(1);
+            box-shadow: var(--card-shadow);
         }
         100% {
             opacity: 0;
-            transform: translate3d(0, -40px, -60px) rotateX(7deg) scale(0.94);
+            transform: translate3d(0, -75px, -70px) rotateX(9deg) scale(0.93);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
         }
     }
 }
