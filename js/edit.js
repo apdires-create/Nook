@@ -955,9 +955,9 @@ EditManager.Media = {
             if (typeof Cropper !== 'undefined') {
                 EditManager.state.cropperInstance = new Cropper(image, {
                     aspectRatio: oran,
-                    viewMode: 2,
+                    viewMode: 1,
                     background: false,
-                    autoCropArea: 0.9,
+                    autoCropArea: 1,
                     highlight: false,
                     guides: false,
                     center: false,

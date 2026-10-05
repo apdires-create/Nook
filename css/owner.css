@@ -837,7 +837,7 @@ body.has-unsaved-changes .edit-action-bar {
 /* Kırpma çerçevesi ve tutamaçlar (banner ve genel mod) */
 .cropper-view-box {
     outline: none !important;
-    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.85);
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.9) !important;
 }
 
 .cropper-line {
@@ -860,7 +860,8 @@ body.has-unsaved-changes .edit-action-bar {
 
 .cropper-modal.is-pfp-crop .cropper-view-box {
     outline: none !important;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.92), 0 0 20px rgba(0, 0, 0, 0.6) !important;
+    /* Dışarı taşmayı tamamen önlemek için kontur içe doğru çizilir */
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.95), inset 0 0 12px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* Dairesel modda köşe tutamaç kalabalığını gizle, sadece köşeleri veya temiz çemberi koru */
