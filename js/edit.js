@@ -1088,6 +1088,12 @@ EditManager.Vitrin = {
                 });
 
                 inputEl.addEventListener('input', function() {
+                    if (isTextarea) {
+                        const lines = this.value.split('\n');
+                        if (lines.length > 5) {
+                            this.value = lines.slice(0, 5).join('\n');
+                        }
+                    }
                     autoResize();
                     const counter = el.querySelector('.bio-counter');
                     if (counter) counter.textContent = `${this.value.length}/${maxLen}`;
@@ -1139,7 +1145,11 @@ EditManager.Vitrin = {
                         evt.preventDefault();
                         kaydetVeKapat();
                     } else {
-                        // Textarea'da Enter basıldığında satır atlamasına izin ver, event bubbling'i durdur
+                        const satirlar = (inputEl.value.match(/\n/g) || []).length + 1;
+                        if (satirlar >= 5) {
+                            evt.preventDefault();
+                            return;
+                        }
                         evt.stopPropagation();
                     }
                 } else if (evt.key === 'Escape') {

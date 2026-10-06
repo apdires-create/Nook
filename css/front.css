@@ -148,6 +148,12 @@
     max-width: 96%;
     word-break: break-word;
     white-space: pre-wrap;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+    max-height: calc(1.6em * 5);
+    overflow: hidden;
 }
 /* #endregion */
 

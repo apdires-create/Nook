@@ -171,14 +171,14 @@ body.is-owner .editable-hover:not(.is-input-active):hover {
 .auto-expand-textarea {
     width: 100%;
     height: auto;
-    min-height: 2.4em;
-    max-height: 35cqh;
+    min-height: calc(1.6em + 10px);
+    max-height: calc(1.6em * 5 + 10px);
     text-align: center;
     resize: none;
     line-height: 1.6;
     font-size: 4.1cqw;
     font-weight: 450;
-    padding: 6px 10px;
+    padding: 5px 8px;
     overflow-y: auto;
     box-sizing: border-box;
     word-break: break-word;
@@ -187,9 +187,9 @@ body.is-owner .editable-hover:not(.is-input-active):hover {
 
 .bio-counter {
     position: absolute;
-    bottom: -18px;
-    right: 4px;
-    font-size: var(--cq-fs-mono);
+    bottom: -15px;
+    right: 0;
+    font-size: 2.8cqw;
     color: var(--text-tertiary);
     font-family: var(--font-mono);
     pointer-events: none;
