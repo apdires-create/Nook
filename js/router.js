@@ -353,6 +353,10 @@ const Router = {
                 companionCard.classList.remove('is-closing');
                 companionCard.style.display = 'flex';
 
+                // Tarayıcının 'display: flex' ve başlangıç transform pozisyonunu (sağda 100vw) işlemesini zorunlu kıl (Reflow)
+                void companionCard.offsetWidth;
+
+                // Animasyon sınıfını uygula
                 requestAnimationFrame(() => {
                     stage.classList.add('has-companion-open');
                 });
@@ -367,7 +371,7 @@ const Router = {
 
             setTimeout(() => {
                 this._companionTransitioning = false;
-            }, isDesktop ? 550 : 450);
+            }, isDesktop ? 550 : 600);
         } else {
             // ==========================================
             // KAPANIŞ SEKANSI
@@ -413,7 +417,7 @@ const Router = {
                     cardContainer.style.transform = '';
                 }
                 this._companionTransitioning = false;
-            }, isDesktop ? 500 : 450);
+            }, isDesktop ? 500 : 600);
         }
     }
 };
@@ -432,8 +436,12 @@ const TouchGestureManager = {
         const stage = document.getElementById('profileStage');
         if (!stage) return;
 
-        // Pasif dokunma başlangıcı
+        // Dokunma başlangıcı
         stage.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
+        
+        // Tarayıcının ekran kenarından geri/ileri gitme (edge swipe history) hareketini engellemek için touchmove
+        stage.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+
         // Dokunma sonu (karar anı)
         stage.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: true });
         // Dokunma iptali (örn. sistem jesti)
@@ -460,6 +468,21 @@ const TouchGestureManager = {
         this.startY = touch.clientY;
         this.startTime = Date.now();
         this.isTracking = true;
+    },
+
+    handleTouchMove(e) {
+        if (!this.isTracking || e.touches.length !== 1) return;
+
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - this.startX;
+        const deltaY = touch.clientY - this.startY;
+
+        // Eğer kullanıcı bariz bir yatay kaydırma yapıyorsa, tarayıcının yerel 'Geri Git' geçmiş navigasyonunu engelle
+        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+            if (e.cancelable) {
+                e.preventDefault();
+            }
+        }
     },
 
     handleTouchEnd(e) {

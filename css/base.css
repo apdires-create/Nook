@@ -462,6 +462,10 @@ html.is-profile-loading #landing-screen {
         height: 100%;
         overflow: hidden !important;
         position: fixed;
+        overscroll-behavior-x: none !important;
+        overscroll-behavior-y: none !important;
+        overscroll-behavior: none !important;
+        touch-action: pan-y pinch-zoom;
     }
 
     body {
@@ -502,7 +506,7 @@ html.is-profile-loading #landing-screen {
         margin: 0 auto;
         flex-shrink: 0;
         box-sizing: border-box;
-        transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+        transition: transform 0.58s cubic-bezier(0.2, 0.9, 0.25, 1), opacity 0.45s ease !important;
         will-change: transform, opacity;
     }
 
