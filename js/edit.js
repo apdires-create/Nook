@@ -1077,10 +1077,18 @@ EditManager.Vitrin = {
             if (!inputEl) return;
 
             if (isTextarea) {
-                if (mevcutYukseklik > 0) {
-                    inputEl.style.height = `${mevcutYukseklik}px`;
-                }
+                const autoResize = () => {
+                    inputEl.style.height = 'auto';
+                    inputEl.style.height = `${Math.max(inputEl.scrollHeight, 40)}px`;
+                };
+
+                // İlk açılışta içeriğe göre yüksekliği hesapla
+                requestAnimationFrame(() => {
+                    autoResize();
+                });
+
                 inputEl.addEventListener('input', function() {
+                    autoResize();
                     const counter = el.querySelector('.bio-counter');
                     if (counter) counter.textContent = `${this.value.length}/${maxLen}`;
                 });
@@ -1126,9 +1134,14 @@ EditManager.Vitrin = {
 
             inputEl.addEventListener('blur', kaydetVeKapat);
             inputEl.addEventListener('keydown', (evt) => {
-                if (evt.key === 'Enter' && !isTextarea) {
-                    evt.preventDefault();
-                    kaydetVeKapat();
+                if (evt.key === 'Enter') {
+                    if (!isTextarea) {
+                        evt.preventDefault();
+                        kaydetVeKapat();
+                    } else {
+                        // Textarea'da Enter basıldığında satır atlamasına izin ver, event bubbling'i durdur
+                        evt.stopPropagation();
+                    }
                 } else if (evt.key === 'Escape') {
                     evt.preventDefault();
                     window._frontEditingActive = false;
