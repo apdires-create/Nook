@@ -151,10 +151,8 @@ body.is-owner .editable-hover:not(.is-input-active):hover {
 }
 
 #profileBio.is-input-active {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: auto !important;
+    display: block !important;
+    width: 100% !important;
     max-width: 96% !important;
     padding: 0 !important;
     border: none !important;
@@ -169,7 +167,7 @@ body.is-owner .editable-hover:not(.is-input-active):hover {
     font-weight: 450;
     text-align: center;
     width: 100%;
-    min-width: 20cqw;
+    min-width: 100%;
     max-width: 100%;
     min-height: calc(1.6em + 4px);
     max-height: calc(1.6em * 5 + 4px);
