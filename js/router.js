@@ -55,6 +55,11 @@ const Router = {
             });
         }
 
+        // Dokunmatik yatay swipe (kaydırma) motorunu başlat
+        if (typeof TouchGestureManager !== 'undefined') {
+            TouchGestureManager.init();
+        }
+
         // Tıklama Olay Delegasyonu (Menü butonları ve Geri butonları için)
         if (this.viewsWrapper) {
             this.viewsWrapper.addEventListener('click', (e) => {
@@ -311,36 +316,28 @@ const Router = {
         // Devam eden bir kapanış veya açılış geçişi varsa bekle
         if (this._companionTransitioning) return;
 
-        const isCurrentlyOpen = stage.classList.contains('has-companion-open') && !companionCard.classList.contains('is-closing');
+        const isCurrentlyOpen = stage.classList.contains('has-companion-open') && !stage.classList.contains('is-companion-closing');
         const nextState = (typeof forceState === 'boolean') ? forceState : !isCurrentlyOpen;
         const isDesktop = window.innerWidth >= 900;
 
         if (nextState) {
             // ==========================================
-            // AÇILIŞ SEKANSI (FLIP - First, Last, Invert, Play)
+            // AÇILIŞ SEKANSI
             // ==========================================
             this._companionTransitioning = true;
 
-            let deltaX = 0;
-            let deltaY = 0;
-
             if (isDesktop && cardContainer) {
-                // FLIP 1: İlk pozisyonu ölç (kart tek başınayken ekranın merkezinde)
+                // MASAÜSTÜ: FLIP Animasyonu (İki kart yan yana sığıyor)
                 const firstRect = cardContainer.getBoundingClientRect();
 
-                // DOM durumunu güncelle (flex-row çift kart düzenine geç)
                 companionCard.classList.remove('is-closing');
                 companionCard.style.display = 'flex';
                 stage.classList.add('has-companion-open');
 
-                // FLIP 2: Yeni layout pozisyonunu ölç (kart sola kaymış konumda)
                 const lastRect = cardContainer.getBoundingClientRect();
+                const deltaX = (firstRect.left + firstRect.width / 2) - (lastRect.left + lastRect.width / 2);
+                const deltaY = (firstRect.top + firstRect.height / 2) - (lastRect.top + lastRect.height / 2);
 
-                // FLIP 3: İki konum arasındaki net koordinat farkını hesapla
-                deltaX = (firstRect.left + firstRect.width / 2) - (lastRect.left + lastRect.width / 2);
-                deltaY = (firstRect.top + firstRect.height / 2) - (lastRect.top + lastRect.height / 2);
-
-                // FLIP 4: Kartı ilk konumundan yeni konumuna pürüzsüzce süzdür
                 if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
                     cardContainer.animate([
                         { transform: `translate3d(${deltaX}px, ${deltaY}px, 0)` },
@@ -351,9 +348,14 @@ const Router = {
                     });
                 }
             } else {
+                // DAR EKRAN / MOBİL: Yatay Deck Açılışı (Profil sola ekran dışına, Showcase sağdan merkeze)
+                stage.classList.remove('is-companion-closing');
                 companionCard.classList.remove('is-closing');
                 companionCard.style.display = 'flex';
-                stage.classList.add('has-companion-open');
+
+                requestAnimationFrame(() => {
+                    stage.classList.add('has-companion-open');
+                });
             }
 
             if (typeof RenderEngine !== 'undefined') {
@@ -363,36 +365,27 @@ const Router = {
                 EditManager.CompanionViews?.init();
             }
 
-            // Mobilde dikey akışta companion card'a tekte yağ gibi süzül
-            if (!isDesktop) {
-                requestAnimationFrame(() => {
-                    setTimeout(() => {
-                        companionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 40);
-                });
-            }
-
             setTimeout(() => {
                 this._companionTransitioning = false;
-            }, 500);
+            }, isDesktop ? 550 : 450);
         } else {
             // ==========================================
-            // KAPANIŞ SEKANSI (Ters FLIP - Merkeze Süzülüş)
+            // KAPANIŞ SEKANSI
             // ==========================================
             this._companionTransitioning = true;
-            companionCard.classList.add('is-closing');
-            stage.classList.add('is-companion-closing');
 
             let closeAnim = null;
 
             if (isDesktop && cardContainer) {
-                // Sahnenin merkezi ile kartın mevcut merkezi arasındaki tam mesafeyi hesapla
+                // MASAÜSTÜ: Ters FLIP Merkeze Süzülüş
+                companionCard.classList.add('is-closing');
+                stage.classList.add('is-companion-closing');
+
                 const stageRect = stage.getBoundingClientRect();
                 const cardRect = cardContainer.getBoundingClientRect();
                 const returnDeltaX = (stageRect.left + stageRect.width / 2) - (cardRect.left + cardRect.width / 2);
                 const returnDeltaY = (stageRect.top + stageRect.height / 2) - (cardRect.top + cardRect.height / 2);
 
-                // Ana kartı bulunduğu yerden ekranın tam merkezine yumuşakça kaydır
                 closeAnim = cardContainer.animate([
                     { transform: 'translate3d(0, 0, 0)' },
                     { transform: `translate3d(${returnDeltaX}px, ${returnDeltaY}px, 0)` }
@@ -402,11 +395,12 @@ const Router = {
                     fill: 'forwards'
                 });
             } else {
-                // Mobilde kapatırken sayfa başına pürüzsüzce geri dön
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // DAR EKRAN / MOBİL: Yatay Deck Kapanışı (Showcase sağa ekran dışına, Profil soldan merkeze)
+                stage.classList.remove('has-companion-open');
+                stage.classList.add('is-companion-closing');
             }
 
-            // Animasyon ve scroll tamamlandıktan sonra DOM durumunu temizle
+            // Animasyon tamamlandıktan sonra DOM durumunu temizle
             setTimeout(() => {
                 stage.classList.remove('has-companion-open');
                 stage.classList.remove('is-companion-closing');
@@ -415,11 +409,90 @@ const Router = {
                 if (closeAnim) {
                     closeAnim.cancel();
                 }
-                if (cardContainer) {
+                if (cardContainer && isDesktop) {
                     cardContainer.style.transform = '';
                 }
                 this._companionTransitioning = false;
-            }, 450);
+            }, isDesktop ? 500 : 450);
+        }
+    }
+};
+// #endregion
+
+// #region 2: DOKUNMATİK YATAY SWIPE MOTORU (TOUCH GESTURE ENGINE)
+const TouchGestureManager = {
+    startX: 0,
+    startY: 0,
+    startTime: 0,
+    isTracking: false,
+    threshold: 45, // Minimum yatay kaydırma eşiği (px)
+    maxVerticalTolerance: 60, // İzin verilen maksimum dikey sapma (px)
+
+    init() {
+        const stage = document.getElementById('profileStage');
+        if (!stage) return;
+
+        // Pasif dokunma başlangıcı
+        stage.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
+        // Dokunma sonu (karar anı)
+        stage.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: true });
+        // Dokunma iptali (örn. sistem jesti)
+        stage.addEventListener('touchcancel', () => { this.isTracking = false; }, { passive: true });
+    },
+
+    handleTouchStart(e) {
+        // Masaüstü veya geçiş esnasında devre dışı
+        if (window.innerWidth >= 900) return;
+        if (Router._companionTransitioning) return;
+        if (document.body.classList.contains('is-pointer-dragging')) return;
+
+        // Modal açıkken swipe çalışmasın
+        const activeModal = document.querySelector('.nook-modal.is-active, .auth-modal.is-active');
+        if (activeModal) return;
+
+        if (e.touches.length !== 1) {
+            this.isTracking = false;
+            return;
+        }
+
+        const touch = e.touches[0];
+        this.startX = touch.clientX;
+        this.startY = touch.clientY;
+        this.startTime = Date.now();
+        this.isTracking = true;
+    },
+
+    handleTouchEnd(e) {
+        if (!this.isTracking) return;
+        this.isTracking = false;
+
+        if (e.changedTouches.length !== 1) return;
+
+        const touch = e.changedTouches[0];
+        const deltaX = touch.clientX - this.startX;
+        const deltaY = touch.clientY - this.startY;
+        const elapsed = Date.now() - this.startTime;
+
+        // Çok uzun süren (örn. 800ms+) basılı tutmalar swipe sayılmaz
+        if (elapsed > 800) return;
+
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+
+        // Yatay hareket dikey hareketten belirgin biçimde büyük olmalı
+        if (absX < this.threshold) return;
+        if (absY > this.maxVerticalTolerance || absY > absX * 0.8) return;
+
+        const stage = document.getElementById('profileStage');
+        const isCompanionOpen = stage && stage.classList.contains('has-companion-open');
+
+        // Sola kaydırma (Swipe Left) -> Profildeyken Showcase'i aç
+        if (deltaX < -this.threshold && !isCompanionOpen) {
+            Router.toggleCompanion(true);
+        }
+        // Sağa kaydırma (Swipe Right) -> Showcase açıkken kapat / Profile dön
+        else if (deltaX > this.threshold && isCompanionOpen) {
+            Router.toggleCompanion(false);
         }
     }
 };

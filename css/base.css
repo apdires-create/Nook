@@ -455,13 +455,13 @@ html.is-profile-loading #landing-screen {
     }
 }
 
-/* 2. MOBİL VE DİKEY EKRANLAR (Akıcı Dikey Sahne) */
+/* 2. DAR VE MOBİL EKRANLAR: YATAY DECK / SWIPE SAHNESİ */
 @media (max-width: 899px) {
     html, body {
-        overflow-x: hidden;
-        overflow-y: auto;
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        height: 100%;
+        overflow: hidden !important;
+        position: fixed;
     }
 
     body {
@@ -472,22 +472,23 @@ html.is-profile-loading #landing-screen {
     }
 
     .stage {
-        width: 100%;
-        height: auto;
-        min-height: calc(100dvh - 56px);
-        flex: 1;
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 8px 12px 32px 12px;
+        perspective: 1200px;
+        overflow: hidden !important;
+        padding: 0;
         box-sizing: border-box;
     }
 
-    /* 5:7 Oranını asla bozmayan ve kapanışta sündürülmeyi önleyen sabit mobil kart geometrisi */
+    /* Sabit 5:7 Geometrisi */
     .stage .card-container,
     .stage .tops-companion-card {
-        --mobile-card-max-h: min(var(--card-height), calc(100dvh - 96px));
+        --mobile-card-max-h: min(var(--card-height), calc(100dvh - 84px));
         --mobile-card-w: min(
             var(--card-narrow-width),
             calc(100vw - 32px),
@@ -501,33 +502,51 @@ html.is-profile-loading #landing-screen {
         margin: 0 auto;
         flex-shrink: 0;
         box-sizing: border-box;
+        transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+        will-change: transform, opacity;
     }
 
+    /* Profil Kartı: Normalde merkezde, Showcase açıkken sola ekran dışına kayar */
     .stage .card-container {
+        position: relative;
         z-index: 5;
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+        pointer-events: auto;
     }
 
+    .stage.has-companion-open .card-container {
+        transform: translate3d(calc(-100vw - 40px), 0, 0) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    /* Showcase Kartı: Normalde sağda ekran dışında, açıkken merkeze oturur */
     .stage .tops-companion-card {
-        z-index: 4;
+        position: absolute;
+        z-index: 6;
+        transform: translate3d(calc(100vw + 40px), 0, 0);
+        opacity: 0;
+        pointer-events: none;
+        animation: none !important;
     }
 
-    .stage.has-companion-open {
-        height: auto;
-        max-height: none;
-        overflow-y: visible;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 28px;
-        /* Showcase bloğunun altında ferah ve ergonomik boşluk */
-        padding: 12px 16px max(48px, env(safe-area-inset-bottom, 24px)) 16px;
-    }
-
-    .stage.has-companion-open .card-container,
     .stage.has-companion-open .tops-companion-card {
-        flex-shrink: 0;
-        margin: 0 auto;
+        transform: translate3d(0, 0, 0) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
+    .stage.is-companion-closing .tops-companion-card {
+        transform: translate3d(calc(100vw + 40px), 0, 0) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    .stage.is-companion-closing .card-container {
+        transform: translate3d(0, 0, 0) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
 }
 
@@ -585,46 +604,7 @@ html.is-profile-loading #landing-screen {
     }
 }
 
-/* Mobil & Dikey Ekranlar: Masaüstüne benzer şekilde profil kartının arkasından/altından 3D süzülüş */
-@media (max-width: 899px) {
-    .tops-companion-card {
-        transform-origin: center top;
-        animation: companionMobile3DEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
 
-    .tops-companion-card.is-closing {
-        animation: companionMobile3DExit 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-    }
-
-    @keyframes companionMobile3DEnter {
-        0% {
-            opacity: 0;
-            transform: translate3d(0, -60px, -50px) rotateX(8deg) scale(0.94);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
-        }
-        40% {
-            opacity: 0.7;
-        }
-        100% {
-            opacity: 1;
-            transform: translate3d(0, 0, 0) rotateX(0deg) scale(1);
-            box-shadow: var(--card-shadow);
-        }
-    }
-
-    @keyframes companionMobile3DExit {
-        0% {
-            opacity: 1;
-            transform: translate3d(0, 0, 0) rotateX(0deg) scale(1);
-            box-shadow: var(--card-shadow);
-        }
-        100% {
-            opacity: 0;
-            transform: translate3d(0, -50px, -50px) rotateX(8deg) scale(0.94);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
-        }
-    }
-}
 
 /* 4. KART İÇİ AKICI KADEMELİ GİRİŞ (STAGGERED REVEAL) */
 .tops-companion-card .companion-header {

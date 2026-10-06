@@ -749,16 +749,17 @@
 }
 /* #endregion */
 
-/* #region 14: MOBİLDE ÜST MENÜ BAR AKIŞI (NATURAL VERTICAL STACK) */
+/* #region 14: MOBİLDE SABİT ÜST MENÜ BAR */
 @media (max-width: 899px) {
     .top-nav {
-        position: relative !important;
-        height: auto !important;
-        min-height: 52px;
-        padding: 12px clamp(12px, 4vw, 24px) 8px clamp(12px, 4vw, 24px);
-        flex-shrink: 0;
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 54px !important;
+        padding: 0 clamp(12px, 4vw, 24px);
         z-index: var(--z-nav);
-        pointer-events: auto;
+        pointer-events: none;
     }
 
     .top-nav-brand,
