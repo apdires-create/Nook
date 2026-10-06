@@ -1074,7 +1074,9 @@ EditManager.Vitrin = {
             if (isTextarea) {
                 const autoResize = () => {
                     inputEl.style.height = 'auto';
-                    inputEl.style.height = `${inputEl.scrollHeight}px`;
+                    // scrollHeight border içermediği için border payını (2px) ekleyip scrollTop sıfırla
+                    inputEl.style.height = `${inputEl.scrollHeight + 2}px`;
+                    inputEl.scrollTop = 0;
                 };
 
                 // İlk açılışta içeriğe göre yüksekliği ayarla

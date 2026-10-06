@@ -174,10 +174,15 @@ body.is-owner .editable-hover:not(.is-input-active):hover {
     resize: none;
     padding: 2px 8px;
     margin: 0;
-    overflow-y: auto;
+    overflow: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     box-sizing: border-box;
     word-break: break-word;
     white-space: pre-wrap;
+}
+.edit-bio-textarea::-webkit-scrollbar {
+    display: none;
 }
 /* #endregion */
 
