@@ -67,10 +67,8 @@ body.is-owner .profile-title:not(.is-input-active) {
 }
 
 body.is-owner .profile-bio:not(.is-input-active) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: auto;
+    display: block;
+    width: 100%;
     max-width: 96%;
     box-sizing: border-box;
 }
@@ -107,9 +105,11 @@ body.is-owner .editable-hover:not(.is-input-active):hover {
 }
 
 .profile-bio.is-input-active {
-    display: block !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     overflow: visible !important;
-    width: 100% !important;
+    width: auto !important;
     max-width: 96% !important;
     padding: 0 !important;
     border: none !important;
@@ -151,48 +151,35 @@ body.is-owner .editable-hover:not(.is-input-active):hover {
 }
 
 #profileBio.is-input-active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
     max-width: 96% !important;
-    overflow: visible;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
 }
 
-.edit-inline-textarea-wrap {
-    position: relative;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.auto-expand-textarea {
-    width: 100%;
-    height: auto;
-    min-height: calc(1.6em + 10px);
-    max-height: calc(1.6em * 5 + 10px);
-    text-align: center;
-    resize: none;
-    line-height: 1.6;
+.edit-bio-textarea {
     font-size: 4.1cqw;
+    line-height: 1.6;
     font-weight: 450;
-    padding: 5px 8px;
+    text-align: center;
+    width: 100%;
+    min-width: 20cqw;
+    max-width: 100%;
+    min-height: calc(1.6em + 4px);
+    max-height: calc(1.6em * 5 + 4px);
+    resize: none;
+    padding: 2px 8px;
+    margin: 0;
     overflow-y: auto;
     box-sizing: border-box;
     word-break: break-word;
     white-space: pre-wrap;
-}
-
-.bio-counter {
-    position: absolute;
-    bottom: -15px;
-    right: 0;
-    font-size: 2.8cqw;
-    color: var(--text-tertiary);
-    font-family: var(--font-mono);
-    pointer-events: none;
 }
 /* #endregion */
 

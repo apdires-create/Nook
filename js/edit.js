@@ -1058,12 +1058,7 @@ EditManager.Vitrin = {
 
             let inputHtml = '';
             if (isTextarea) {
-                inputHtml = `
-                    <div class="edit-inline-textarea-wrap">
-                        <textarea class="edit-input-rect auto-expand-textarea" maxlength="${maxLen}" placeholder="Kendinden bahset...">${EditManager.escapeHtml(guncelDeger)}</textarea>
-                        <span class="bio-counter">${guncelDeger.length}/${maxLen}</span>
-                    </div>
-                `;
+                inputHtml = `<textarea class="edit-input-rect edit-bio-textarea" maxlength="${maxLen}" placeholder="Kendinden bahset...">${EditManager.escapeHtml(guncelDeger)}</textarea>`;
             } else {
                 const placeholder = (fieldName === 'gorunen_isim') ? 'İsim gir...' : 'Ünvan ekle...';
                 const charWidth = guncelDeger.length === 0 
@@ -1079,24 +1074,18 @@ EditManager.Vitrin = {
             if (isTextarea) {
                 const autoResize = () => {
                     inputEl.style.height = 'auto';
-                    inputEl.style.height = `${Math.max(inputEl.scrollHeight, 40)}px`;
+                    inputEl.style.height = `${inputEl.scrollHeight}px`;
                 };
 
-                // İlk açılışta içeriğe göre yüksekliği hesapla
-                requestAnimationFrame(() => {
-                    autoResize();
-                });
+                // İlk açılışta içeriğe göre yüksekliği ayarla
+                autoResize();
 
                 inputEl.addEventListener('input', function() {
-                    if (isTextarea) {
-                        const lines = this.value.split('\n');
-                        if (lines.length > 5) {
-                            this.value = lines.slice(0, 5).join('\n');
-                        }
+                    const lines = this.value.split('\n');
+                    if (lines.length > 5) {
+                        this.value = lines.slice(0, 5).join('\n');
                     }
                     autoResize();
-                    const counter = el.querySelector('.bio-counter');
-                    if (counter) counter.textContent = `${this.value.length}/${maxLen}`;
                 });
             } else {
                 const placeholder = (fieldName === 'gorunen_isim') ? 'İsim gir...' : 'Ünvan ekle...';
