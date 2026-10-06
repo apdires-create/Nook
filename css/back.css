@@ -683,7 +683,15 @@ body.is-owner .nook-link-row.is-expanded input {
     background: var(--bg-card-subtle);
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-item);
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                padding 0.3s ease,
+                margin 0.3s ease,
+                border-color 0.25s ease,
+                box-shadow 0.25s ease;
 }
 
 body.is-owner .top-item-card {
@@ -692,6 +700,87 @@ body.is-owner .top-item-card {
 
 body.is-owner .top-item-card:active {
     cursor: grabbing;
+}
+
+/* Bir kart genişletildiğinde diğer kartların ve ekleme butonunun yok olması */
+.tops-container-wrap.has-expanded-item .top-item-card:not(.is-expanded),
+.tops-container-wrap.has-expanded-item .top-poster-add-card {
+    opacity: 0 !important;
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: -0.8cqh !important;
+    margin-bottom: -0.8cqh !important;
+    border-color: transparent !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+    transform: scale(0.96) !important;
+}
+
+/* Seçilen ve Genişleyen Kart (Seçenek A Düzeni) */
+.top-item-card.is-expanded {
+    order: -1;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--accent-color, #3b5bdb);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 16px rgba(59, 91, 219, 0.25);
+    padding: 3cqw 3.5cqw;
+    min-height: 38cqh;
+    align-items: flex-start;
+}
+
+.top-item-card.is-expanded .top-item-thumb {
+    width: 22cqw;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    border-color: rgba(255, 255, 255, 0.18);
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.top-item-card.is-expanded .top-item-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex: 1;
+    min-height: 100%;
+}
+
+.top-item-card.is-expanded .top-item-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    font-size: calc(var(--cq-fs-item-title) * 1.08);
+    line-height: 1.3;
+}
+
+.top-item-card.is-expanded .top-item-desc {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow: visible;
+    max-height: none;
+    margin-top: 1.2cqh;
+    font-size: calc(var(--cq-fs-desc) * 1.05);
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+/* Meta rozetler: Üstte puan, altta sağa yaslı yıl/yayıncı */
+.top-item-meta-header {
+    display: flex;
+    align-items: center;
+    gap: 1.2cqw;
+    margin-left: auto;
+}
+
+.top-item-meta-footer {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 1.4cqw;
+    margin-top: 1.6cqh;
+    padding-top: 1cqh;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
 }
 
 .top-item-thumb {
@@ -712,6 +801,7 @@ body.is-owner .top-item-card:active {
     -webkit-user-drag: none;
     user-select: none;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .top-item-thumb img {
@@ -759,15 +849,6 @@ body.is-owner .top-item-card:active {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.top-item-meta-row {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1.2cqw;
-    margin-top: 0.4cqh;
-    margin-bottom: 0.2cqh;
 }
 
 .top-meta-badge {

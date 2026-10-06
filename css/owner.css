@@ -523,13 +523,20 @@ body.is-owner .delete-section-btn:hover {
 }
 
 body.is-owner .link-item-row:hover .item-delete-btn,
-body.is-owner .top-item-card:hover .item-delete-btn {
+body.is-owner .top-item-card:hover .item-delete-btn,
+body.is-owner .top-item-card.is-expanded .item-delete-btn {
     display: flex;
 }
 
 .item-delete-btn:hover {
     color: #ef4444;
     background: rgba(239, 68, 68, 0.15);
+}
+
+.top-item-card.is-expanded .item-delete-btn {
+    top: 10px;
+    right: 10px;
+    z-index: 5;
 }
 
 .top-item-card {

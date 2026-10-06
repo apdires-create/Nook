@@ -226,6 +226,14 @@ const Router = {
                 // 2. Modal yoksa sahne hiyerarşisindeki adımları kapat
                 const stage = document.getElementById('profileStage');
                 const companionCard = document.getElementById('topsCompanionCard');
+                const topsContainer = document.getElementById('tops-container-wrap');
+
+                if (topsContainer && topsContainer.classList.contains('has-expanded-item')) {
+                    topsContainer.classList.remove('has-expanded-item');
+                    topsContainer.querySelectorAll('.top-item-card.is-expanded').forEach(c => c.classList.remove('is-expanded'));
+                    return;
+                }
+
                 if (stage && stage.classList.contains('has-companion-open') && companionCard && !companionCard.classList.contains('is-closing')) {
                     this.toggleCompanion(false);
                 } else if (this.activeDetailView) {

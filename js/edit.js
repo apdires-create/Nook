@@ -2843,6 +2843,7 @@ EditManager.CompanionViews = {
         EditManager.initPointerSortable(container, {
             itemSelector: '.top-item-card',
             axis: 'y',
+            canDrag: (card) => !card.classList.contains('is-expanded') && !container.classList.contains('has-expanded-item'),
             excludedDragSelectors: '.item-delete-btn, .top-poster-add-card, input, button, a',
             onMove: () => {
                 const currentAddCard = container.querySelector('#top-add-poster-btn');

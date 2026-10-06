@@ -463,43 +463,46 @@ const RenderEngine = {
                 ? `<img class="top-item-thumb" src="${safeAfis}" alt="${this.escapeHtml(item.baslik || '')}" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.style.display='none'">`
                 : `<div class="top-item-thumb"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></div>`;
 
-            const metaBadges = [];
-            if (item.skor) {
-                metaBadges.push(`<span class="top-meta-badge is-score">★ ${this.escapeHtml(item.skor)}</span>`);
-            }
+            const scoreBadge = item.skor
+                ? `<span class="top-meta-badge is-score">★ ${this.escapeHtml(item.skor)}</span>`
+                : '';
+
+            const bottomMetaBadges = [];
             if (item.yil) {
-                metaBadges.push(`<span class="top-meta-badge is-year">${this.escapeHtml(item.yil)}</span>`);
+                bottomMetaBadges.push(`<span class="top-meta-badge is-year">${this.escapeHtml(item.yil)}</span>`);
             }
             if (item.yonetmen) {
-                metaBadges.push(`<span class="top-meta-badge is-extra" title="Yönetmen">Yön: ${this.escapeHtml(item.yonetmen)}</span>`);
+                bottomMetaBadges.push(`<span class="top-meta-badge is-extra" title="Yönetmen">Yön: ${this.escapeHtml(item.yonetmen)}</span>`);
             }
             if (item.yayinci) {
-                metaBadges.push(`<span class="top-meta-badge is-extra" title="Yayıncı Firma">${this.escapeHtml(item.yayinci)}</span>`);
+                bottomMetaBadges.push(`<span class="top-meta-badge is-extra" title="Yayıncı Firma">${this.escapeHtml(item.yayinci)}</span>`);
             }
             if (item.studyo) {
-                metaBadges.push(`<span class="top-meta-badge is-extra" title="Stüdyo">${this.escapeHtml(item.studyo)}</span>`);
+                bottomMetaBadges.push(`<span class="top-meta-badge is-extra" title="Stüdyo">${this.escapeHtml(item.studyo)}</span>`);
             }
             if (item.yazar) {
-                metaBadges.push(`<span class="top-meta-badge is-extra" title="Yazar">${this.escapeHtml(item.yazar)}</span>`);
+                bottomMetaBadges.push(`<span class="top-meta-badge is-extra" title="Yazar">${this.escapeHtml(item.yazar)}</span>`);
             }
             if (item.seri) {
-                metaBadges.push(`<span class="top-meta-badge is-series" title="Seri / Evren">${this.escapeHtml(item.seri)}</span>`);
+                bottomMetaBadges.push(`<span class="top-meta-badge is-series" title="Seri / Evren">${this.escapeHtml(item.seri)}</span>`);
             }
 
-            const metaRowHtml = metaBadges.length > 0
-                ? `<div class="top-item-meta-row">${metaBadges.join('')}</div>`
+            const headerMetaHtml = scoreBadge ? `<div class="top-item-meta-header">${scoreBadge}</div>` : '';
+            const footerMetaHtml = bottomMetaBadges.length > 0
+                ? `<div class="top-item-meta-footer">${bottomMetaBadges.join('')}</div>`
                 : '';
 
             return `
-                <div class="top-item-card" data-index="${idx}" data-original-index="${idx}" data-id="${this.escapeHtml(itemId)}">
+                <div class="top-item-card" data-index="${idx}" data-original-index="${idx}" data-id="${this.escapeHtml(itemId)}" role="button" tabindex="0">
                     ${thumbHtml}
                     <div class="top-item-content">
                         <div class="top-item-header-row">
                             <span class="top-item-rank">#${idx + 1}</span>
                             <h4 class="top-item-title">${this.escapeHtml(item.baslik)}</h4>
+                            ${headerMetaHtml}
                         </div>
-                        ${metaRowHtml}
                         <p class="top-item-desc">${this.escapeHtml(item.aciklama || '')}</p>
+                        ${footerMetaHtml}
                     </div>
                 </div>
             `;
@@ -534,6 +537,36 @@ const RenderEngine = {
                 ${addPosterSlotHtml}
             </div>
         `;
+
+        // 3.5: AFİŞ KARTLARINA TIKLAYARAK GENİŞLEME (EXPAND & FOCUS)
+        const topsContainer = companionBody.querySelector('#tops-container-wrap');
+        if (topsContainer) {
+            topsContainer.querySelectorAll('.top-item-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // Sürükleme yeni bittiyse veya silme butonuna tıklandıysa yoksay
+                    if (window._suruklemeBitti && Date.now() - window._suruklemeBitti < 250) {
+                        return;
+                    }
+                    if (e.target.closest('.item-delete-btn')) {
+                        return;
+                    }
+
+                    const isAlreadyExpanded = card.classList.contains('is-expanded');
+
+                    // Diğer tüm kartların genişlemesini kaldır
+                    topsContainer.querySelectorAll('.top-item-card').forEach(c => {
+                        c.classList.remove('is-expanded');
+                    });
+
+                    if (isAlreadyExpanded) {
+                        topsContainer.classList.remove('has-expanded-item');
+                    } else {
+                        topsContainer.classList.add('has-expanded-item');
+                        card.classList.add('is-expanded');
+                    }
+                });
+            });
+        }
 
         // 4. BLOĞUN EN ALTINDAKİ ŞIK HARİCİ LİNK
         const footerEl = document.getElementById('companionFooter');
