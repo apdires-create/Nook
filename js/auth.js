@@ -70,8 +70,8 @@ function turnstileWidgetiHazirla(hedefId = 'auth-turnstile') {
         if (!window.turnstile) return;
         try {
             if (turnstileWidgetIds[hedefId] !== undefined) {
-                // Halihazırda geçerli bir token varsa modu değiştirince sıfırlama yapma
-                if (!turnstileToken) {
+                // Halihazırda bu widget için geçerli bir token yoksa yeniden çözdür
+                if (!turnstileTokens[hedefId]) {
                     window.turnstile.reset(turnstileWidgetIds[hedefId]);
                 }
                 widget.classList.remove('is-active');
@@ -977,15 +977,18 @@ function authModaliniBaslat() {
             accountChangePassBtn.textContent = 'Doğrulanıyor...';
 
             try {
+                console.log("[Şifre Güncelleme] Doğrulama başlatılıyor...", { email: currentUserEmail, hasToken: !!token });
                 // 1. Mevcut şifreyi signInWithPassword ve Turnstile token ile doğrula
                 const { error: verifyErr } = await supabaseClient.auth.signInWithPassword({
                     email: currentUserEmail,
                     password: currentPass,
                     options: { captchaToken: token }
                 });
+                console.log("[Şifre Güncelleme] signInWithPassword sonucu:", verifyErr ? verifyErr.message : "Başarılı");
                 turnstileSifirla('account-pass-turnstile');
 
                 if (verifyErr) {
+                    console.error("[Şifre Güncelleme] Doğrulama hatası:", verifyErr);
                     accountChangePassBtn.disabled = false;
                     accountChangePassBtn.textContent = 'Şifreyi Güncelle';
                     const errLower = (verifyErr.message || '').toLowerCase();
@@ -998,17 +1001,26 @@ function authModaliniBaslat() {
                     return;
                 }
 
-                // 2. Doğrulama başarılı -> Yeni şifreyi kaydet
+                // 2. Doğrulama başarılı -> Yeni şifreyi kaydet (Supabase "Require current password" politikası için current_password gönderilir)
                 accountChangePassBtn.textContent = 'Güncelleniyor...';
+                console.log("[Şifre Güncelleme] updateUser çağrılıyor...");
                 const { error: updateErr } = await supabaseClient.auth.updateUser({
-                    password: newPass
+                    password: newPass,
+                    current_password: currentPass
                 });
+                console.log("[Şifre Güncelleme] updateUser sonucu:", updateErr ? updateErr.message : "Başarılı");
 
                 accountChangePassBtn.disabled = false;
                 accountChangePassBtn.textContent = 'Şifreyi Güncelle';
 
                 if (updateErr) {
-                    authHataGoster("Şifre güncellenemedi: " + updateErr.message, msgBox);
+                    console.error("[Şifre Güncelleme] updateUser hatası:", updateErr);
+                    const errLower = (updateErr.message || '').toLowerCase();
+                    if (errLower.includes('current password') || errLower.includes('invalid credentials')) {
+                        authHataGoster("Mevcut şifreniz hatalı.", msgBox);
+                    } else {
+                        authHataGoster("Şifre güncellenemedi: " + updateErr.message, msgBox);
+                    }
                 } else {
                     authBasariGoster("Şifreniz başarıyla güncellendi!", msgBox);
                     if (accountCurrentPassword) accountCurrentPassword.value = '';
@@ -1021,7 +1033,7 @@ function authModaliniBaslat() {
                     }, 1800);
                 }
             } catch (err) {
-                console.error("Şifre güncelleme hatası:", err);
+                console.error("[Şifre Güncelleme] Beklenmedik hata:", err);
                 turnstileSifirla('account-pass-turnstile');
                 accountChangePassBtn.disabled = false;
                 accountChangePassBtn.textContent = 'Şifreyi Güncelle';
