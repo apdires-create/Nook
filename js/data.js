@@ -1,7 +1,17 @@
+function escapeIlike(val) {
+    return (val || '').replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+}
+
 // #region 1: SUPABASE PROFİL VERİ ÇEKME MOTORU (DATA FETCHING)
 async function tumVerileriCek() {
     if (!KULLANICI_ADI || !supabaseClient) {
         yuklemeHataDurumunuGoster("Veritabanı bağlantısı kurulamadı veya kullanıcı adı bulunamadı.");
+        return false;
+    }
+
+    // Kullanıcı adı format kontrolü: Geçersizse doğrudan bulunamadı ekranı göster
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(KULLANICI_ADI)) {
+        yuklemeHataDurumunuGoster("Aradığınız kullanıcı bulunamadı veya profil henüz oluşturulmamış.");
         return false;
     }
 
@@ -12,7 +22,7 @@ async function tumVerileriCek() {
         const { data: profil, error } = await supabaseClient
             .from('profiles')
             .select('*')
-            .ilike('kullanici_adi', KULLANICI_ADI)
+            .ilike('kullanici_adi', escapeIlike(KULLANICI_ADI))
             .single();
 
         if (error || !profil) {
@@ -224,6 +234,7 @@ function yuklemeHataDurumunuGoster(mesaj) {
 async function icerikAra(aramaMetni, aramaTuru) {
     if (!aramaMetni || !aramaMetni.trim()) return [];
     const query = aramaMetni.trim();
+    if (query.length < 2) return [];
     const tur = (aramaTuru || 'film').toLowerCase();
 
     if (!supabaseClient || typeof supabaseClient.functions === 'undefined') {
@@ -242,6 +253,12 @@ async function icerikAra(aramaMetni, aramaTuru) {
 
         if (error) {
             console.error("Supabase Functions arama hatası:", error);
+            const status = error.context?.status || error.status;
+            if (status === 429) {
+                const rateLimitErr = new Error("Çok hızlı arama yapıyorsunuz. Lütfen birkaç saniye bekleyin.");
+                rateLimitErr.code = 'RATE_LIMIT';
+                throw rateLimitErr;
+            }
             return [];
         }
 

@@ -555,7 +555,15 @@ EditManager.Global = {
     getTemizVeri(veri) {
         if (!veri) return null;
         const front = veri.front_data || {};
-        const links = (Array.isArray(veri.links) && veri.links.length > 0) ? veri.links : null;
+        const links = (Array.isArray(veri.links) && veri.links.length > 0)
+            ? veri.links
+                .filter(l => l && typeof l === 'object' && l.url && typeof l.url === 'string' && l.url.trim() !== '')
+                .map(l => ({
+                    baslik: (l.baslik || l.isim || 'Bağlantı').trim().slice(0, 15),
+                    isim: (l.baslik || l.isim || 'Bağlantı').trim().slice(0, 15),
+                    url: l.url.trim()
+                }))
+            : null;
         let tops = null;
         if (veri.tops && Array.isArray(veri.tops.listeler) && veri.tops.listeler.length > 0) {
             const temizListeler = veri.tops.listeler.map((l, lIdx) => {
@@ -686,15 +694,26 @@ EditManager.Global = {
             let workingOnPayload = {};
             if (kartVerisi.working_on && typeof kartVerisi.working_on === 'object' && !Array.isArray(kartVerisi.working_on)) {
                 if (kartVerisi.working_on.metin && kartVerisi.working_on.metin.trim() !== '') {
-                    workingOnPayload = { metin: kartVerisi.working_on.metin.trim() };
+                    workingOnPayload = { metin: kartVerisi.working_on.metin.trim().slice(0, 160) };
                 }
             }
+
+            const temizLinkler = (Array.isArray(kartVerisi.links) ? kartVerisi.links : [])
+                .filter(l => l && typeof l === 'object' && l.url && typeof l.url === 'string' && l.url.trim() !== '')
+                .map(l => ({
+                    baslik: (l.baslik || l.isim || 'Bağlantı').trim().slice(0, 15),
+                    isim: (l.baslik || l.isim || 'Bağlantı').trim().slice(0, 15),
+                    url: l.url.trim()
+                }));
+
+            // Yerel state'teki links dizisini de temizlenmiş versiyonla güncelle
+            kartVerisi.links = temizLinkler;
 
             const { data: guncellenen, error } = await supabaseClient
                 .from('profiles')
                 .update({
                     front_data: guvenliObje(kartVerisi.front_data),
-                    links: Array.isArray(kartVerisi.links) ? kartVerisi.links : [],
+                    links: temizLinkler,
                     tops: guvenliObje(kartVerisi.tops),
                     trophies: Array.isArray(kartVerisi.trophies) ? kartVerisi.trophies : [],
                     widgets: Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets : [],
@@ -1340,9 +1359,8 @@ EditManager.BackViews = {
 
     // --- Links ---
     urlGecerliMi(string) {
-        if (!string) return false;
-        const res = string.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
-        return (res !== null);
+        if (!string || typeof string !== 'string') return false;
+        return /^https?:\/\/[^"'\s<>]+$/.test(string.trim());
     },
 
     kapatTumLinkAkordeonlari() {
@@ -1557,7 +1575,7 @@ EditManager.BackViews = {
                         </a>
                         <div class="nook-link-edit-fields">
                             <div class="nook-link-icon">${RenderEngine.getLinkIcon(link.url)}</div>
-                            <input type="text" class="nook-link-input edit-isim-input" placeholder="Görünen İsim (Örn: GitHub)" value="${RenderEngine.escapeHtml(baslik)}" autocomplete="off" spellcheck="false" draggable="false">
+                            <input type="text" class="nook-link-input edit-isim-input" placeholder="Görünen İsim (Örn: GitHub)" value="${RenderEngine.escapeHtml(baslik)}" maxlength="15" autocomplete="off" spellcheck="false" draggable="false">
                         </div>
                     </div>
                     <div class="nook-link-collapse" style="height: 0px;">
@@ -1809,7 +1827,7 @@ EditManager.BackViews = {
             <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 8px 0;">
                 Üzerinde çalıştığın proje veya anlık durumunu güncelle.
             </p>
-            <textarea class="inline-form-input working-text-input" rows="3" placeholder="Örn: Building next-gen UI components on Nook...">${EditManager.escapeHtml(mevcutMetin)}</textarea>
+            <textarea class="inline-form-input working-text-input" rows="3" maxlength="160" placeholder="Örn: Building next-gen UI components on Nook...">${EditManager.escapeHtml(mevcutMetin)}</textarea>
             <div class="inline-form-actions">
                 <button type="button" class="form-btn-sm form-btn-cancel working-cancel-btn">İptal</button>
                 <button type="button" class="form-btn-sm form-btn-submit working-save-btn">Kaydet</button>
@@ -1842,7 +1860,7 @@ EditManager.BackViews = {
         };
 
         form.querySelector('.working-save-btn').onclick = () => {
-            const metin = form.querySelector('.working-text-input').value.trim();
+            const metin = form.querySelector('.working-text-input').value.trim().slice(0, 160);
             if (!metin) {
                 alert("Lütfen durum metni girin!");
                 return;
@@ -1941,7 +1959,7 @@ EditManager.BackViews = {
             <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 8px 0;">
                 ${mevcutUser ? 'Yeni Monkeytype kullanıcı adını gir:' : 'Monkeytype kullanıcı adını girerek canlı klavye yazma skorlarını kartına ekle:'}
             </p>
-            <input type="text" class="inline-form-input widget-user-input" placeholder="Kullanıcı Adı (Örn: miodec)" value="${EditManager.escapeHtml(mevcutUser)}">
+            <input type="text" class="inline-form-input widget-user-input" maxlength="30" placeholder="Kullanıcı Adı (Örn: miodec)" value="${EditManager.escapeHtml(mevcutUser)}">
             <div class="inline-form-actions">
                 <button type="button" class="form-btn-sm form-btn-cancel widget-cancel-btn">İptal</button>
                 <button type="button" class="form-btn-sm form-btn-submit widget-save-btn">${mevcutUser ? 'Güncelle' : 'Ekle'}</button>
@@ -1969,6 +1987,10 @@ EditManager.BackViews = {
             const yeniUser = form.querySelector('.widget-user-input').value.trim();
             if (!yeniUser) {
                 alert("Lütfen Monkeytype kullanıcı adınızı girin!");
+                return;
+            }
+            if (!/^[a-zA-Z0-9_]{1,30}$/.test(yeniUser)) {
+                alert("Monkeytype kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir (en fazla 30 karakter).");
                 return;
             }
 
@@ -2579,6 +2601,7 @@ EditManager.TopsModal = {
 EditManager.MediaSearchModal = {
     aramaTuru: 'film',
     debounceTimer: null,
+    aktifIstekId: 0,
 
     init() {
         const modal = document.getElementById('tops-search-modal');
@@ -2594,7 +2617,13 @@ EditManager.MediaSearchModal = {
                 clearTimeout(this.debounceTimer);
                 const query = e.target.value.trim();
                 if (!query) {
+                    this.aktifIstekId++;
                     this.sonuclariCiz([], 'Aramak için bir isim yazın...');
+                    return;
+                }
+                if (query.length < 2) {
+                    this.aktifIstekId++;
+                    this.sonuclariCiz([], 'Aramak için en az 2 karakter yazın...');
                     return;
                 }
                 this.debounceTimer = setTimeout(() => {
@@ -2612,6 +2641,7 @@ EditManager.MediaSearchModal = {
         if (!modal) return;
 
         this.aramaTuru = tur || 'film';
+        this.aktifIstekId++;
 
         const turBasliklari = {
             film: { baslik: 'Film Ara', placeholder: 'Film adı yazın (Örn: Inception, Interstellar)...' },
@@ -2637,11 +2667,18 @@ EditManager.MediaSearchModal = {
     },
 
     kapat() {
+        this.aktifIstekId++;
         const modal = document.getElementById('tops-search-modal');
         if (modal) modal.classList.remove('is-open');
     },
 
     async ara(query) {
+        if (!query || query.length < 2) {
+            this.sonuclariCiz([], 'Aramak için en az 2 karakter yazın...');
+            return;
+        }
+
+        const buIstekId = ++this.aktifIstekId;
         const resultsWrap = document.getElementById('tops-search-results');
         if (resultsWrap) {
             resultsWrap.innerHTML = `
@@ -2657,14 +2694,20 @@ EditManager.MediaSearchModal = {
 
         try {
             const sonuclar = await icerikAra(query, this.aramaTuru);
+            if (buIstekId !== this.aktifIstekId) return; // Eski isteğin cevabını yoksay
+
             if (!sonuclar || sonuclar.length === 0) {
                 this.sonuclariCiz([], `"${query}" ile ilgili sonuç bulunamadı.`);
             } else {
                 this.sonuclariCiz(sonuclar);
             }
         } catch (err) {
+            if (buIstekId !== this.aktifIstekId) return;
             console.error("Arama hatası:", err);
-            this.sonuclariCiz([], 'Arama sırasında bir sorun oluştu.');
+            const mesaj = (err && err.code === 'RATE_LIMIT')
+                ? "Çok hızlı arama yapıyorsunuz. Lütfen birkaç saniye bekleyin."
+                : 'Arama sırasında bir sorun oluştu.';
+            this.sonuclariCiz([], mesaj);
         }
     },
 

@@ -1562,3 +1562,19 @@ body.has-unsaved-changes .edit-action-bar {
 }
 /* #endregion */
 
+/* #region 17: DOKUNMATİK CİHAZ KONTROLLERİ (@media hover: none) */
+@media (hover: none) {
+    body.is-owner .tag-pill .tag-remove-btn,
+    body.is-owner .link-item-row .item-delete-btn,
+    body.is-owner .top-item-card .item-delete-btn {
+        display: flex !important;
+        opacity: 0.9;
+    }
+
+    body.is-owner .banner-box .image-edit-overlay,
+    body.is-owner .avatar-box .image-edit-overlay {
+        opacity: 0.8 !important;
+    }
+}
+/* #endregion */
+

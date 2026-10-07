@@ -410,19 +410,8 @@
                     <a href="#" id="account-page-link" class="account-profile-link" target="_self" style="display: none;">Sayfama Git ↗</a>
                 </div>
 
-                <!-- HESAP EYLEMLERİ: BAĞLANTI KOPYALA & ŞİFRE DEĞİŞTİR -->
+                <!-- HESAP EYLEMLERİ: ŞİFRE DEĞİŞTİR -->
                 <div class="account-actions-group">
-                    <button type="button" id="account-copy-link-btn" class="account-toggle-btn account-copy-btn">
-                        <span class="account-toggle-label">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                            Profil Bağlantısını Kopyala
-                        </span>
-                        <span class="account-copy-badge" id="account-copy-badge">Kopyala</span>
-                    </button>
-
                     <button type="button" id="account-toggle-pass-btn" class="account-toggle-btn">
                         <span class="account-toggle-label">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -437,11 +426,15 @@
                     </button>
                     <div id="account-password-section" class="account-password-section" style="display: none;">
                         <div class="auth-input-group">
-                            <input type="password" id="account-new-password" class="auth-input" placeholder="Yeni Şifre (En az 8 karakter)">
+                            <input type="password" id="account-current-password" class="auth-input" placeholder="Mevcut Şifre" autocomplete="current-password">
                         </div>
                         <div class="auth-input-group">
-                            <input type="password" id="account-confirm-password" class="auth-input" placeholder="Yeni Şifre (Tekrar)">
+                            <input type="password" id="account-new-password" class="auth-input" placeholder="Yeni Şifre (En az 8 karakter)" autocomplete="new-password">
                         </div>
+                        <div class="auth-input-group">
+                            <input type="password" id="account-confirm-password" class="auth-input" placeholder="Yeni Şifre (Tekrar)" autocomplete="new-password">
+                        </div>
+                        <div id="account-pass-turnstile" class="cf-turnstile"></div>
                         <div id="account-password-msg" class="auth-error-box" style="display: none;"></div>
                         <button type="button" id="account-change-password-btn" class="auth-submit-btn secondary-submit">Şifreyi Güncelle</button>
                     </div>
@@ -454,8 +447,10 @@
                     <div id="account-delete-confirm-box" class="account-delete-confirm-box" style="display: none;">
                         <p class="account-delete-warning-text">Bu işlem geri alınamaz. Hesabını ve tüm içeriklerini silmek için şifreni gir:</p>
                         <div class="auth-input-group">
-                            <input type="password" id="account-delete-password" class="auth-input" placeholder="Mevcut Hesap Şifresi">
+                            <input type="password" id="account-delete-password" class="auth-input" placeholder="Mevcut Hesap Şifresi" autocomplete="current-password">
                         </div>
+                        <div id="account-delete-turnstile" class="cf-turnstile"></div>
+                        <div id="account-delete-msg" class="auth-error-box" style="display: none;"></div>
                         <div class="account-delete-btn-group">
                             <button type="button" id="account-delete-cancel-btn" class="account-delete-cancel-btn">Vazgeç</button>
                             <button type="button" id="account-delete-confirm-btn" class="account-delete-confirm-btn">Evet, Hesabımı Sil</button>

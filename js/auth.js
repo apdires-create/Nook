@@ -3,35 +3,58 @@ let isLoginMode = true;
 let hataliGirisDenemesi = 0;
 let girisKilitliMi = false;
 let turnstileToken = null;
+const turnstileTokens = {};
 
-function turnstileTokenAlindi(token) {
+function turnstileTokenAlindi(token, widgetEl) {
     turnstileToken = token;
-    // Onay alındığında kutuyu gizle
-    document.querySelectorAll('.cf-turnstile').forEach(el => {
-        el.classList.remove('is-active');
-    });
+    if (widgetEl && widgetEl.id) {
+        turnstileTokens[widgetEl.id] = token;
+    }
+    // Onay alındığında ilgili kutuyu gizle
+    if (widgetEl) {
+        widgetEl.classList.remove('is-active');
+    } else {
+        document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
+    }
 }
 
-function turnstileHata() {
+function turnstileHata(widgetEl) {
     turnstileToken = null;
-    document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
+    if (widgetEl && widgetEl.id) delete turnstileTokens[widgetEl.id];
+    if (widgetEl) {
+        widgetEl.classList.remove('is-active');
+    } else {
+        document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
+    }
 }
 
-function turnstileSuresiDoldu() {
+function turnstileSuresiDoldu(widgetEl) {
     turnstileToken = null;
-    document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
+    if (widgetEl && widgetEl.id) delete turnstileTokens[widgetEl.id];
+    if (widgetEl) {
+        widgetEl.classList.remove('is-active');
+    } else {
+        document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
+    }
 }
 
 const turnstileWidgetIds = {};
 
 function turnstileSifirla(hedefId = null) {
-    turnstileToken = null;
-    document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
+    if (hedefId) {
+        delete turnstileTokens[hedefId];
+        const el = document.getElementById(hedefId);
+        if (el) el.classList.remove('is-active');
+    } else {
+        turnstileToken = null;
+        Object.keys(turnstileTokens).forEach(k => delete turnstileTokens[k]);
+        document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
+    }
     if (!window.turnstile) return;
     try {
         if (hedefId && turnstileWidgetIds[hedefId] !== undefined) {
             window.turnstile.reset(turnstileWidgetIds[hedefId]);
-        } else {
+        } else if (!hedefId) {
             window.turnstile.reset();
         }
     } catch (err) {
@@ -57,9 +80,9 @@ function turnstileWidgetiHazirla(hedefId = 'auth-turnstile') {
 
             const widgetId = window.turnstile.render('#' + hedefId, {
                 sitekey: '0x4AAAAAAFGojYtbrPQuD8-O',
-                callback: turnstileTokenAlindi,
-                'error-callback': turnstileHata,
-                'expired-callback': turnstileSuresiDoldu,
+                callback: (token) => turnstileTokenAlindi(token, widget),
+                'error-callback': () => turnstileHata(widget),
+                'expired-callback': () => turnstileSuresiDoldu(widget),
                 'before-interactive-callback': () => {
                     // Yalnızca kullanıcıdan manuel etkileşim (tıklama/doğrulama) istendiğinde kutuyu görünür yap
                     widget.classList.add('is-active');
@@ -72,6 +95,7 @@ function turnstileWidgetiHazirla(hedefId = 'auth-turnstile') {
             });
 
             turnstileWidgetIds[hedefId] = widgetId;
+            widget.dataset.turnstileRendered = 'true';
         } catch (err) {
             console.warn('Turnstile render hatası:', err);
         }
@@ -449,10 +473,16 @@ async function sistemeKayitOl(email, password, username) {
         return false;
     }
 
+    const REZERVE_ISIMLER = ['admin', 'api', 'login', 'register', 'nook', 'www', 'support', 'help', 'settings', 'about', 'terms', 'privacy'];
+    if (REZERVE_ISIMLER.includes(temizKullaniciAdi.toLowerCase())) {
+        authHataGoster("Bu kullanıcı adı sistem tarafından ayrılmıştır. Lütfen başka bir isim seçin.");
+        return false;
+    }
+
     const { data: existingUser } = await supabaseClient
         .from('profiles')
         .select('kullanici_adi')
-        .ilike('kullanici_adi', temizKullaniciAdi)
+        .ilike('kullanici_adi', (temizKullaniciAdi || '').replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_'))
         .maybeSingle();
 
     if (existingUser) {
@@ -473,7 +503,14 @@ async function sistemeKayitOl(email, password, username) {
 
     if (error) {
         let hataMesaji = "Kayıt Hatası: " + error.message;
-        if (error.message.includes("rate limit")) hataMesaji = "Çok fazla istek yapıldı. Lütfen biraz bekleyin.";
+        const errLower = (error.message || '').toLowerCase();
+        if (errLower.includes("rate limit")) {
+            hataMesaji = "Çok fazla istek yapıldı. Lütfen biraz bekleyin.";
+        } else if (errLower.includes("database error saving new user")) {
+            hataMesaji = "Kayıt sırasında bir hata oluştu. Lütfen bilgilerinizi kontrol edin veya farklı bir kullanıcı adı deneyin.";
+        } else if (errLower.includes("user already registered")) {
+            hataMesaji = "Bu e-posta adresi zaten kayıtlı! Lütfen giriş yapın.";
+        }
         authHataGoster(hataMesaji);
         return false;
     }
@@ -640,10 +677,9 @@ function authModaliniBaslat() {
     const accountDisplayEmail = document.getElementById('account-display-email');
     const accountAvatarInitial = document.getElementById('account-avatar-initial');
     const accountPageLink = document.getElementById('account-page-link');
-    const accountCopyLinkBtn = document.getElementById('account-copy-link-btn');
-    const accountCopyBadge = document.getElementById('account-copy-badge');
     const accountTogglePassBtn = document.getElementById('account-toggle-pass-btn');
     const accountPassSection = document.getElementById('account-password-section');
+    const accountCurrentPassword = document.getElementById('account-current-password');
     const accountNewPassword = document.getElementById('account-new-password');
     const accountConfirmPassword = document.getElementById('account-confirm-password');
     const accountChangePassBtn = document.getElementById('account-change-password-btn');
@@ -681,13 +717,16 @@ function authModaliniBaslat() {
             }
             if (accountPassSection) accountPassSection.style.display = 'none';
             if (accountTogglePassBtn) accountTogglePassBtn.classList.remove('is-active');
+            if (accountCurrentPassword) accountCurrentPassword.value = '';
             if (accountNewPassword) accountNewPassword.value = '';
             if (accountConfirmPassword) accountConfirmPassword.value = '';
+            turnstileSifirla('account-pass-turnstile');
 
             // Hesap silme panelini sıfırla
             if (deleteConfirmBox) deleteConfirmBox.style.display = 'none';
             if (deleteAccountBtn) deleteAccountBtn.style.display = 'inline-block';
             if (deletePasswordInput) deletePasswordInput.value = '';
+            turnstileSifirla('account-delete-turnstile');
         } else if (mode === 'recovery') {
             if (recoveryContainer) recoveryContainer.style.display = 'flex';
             if (title) title.textContent = 'Yeni Şifre Belirle';
@@ -778,14 +817,6 @@ function authModaliniBaslat() {
         try {
             await navigator.clipboard.writeText(url);
             toastBildirimiGoster("Profil bağlantısı panoya kopyalandı!", 3000, 'success');
-            if (accountCopyBadge) {
-                accountCopyBadge.textContent = "Kopyalandı!";
-                accountCopyBadge.classList.add('is-copied');
-                setTimeout(() => {
-                    accountCopyBadge.textContent = "Kopyala";
-                    accountCopyBadge.classList.remove('is-copied');
-                }, 2000);
-            }
         } catch (e) {
             console.warn("Clipboard kopyalama hatası:", e);
             toastBildirimiGoster("Bağlantı kopyalanamadı, lütfen tarayıcı adres çubuğunu kullanın.", 3000, 'warning');
@@ -797,10 +828,6 @@ function authModaliniBaslat() {
             if (userDropdown) userDropdown.classList.remove('is-open');
             profilLinkiniKopyala();
         });
-    }
-
-    if (accountCopyLinkBtn) {
-        accountCopyLinkBtn.addEventListener('click', profilLinkiniKopyala);
     }
 
     if (navAccountBtn) {
@@ -901,7 +928,12 @@ function authModaliniBaslat() {
             accountPassSection.style.display = isClosed ? 'flex' : 'none';
             accountTogglePassBtn.classList.toggle('is-active', isClosed);
             if (isClosed) {
-                setTimeout(() => accountNewPassword?.focus(), 50);
+                setTimeout(() => accountCurrentPassword?.focus(), 50);
+                requestAnimationFrame(() => {
+                    if (window.turnstile) turnstileWidgetiHazirla('account-pass-turnstile');
+                });
+            } else {
+                turnstileSifirla('account-pass-turnstile');
             }
         });
     }
@@ -909,14 +941,15 @@ function authModaliniBaslat() {
     // Hesabım: Şifre Değiştir
     if (accountChangePassBtn) {
         accountChangePassBtn.addEventListener('click', async () => {
-            const newPass = accountNewPassword?.value;
-            const confirmPass = accountConfirmPassword?.value;
+            const currentPass = (accountCurrentPassword?.value || '').trim();
+            const newPass = (accountNewPassword?.value || '').trim();
+            const confirmPass = (accountConfirmPassword?.value || '').trim();
             const msgBox = document.getElementById('account-password-msg');
 
             authHataTemizle(msgBox);
 
-            if (!newPass || !confirmPass) {
-                authHataGoster("Lütfen her iki şifre alanını da doldurun.", msgBox);
+            if (!currentPass || !newPass || !confirmPass) {
+                authHataGoster("Lütfen tüm şifre alanlarını doldurun.", msgBox);
                 return;
             }
             if (newPass.length < 8) {
@@ -924,26 +957,75 @@ function authModaliniBaslat() {
                 return;
             }
             if (newPass !== confirmPass) {
-                authHataGoster("Girdiğin şifreler uyuşmuyor.", msgBox);
+                authHataGoster("Girdiğin yeni şifreler uyuşmuyor.", msgBox);
+                return;
+            }
+
+            const token = turnstileTokens['account-pass-turnstile'] || turnstileToken;
+            if (!token) {
+                authHataGoster("Lütfen güvenlik doğrulamasını tamamlayın.", msgBox);
+                return;
+            }
+
+            const currentUserEmail = aktifKullaniciOturumu?.user?.email;
+            if (!currentUserEmail) {
+                authHataGoster("Oturum bilgisine ulaşılamadı. Lütfen sayfayı yenileyip tekrar giriş yapın.", msgBox);
                 return;
             }
 
             accountChangePassBtn.disabled = true;
-            accountChangePassBtn.textContent = 'Güncelleniyor...';
+            accountChangePassBtn.textContent = 'Doğrulanıyor...';
 
-            const { data, error } = await supabaseClient.auth.updateUser({
-                password: newPass
-            });
+            try {
+                // 1. Mevcut şifreyi signInWithPassword ve Turnstile token ile doğrula
+                const { error: verifyErr } = await supabaseClient.auth.signInWithPassword({
+                    email: currentUserEmail,
+                    password: currentPass,
+                    options: { captchaToken: token }
+                });
+                turnstileSifirla('account-pass-turnstile');
 
-            accountChangePassBtn.disabled = false;
-            accountChangePassBtn.textContent = 'Şifreyi Güncelle';
+                if (verifyErr) {
+                    accountChangePassBtn.disabled = false;
+                    accountChangePassBtn.textContent = 'Şifreyi Güncelle';
+                    const errLower = (verifyErr.message || '').toLowerCase();
+                    if (errLower.includes('invalid login credentials') || errLower.includes('invalid_credentials')) {
+                        authHataGoster("Mevcut şifreniz hatalı.", msgBox);
+                    } else {
+                        authHataGoster("Doğrulama hatası: " + verifyErr.message, msgBox);
+                    }
+                    accountCurrentPassword?.focus();
+                    return;
+                }
 
-            if (error) {
-                authHataGoster("Şifre güncellenemedi: " + error.message, msgBox);
-            } else {
-                authBasariGoster("Şifreniz başarıyla güncellendi!", msgBox);
-                if (accountNewPassword) accountNewPassword.value = '';
-                if (accountConfirmPassword) accountConfirmPassword.value = '';
+                // 2. Doğrulama başarılı -> Yeni şifreyi kaydet
+                accountChangePassBtn.textContent = 'Güncelleniyor...';
+                const { error: updateErr } = await supabaseClient.auth.updateUser({
+                    password: newPass
+                });
+
+                accountChangePassBtn.disabled = false;
+                accountChangePassBtn.textContent = 'Şifreyi Güncelle';
+
+                if (updateErr) {
+                    authHataGoster("Şifre güncellenemedi: " + updateErr.message, msgBox);
+                } else {
+                    authBasariGoster("Şifreniz başarıyla güncellendi!", msgBox);
+                    if (accountCurrentPassword) accountCurrentPassword.value = '';
+                    if (accountNewPassword) accountNewPassword.value = '';
+                    if (accountConfirmPassword) accountConfirmPassword.value = '';
+                    setTimeout(() => {
+                        if (accountPassSection) accountPassSection.style.display = 'none';
+                        if (accountTogglePassBtn) accountTogglePassBtn.classList.remove('is-active');
+                        authHataTemizle(msgBox);
+                    }, 1800);
+                }
+            } catch (err) {
+                console.error("Şifre güncelleme hatası:", err);
+                turnstileSifirla('account-pass-turnstile');
+                accountChangePassBtn.disabled = false;
+                accountChangePassBtn.textContent = 'Şifreyi Güncelle';
+                authHataGoster("Beklenmedik bir hata oluştu: " + (err.message || err), msgBox);
             }
         });
     }
@@ -953,10 +1035,15 @@ function authModaliniBaslat() {
         deleteAccountBtn.addEventListener('click', () => {
             deleteAccountBtn.style.display = 'none';
             deleteConfirmBox.style.display = 'flex';
+            const deleteMsgBox = document.getElementById('account-delete-msg');
+            if (deleteMsgBox) authHataTemizle(deleteMsgBox);
             if (deletePasswordInput) {
                 deletePasswordInput.value = '';
                 setTimeout(() => deletePasswordInput.focus(), 60);
             }
+            requestAnimationFrame(() => {
+                if (window.turnstile) turnstileWidgetiHazirla('account-delete-turnstile');
+            });
         });
     }
 
@@ -965,6 +1052,9 @@ function authModaliniBaslat() {
             deleteConfirmBox.style.display = 'none';
             deleteAccountBtn.style.display = 'inline-block';
             if (deletePasswordInput) deletePasswordInput.value = '';
+            const deleteMsgBox = document.getElementById('account-delete-msg');
+            if (deleteMsgBox) authHataTemizle(deleteMsgBox);
+            turnstileSifirla('account-delete-turnstile');
         });
     }
 
@@ -972,10 +1062,20 @@ function authModaliniBaslat() {
     if (deleteConfirmBtn) {
         deleteConfirmBtn.addEventListener('click', async () => {
             const girilenSifre = (deletePasswordInput?.value || '').trim();
+            const deleteMsgBox = document.getElementById('account-delete-msg');
+            if (deleteMsgBox) authHataTemizle(deleteMsgBox);
 
             if (!girilenSifre) {
-                toastBildirimiGoster("Hesabınızı silmek için lütfen şifrenizi girin.", 3500, 'warning');
+                if (deleteMsgBox) authHataGoster("Lütfen hesap şifrenizi girin.", deleteMsgBox);
+                else toastBildirimiGoster("Hesabınızı silmek için lütfen şifrenizi girin.", 3500, 'warning');
                 deletePasswordInput?.focus();
+                return;
+            }
+
+            const token = turnstileTokens['account-delete-turnstile'] || turnstileToken;
+            if (!token) {
+                if (deleteMsgBox) authHataGoster("Lütfen güvenlik doğrulamasını tamamlayın.", deleteMsgBox);
+                else toastBildirimiGoster("Lütfen güvenlik doğrulamasını tamamlayın.", 3500, 'warning');
                 return;
             }
 
@@ -990,17 +1090,25 @@ function authModaliniBaslat() {
             deleteConfirmBtn.textContent = 'Doğrulanıyor...';
 
             try {
-                // 1. Şifre Doğrulaması: Kullanıcının girdiği şifreyi signInWithPassword ile doğrula
+                // 1. Şifre Doğrulaması: Kullanıcının girdiği şifreyi signInWithPassword ve Turnstile token ile doğrula
                 const { error: authErr } = await supabaseClient.auth.signInWithPassword({
                     email: currentUserEmail,
-                    password: girilenSifre
+                    password: girilenSifre,
+                    options: { captchaToken: token }
                 });
+                turnstileSifirla('account-delete-turnstile');
 
                 if (authErr) {
                     deleteConfirmBtn.disabled = false;
                     if (deleteCancelBtn) deleteCancelBtn.disabled = false;
                     deleteConfirmBtn.textContent = 'Evet, Hesabımı Sil';
-                    toastBildirimiGoster("Girdiğiniz şifre hatalı. Hesap silinmedi.", 4000, 'error');
+                    const errLower = (authErr.message || '').toLowerCase();
+                    let mesaj = "Doğrulama hatası: " + authErr.message;
+                    if (errLower.includes('invalid login credentials') || errLower.includes('invalid_credentials')) {
+                        mesaj = "Girdiğiniz şifre hatalı. Hesap silinmedi.";
+                    }
+                    if (deleteMsgBox) authHataGoster(mesaj, deleteMsgBox);
+                    toastBildirimiGoster(mesaj, 4000, 'error');
                     deletePasswordInput?.focus();
                     return;
                 }
@@ -1028,6 +1136,7 @@ function authModaliniBaslat() {
                     deleteConfirmBtn.disabled = false;
                     if (deleteCancelBtn) deleteCancelBtn.disabled = false;
                     deleteConfirmBtn.textContent = 'Evet, Hesabımı Sil';
+                    if (deleteMsgBox) authHataGoster("Hesap silinirken hata oluştu: " + rpcErr.message, deleteMsgBox);
                     toastBildirimiGoster("Hesap silinirken bir hata oluştu: " + rpcErr.message, 4500, 'error');
                 } else {
                     toastBildirimiGoster("Hesabınız kalıcı olarak silindi. Hoşça kalın.", 4000, 'success');
@@ -1038,10 +1147,13 @@ function authModaliniBaslat() {
                 }
             } catch (genelErr) {
                 console.error("Hesap silme işleminde beklenmedik hata:", genelErr);
+                turnstileSifirla('account-delete-turnstile');
                 deleteConfirmBtn.disabled = false;
                 if (deleteCancelBtn) deleteCancelBtn.disabled = false;
                 deleteConfirmBtn.textContent = 'Evet, Hesabımı Sil';
-                toastBildirimiGoster("İşlem gerçekleştirilemedi: " + (genelErr.message || genelErr), 4000, 'error');
+                const msg = "İşlem gerçekleştirilemedi: " + (genelErr.message || genelErr);
+                if (deleteMsgBox) authHataGoster(msg, deleteMsgBox);
+                toastBildirimiGoster(msg, 4000, 'error');
             }
         });
     }
