@@ -1,3 +1,8 @@
+// ==========================================================================
+// NOOK LANDING PAGE (ALFA SÜRÜMÜ)
+// Temiz & Sade: Demo Profil Kartı, 3D Flip Formu, Oturum ve Turnstile Akışı
+// ==========================================================================
+
 // #region 1: NOOK PROFIL KARTI DEMO MOTORU (RANDOM PROFILES)
 (function () {
     const NOOK_PROFILES = [
@@ -75,78 +80,12 @@
 })();
 // #endregion
 
-// #region 2: DEMO LİSTE VERİLERİ (ANIME, SHOWS, GAMES)
-const SHOWS_DATA = {
-    anime: [
-        { t: 'Solo Leveling', e: '⚔️', c: 'linear-gradient(160deg,#241633,#0e0b1a)' },
-        { t: 'Konosuba', e: '✨', c: 'linear-gradient(160deg,#3a2a12,#1a1206)' },
-        { t: 'Kaguya-sama', e: '💮', c: 'linear-gradient(160deg,#3a1230,#160816)' },
-        { t: 'Call of the Night', e: '🌙', c: 'linear-gradient(160deg,#12203a,#060a16)' },
-        { t: 'Frieren', e: '❄️', c: 'linear-gradient(160deg,#123a34,#061613)' },
-        { t: 'Chainsaw Man', e: '🪚', c: 'linear-gradient(160deg,#3a1414,#160606)' },
-        { t: 'Jujutsu Kaisen', e: '👁️', c: 'linear-gradient(160deg,#141c3a,#060916)' },
-        { t: 'Darling in the Franxx', e: '🤖', c: 'linear-gradient(160deg,#3a1424,#16060e)' },
-        { t: 'Kakegurui', e: '🃏', c: 'linear-gradient(160deg,#3a0e0e,#160404)' },
-        { t: 'Naruto', e: '🍥', c: 'linear-gradient(160deg,#3a2a0e,#160f04)' },
-        { t: 'One Piece', e: '🏴‍☠️', c: 'linear-gradient(160deg,#123a2a,#061610)' },
-        { t: 'Oshi no Ko', e: '⭐', c: 'linear-gradient(160deg,#2a1438,#0f0616)' }
-    ],
-    shows: [
-        { t: 'Severance', e: '🗂️', c: 'linear-gradient(160deg,#20242e,#0c0e12)' },
-        { t: 'The Bear', e: '🔪', c: 'linear-gradient(160deg,#3a2412,#160e06)' },
-        { t: 'Arcane', e: '🔧', c: 'linear-gradient(160deg,#122a3a,#061016)' },
-        { t: 'Slow Horses', e: '🐎', c: 'linear-gradient(160deg,#2a2a2a,#101010)' },
-        { t: 'Dark', e: '🕳️', c: 'linear-gradient(160deg,#141414,#040404)' },
-        { t: 'Fleabag', e: '🍷', c: 'linear-gradient(160deg,#3a1224,#16060e)' },
-        { t: 'Succession', e: '💼', c: 'linear-gradient(160deg,#242630,#0d0e14)' },
-        { t: 'Better Call Saul', e: '⚖️', c: 'linear-gradient(160deg,#362818,#140e06)' },
-        { t: 'Mr. Robot', e: '💻', c: 'linear-gradient(160deg,#122226,#050d0f)' },
-        { t: 'Chernobyl', e: '☢️', c: 'linear-gradient(160deg,#262a1b,#0e1008)' },
-        { t: 'Stranger Things', e: '🚲', c: 'linear-gradient(160deg,#33151b,#140508)' },
-        { t: 'Shogun', e: '⛩️', c: 'linear-gradient(160deg,#2b1d16,#100a06)' }
-    ],
-    games: [
-        { t: 'Elden Ring', e: '🗡️', c: 'linear-gradient(160deg,#2a2412,#100e04)' },
-        { t: 'Hades', e: '🔥', c: 'linear-gradient(160deg,#3a1010,#160404)' },
-        { t: 'Stardew Valley', e: '🌾', c: 'linear-gradient(160deg,#1c3a12,#0a1606)' },
-        { t: "Baldur's Gate 3", e: '🎲', c: 'linear-gradient(160deg,#241c3a,#0c0a16)' },
-        { t: 'Celeste', e: '🏔️', c: 'linear-gradient(160deg,#12243a,#040c16)' },
-        { t: 'Hollow Knight', e: '🦋', c: 'linear-gradient(160deg,#1a1a2a,#060610)' },
-        { t: 'Cyberpunk 2077', e: '🦾', c: 'linear-gradient(160deg,#383214,#141204)' },
-        { t: 'Outer Wilds', e: '🪐', c: 'linear-gradient(160deg,#162b33,#061014)' },
-        { t: 'Disco Elysium', e: '🪩', c: 'linear-gradient(160deg,#2e1e2d,#120912)' },
-        { t: 'Portal 2', e: '🌀', c: 'linear-gradient(160deg,#142c38,#051016)' },
-        { t: 'Sekiro', e: '🎋', c: 'linear-gradient(160deg,#2a1815,#100605)' },
-        { t: 'Zelda: TotK', e: '🏹', c: 'linear-gradient(160deg,#162e24,#05140e)' }
-    ]
-};
-
-function renderPreviewGrid(container, list, limit) {
-    if (!container || !list) return;
-    container.innerHTML = '';
-    const items = limit ? list.slice(0, limit) : list;
-    items.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = 'landing-preview-card';
-        card.innerHTML = `
-            <div class="landing-cover-box" style="background: ${item.c};">
-                <span class="landing-cover-emoji">${item.e}</span>
-                <span class="landing-cover-rank">#${index + 1}</span>
-            </div>
-            <div class="landing-cover-title" title="${item.t}">${item.t}</div>
-        `;
-        container.appendChild(card);
-    });
-}
-// #endregion
-
-// #region 3: LANDING SAYFA VE FORM YÖNETİCİSİ
+// #region 2: LANDING SAYFA VE FORM YÖNETİCİSİ
 function landingEkraniniBaslat() {
     // 1. Profil kartlarını mount et
     if (window.NookProfileCard) window.NookProfileCard.mountAll();
 
     // 2. DOM Elemanları
-    const landingScreen = document.getElementById('landing-screen') || document.querySelector('.landing-screen');
     const landingBox = document.getElementById('main-landing-box');
     const mainTitle = document.getElementById('landing-main-title');
     const usernameInput = document.getElementById('landing-username');
@@ -177,25 +116,10 @@ function landingEkraniniBaslat() {
     const heroStartBtn = document.getElementById('hero-start-btn');
     const flipFrontTrigger = document.getElementById('flip-front-trigger');
     const flipBackBtn = document.getElementById('flip-back-btn');
-    const finalStartBtn = document.getElementById('final-start-btn');
 
     let isLandingLoginMode = true;
 
-    // 3. Yumuşak Kaydırma Yardımcısı
-    function landingKaydir(hedefSecici) {
-        const target = document.querySelector(hedefSecici);
-        if (!target) return;
-        if (landingScreen) {
-            const targetRect = target.getBoundingClientRect();
-            const screenRect = landingScreen.getBoundingClientRect();
-            const topPos = targetRect.top - screenRect.top + landingScreen.scrollTop - 70;
-            landingScreen.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
-        } else {
-            target.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-
-    // 4. Form Modu ve Kart Dönüş Yönetimi
+    // 3. Form Modu ve Kart Dönüş Kontrolü
     function flipToBack(targetMode) {
         if (flipCardInner && !flipCardInner.classList.contains('is-flipped')) {
             flipCardInner.classList.add('is-flipped');
@@ -221,7 +145,6 @@ function landingEkraniniBaslat() {
     if (heroLoginBtn) {
         heroLoginBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            landingKaydir('#about');
             flipToBack('login');
         });
     }
@@ -247,17 +170,7 @@ function landingEkraniniBaslat() {
         });
     }
 
-    if (finalStartBtn) {
-        finalStartBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            landingKaydir('#about');
-            setTimeout(() => {
-                flipToBack('register');
-            }, 300);
-        });
-    }
-
-    // 5. Oturum Açıksa Navbar Kullanıcı Menüsü
+    // 4. Oturum Açıksa Navbar Kullanıcı Menüsü
     if (typeof aktifKullaniciOturumu !== 'undefined' && aktifKullaniciOturumu && typeof aktifKullaniciAdi !== 'undefined' && aktifKullaniciAdi) {
         if (heroLoginBtn) heroLoginBtn.style.display = 'none';
         if (navUserMenu) navUserMenu.style.display = 'block';
@@ -283,7 +196,7 @@ function landingEkraniniBaslat() {
         }
     }
 
-    // 6. Başlık Havuzları & Mod Değişimi
+    // 5. Başlık Havuzları & Mod Değişimi
     const loginBasliklari = [
         "Nook'a Dön",
         "Kendi Köşene Geç",
@@ -325,7 +238,7 @@ function landingEkraniniBaslat() {
         });
     }
 
-    // 7. Şifremi Unuttum Formu
+    // 6. Şifremi Unuttum Formu
     if (forgotTrigger && mainForm && forgotForm) {
         forgotTrigger.addEventListener('click', () => {
             if (typeof authHataTemizle === 'function') authHataTemizle();
@@ -361,7 +274,7 @@ function landingEkraniniBaslat() {
         });
     }
 
-    // 8. Giriş / Kayıt Form Gönderimi
+    // 7. Giriş / Kayıt Form Gönderimi
     if (submitBtn) {
         submitBtn.addEventListener('click', async () => {
             const email = emailInput?.value.trim();
@@ -402,60 +315,6 @@ function landingEkraniniBaslat() {
                 e.preventDefault();
                 if (submitBtn) submitBtn.click();
             }
-        });
-    }
-
-    // 9. Önizleme Sıralı Listeleri & Sekme Değişimi
-    const previewTabs = document.getElementById('landingPreviewTabs');
-    const previewGrid = document.getElementById('landingPreviewGrid');
-    const miniTabs = document.getElementById('landingMiniTabs');
-    const miniGrid = document.getElementById('landingMiniGrid');
-
-    if (previewGrid) renderPreviewGrid(previewGrid, SHOWS_DATA.anime, 12);
-    if (miniGrid) renderPreviewGrid(miniGrid, SHOWS_DATA.anime, 6);
-
-    if (previewTabs && previewGrid) {
-        previewTabs.addEventListener('click', (e) => {
-            const btn = e.target.closest('.landing-tab-btn');
-            if (!btn) return;
-            previewTabs.querySelectorAll('.landing-tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const tabKey = btn.dataset.tab;
-            if (SHOWS_DATA[tabKey]) {
-                renderPreviewGrid(previewGrid, SHOWS_DATA[tabKey], 12);
-            }
-        });
-    }
-
-    if (miniTabs && miniGrid) {
-        miniTabs.addEventListener('click', (e) => {
-            const btn = e.target.closest('.landing-tab-btn');
-            if (!btn) return;
-            miniTabs.querySelectorAll('.landing-tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const tabKey = btn.dataset.tab;
-            if (SHOWS_DATA[tabKey]) {
-                renderPreviewGrid(miniGrid, SHOWS_DATA[tabKey], 6);
-            }
-        });
-    }
-
-    // 10. Navigasyon ve Footer Sayfa İçi Kaydırma
-    document.querySelectorAll('.landing-nav-link, .landing-footer-col a[href^="#"]').forEach(link => {
-        link.addEventListener('click', (e) => {
-            const href = link.getAttribute('href');
-            if (href && href.startsWith('#')) {
-                e.preventDefault();
-                landingKaydir(href);
-            }
-        });
-    });
-
-    const brandLink = document.querySelector('.landing-nav-brand');
-    if (brandLink) {
-        brandLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            landingKaydir('#about');
         });
     }
 }

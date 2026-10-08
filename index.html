@@ -52,21 +52,18 @@
     <div id="landing-screen" class="landing-screen" style="display: none;">
         <div class="landing-starfield"></div>
         
-        <!-- 2.1: Sabit Üst Menü -->
+        <!-- 2.1: Sade Üst Menü -->
         <nav class="landing-navbar">
             <a href="/" class="landing-nav-brand">
                 <div class="landing-nav-logo-box">N</div>
-                <span class="landing-nav-brand-text">Nook</span>
+                <div class="landing-brand-col">
+                    <span class="landing-nav-brand-text">Nook</span>
+                    <span class="landing-nav-badge">ALFA</span>
+                </div>
             </a>
             
-            <div class="landing-nav-links">
-                <a href="#about" class="landing-nav-link">About</a>
-                <a href="#explore" class="landing-nav-link">Explore</a>
-                <a href="#features" class="landing-nav-link">Features</a>
-            </div>
-            
             <div class="landing-nav-actions">
-                <button id="hero-login-btn" class="landing-nav-login-btn">Log in</button>
+                <button id="hero-login-btn" class="landing-nav-login-btn">Giriş Yap</button>
                 
                 <div id="landing-user-menu" class="landing-nav-user-menu" style="display: none;">
                     <button class="landing-nav-user-trigger" id="landing-user-trigger">
@@ -84,34 +81,29 @@
         <!-- İçerik Kapsayıcısı -->
         <main class="landing-main-wrap">
 
-            <!-- 2.2: Hero Bölümü -->
+            <!-- 2.2: Hero Bölümü (Sade Manşet & 3D Flip Kart) -->
             <section class="landing-hero" id="about">
                 <div class="landing-hero-left">
-                    <span class="eyebrow-free">
-                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2v20M2 12h20"/></svg>
-                        It's free!
-                    </span>
                     <h1 class="landing-hero-title">Nook</h1>
                     <p class="landing-hero-subtitle">
-                        Your very own corner on the internet — rank the shows you love, pin the games you're grinding, and hand people a page that's actually <strong>you</strong>.
+                        Sana ait kişisel bir köşe: sevdiğin yapımları sırala, rekorlarını sergile ve kimliğini tek bir kartta paylaş.
                     </p>
                     <div class="landing-hero-cta-group">
                         <button class="landing-hero-cta-btn" id="hero-start-btn">
-                            Get your Nook 
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            Kayıt Ol
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                                 <polyline points="12 5 19 12 12 19"></polyline>
                             </svg>
                         </button>
-                        <span class="hero-meta">No credit card. 60 seconds to claim your name.</span>
                     </div>
                 </div>
 
                 <div class="landing-hero-right">
                     <div class="tilted-visual-wrapper">
                         <div class="flip-card-inner" id="hero-flip-card">
-                            <!-- Ön Yüz: Dinamik Demo Profil Kartı (Kullanıcı Kartı Yapısında) -->
-                            <div class="flip-card-front" id="flip-front-trigger" style="cursor: pointer;" title="Giriş yapmak için tıkla">
+                            <!-- Ön Yüz: Dinamik Demo Profil Kartı -->
+                            <div class="flip-card-front" id="flip-front-trigger" style="cursor: pointer;" title="Giriş / Kayıt için tıkla">
                                 <div class="nook-profile-card nook-user-card-preview" data-nook-card data-nook-key="hero-card"></div>
                             </div>
 
@@ -165,270 +157,19 @@
                 </div>
             </section>
 
-            <!-- Constellation Bölücü 1 -->
-            <div class="landing-constellation" aria-hidden="true">
-                <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
-                    <path d="M100 10 Q 400 110 600 60 T 1100 20"/>
-                    <circle cx="100" cy="10" r="3.5"></circle>
-                    <circle cx="600" cy="60" r="3.5"></circle>
-                    <circle cx="1100" cy="20" r="3.5"></circle>
-                </svg>
-            </div>
-
-            <!-- 2.3: Live Preview / Explore Bölümü (Canlı Profil Tarayıcı Maketi) -->
-            <section class="landing-section" id="explore">
-                <div class="landing-section-head">
-                    <span class="landing-section-tag">LIVE PREVIEW</span>
-                    <h2 class="landing-section-title">This is what a Nook looks like</h2>
-                    <p class="landing-section-sub">A banner, a profile card, a widget slot, and a running list of everything you're into right now — all on one link.</p>
+            <!-- 2.3: Sade Alfa Footer (Veri Politikası & API Shoutout) -->
+            <footer class="landing-alfa-footer">
+                <div class="alfa-footer-col">
+                    <h4>Gizlilik &amp; Veri Güvenliği</h4>
+                    <p>Kullanıcı verileri ve oturumlar Supabase altyapısında saklanır. Üçüncü taraf reklam izleyicisi, çerez profillemesi veya veri satışı barındırmaz.</p>
                 </div>
-
-                <div class="landing-browser-frame">
-                    <div class="landing-browser-banner">
-                        <span class="landing-banner-pill">Preview Mode</span>
-                    </div>
-                    <div class="landing-browser-body">
-                        <!-- 1. Sütun: Gerçek Kullanıcı Kartı Yapısında Önizleme -->
-                        <div class="landing-panel-card">
-                            <div class="preview-user-card">
-                                <div class="preview-card-banner"></div>
-                                <div class="preview-card-avatar">A</div>
-                                <div class="preview-card-name">Apdi</div>
-                                <div class="preview-card-title">Designer &amp; Builder</div>
-                                <div class="preview-card-bio">Nah, I'd design. Building things on the web with taste and attention to detail.</div>
-                                <div class="preview-card-tags">
-                                    <span class="landing-tag-pill">Dribbble</span>
-                                    <span class="landing-tag-pill">GitHub</span>
-                                    <span class="landing-tag-pill">Spotify</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 2. Sütun: Canlı Widget Yuvaları -->
-                        <div class="landing-panel-widgets">
-                            <div class="landing-widget-box">
-                                <div class="landing-widget-header">
-                                    <div class="landing-widget-icon">mt</div>
-                                    <div>
-                                        <div class="landing-widget-name">Monkeytype</div>
-                                        <div class="landing-widget-meta">crosneck</div>
-                                    </div>
-                                </div>
-                                <div class="landing-widget-stats">
-                                    <div>
-                                        <div class="widget-stat-num">142</div>
-                                        <div class="widget-stat-lbl">WPM</div>
-                                    </div>
-                                    <div>
-                                        <div class="widget-stat-num">98%</div>
-                                        <div class="widget-stat-lbl">ACCURACY</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="landing-widget-slot">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6; margin-right: 6px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                Custom Widget Slot
-                            </div>
-                        </div>
-
-                        <!-- 3. Sütun: İnteraktif Sıralı Liste Vitrini -->
-                        <div class="landing-panel-showcase">
-                            <div class="landing-preview-tabs" id="landingPreviewTabs">
-                                <button type="button" class="landing-tab-btn active" data-tab="anime">Anime</button>
-                                <button type="button" class="landing-tab-btn" data-tab="shows">Shows</button>
-                                <button type="button" class="landing-tab-btn" data-tab="games">Games</button>
-                            </div>
-                            <div class="landing-preview-grid" id="landingPreviewGrid"></div>
-                        </div>
-                    </div>
+                <div class="alfa-footer-col">
+                    <h4>Güç Verenler (Shoutout)</h4>
+                    <p>Altyapı: <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a> · Güvenlik: <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener">Cloudflare Turnstile</a> · Hız API: <a href="https://monkeytype.com" target="_blank" rel="noopener">Monkeytype</a></p>
                 </div>
-            </section>
-
-            <!-- Constellation Bölücü 2 -->
-            <div class="landing-constellation" aria-hidden="true">
-                <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
-                    <path d="M1100 100 Q 800 5 600 55 T 100 100"/>
-                    <circle cx="1100" cy="100" r="3.5"></circle>
-                    <circle cx="600" cy="55" r="3.5"></circle>
-                    <circle cx="100" cy="100" r="3.5"></circle>
-                </svg>
-            </div>
-
-            <!-- 2.4: Feature 1 — Sıralı Listeler (Ranked Lists) -->
-            <section class="landing-section" id="features">
-                <div class="landing-split-row">
-                    <div class="landing-split-visual">
-                        <div class="landing-browser-frame mini-browser">
-                            <div class="mini-browser-head">
-                                <div class="landing-preview-tabs mini-tabs" id="landingMiniTabs">
-                                    <button type="button" class="landing-tab-btn active" data-tab="anime">Anime</button>
-                                    <button type="button" class="landing-tab-btn" data-tab="shows">Shows</button>
-                                    <button type="button" class="landing-tab-btn" data-tab="games">Games</button>
-                                </div>
-                            </div>
-                            <div class="landing-preview-grid mini-grid" id="landingMiniGrid"></div>
-                        </div>
-                    </div>
-                    <div class="landing-split-text">
-                        <span class="landing-section-tag">RANKED, NOT JUST SAVED</span>
-                        <h2 class="landing-split-title">Make a <span class="landing-accent">list</span> of your favorite shows</h2>
-                        <p class="landing-split-desc">Drag to reorder, split it across anime, shows, and games, and let people scroll straight to the stuff you'd actually recommend.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2.5: Feature 2 — Canlı Widget'lar (Custom Widgets) -->
-            <section class="landing-section">
-                <div class="landing-split-row reverse">
-                    <div class="landing-split-visual">
-                        <div class="landing-widget-stack">
-                            <div class="landing-stacked-wcard card-ghost-2">
-                                <div class="landing-widget-icon">gh</div>
-                                <span class="stat-ghost-text">742 Commits this year</span>
-                            </div>
-                            <div class="landing-stacked-wcard card-ghost-1">
-                                <div class="landing-widget-icon">sp</div>
-                                <span class="stat-ghost-text">Playing: Lamp — For Lovers</span>
-                            </div>
-                            <div class="landing-stacked-wcard card-main">
-                                <div class="landing-widget-header">
-                                    <div class="landing-widget-icon">mt</div>
-                                    <div>
-                                        <div class="landing-widget-name">Monkeytype</div>
-                                        <div class="landing-widget-meta">crosneck</div>
-                                    </div>
-                                </div>
-                                <div class="landing-widget-stats">
-                                    <div>
-                                        <div class="widget-stat-num">142</div>
-                                        <div class="widget-stat-lbl">10 WORDS</div>
-                                    </div>
-                                    <div>
-                                        <div class="widget-stat-num">102</div>
-                                        <div class="widget-stat-lbl">15 SECONDS</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="landing-split-text">
-                        <span class="landing-section-tag">BRING YOUR OWN DATA</span>
-                        <h2 class="landing-split-title">Create your <span class="landing-accent">widgets</span> and show your <span class="landing-accent">talent</span></h2>
-                        <p class="landing-split-desc">Typing speed, coding streaks, playlists, whatever you're proud of — build a widget once, pin it anywhere on your page.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2.6: How It Works (Nasıl Çalışır?) -->
-            <section class="landing-section">
-                <div class="landing-section-head">
-                    <span class="landing-section-tag">GETTING STARTED</span>
-                    <h2 class="landing-section-title">From nothing to your own corner in three steps</h2>
-                </div>
-                <div class="landing-steps-grid">
-                    <div class="landing-step-card">
-                        <span class="landing-step-num">STEP 01</span>
-                        <h3 class="landing-step-heading">Claim your name</h3>
-                        <p class="landing-step-text">Pick a username, that's your personal link from now on — nook/?user=you.</p>
-                    </div>
-                    <div class="landing-step-card">
-                        <span class="landing-step-num">STEP 02</span>
-                        <h3 class="landing-step-heading">Fill your corner</h3>
-                        <p class="landing-step-text">Add a banner, a bio, your ranked lists, and whichever widgets say something about you.</p>
-                    </div>
-                    <div class="landing-step-card">
-                        <span class="landing-step-num">STEP 03</span>
-                        <h3 class="landing-step-heading">Send the link</h3>
-                        <p class="landing-step-text">Drop it in your bio, your Discord, anywhere — it updates the moment you do.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2.7: Feature Grid (Neler Dahil?) -->
-            <section class="landing-section">
-                <div class="landing-section-head">
-                    <span class="landing-section-tag">EVERYTHING INCLUDED</span>
-                    <h2 class="landing-section-title">What's inside a Nook</h2>
-                </div>
-                <div class="landing-features-grid">
-                    <div class="landing-feat-card">
-                        <div class="landing-feat-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M3 9h18"/></svg>
-                        </div>
-                        <h3 class="landing-feat-heading">Custom banner &amp; card</h3>
-                        <p class="landing-feat-desc">Your own colors, your own picture, your own opening line.</p>
-                    </div>
-                    <div class="landing-feat-card">
-                        <div class="landing-feat-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
-                        </div>
-                        <h3 class="landing-feat-heading">Ranked lists</h3>
-                        <p class="landing-feat-desc">Anime, shows, and games, ordered the way you'd actually argue about them.</p>
-                    </div>
-                    <div class="landing-feat-card">
-                        <div class="landing-feat-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
-                        </div>
-                        <h3 class="landing-feat-heading">Live widgets</h3>
-                        <p class="landing-feat-desc">Small blocks that pull in real stats, not just static text.</p>
-                    </div>
-                    <div class="landing-feat-card">
-                        <div class="landing-feat-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-                        </div>
-                        <h3 class="landing-feat-heading">One link, always current</h3>
-                        <p class="landing-feat-desc">Edit whenever you want — nothing to rebuild or republish.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2.8: Final CTA Bölümü -->
-            <section class="landing-final-cta" id="final-cta">
-                <h2 class="landing-final-title">Join now and get your own <span class="landing-accent">Nook</span><br>in this digital world!</h2>
-                <p class="landing-final-sub">It's free, it takes a minute, and your corner is waiting.</p>
-                <button type="button" class="landing-hero-cta-btn landing-final-btn" id="final-start-btn">
-                    Start Now
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 12h14M13 6l6 6-6 6"/>
-                    </svg>
-                </button>
-            </section>
-
-            <!-- 2.9: Footer -->
-            <footer class="landing-footer">
-                <div class="landing-footer-top">
-                    <div class="landing-footer-brand-col">
-                        <div class="landing-nav-brand">
-                            <div class="landing-nav-logo-box">N</div>
-                            <span class="landing-nav-brand-text">Nook</span>
-                        </div>
-                        <p class="landing-footer-blurb">A small, personal corner of the internet for the shows you rank, the games you're playing, and the things you've built.</p>
-                    </div>
-                    <div class="landing-footer-col">
-                        <h4>Product</h4>
-                        <a href="#explore">Explore</a>
-                        <a href="#features">Features</a>
-                        <a href="#final-cta">Start now</a>
-                    </div>
-                    <div class="landing-footer-col">
-                        <h4>Company</h4>
-                        <a href="#about">About</a>
-                        <a href="#">Blog</a>
-                        <a href="#">Contact</a>
-                    </div>
-                    <div class="landing-footer-col">
-                        <h4>Legal</h4>
-                        <a href="#">Privacy</a>
-                        <a href="#">Terms</a>
-                    </div>
-                </div>
-                <div class="landing-footer-bottom">
-                    <span>&copy; 2026 Nook. All rights reserved.</span>
-                    <div class="landing-footer-social">
-                        <a href="https://github.com" target="_blank" rel="noopener" aria-label="GitHub">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-1.02-.01-1.86-2.78.61-3.37-1.21-3.37-1.21-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05.89 1.57 2.34 1.12 2.91.85.09-.66.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.73 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z"/></svg>
-                        </a>
-                    </div>
+                <div class="alfa-footer-col">
+                    <h4>Nook Alfa</h4>
+                    <p>&copy; 2026 Nook. Tüm hakları saklıdır. Aktif geliştirilmekte olan alfa sürümüdür.</p>
                 </div>
             </footer>
         </main>
