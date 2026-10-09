@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="nookBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141824"/>
+      <stop offset="100%" stop-color="#090b10"/>
+    </linearGradient>
+    <linearGradient id="nookGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b5bdb" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ffd43b" stop-opacity="0.2"/>
+    </linearGradient>
+    <linearGradient id="nookText" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d0d7e2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Arka Plan Yuvarlak Kutu -->
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#nookBg)" stroke="rgba(255, 255, 255, 0.15)" stroke-width="2"/>
+  
+  <!-- İç İnce Işıma / Kontur -->
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="none" stroke="url(#nookGlow)" stroke-width="1.2" opacity="0.8"/>
+
+  <!-- Nook 'N' Monogramı -->
+  <path d="M21 44.5 V19.5 H26.5 L37.5 35.8 V19.5 H43 V44.5 H37.5 L26.5 28.2 V44.5 Z" fill="url(#nookText)"/>
+</svg>

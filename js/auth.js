@@ -597,7 +597,7 @@ async function sistemeYeniSifreKaydet(yeniSifre, tekrarSifre, hedefBox = '#auth-
     authBasariGoster("Şifreniz başarıyla kaydedildi! Sayfa yönlendiriliyor...", hedefBox);
     
     // Kullanıcının profiline yönlendir
-    let hedefSayfa = '/';
+    let hedefSayfa = window.location.pathname;
     try {
         const { data: userData } = await supabaseClient.auth.getUser();
         if (userData?.user?.id) {
