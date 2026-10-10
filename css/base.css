@@ -564,6 +564,7 @@ html.is-profile-loading #landing-screen {
         transform: translate3d(calc(100vw + 40px), 0, 0);
         opacity: 0;
         pointer-events: none;
+        display: flex !important;
         animation: none !important;
     }
 
@@ -571,7 +572,6 @@ html.is-profile-loading #landing-screen {
         transform: translate3d(0, 0, 0) !important;
         opacity: 1 !important;
         pointer-events: auto !important;
-        display: flex !important;
     }
 
     /* Trophies Kartı: Normalde solda ekran dışında */
@@ -581,6 +581,7 @@ html.is-profile-loading #landing-screen {
         transform: translate3d(calc(-100vw - 40px), 0, 0);
         opacity: 0;
         pointer-events: none;
+        display: flex !important;
         animation: none !important;
     }
 
@@ -588,11 +589,9 @@ html.is-profile-loading #landing-screen {
         transform: translate3d(0, 0, 0) !important;
         opacity: 1 !important;
         pointer-events: auto !important;
-        display: flex !important;
     }
 
     .stage.is-companion-closing .companion-card {
-        opacity: 0 !important;
         pointer-events: none !important;
     }
 

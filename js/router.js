@@ -281,12 +281,19 @@ const Router = {
         const cardContainer = this.cardContainer || document.getElementById('cardContainer');
         if (!stage) return;
 
-        // Devam eden bir kapanış veya açılış geçişi varsa bekle
-        if (this._companionTransitioning) return;
+        const isDesktop = window.innerWidth >= 900;
+
+        // Masaüstünde geçiş sürerken bekle
+        if (isDesktop && this._companionTransitioning) return;
+
+        // Devam eden kapanış/açılış zamanlayıcılarını iptal et (Hızlı / art arda kaydırma desteği)
+        if (this._companionTimer) {
+            clearTimeout(this._companionTimer);
+            this._companionTimer = null;
+        }
 
         const isShowcaseOpen = stage.classList.contains('is-showcase-active');
         const isTrophiesOpen = stage.classList.contains('is-trophies-active');
-        const isCurrentlyOpen = stage.classList.contains('has-companion-open') && !stage.classList.contains('is-companion-closing');
 
         let nextState;
         if (typeof forceState === 'boolean') {
@@ -301,7 +308,6 @@ const Router = {
             }
         }
 
-        const isDesktop = window.innerWidth >= 900;
         const activeCompanion = (type === 'showcase') ? topsCard : trophiesCard;
         const otherCompanion = (type === 'showcase') ? trophiesCard : topsCard;
 
@@ -311,7 +317,7 @@ const Router = {
             // ==========================================
             this._companionTransitioning = true;
 
-            if (otherCompanion) {
+            if (isDesktop && otherCompanion) {
                 otherCompanion.style.display = 'none';
                 otherCompanion.classList.remove('is-closing');
             }
@@ -359,15 +365,13 @@ const Router = {
                 }
             } else {
                 stage.classList.remove('is-companion-closing');
-                if (activeCompanion) void activeCompanion.offsetWidth;
-                requestAnimationFrame(() => {
-                    stage.classList.add('has-companion-open');
-                });
+                stage.classList.add('has-companion-open');
             }
 
-            setTimeout(() => {
+            this._companionTimer = setTimeout(() => {
                 this._companionTransitioning = false;
-            }, isDesktop ? 550 : 420);
+                this._companionTimer = null;
+            }, isDesktop ? 550 : 250);
 
         } else {
             // ==========================================
@@ -377,7 +381,7 @@ const Router = {
             let closeAnim = null;
 
             const currentCard = isShowcaseOpen ? topsCard : trophiesCard;
-            if (currentCard) currentCard.classList.add('is-closing');
+            if (currentCard && isDesktop) currentCard.classList.add('is-closing');
             stage.classList.add('is-companion-closing');
 
             if (isDesktop && cardContainer) {
@@ -398,20 +402,23 @@ const Router = {
                 stage.classList.remove('has-companion-open');
             }
 
-            setTimeout(() => {
+            this._companionTimer = setTimeout(() => {
                 stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-showcase-active', 'is-trophies-active');
-                if (topsCard) {
-                    topsCard.classList.remove('is-closing');
-                    topsCard.style.display = 'none';
-                }
-                if (trophiesCard) {
-                    trophiesCard.classList.remove('is-closing');
-                    trophiesCard.style.display = 'none';
+                if (isDesktop) {
+                    if (topsCard) {
+                        topsCard.classList.remove('is-closing');
+                        topsCard.style.display = 'none';
+                    }
+                    if (trophiesCard) {
+                        trophiesCard.classList.remove('is-closing');
+                        trophiesCard.style.display = 'none';
+                    }
                 }
                 if (closeAnim) closeAnim.cancel();
                 if (cardContainer && isDesktop) cardContainer.style.transform = '';
                 this._companionTransitioning = false;
-            }, isDesktop ? 500 : 420);
+                this._companionTimer = null;
+            }, isDesktop ? 500 : 250);
         }
     }
 };
@@ -423,8 +430,8 @@ const TouchGestureManager = {
     startY: 0,
     startTime: 0,
     isTracking: false,
-    threshold: 35, // Hızlı ve duyarlı yatay kaydırma eşiği (px)
-    maxVerticalTolerance: 90, // Doğal başparmak kaydırması için esnek dikey tolerans (px)
+    threshold: 30, // Hızlı ve anında tepki veren yatay kaydırma eşiği (px)
+    maxVerticalTolerance: 100, // Doğal başparmak açısı toleransı (px)
 
     init() {
         const stage = document.getElementById('profileStage');
@@ -443,9 +450,8 @@ const TouchGestureManager = {
     },
 
     handleTouchStart(e) {
-        // Masaüstü veya geçiş esnasında devre dışı
+        // Masaüstünde devre dışı
         if (window.innerWidth >= 900) return;
-        if (Router._companionTransitioning) return;
         if (document.body.classList.contains('is-pointer-dragging')) return;
 
         // Modal açıkken swipe çalışmasın
@@ -472,7 +478,7 @@ const TouchGestureManager = {
         const deltaY = touch.clientY - this.startY;
 
         // Eğer kullanıcı belirgin bir yatay kaydırma yapıyorsa, tarayıcının yerel 'Geri Git' geçmiş navigasyonunu engelle
-        if (Math.abs(deltaX) > Math.abs(deltaY) * 0.8 && Math.abs(deltaX) > 8) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) * 0.7 && Math.abs(deltaX) > 6) {
             if (e.cancelable) {
                 e.preventDefault();
             }
@@ -490,15 +496,15 @@ const TouchGestureManager = {
         const deltaY = touch.clientY - this.startY;
         const elapsed = Date.now() - this.startTime;
 
-        // Çok uzun süren (örn. 850ms+) basılı tutmalar swipe sayılmaz
-        if (elapsed > 850) return;
+        // 900ms üzeri uzun dokunuşlar swipe sayılmaz
+        if (elapsed > 900) return;
 
         const absX = Math.abs(deltaX);
         const absY = Math.abs(deltaY);
 
         // Yatay hareket eşiği ve doğal başparmak açısı kontrolü
         if (absX < this.threshold) return;
-        if (absY > this.maxVerticalTolerance || absY > absX * 1.1) return;
+        if (absY > this.maxVerticalTolerance || absY > absX * 1.3) return;
 
         const stage = document.getElementById('profileStage');
         const isShowcaseOpen = stage && stage.classList.contains('is-showcase-active');
@@ -506,7 +512,7 @@ const TouchGestureManager = {
         const isAnyOpen = stage && stage.classList.contains('has-companion-open');
 
         if (!isAnyOpen) {
-            // [Profil Kartı Merkezde]:
+            // [1. Profil Kartı Merkezde]:
             // Sola kaydırma (Swipe Left) -> Showcase'e (Sağ kanat) geç
             if (deltaX < -this.threshold) {
                 Router.toggleCompanion(true, 'showcase');
@@ -516,15 +522,23 @@ const TouchGestureManager = {
                 Router.toggleCompanion(true, 'trophies');
             }
         } else if (isShowcaseOpen) {
-            // [Showcase Açık]:
-            // Sağa kaydırma (Swipe Right) -> Profil Kartına geri dön
+            // [2. Showcase Açık]:
+            // Sağa kaydırma (Swipe Right) -> Profil Kartına dön
             if (deltaX > this.threshold) {
                 Router.toggleCompanion(false);
             }
+            // Sola kaydırma (Swipe Left) -> Tekrar profil kartına dönerek akışı koru
+            else if (deltaX < -this.threshold) {
+                Router.toggleCompanion(false);
+            }
         } else if (isTrophiesOpen) {
-            // [Trophies Açık]:
-            // Sola kaydırma (Swipe Left) -> Profil Kartına geri dön
+            // [3. Trophies Açık]:
+            // Sola kaydırma (Swipe Left) -> Profil Kartına dön
             if (deltaX < -this.threshold) {
+                Router.toggleCompanion(false);
+            }
+            // Sağa kaydırma (Swipe Right) -> Tekrar profil kartına dönerek akışı koru
+            else if (deltaX > this.threshold) {
                 Router.toggleCompanion(false);
             }
         }
