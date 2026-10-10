@@ -1000,7 +1000,7 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
 .section-picker-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -1009,21 +1009,21 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 12px 14px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
+    padding: 13px 16px;
+    background: var(--modal-item-bg, rgba(255, 255, 255, 0.03));
+    border: var(--modal-item-border, 1px solid rgba(255, 255, 255, 0.08));
+    border-radius: var(--modal-item-radius, 14px);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
     width: 100%;
     box-sizing: border-box;
     text-align: left;
 }
 
-.section-picker-item:hover {
-    background: rgba(59, 91, 219, 0.12);
-    border-color: var(--accent-color);
-    transform: translateX(4px);
+.section-picker-item:not(.is-coming-soon):hover {
+    background: var(--modal-item-hover-bg, rgba(59, 91, 219, 0.12));
+    border-color: var(--modal-item-hover-border, var(--accent-color));
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 .picker-item-icon {
@@ -1035,12 +1035,12 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--accent-light);
+    color: var(--accent-color, #748ffc);
     flex-shrink: 0;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
-.section-picker-item:hover .picker-item-icon {
+.section-picker-item:not(.is-coming-soon):hover .picker-item-icon {
     background: var(--accent-color);
     color: #ffffff;
 }
@@ -1080,25 +1080,36 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
     font-weight: 600;
     padding: 2px 7px;
     border-radius: var(--radius-pill);
-    background: rgba(245, 158, 11, 0.16);
-    color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.35);
+    background: rgba(245, 158, 11, 0.12);
+    color: rgba(245, 158, 11, 0.85);
+    border: 1px solid rgba(245, 158, 11, 0.25);
 }
 
 .section-picker-item.is-coming-soon {
-    opacity: 0.72;
+    background: var(--modal-item-beta-bg, rgba(12, 14, 20, 0.65));
+    border-color: rgba(255, 255, 255, 0.05);
+    opacity: var(--modal-item-beta-opacity, 0.45);
     cursor: pointer;
+    box-shadow: none;
+}
+
+.section-picker-item.is-coming-soon .picker-item-icon {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.4);
+    filter: grayscale(0.5);
 }
 
 .section-picker-item.is-coming-soon:hover {
-    background: rgba(245, 158, 11, 0.08);
-    border-color: rgba(245, 158, 11, 0.4);
-    transform: translateX(2px);
+    background: var(--modal-item-beta-bg, rgba(12, 14, 20, 0.65));
+    border-color: rgba(255, 255, 255, 0.05);
+    transform: none;
+    box-shadow: none;
 }
 
 .section-picker-item.is-coming-soon:hover .picker-item-icon {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
+    background: rgba(255, 255, 255, 0.02);
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .picker-item-desc {
@@ -1111,12 +1122,11 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
 
 .picker-item-action {
     color: rgba(255, 255, 255, 0.3);
-    transition: all 0.2s ease;
+    transition: color 0.18s ease;
 }
 
-.section-picker-item:hover .picker-item-action {
-    color: var(--accent-light);
-    transform: translateX(2px);
+.section-picker-item:not(.is-coming-soon):hover .picker-item-action {
+    color: var(--accent-color);
 }
 /* #endregion */
 
@@ -1622,7 +1632,8 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
     .section-picker-panel,
     .tag-picker-panel,
     .tops-modal-panel,
-    .block-delete-panel {
+    .block-delete-panel,
+    .trophy-picker-panel {
         padding: 16px;
         gap: 12px;
     }

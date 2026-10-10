@@ -119,6 +119,18 @@
     --modal-w-sm: min(360px, 92vw);
     --modal-w-md: min(460px, 92vw);
     --modal-w-lg: min(520px, 92vw);
+
+    /* Modal Liste & Seçici Eleman Tokenları */
+    --modal-item-bg: rgba(255, 255, 255, 0.03);
+    --modal-item-border: 1px solid var(--border-soft);
+    --modal-item-radius: 14px;
+    --modal-item-hover-bg: rgba(59, 91, 219, 0.12);
+    --modal-item-hover-border: var(--accent-color);
+    
+    /* Beta / Devam Eden İçerik Tokenları */
+    --modal-item-beta-bg: rgba(12, 14, 20, 0.65);
+    --modal-item-beta-border: 1px solid rgba(255, 255, 255, 0.05);
+    --modal-item-beta-opacity: 0.45;
 }
 /* #endregion */
 

@@ -543,7 +543,7 @@ const EditManager = {
             trophyModal.className = 'trophy-picker-modal';
             trophyModal.innerHTML = `
                 <div class="trophy-picker-backdrop" id="trophy-picker-backdrop"></div>
-                <div class="trophy-picker-panel">
+                <div class="trophy-picker-panel section-picker-panel">
                     <div class="section-picker-header">
                         <div>
                             <h3 class="section-picker-title">Başarım Ekle</h3>
