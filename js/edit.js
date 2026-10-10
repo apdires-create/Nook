@@ -26,6 +26,7 @@ const EditManager = {
         this.TopsModal.init();
         this.MediaSearchModal.init();
         this.CompanionViews.init();
+        if (this.TrophyPicker) this.TrophyPicker.init();
         if (this.TrophiesView) this.TrophiesView.init();
 
         document.body.classList.add('global-edit-mode');
@@ -534,6 +535,27 @@ const EditManager = {
             `;
             document.body.appendChild(searchModal);
         }
+
+        // 10. Başarım Seçici Modalı (Trophy Picker Modal)
+        if (!document.getElementById('trophy-picker-modal')) {
+            const trophyModal = document.createElement('div');
+            trophyModal.id = 'trophy-picker-modal';
+            trophyModal.className = 'trophy-picker-modal';
+            trophyModal.innerHTML = `
+                <div class="trophy-picker-backdrop" id="trophy-picker-backdrop"></div>
+                <div class="trophy-picker-panel">
+                    <div class="section-picker-header">
+                        <div>
+                            <h3 class="section-picker-title">Başarım Ekle</h3>
+                            <p class="section-picker-desc">Profilinde sergilemek istediğin başarım veya oyun rekorunu seç.</p>
+                        </div>
+                        <button type="button" class="section-picker-close" id="trophy-picker-close">&times;</button>
+                    </div>
+                    <div class="section-picker-list" id="trophyPickerList"></div>
+                </div>
+            `;
+            document.body.appendChild(trophyModal);
+        }
     },
 
     initThemeMenu() {
@@ -643,7 +665,12 @@ EditManager.Global = {
                 listeler: temizListeler
             };
         }
-        const trophies = (Array.isArray(veri.trophies) && veri.trophies.length > 0) ? veri.trophies : null;
+        let trophies = null;
+        if (Array.isArray(veri.trophies) && veri.trophies.length > 0) {
+            trophies = veri.trophies;
+        } else if (veri.trophies && typeof veri.trophies === 'object' && Object.keys(veri.trophies).length > 0) {
+            trophies = veri.trophies;
+        }
         const widgets = (Array.isArray(veri.widgets) && veri.widgets.length > 0) ? veri.widgets : null;
         let working_on = null;
         if (veri.working_on && veri.working_on.metin && veri.working_on.metin.trim() !== '') {
@@ -767,13 +794,20 @@ EditManager.Global = {
             // Yerel state'teki links dizisini de temizlenmiş versiyonla güncelle
             kartVerisi.links = temizLinkler;
 
+            let trophiesPayload = [];
+            if (Array.isArray(kartVerisi.trophies)) {
+                trophiesPayload = kartVerisi.trophies;
+            } else if (kartVerisi.trophies && typeof kartVerisi.trophies === 'object') {
+                trophiesPayload = Object.values(kartVerisi.trophies).filter(Boolean);
+            }
+
             const { data: guncellenen, error } = await supabaseClient
                 .from('profiles')
                 .update({
                     front_data: guvenliObje(kartVerisi.front_data),
                     links: temizLinkler,
                     tops: guvenliObje(kartVerisi.tops),
-                    trophies: Array.isArray(kartVerisi.trophies) ? kartVerisi.trophies : [],
+                    trophies: trophiesPayload,
                     widgets: Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets : [],
                     working_on: workingOnPayload,
                     theme_config: guvenliObje(kartVerisi.theme_config)
@@ -822,19 +856,19 @@ EditManager.Global = {
     },
 
     toastGoster(mesaj, tip = 'success') {
+        if (typeof window.toastBildirimiGoster === 'function') {
+            window.toastBildirimiGoster(mesaj, 3500, tip);
+            return;
+        }
         const toast = document.getElementById('nook-toast');
         if (!toast) return;
 
         toast.textContent = mesaj;
-        if (tip === 'error') {
-            toast.classList.add('is-error');
-        } else {
-            toast.classList.remove('is-error');
-        }
+        toast.className = `nook-toast nook-toast-${tip}`;
         toast.classList.add('is-visible');
-        setTimeout(() => {
+        clearTimeout(toast._timeout);
+        toast._timeout = setTimeout(() => {
             toast.classList.remove('is-visible');
-            toast.classList.remove('is-error');
         }, 3500);
     }
 };
@@ -2205,7 +2239,12 @@ EditManager.TrophiesView = {
     },
 
     acMonkeytypeFormu(mevcutKullanici = '') {
-        const body = document.getElementById('trophiesDetailBody') || document.getElementById('trophiesMasterList');
+        // Formu açmadan önce detay görünümüne geç
+        window._activeTrophyDetail = 'monkeytype';
+        RenderEngine.trophiesCiz(kartVerisi);
+
+        const detailBody = document.getElementById('trophiesDetailBody');
+        const body = detailBody || document.getElementById('trophiesMasterList');
         if (!body) return;
 
         const existingForm = body.querySelector('.mt-form-wrap');
@@ -2226,6 +2265,10 @@ EditManager.TrophiesView = {
         formWrap.querySelector('.mt-form-cancel').onclick = (e) => {
             e.stopPropagation();
             formWrap.remove();
+            if (!mevcutKullanici && !kartVerisi.trophies?.monkeytype) {
+                window._activeTrophyDetail = null;
+                RenderEngine.trophiesCiz(kartVerisi);
+            }
         };
 
         formWrap.querySelector('.mt-form-save').onclick = (e) => {
@@ -2233,11 +2276,19 @@ EditManager.TrophiesView = {
             const input = formWrap.querySelector('.mt-user-input');
             const yeniUser = input.value.trim();
             if (!yeniUser) {
-                alert("Lütfen Monkeytype kullanıcı adınızı girin!");
+                if (typeof window.toastBildirimiGoster === 'function') {
+                    window.toastBildirimiGoster("Lütfen Monkeytype kullanıcı adınızı girin!", 3000, 'warning');
+                } else {
+                    alert("Lütfen Monkeytype kullanıcı adınızı girin!");
+                }
                 return;
             }
             if (!/^[a-zA-Z0-9_]{1,30}$/.test(yeniUser)) {
-                alert("Monkeytype kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir (en fazla 30 karakter).");
+                if (typeof window.toastBildirimiGoster === 'function') {
+                    window.toastBildirimiGoster("Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir (en fazla 30 karakter).", 3500, 'warning');
+                } else {
+                    alert("Monkeytype kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir (en fazla 30 karakter).");
+                }
                 return;
             }
 
@@ -2273,6 +2324,128 @@ EditManager.TrophiesView = {
         body.prepend(formWrap);
         const inp = formWrap.querySelector('.mt-user-input');
         if (inp) inp.focus();
+    }
+};
+// #endregion
+
+// #region 5.5: BAŞARIM VE KUPA SEÇİCİ (TROPHY PICKER)
+EditManager.TrophyPicker = {
+    init() {
+        const modal = document.getElementById('trophy-picker-modal');
+        const closeBtn = document.getElementById('trophy-picker-close');
+        const backdrop = document.getElementById('trophy-picker-backdrop');
+        if (closeBtn) closeBtn.onclick = () => this.kapat();
+        if (backdrop) backdrop.onclick = () => this.kapat();
+    },
+
+    ac() {
+        const modal = document.getElementById('trophy-picker-modal');
+        const list = document.getElementById('trophyPickerList');
+        if (!modal || !list) return;
+
+        const hasMt = !!(kartVerisi.trophies?.monkeytype || (Array.isArray(kartVerisi.widgets) && kartVerisi.widgets.some(w => w.tur === 'monkeytype')));
+
+        const items = [
+            {
+                id: 'monkeytype',
+                tur: 'monkeytype',
+                baslik: 'Monkeytype Rekoru',
+                alt: 'Canlı klavye yazma hızı (WPM) ve doğruluk skorunu bağla',
+                ikon: '<span style="font-weight: 800; font-size: 1.1rem; color: #eab308; letter-spacing: -0.5px;">mt</span>',
+                varMi: hasMt,
+                comingSoon: false
+            },
+            {
+                id: 'lol',
+                tur: 'lol',
+                baslik: 'League of Legends Rank',
+                alt: 'Dereceli lig, LP ve en çok oynanan şampiyon verileri',
+                ikon: '<span style="font-size: 1.25rem;">⚔️</span>',
+                varMi: false,
+                comingSoon: true
+            },
+            {
+                id: 'valorant',
+                tur: 'valorant',
+                baslik: 'Valorant Rank & Peak',
+                alt: 'Mevcut rekabetçi kademe, RR ve kariyer zirvesi',
+                ikon: '<span style="font-size: 1.25rem;">🎯</span>',
+                varMi: false,
+                comingSoon: true
+            },
+            {
+                id: 'brawlhalla',
+                tur: 'brawlhalla',
+                baslik: 'Brawlhalla Elo',
+                alt: 'Kişisel 1v1 elo puanı ve sezon zirvesi',
+                ikon: '<span style="font-size: 1.25rem;">🥊</span>',
+                varMi: false,
+                comingSoon: true
+            }
+        ];
+
+        list.innerHTML = items.map(item => {
+            const itemClasses = ['section-picker-item'];
+            if (item.varMi) itemClasses.push('is-already-added');
+            if (item.comingSoon) itemClasses.push('is-coming-soon');
+
+            let badgeHtml = '';
+            if (item.varMi) {
+                badgeHtml = '<span class="picker-added-badge">Mevcut</span>';
+            } else if (item.comingSoon) {
+                badgeHtml = '<span class="picker-soon-badge">Beta Sürecinde</span>';
+            }
+
+            return `
+                <div class="${itemClasses.join(' ')}" data-trophy-type="${item.id}" ${item.comingSoon ? 'data-coming-soon="true"' : ''}>
+                    <div class="picker-item-icon" style="background: rgba(255, 255, 255, 0.05);">${item.ikon}</div>
+                    <div class="picker-item-info">
+                        <div class="picker-item-title-row">
+                            <span class="picker-item-title">${item.baslik}</span>
+                            ${badgeHtml}
+                        </div>
+                        <span class="picker-item-desc">${item.alt}</span>
+                    </div>
+                    <div class="picker-item-action">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        list.querySelectorAll('.section-picker-item').forEach(el => {
+            el.onclick = () => {
+                const isSoon = el.dataset.comingSoon === 'true';
+                if (isSoon) {
+                    if (typeof window.toastBildirimiGoster === 'function') {
+                        window.toastBildirimiGoster("Bu oyun desteği beta sürecinde eklenecektir!", 3000, 'warning');
+                    } else if (typeof EditManager.Global?.toastGoster === 'function') {
+                        EditManager.Global.toastGoster("Bu oyun desteği beta sürecinde eklenecektir!", 'warning');
+                    }
+                    this.kapat();
+                    return;
+                }
+
+                const trophyType = el.dataset.trophyType;
+                this.kapat();
+
+                if (trophyType === 'monkeytype') {
+                    if (EditManager.TrophiesView) {
+                        const existingUser = kartVerisi.trophies?.monkeytype?.kullanici || '';
+                        EditManager.TrophiesView.acMonkeytypeFormu(existingUser);
+                    }
+                }
+            };
+        });
+
+        modal.classList.add('is-open');
+    },
+
+    kapat() {
+        const modal = document.getElementById('trophy-picker-modal');
+        if (modal) modal.classList.remove('is-open');
     }
 };
 // #endregion

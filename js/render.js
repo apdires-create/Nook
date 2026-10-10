@@ -199,60 +199,39 @@ const RenderEngine = {
             if (!username) {
                 if (isUserOwner) {
                     itemsHtml += `
-                        <div class="companion-empty-state" style="padding: 2.5cqh 0; text-align: center;">
-                            <p class="placeholder-text" style="margin-bottom: 1.5cqh; color: var(--text-tertiary);">Henüz eklenmiş bir başarım yok.</p>
-                            <button type="button" class="companion-add-row-btn" id="trophiesMasterAddBtn">
+                        <div class="companion-empty-state" style="padding: 4cqh 2cqw; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <div class="companion-empty-title" style="margin-bottom: 0.8cqh;">Başarı Ekle</div>
+                            <p class="companion-empty-desc" style="margin-bottom: 2.2cqh; color: var(--text-tertiary);">Klavye hız rekorlarını veya dijital başarımlarını profilinde sergile.</p>
+                            <button type="button" class="companion-add-row-btn" id="trophiesMasterAddBtn" style="width: auto; padding: 1.2cqh 5cqw;">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
                                     <line x1="12" y1="5" x2="12" y2="19"></line>
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>
-                                <span>Monkeytype Ekle</span>
+                                <span>Başarını Sergile</span>
                             </button>
                         </div>
                     `;
                 } else {
-                    itemsHtml += `<p class="placeholder-text" style="text-align: center; color: var(--text-tertiary); padding: 3cqh 0;">Henüz başarı veya rekor eklenmemiş.</p>`;
+                    itemsHtml += `
+                        <div class="companion-empty-state" style="padding: 4cqh 2cqw; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                            <div class="companion-empty-title">Henüz Bir Başarı Yok</div>
+                            <p class="companion-empty-desc" style="color: var(--text-tertiary);">Kullanıcı bu vitrinde henüz bir başarım paylaşmamış.</p>
+                        </div>
+                    `;
                 }
             } else if (isUserOwner) {
-                // Monkeytype zaten ekliyse diğer oyunlar yakında butonu veya pasif ekle
                 itemsHtml += `
                     <button type="button" class="companion-add-row-btn" id="trophiesMasterAddBtn" style="margin-top: 4px;">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
-                        <span>Yeni İçerik Ekle</span>
+                        <span>Başarını Sergile</span>
                     </button>
                 `;
             }
 
-            // Gelecek Oyunlar Vitrini (Önizleme)
-            const gamesPreviewHtml = `
-                <div class="trophies-games-preview" style="margin-top: 2cqh; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 1.6cqh;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2cqh;">
-                        <span style="font-size: var(--cq-fs-desc); font-weight: 600; color: var(--text-secondary); letter-spacing: 0.03em; text-transform: uppercase;">Oyun Rankları</span>
-                        <span style="font-size: var(--cq-fs-mono); color: var(--text-tertiary); background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">Alfa Sonrası</span>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.8cqw;">
-                        <div style="background: var(--bg-card-subtle); border: 1px solid var(--border-soft); border-radius: var(--radius-item); padding: 2cqw 2.5cqw; opacity: 0.65; display: flex; align-items: center; gap: 2cqw;">
-                            <span style="font-size: 1.15rem;">⚔️</span>
-                            <div style="overflow: hidden;">
-                                <div style="font-size: var(--cq-fs-pill); font-weight: 600; color: var(--text-primary);">LoL / Valo</div>
-                                <div style="font-size: var(--cq-fs-mono); color: var(--text-tertiary);">Rank & Peak</div>
-                            </div>
-                        </div>
-                        <div style="background: var(--bg-card-subtle); border: 1px solid var(--border-soft); border-radius: var(--radius-item); padding: 2cqw 2.5cqw; opacity: 0.65; display: flex; align-items: center; gap: 2cqw;">
-                            <span style="font-size: 1.15rem;">🥊</span>
-                            <div style="overflow: hidden;">
-                                <div style="font-size: var(--cq-fs-pill); font-weight: 600; color: var(--text-primary);">Brawlhalla</div>
-                                <div style="font-size: var(--cq-fs-mono); color: var(--text-tertiary);">Elo & Kupa</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            masterList.innerHTML = itemsHtml + gamesPreviewHtml;
+            masterList.innerHTML = itemsHtml;
 
             // Master satır tıklamaları (Detaya git)
             masterList.querySelectorAll('.companion-row-item').forEach(item => {
@@ -291,10 +270,10 @@ const RenderEngine = {
             const masterAddBtn = masterList.querySelector('#trophiesMasterAddBtn');
             if (masterAddBtn) {
                 masterAddBtn.onclick = () => {
-                    if (username) {
-                        alert("LoL ve Valorant gibi diğer oyun içerikleri alfa sürümü sonrasında eklenecektir!");
-                    } else if (typeof EditManager !== 'undefined' && EditManager.TrophiesView) {
-                        EditManager.TrophiesView.acMonkeytypeFormu('');
+                    if (typeof EditManager !== 'undefined' && EditManager.TrophyPicker) {
+                        EditManager.TrophyPicker.ac();
+                    } else if (typeof toastBildirimiGoster === 'function') {
+                        toastBildirimiGoster("Başarım seçici yükleniyor...", 2000);
                     }
                 };
             }

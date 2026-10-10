@@ -951,36 +951,7 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
     display: none !important;
 }
 
-/* Toast Bildirimi */
-.nook-toast {
-    position: fixed;
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #10b981;
-    color: #ffffff;
-    font-size: 0.88rem;
-    font-weight: 600;
-    padding: 10px 20px;
-    border-radius: var(--radius-pill);
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
-    z-index: var(--z-toast);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: top 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.25s ease, visibility 0.25s ease;
-}
-
-.nook-toast.is-visible {
-    top: 24px;
-    opacity: 1;
-    visibility: visible;
-}
-
-.nook-toast.is-error {
-    background: #ef4444;
-    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
-}
+/* Toast bildirimleri base.css içindeki merkezi tokenlardan beslenir */
 /* #endregion */
 
 /* #region 7: BÖLÜM EKLEME MODALI (SECTION PICKER MODAL) */

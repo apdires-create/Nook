@@ -648,24 +648,7 @@
     transform: none;
 }
 
-/* Toast Bildirimi Varyasyonları (Success, Error, Warning) */
-.nook-toast-error {
-    background: #e50914 !important;
-    box-shadow: 0 8px 24px rgba(229, 9, 20, 0.45) !important;
-    color: #ffffff !important;
-}
-
-.nook-toast-warning {
-    background: #f59e0b !important;
-    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.45) !important;
-    color: #ffffff !important;
-}
-
-.nook-toast-success {
-    background: #10b981 !important;
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4) !important;
-    color: #ffffff !important;
-}
+/* Toast Bildirimi Varyasyonları (base.css içindeki merkezi tokenlardan beslenir) */
 
 .logout-btn {
     background: rgba(255, 255, 255, 0.1);

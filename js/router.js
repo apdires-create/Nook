@@ -186,7 +186,7 @@ const Router = {
             if (e.key === 'Escape') {
                 // 1. En üstteki açık modalı öncelikle kapat (Z-index hiyerarşisine göre)
                 const activeModals = Array.from(document.querySelectorAll(
-                    '.image-cropper-modal.is-open, .block-delete-modal.is-open, .tops-search-modal.is-open, .tops-setup-modal.is-open, .tag-picker-modal.is-open, .add-section-modal.is-open, .auth-modal.is-open'
+                    '.image-cropper-modal.is-open, .block-delete-modal.is-open, .tops-search-modal.is-open, .tops-setup-modal.is-open, .tag-picker-modal.is-open, .add-section-modal.is-open, .trophy-picker-modal.is-open, .auth-modal.is-open'
                 ));
                 if (activeModals.length > 0) {
                     const topModal = activeModals[activeModals.length - 1];
@@ -197,6 +197,9 @@ const Router = {
                     } else if (topModal.id === 'block-delete-modal') {
                         const cancelBtn = document.getElementById('block-delete-cancel');
                         if (cancelBtn) cancelBtn.click();
+                        else topModal.classList.remove('is-open');
+                    } else if (topModal.id === 'trophy-picker-modal') {
+                        if (window.EditManager?.TrophyPicker) window.EditManager.TrophyPicker.kapat();
                         else topModal.classList.remove('is-open');
                     } else if (topModal.id === 'tops-search-modal') {
                         if (window.EditManager?.MediaSearchModal) window.EditManager.MediaSearchModal.kapat();
