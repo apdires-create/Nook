@@ -73,7 +73,9 @@ html, body {
 
 /* #region 2: 5:7 SABİT ORANLI KART GÖVDESİ */
 .card-container,
-.tops-companion-card {
+.tops-companion-card,
+.trophies-companion-card,
+.companion-card {
     position: relative;
     aspect-ratio: var(--card-aspect-ratio);
     height: var(--card-height);
@@ -90,7 +92,9 @@ html, body {
 
 @media (max-aspect-ratio: 5/7) {
     .card-container,
-    .tops-companion-card {
+    .tops-companion-card,
+    .trophies-companion-card,
+    .companion-card {
         --ratio-card-max-h: min(var(--card-height), calc(100dvh - 100px));
         --ratio-card-w: min(var(--card-narrow-width), calc(100vw - 32px), calc(var(--ratio-card-max-h) * 5 / 7));
         width: var(--ratio-card-w);
@@ -101,12 +105,16 @@ html, body {
 
 .card-container,
 .nook-card,
-.tops-companion-card {
+.tops-companion-card,
+.trophies-companion-card,
+.companion-card {
     border-radius: var(--card-radius);
 }
 
 .nook-card,
-.tops-companion-card {
+.tops-companion-card,
+.trophies-companion-card,
+.companion-card {
     background: var(--card-bg);
     border: var(--card-border);
     box-shadow: var(--card-shadow);
@@ -441,7 +449,7 @@ html.is-profile-loading #landing-screen {
     }
 
     .stage.has-companion-open .card-container,
-    .stage.has-companion-open .tops-companion-card {
+    .stage.has-companion-open .companion-card {
         flex-shrink: 0;
         aspect-ratio: var(--card-aspect-ratio);
         /* Duvarlar ve kartlar arası gap tam dengeli; kartlar asla ekran dışına taşmaz */
@@ -452,6 +460,20 @@ html.is-profile-loading #landing-screen {
         max-height: calc(100vh - (2 * var(--stage-padding)));
         max-width: calc((100vw - (2 * var(--stage-padding)) - var(--stage-gap)) / 2);
         width: auto;
+    }
+
+    /* Masaüstünde aktif olan kanat görünür, diğeri gizlenir */
+    .stage.has-companion-open.is-showcase-active #topsCompanionCard {
+        display: flex !important;
+    }
+    .stage.has-companion-open.is-showcase-active #trophiesCompanionCard {
+        display: none !important;
+    }
+    .stage.has-companion-open.is-trophies-active #trophiesCompanionCard {
+        display: flex !important;
+    }
+    .stage.has-companion-open.is-trophies-active #topsCompanionCard {
+        display: none !important;
     }
 }
 
@@ -491,7 +513,7 @@ html.is-profile-loading #landing-screen {
 
     /* Sabit 5:7 Geometrisi */
     .stage .card-container,
-    .stage .tops-companion-card {
+    .stage .companion-card {
         --mobile-card-max-h: min(var(--card-height), calc(100dvh - 84px));
         --mobile-card-w: min(
             var(--card-narrow-width),
@@ -510,7 +532,7 @@ html.is-profile-loading #landing-screen {
         will-change: transform, opacity;
     }
 
-    /* Profil Kartı: Normalde merkezde, Showcase açıkken sola ekran dışına kayar */
+    /* Profil Kartı: Normalde merkezde */
     .stage .card-container {
         position: relative;
         z-index: 5;
@@ -519,14 +541,22 @@ html.is-profile-loading #landing-screen {
         pointer-events: auto;
     }
 
-    .stage.has-companion-open .card-container {
+    /* Showcase açıkken profil sola kayar */
+    .stage.has-companion-open.is-showcase-active .card-container {
         transform: translate3d(calc(-100vw - 40px), 0, 0) !important;
         opacity: 0 !important;
         pointer-events: none !important;
     }
 
-    /* Showcase Kartı: Normalde sağda ekran dışında, açıkken merkeze oturur */
-    .stage .tops-companion-card {
+    /* Trophies açıkken profil sağa kayar */
+    .stage.has-companion-open.is-trophies-active .card-container {
+        transform: translate3d(calc(100vw + 40px), 0, 0) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    /* Showcase Kartı: Normalde sağda ekran dışında */
+    .stage #topsCompanionCard {
         position: absolute;
         z-index: 6;
         transform: translate3d(calc(100vw + 40px), 0, 0);
@@ -535,14 +565,31 @@ html.is-profile-loading #landing-screen {
         animation: none !important;
     }
 
-    .stage.has-companion-open .tops-companion-card {
+    .stage.has-companion-open.is-showcase-active #topsCompanionCard {
         transform: translate3d(0, 0, 0) !important;
         opacity: 1 !important;
         pointer-events: auto !important;
+        display: flex !important;
     }
 
-    .stage.is-companion-closing .tops-companion-card {
-        transform: translate3d(calc(100vw + 40px), 0, 0) !important;
+    /* Trophies Kartı: Normalde solda ekran dışında */
+    .stage #trophiesCompanionCard {
+        position: absolute;
+        z-index: 6;
+        transform: translate3d(calc(-100vw - 40px), 0, 0);
+        opacity: 0;
+        pointer-events: none;
+        animation: none !important;
+    }
+
+    .stage.has-companion-open.is-trophies-active #trophiesCompanionCard {
+        transform: translate3d(0, 0, 0) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        display: flex !important;
+    }
+
+    .stage.is-companion-closing .companion-card {
         opacity: 0 !important;
         pointer-events: none !important;
     }
@@ -554,8 +601,8 @@ html.is-profile-loading #landing-screen {
     }
 }
 
-/* 3. TOPS COMPANION CARD GÖVDESİ */
-.tops-companion-card {
+/* 3. COMPANION CARD GÖVDESİ */
+.companion-card {
     position: relative;
     border-radius: var(--card-radius);
     background: var(--card-bg);
@@ -572,7 +619,7 @@ html.is-profile-loading #landing-screen {
 }
 
 /* Kapanırken ana kartın arkasına yumuşakça saklanma */
-.tops-companion-card.is-closing {
+.companion-card.is-closing {
     animation: companionCard3DExit 0.50s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
     pointer-events: none;
 }
@@ -696,6 +743,18 @@ html.is-profile-loading #landing-screen {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.companion-brand.brand-trophies .companion-brand-icon {
+    background: rgba(224, 49, 49, 0.18);
+    color: #ff8787;
+    border: 1px solid rgba(224, 49, 49, 0.4);
+}
+
+.companion-brand.brand-showcase .companion-brand-icon {
+    background: rgba(59, 91, 219, 0.18);
+    color: #748ffc;
+    border: 1px solid rgba(59, 91, 219, 0.4);
 }
 
 .companion-title {

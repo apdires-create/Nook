@@ -26,6 +26,7 @@ const EditManager = {
         this.TopsModal.init();
         this.MediaSearchModal.init();
         this.CompanionViews.init();
+        if (this.TrophiesView) this.TrophiesView.init();
 
         document.body.classList.add('global-edit-mode');
     },
@@ -263,13 +264,79 @@ const EditManager = {
             const bar = document.createElement('div');
             bar.id = 'edit-action-bar';
             bar.className = 'edit-action-bar';
+            const currentColor = kartVerisi.theme_config?.primary_color || '#3b5bdb';
             bar.innerHTML = `
-                <div class="edit-action-btns">
-                    <button type="button" id="edit-cancel-btn" class="edit-bar-btn cancel-btn">Sıfırla</button>
-                    <button type="button" id="edit-save-btn" class="edit-bar-btn save-btn">Kaydet</button>
+                <div class="edit-action-bar-inner">
+                    <div class="edit-color-picker-wrap">
+                        <button type="button" id="edit-color-trigger" class="edit-bar-color-btn" title="Vurgu Rengini Değiştir">
+                            <span class="edit-color-dot" id="edit-color-dot" style="background: ${currentColor};"></span>
+                            <span>Renk</span>
+                        </button>
+                        <div class="edit-color-popover" id="edit-color-popover" style="display: none;">
+                            <div class="color-presets-row">
+                                <button type="button" class="color-swatch-btn" data-color="#3b5bdb" style="background: #3b5bdb;" title="Sapphire"></button>
+                                <button type="button" class="color-swatch-btn" data-color="#e03131" style="background: #e03131;" title="Ruby"></button>
+                                <button type="button" class="color-swatch-btn" data-color="#2f9e44" style="background: #2f9e44;" title="Emerald"></button>
+                                <button type="button" class="color-swatch-btn" data-color="#f59f00" style="background: #f59f00;" title="Amber"></button>
+                                <button type="button" class="color-swatch-btn" data-color="#9c36b5" style="background: #9c36b5;" title="Amethyst"></button>
+                                <button type="button" class="color-swatch-btn" data-color="#1098ad" style="background: #1098ad;" title="Cyan"></button>
+                                <label class="color-custom-label" title="Özel Renk Seç">
+                                    <input type="color" id="edit-color-input" value="${currentColor}" class="color-native-input">
+                                    <span class="color-custom-wheel">🎨</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="edit-action-btns">
+                        <button type="button" id="edit-cancel-btn" class="edit-bar-btn cancel-btn">Sıfırla</button>
+                        <button type="button" id="edit-save-btn" class="edit-bar-btn save-btn">Kaydet</button>
+                    </div>
                 </div>
             `;
             document.body.appendChild(bar);
+
+            const colorTrigger = bar.querySelector('#edit-color-trigger');
+            const colorPopover = bar.querySelector('#edit-color-popover');
+            const colorDot = bar.querySelector('#edit-color-dot');
+            const nativeColorInput = bar.querySelector('#edit-color-input');
+
+            if (colorTrigger && colorPopover) {
+                colorTrigger.onclick = (e) => {
+                    e.stopPropagation();
+                    const isShown = colorPopover.style.display !== 'none';
+                    colorPopover.style.display = isShown ? 'none' : 'block';
+                };
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.edit-color-picker-wrap')) {
+                        colorPopover.style.display = 'none';
+                    }
+                });
+
+                const applyColor = (color) => {
+                    if (!color) return;
+                    document.documentElement.style.setProperty('--accent-color', color);
+                    if (colorDot) colorDot.style.background = color;
+                    if (nativeColorInput) nativeColorInput.value = color;
+                    if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
+                    kartVerisi.theme_config.primary_color = color;
+                    EditManager.Global.degisiklikYapildi();
+                };
+
+                colorPopover.querySelectorAll('.color-swatch-btn').forEach(btn => {
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        applyColor(btn.dataset.color);
+                        colorPopover.style.display = 'none';
+                    };
+                });
+
+                if (nativeColorInput) {
+                    nativeColorInput.oninput = (e) => {
+                        applyColor(e.target.value);
+                    };
+                }
+            }
         }
 
         // 2. Cropper Modal Enjeksiyonu
@@ -1184,10 +1251,14 @@ EditManager.Vitrin = {
             if (!pill.querySelector('.tag-remove-btn')) {
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'tag-remove-btn';
+                removeBtn.type = 'button';
                 removeBtn.innerHTML = '&times;';
                 removeBtn.title = 'Etiketi Sil';
+                removeBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+                removeBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
                 removeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     const tags = Array.isArray(kartVerisi.front_data?.tags) ? kartVerisi.front_data.tags : [];
                     tags.splice(idx, 1);
                     kartVerisi.front_data.tags = tags;
@@ -1198,20 +1269,6 @@ EditManager.Vitrin = {
                 pill.appendChild(removeBtn);
             }
         });
-
-        // 6'dan az tag varsa "+ Tag Ekle" hapı ekle
-        const tags = Array.isArray(kartVerisi.front_data?.tags) ? kartVerisi.front_data.tags : [];
-        if (tags.length < 6 && !tagsGrid.querySelector('.tag-add-pill')) {
-            const addPill = document.createElement('button');
-            addPill.className = 'tag-add-pill';
-            addPill.textContent = '+ Tag Ekle';
-            addPill.addEventListener('click', () => {
-                if (EditManager.TagPicker) {
-                    EditManager.TagPicker.ac();
-                }
-            });
-            tagsGrid.appendChild(addPill);
-        }
 
         // Sürükle-Bırak Sistemi (Pointer Reorder: Hover, Grab, Drop)
         EditManager.initPointerSortable(tagsGrid, {
@@ -1431,10 +1488,7 @@ EditManager.BackViews = {
     },
 
     linksDuzenlemeKur() {
-        const panel = document.getElementById('view-links');
-        if (!panel) return;
-
-        const scrollWrap = panel.querySelector('.scrollable-fade');
+        const scrollWrap = document.getElementById('linksScrollWrap') || document.getElementById('view-links')?.querySelector('.scrollable-fade');
         if (!scrollWrap) return;
 
         // Sahip modunda boş bildirim metnini kaldır
@@ -2086,6 +2140,129 @@ EditManager.BackViews = {
             };
             scrollWrap.appendChild(addBtn);
         }
+    }
+};
+
+EditManager.TrophiesView = {
+    init() {
+        const body = document.getElementById('trophiesBody');
+        if (!body) return;
+
+        const addBtn = body.querySelector('#trophies-add-mt-btn');
+        if (addBtn) {
+            addBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.acMonkeytypeFormu('');
+            };
+        }
+
+        const mtCard = body.querySelector('.monkeytype-card');
+        if (mtCard && !mtCard.querySelector('.mt-owner-actions')) {
+            const actionsWrap = document.createElement('div');
+            actionsWrap.className = 'mt-owner-actions';
+            actionsWrap.style.display = 'flex';
+            actionsWrap.style.justifyContent = 'flex-end';
+            actionsWrap.style.gap = '8px';
+            actionsWrap.style.marginTop = '10px';
+
+            actionsWrap.innerHTML = `
+                <button type="button" class="form-btn-sm form-btn-cancel mt-edit-user-btn" style="font-size: 0.75rem;">Kullanıcıyı Değiştir</button>
+                <button type="button" class="form-btn-sm form-btn-cancel mt-remove-btn" style="color: #ef4444; font-size: 0.75rem;">Rekoru Kaldır</button>
+            `;
+
+            actionsWrap.querySelector('.mt-edit-user-btn').onclick = (e) => {
+                e.stopPropagation();
+                const mevcutUser = mtCard.dataset.username || '';
+                this.acMonkeytypeFormu(mevcutUser);
+            };
+
+            actionsWrap.querySelector('.mt-remove-btn').onclick = (e) => {
+                e.stopPropagation();
+                if (kartVerisi.trophies) {
+                    delete kartVerisi.trophies.monkeytype;
+                    if (Array.isArray(kartVerisi.trophies)) {
+                        kartVerisi.trophies = kartVerisi.trophies.filter(x => x.tur !== 'monkeytype');
+                    }
+                }
+                if (Array.isArray(kartVerisi.widgets)) {
+                    kartVerisi.widgets = kartVerisi.widgets.filter(x => x.tur !== 'monkeytype');
+                }
+                RenderEngine.trophiesCiz(kartVerisi);
+                EditManager.Global.degisiklikYapildi();
+            };
+
+            mtCard.appendChild(actionsWrap);
+        }
+    },
+
+    acMonkeytypeFormu(mevcutKullanici = '') {
+        const body = document.getElementById('trophiesBody');
+        if (!body) return;
+
+        const existingForm = body.querySelector('.mt-form-wrap');
+        if (existingForm) existingForm.remove();
+
+        const formWrap = document.createElement('div');
+        formWrap.className = 'inline-form-card mt-form-wrap';
+        formWrap.style.marginBottom = '12px';
+        formWrap.innerHTML = `
+            <div style="font-size: var(--cq-fs-desc); font-weight: 600; margin-bottom: 8px;">Monkeytype Kullanıcı Adı:</div>
+            <input type="text" class="inline-form-input mt-user-input" placeholder="apdi" value="${RenderEngine.escapeHtml(mevcutKullanici)}" maxlength="30" autocomplete="off" spellcheck="false">
+            <div class="inline-form-actions" style="margin-top: 8px; display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" class="form-btn-sm form-btn-cancel mt-form-cancel">İptal</button>
+                <button type="button" class="form-btn-sm form-btn-save mt-form-save">Kaydet</button>
+            </div>
+        `;
+
+        formWrap.querySelector('.mt-form-cancel').onclick = (e) => {
+            e.stopPropagation();
+            formWrap.remove();
+        };
+
+        formWrap.querySelector('.mt-form-save').onclick = (e) => {
+            e.stopPropagation();
+            const input = formWrap.querySelector('.mt-user-input');
+            const yeniUser = input.value.trim();
+            if (!yeniUser) {
+                alert("Lütfen Monkeytype kullanıcı adınızı girin!");
+                return;
+            }
+            if (!/^[a-zA-Z0-9_]{1,30}$/.test(yeniUser)) {
+                alert("Monkeytype kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir (en fazla 30 karakter).");
+                return;
+            }
+
+            if (!kartVerisi.trophies || typeof kartVerisi.trophies !== 'object') {
+                kartVerisi.trophies = {};
+            }
+            if (Array.isArray(kartVerisi.trophies)) {
+                kartVerisi.trophies = { items: kartVerisi.trophies };
+            }
+            kartVerisi.trophies.monkeytype = {
+                tur: 'monkeytype',
+                kullanici: yeniUser
+            };
+            if (!Array.isArray(kartVerisi.widgets)) kartVerisi.widgets = [];
+            kartVerisi.widgets = kartVerisi.widgets.filter(x => x.tur !== 'monkeytype');
+            kartVerisi.widgets.push({ tur: 'monkeytype', kullanici: yeniUser });
+
+            formWrap.remove();
+            RenderEngine.trophiesCiz(kartVerisi);
+            EditManager.Global.degisiklikYapildi();
+
+            if (typeof canliMonkeytypeVerisiCek === 'function') {
+                canliMonkeytypeVerisiCek(yeniUser).then(skorlar => {
+                    if (skorlar) {
+                        kartVerisi.canli_monkeytype = skorlar;
+                        RenderEngine.trophiesCiz(kartVerisi);
+                    }
+                });
+            }
+        };
+
+        body.prepend(formWrap);
+        const inp = formWrap.querySelector('.mt-user-input');
+        if (inp) inp.focus();
     }
 };
 // #endregion
@@ -2855,9 +3032,7 @@ EditManager.CompanionViews = {
             if (!card.querySelector('.item-delete-btn')) {
                 const delBtn = document.createElement('button');
                 delBtn.className = 'item-delete-btn';
-                delBtn.style.position = 'absolute';
-                delBtn.style.top = '8px';
-                delBtn.style.right = '8px';
+                delBtn.type = 'button';
                 delBtn.title = "Afişi Kaldır";
                 delBtn.innerHTML = `
                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
@@ -2865,8 +3040,11 @@ EditManager.CompanionViews = {
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     </svg>
                 `;
+                delBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+                delBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
                 delBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     if (aktifListe && Array.isArray(aktifListe.ogeler)) {
                         if (cardId) {
                             aktifListe.ogeler = aktifListe.ogeler.filter(x => (x.id || x.kimlik) !== cardId);

@@ -145,12 +145,15 @@ async function tumVerileriCek() {
             RenderEngine.vitrinCiz(kartVerisi);
             RenderEngine.menuCiz(kartVerisi);
             RenderEngine.altEkranlariCiz(kartVerisi);
+            if (typeof RenderEngine.trophiesCiz === 'function') {
+                RenderEngine.trophiesCiz(kartVerisi);
+            }
         }
 
-        // Canlı Widget Skorlarını Asenkron Sorgula (Non-blocking)
-        const mtWidget = Array.isArray(kartVerisi.widgets) 
-            ? kartVerisi.widgets.find(w => w && w.tur === 'monkeytype')
-            : null;
+        // Canlı Widget / Trophies Skorlarını Asenkron Sorgula (Non-blocking)
+        const mtWidget = (Array.isArray(kartVerisi.trophies) ? kartVerisi.trophies.find(t => t && t.tur === 'monkeytype') : null)
+            || (kartVerisi.trophies?.monkeytype ? kartVerisi.trophies.monkeytype : null)
+            || (Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets.find(w => w && w.tur === 'monkeytype') : null);
 
         if (mtWidget) {
             const mtUser = mtWidget.ayarlar?.kullanici || mtWidget.kullanici || mtWidget.username;
@@ -159,6 +162,9 @@ async function tumVerileriCek() {
                     if (skorlar) {
                         kartVerisi.canli_monkeytype = skorlar;
                         if (typeof RenderEngine !== 'undefined') {
+                            if (typeof RenderEngine.trophiesCiz === 'function') {
+                                RenderEngine.trophiesCiz(kartVerisi);
+                            }
                             RenderEngine.monkeytypeGuncelle(skorlar);
                         }
                     }

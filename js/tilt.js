@@ -5,7 +5,10 @@ const TiltEngine = {
     mouseY: 0,
     currentTiltX: 0,
     currentTiltY: 0,
-    maxTilt: 1,
+    currentHoverSag: 0,
+    currentHoverTiltX: 0,
+    isCardHovered: false,
+    maxTilt: 2.2,
     lerpSpeed: 0.08,
 
     init() {
@@ -21,6 +24,15 @@ const TiltEngine = {
         window.addEventListener('mouseleave', () => {
             this.mouseX = 0;
             this.mouseY = 0;
+            this.isCardHovered = false;
+        });
+
+        this.cardContainer.addEventListener('mouseenter', () => {
+            this.isCardHovered = true;
+        });
+
+        this.cardContainer.addEventListener('mouseleave', () => {
+            this.isCardHovered = false;
         });
 
         this.loop();
@@ -31,28 +43,43 @@ const TiltEngine = {
         const isCompanionOpen = stage && stage.classList.contains('has-companion-open');
         const isTransitioning = typeof Router !== 'undefined' && Router._companionTransitioning;
 
-        // Showcase açılırken, kapanırken veya açıkken tilt hedefi 0'dır (olduğu yerden yumuşakça sıfıra süzülür)
+        // Showcase / Trophies açıkken veya geçiş esnasında tilt hedefi 0'dır
         let targetTiltX = 0;
         let targetTiltY = 0;
+        let targetHoverSag = 0;
+        let targetHoverTiltX = 0;
 
         if (!isCompanionOpen && !isTransitioning) {
             targetTiltX = -this.mouseY * this.maxTilt;
             targetTiltY = this.mouseX * this.maxTilt;
+
+            if (this.isCardHovered) {
+                targetHoverSag = -8;
+                targetHoverTiltX = 1.6;
+            }
         }
 
         this.currentTiltX += (targetTiltX - this.currentTiltX) * this.lerpSpeed;
         this.currentTiltY += (targetTiltY - this.currentTiltY) * this.lerpSpeed;
+        this.currentHoverSag += (targetHoverSag - this.currentHoverSag) * this.lerpSpeed;
+        this.currentHoverTiltX += (targetHoverTiltX - this.currentHoverTiltX) * this.lerpSpeed;
 
         if (this.cardContainer) {
-            // Eğer showcase açık ve tilt neredeyse 0 ise CPU'yu yormadan transform'u temiz tut
-            const absTilt = Math.abs(this.currentTiltX) + Math.abs(this.currentTiltY);
+            const absTilt = Math.abs(this.currentTiltX) + Math.abs(this.currentTiltY) + Math.abs(this.currentHoverSag);
             if (isCompanionOpen && !isTransitioning && absTilt < 0.005) {
                 this.currentTiltX = 0;
                 this.currentTiltY = 0;
-                this.cardContainer.style.transform = 'rotateX(0deg) rotateY(0deg)';
+                this.currentHoverSag = 0;
+                this.currentHoverTiltX = 0;
+                this.cardContainer.style.transform = 'translateZ(0px) rotateX(0deg) rotateY(0deg)';
             } else {
-                const multiplier = (typeof Router !== 'undefined' && Router.isFlipped) ? 0.35 : 1;
-                this.cardContainer.style.transform = `rotateX(${this.currentTiltX * multiplier}deg) rotateY(${this.currentTiltY * multiplier}deg)`;
+                const isFlipped = (typeof Router !== 'undefined' && Router.isFlipped);
+                const multiplier = isFlipped ? 0.35 : 1;
+                const finalTiltX = (this.currentTiltX + (isFlipped ? -this.currentHoverTiltX : this.currentHoverTiltX)) * multiplier;
+                const finalTiltY = this.currentTiltY * multiplier;
+                const finalSagZ = this.currentHoverSag;
+
+                this.cardContainer.style.transform = `translateZ(${finalSagZ.toFixed(2)}px) rotateX(${finalTiltX.toFixed(2)}deg) rotateY(${finalTiltY.toFixed(2)}deg)`;
             }
         }
 

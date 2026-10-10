@@ -1,8 +1,53 @@
-/* #region 1: ARKA YÜZ GÖVDESİ VE GEÇİŞ PANELLERİ */
+/* #region 1: ARKA YÜZ GÖVDESİ VE SAF LİNKLER LİSTESİ */
 .card-back {
     transform: rotateY(180deg) translateZ(2px);
     background: var(--bg-card);
     padding: 4.5cqw;
+}
+
+.back-links-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.back-links-header {
+    display: flex;
+    align-items: center;
+    gap: 2.5cqw;
+    padding-bottom: 1.5cqh;
+    border-bottom: 1px solid var(--border-soft);
+    flex-shrink: 0;
+}
+
+.back-links-title-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.back-links-title {
+    margin: 0;
+    font-size: var(--cq-fs-name);
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+}
+
+.back-links-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.8cqh;
+    margin-top: 1.5cqh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 2cqh;
+    padding-inline: 0.5cqw;
 }
 
 .views-wrapper {

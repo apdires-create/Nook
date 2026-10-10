@@ -4,58 +4,101 @@
     transform: translateZ(2px);
 }
 
-/* Sol Üst: Menüyü Gör Butonu */
-.flip-trigger-btn.flip-trigger-left {
-    left: 3.5cqw;
-    right: auto;
+/* Sağ Üst: Showcase ve Trophies Dikey Bayrakları (Flag Badges) */
+.card-flags-wrapper {
+    position: absolute;
+    top: 3.2cqw;
+    right: 3.2cqw;
+    display: flex;
+    align-items: center;
+    gap: 1.8cqw;
+    z-index: 20;
 }
 
-/* Sağ Üst: Tops Showcase Wing Tetikleyici Butonu */
-.showcase-trigger-btn {
-    position: absolute;
-    top: 3.5cqw;
-    right: 3.5cqw;
-    width: var(--btn-icon-size);
-    height: var(--btn-icon-size);
-    border-radius: var(--radius-circle);
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--border-highlight);
-    color: #ffd43b;
+.card-flag-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 1.2cqw;
+    padding: 1cqw 2.6cqw;
+    border-radius: var(--radius-pill);
+    font-size: var(--cq-fs-desc);
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.22s ease,
+                border-color 0.22s ease,
+                box-shadow 0.22s ease,
+                color 0.22s ease;
+    user-select: none;
+}
+
+.card-flag-btn .flag-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.showcase-trigger-btn svg {
-    width: var(--btn-icon-svg);
-    height: var(--btn-icon-svg);
-    stroke: currentColor;
-    transition: transform 0.22s ease;
+.card-flag-btn .flag-label {
+    line-height: 1;
+    letter-spacing: 0.02em;
 }
 
-.showcase-trigger-btn:hover {
-    transform: scale(1.1);
-    background: rgba(0, 0, 0, 0.8);
-    border-color: #ffd43b;
-    box-shadow: 0 0 20px rgba(255, 212, 59, 0.35);
+/* 🟥 Trophies Kırmızı Bayrak */
+.card-flag-btn.flag-trophies {
+    background: rgba(224, 49, 49, 0.2);
+    border: 1px solid rgba(224, 49, 49, 0.45);
+    color: #ff8787;
 }
 
-.showcase-trigger-btn:hover svg {
-    transform: rotate(15deg);
-}
-
-/* Tops Companion Card açıkken butonun aktif parlaması */
-.stage.has-companion-open .showcase-trigger-btn {
-    background: rgba(59, 91, 219, 0.3);
-    border-color: var(--accent-color);
+.card-flag-btn.flag-trophies:hover {
+    background: rgba(224, 49, 49, 0.35);
+    border-color: #ff6b6b;
     color: #ffffff;
-    box-shadow: 0 0 18px var(--accent-glow);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(224, 49, 49, 0.45);
+}
+
+.stage.has-companion-open.is-trophies-active .card-flag-btn.flag-trophies {
+    background: #e03131;
+    border-color: #ffa8a8;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(224, 49, 49, 0.75);
+}
+
+/* 🟦 Showcase Mavi Bayrak */
+.card-flag-btn.flag-showcase {
+    background: rgba(59, 91, 219, 0.2);
+    border: 1px solid rgba(59, 91, 219, 0.45);
+    color: #748ffc;
+}
+
+.card-flag-btn.flag-showcase:hover {
+    background: rgba(59, 91, 219, 0.35);
+    border-color: #91a7ff;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(59, 91, 219, 0.45);
+}
+
+.stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase {
+    background: #3b5bdb;
+    border-color: #bac8ff;
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(59, 91, 219, 0.75);
+}
+
+@media (max-width: 360px) {
+    .card-flag-btn .flag-label {
+        display: none;
+    }
+    .card-flag-btn {
+        padding: 1.4cqw 2cqw;
+    }
 }
 /* #endregion */
 
@@ -162,6 +205,7 @@
     margin-top: auto;
     flex-shrink: 0;
     width: 100%;
+    position: relative;
 }
 
 .tags-grid {
@@ -170,6 +214,36 @@
     align-items: center;
     justify-content: center;
     gap: 1.8cqw;
+}
+
+.tag-edit-trigger-btn {
+    display: none;
+    position: absolute;
+    right: 0;
+    bottom: -2px;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-circle);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: var(--text-secondary);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 5;
+    padding: 0;
+}
+
+body.is-owner .tag-edit-trigger-btn {
+    display: inline-flex;
+}
+
+.tag-edit-trigger-btn:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #ffffff;
+    transform: scale(1.1);
 }
 
 .tag-pill {

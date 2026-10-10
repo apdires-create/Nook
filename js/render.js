@@ -78,152 +78,202 @@ const RenderEngine = {
     },
     // #endregion
 
-    // 1.2: Arka Yüz (Kök Menü) Render Fonksiyonu
+    // 1.2: Arka Yüz (Saf Linkler) Render Fonksiyonu
+    linklerCiz(data) {
+        const wrapper = document.getElementById('links-wrapper');
+        if (!wrapper) return;
+
+        const kart = (data && data.kullanici_adi) ? data : (typeof kartVerisi !== 'undefined' ? kartVerisi : {});
+        const links = Array.isArray(kart.links) ? kart.links : (Array.isArray(data) ? data : []);
+        const isUserOwner = (typeof isOwner !== 'undefined' && isOwner);
+
+        if (links.length === 0) {
+            wrapper.innerHTML = `<p class="placeholder-text" style="text-align: center; color: var(--text-tertiary); padding: 4cqh 0; font-size: var(--cq-fs-body);">Henüz bağlantı eklenmemiş.</p>`;
+        } else {
+            wrapper.innerHTML = links.map(link => {
+                const baslik = link.baslik || link.isim || 'Bağlantı';
+                let domain = 'Bağlantı';
+                try {
+                    let parsedUrl = link.url;
+                    if (parsedUrl && !parsedUrl.startsWith('http://') && !parsedUrl.startsWith('https://')) {
+                        parsedUrl = 'https://' + parsedUrl;
+                    }
+                    if (parsedUrl) domain = new URL(parsedUrl).hostname.replace(/^www\./, '');
+                } catch(e) {}
+
+                return `
+                    <a href="${this.safeUrl(link.url)}" target="_blank" rel="noopener noreferrer" class="nook-link-row">
+                        <div class="nook-link-main">
+                            <div class="nook-link-icon">${this.getLinkIcon(link.url)}</div>
+                            <div class="nook-link-info">
+                                <span class="nook-link-name">${this.escapeHtml(baslik)}</span>
+                                <span class="nook-link-domain">${this.escapeHtml(domain)}</span>
+                            </div>
+                        </div>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        // Sahip modunda düzenleme kontrollerini bağla
+        if (isUserOwner && typeof EditManager !== 'undefined' && EditManager.BackViews) {
+            EditManager.BackViews.init();
+        }
+    },
+
     menuCiz(data) {
-        const menuNav = document.getElementById('menuNav');
-        if (!menuNav) return;
+        this.linklerCiz(data);
+    },
+
+    altEkranlariCiz(data) {
+        this.linklerCiz(data);
+    },
+
+    // 1.3: Trophies Eşlikçi Kart Render Motoru
+    trophiesCiz(data) {
+        const body = document.getElementById('trophiesBody');
+        if (!body) return;
 
         const kart = (data && data.kullanici_adi) ? data : (typeof kartVerisi !== 'undefined' ? kartVerisi : {});
         const isUserOwner = (typeof isOwner !== 'undefined' && isOwner);
 
-        const aktifMenuler = [];
-
-        // Links - SADECE içerik varsa
-        if (Array.isArray(kart.links) && kart.links.length > 0) {
-            aktifMenuler.push({ id: "links", baslik: "Links" });
+        // Monkeytype verisini bul (trophies veya geriye dönük widgets fallback)
+        let mtData = null;
+        if (kart.trophies) {
+            if (kart.trophies.monkeytype) {
+                mtData = kart.trophies.monkeytype;
+            } else if (Array.isArray(kart.trophies)) {
+                mtData = kart.trophies.find(x => x.tur === 'monkeytype');
+            }
+        }
+        if (!mtData && Array.isArray(kart.widgets)) {
+            mtData = kart.widgets.find(x => x.tur === 'monkeytype');
         }
 
-        // Trophies - SADECE içerik varsa
-        if (Array.isArray(kart.trophies) && kart.trophies.length > 0) {
-            aktifMenuler.push({ id: "trophies", baslik: "Trophies" });
-        }
+        const username = mtData ? (mtData.kullanici || mtData.username || mtData.ayarlar?.kullanici || '') : '';
+        const live = (typeof kartVerisi !== 'undefined' && kartVerisi.canli_monkeytype) ? kartVerisi.canli_monkeytype : null;
 
-        // Widgets - SADECE içerik varsa
-        if (Array.isArray(kart.widgets) && kart.widgets.length > 0) {
-            aktifMenuler.push({ id: "widgets", baslik: "Widgets" });
-        }
+        let mtHtml = '';
+        if (username) {
+            const getStat = (mode, amount) => {
+                if (!live) return { wpm: '-', acc: '-' };
+                const modeData = live[mode];
+                const stat = (modeData && modeData[amount]) ? modeData[amount][0] : null;
+                if (!stat) return { wpm: '-', acc: '-' };
+                return {
+                    wpm: Math.round(stat.wpm || 0),
+                    acc: Math.round(stat.acc || 0)
+                };
+            };
 
-        // Working on - SADECE içerik varsa
-        if (kart.working_on && (kart.working_on.metin || kart.working_on.status)) {
-            aktifMenuler.push({ id: "working-on", baslik: "Working on" });
-        }
+            const t15 = getStat('time', '15');
+            const t60 = getStat('time', '60');
+            const w10 = getStat('words', '10');
+            const w25 = getStat('words', '25');
 
-        // Kullanıcının belirlediği özel sıralama varsa ona göre diz
-        if (kart.theme_config && Array.isArray(kart.theme_config.menu_order)) {
-            aktifMenuler.sort((a, b) => {
-                const idxA = kart.theme_config.menu_order.indexOf(a.id);
-                const idxB = kart.theme_config.menu_order.indexOf(b.id);
-                return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
-            });
-        }
-
-        let html = '';
-
-        if (aktifMenuler.length === 0) {
-            if (isUserOwner) {
-                html = `
-                    <div class="empty-menu-container">
-                        <p class="empty-menu-notice-text">Arka taraf henüz boş.</p>
-                        <button type="button" class="add-section-big-btn" id="open-add-section-modal">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
+            mtHtml = `
+                <div class="monkeytype-card" data-username="${this.escapeHtml(username)}">
+                    <div class="mt-card-header">
+                        <div class="mt-brand-badge">
+                            <span class="mt-brand-icon">mt</span>
+                            <span class="mt-brand-name">monkeytype</span>
+                        </div>
+                        <a href="https://monkeytype.com/profile/${encodeURIComponent(username)}" target="_blank" rel="noopener noreferrer" class="mt-profile-link" title="Monkeytype Profilini Gör">
+                            <span>@${this.escapeHtml(username)}</span>
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
                             </svg>
-                            <span>İçerik Ekle</span>
-                        </button>
+                        </a>
                     </div>
-                `;
-            } else {
-                html = `
-                    <div class="empty-menu-notice">
-                        <p class="empty-menu-text">Henüz içerik veya bağlantı eklenmemiş.</p>
+
+                    <div class="mt-scores-grid">
+                        <div class="mt-score-box" data-mode="time" data-amount="15">
+                            <span class="mt-score-title">15s Time</span>
+                            <div class="mt-score-main">
+                                <span class="mt-score-wpm">${t15.wpm}</span>
+                                <span class="mt-score-unit">wpm</span>
+                            </div>
+                            <span class="mt-score-acc">${t15.acc !== '-' ? `${t15.acc}% acc` : '-% acc'}</span>
+                        </div>
+
+                        <div class="mt-score-box" data-mode="time" data-amount="60">
+                            <span class="mt-score-title">60s Time</span>
+                            <div class="mt-score-main">
+                                <span class="mt-score-wpm">${t60.wpm}</span>
+                                <span class="mt-score-unit">wpm</span>
+                            </div>
+                            <span class="mt-score-acc">${t60.acc !== '-' ? `${t60.acc}% acc` : '-% acc'}</span>
+                        </div>
+
+                        <div class="mt-score-box" data-mode="words" data-amount="10">
+                            <span class="mt-score-title">10 Words</span>
+                            <div class="mt-score-main">
+                                <span class="mt-score-wpm">${w10.wpm}</span>
+                                <span class="mt-score-unit">wpm</span>
+                            </div>
+                            <span class="mt-score-acc">${w10.acc !== '-' ? `${w10.acc}% acc` : '-% acc'}</span>
+                        </div>
+
+                        <div class="mt-score-box" data-mode="words" data-amount="25">
+                            <span class="mt-score-title">25 Words</span>
+                            <div class="mt-score-main">
+                                <span class="mt-score-wpm">${w25.wpm}</span>
+                                <span class="mt-score-unit">wpm</span>
+                            </div>
+                            <span class="mt-score-acc">${w25.acc !== '-' ? `${w25.acc}% acc` : '-% acc'}</span>
+                        </div>
                     </div>
-                `;
-            }
+                </div>
+            `;
+        } else if (isUserOwner) {
+            mtHtml = `
+                <div class="companion-empty-state" style="padding: 3cqh 0; text-align: center;">
+                    <p class="placeholder-text" style="margin-bottom: 1.5cqh; color: var(--text-tertiary);">Henüz Monkeytype rekoru eklenmemiş.</p>
+                    <button type="button" class="view-add-btn" id="trophies-add-mt-btn" style="width: auto; margin: 0 auto; display: inline-flex;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Monkeytype Ekle</span>
+                    </button>
+                </div>
+            `;
         } else {
-            // İçeriği olan kategorilerin butonları
-            const butonlarHtml = aktifMenuler.map(item => `
-                <button class="nav-item-btn" data-target="${item.id}">
-                    <div class="nav-btn-left">
-                        ${this.getCategoryBadge(item.id, false)}
-                        <span class="nav-item-title">${this.escapeHtml(item.baslik)}</span>
+            mtHtml = `<p class="placeholder-text" style="text-align: center; color: var(--text-tertiary); padding: 3cqh 0;">Henüz başarı veya rekor eklenmemiş.</p>`;
+        }
+
+        // Gelecek Oyunlar Vitrini (Önizleme)
+        const gamesPreviewHtml = `
+            <div class="trophies-games-preview" style="margin-top: 2.2cqh; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 1.8cqh;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.4cqh;">
+                    <span style="font-size: var(--cq-fs-desc); font-weight: 600; color: var(--text-secondary); letter-spacing: 0.03em; text-transform: uppercase;">Oyun Rankları</span>
+                    <span style="font-size: var(--cq-fs-mono); color: var(--text-tertiary); background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">Alfa Sonrası</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.8cqw;">
+                    <div style="background: var(--bg-card-subtle); border: 1px solid var(--border-soft); border-radius: var(--radius-item); padding: 2cqw 2.5cqw; opacity: 0.65; display: flex; align-items: center; gap: 2cqw;">
+                        <span style="font-size: 1.15rem;">⚔️</span>
+                        <div style="overflow: hidden;">
+                            <div style="font-size: var(--cq-fs-pill); font-weight: 600; color: var(--text-primary);">LoL / Valo</div>
+                            <div style="font-size: var(--cq-fs-mono); color: var(--text-tertiary);">Rank & Peak</div>
+                        </div>
                     </div>
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </button>
-            `).join('');
-
-            // Sahip ise yeni içerik ekleme butonu
-            const addBtnHtml = isUserOwner ? `
-                <button type="button" class="add-section-nav-btn" id="open-add-section-modal">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    <span>İçerik Ekle</span>
-                </button>
-            ` : '';
-
-            html = butonlarHtml + addBtnHtml;
-        }
-
-        menuNav.innerHTML = html;
-
-        // Sahip modunda buton olaylarını bağla
-        if (isUserOwner && typeof EditManager !== 'undefined' && EditManager.SectionPicker) {
-            EditManager.SectionPicker.bagla();
-        }
-    },
-
-    // 1.3: Arka Yüz (Alt Ekranlar) Dinamik Render Fonksiyonu
-    altEkranlariCiz(data) {
-        const viewsWrapper = document.getElementById('viewsWrapper');
-        if (!viewsWrapper || !data) return;
-
-        // O anda açık olan bir alt detay ekranı varsa ID'sini kaydet
-        const activeDetailId = (typeof Router !== 'undefined' && Router.activeDetailView)
-            ? Router.activeDetailView.id
-            : null;
-
-        // Kök menü haricindeki eski dinamik ekranları temizle
-        const existingDetails = viewsWrapper.querySelectorAll('.view-detail');
-        existingDetails.forEach(el => el.remove());
-
-        // 1. Links Ekranı
-        viewsWrapper.appendChild(this.ekranKabuguOlustur('links', 'Links', this.linksIcerikHTML(data.links)));
-
-        // 2. Trophies Ekranı
-        viewsWrapper.appendChild(this.ekranKabuguOlustur('trophies', 'Trophies', this.trophiesIcerikHTML(data.trophies)));
-
-        // 4. Widgets Ekranı
-        viewsWrapper.appendChild(this.ekranKabuguOlustur('widgets', 'Widgets', this.widgetsIcerikHTML(data.widgets)));
-
-        // 5. Working on Ekranı
-        const workingText = data.working_on?.metin || '';
-        viewsWrapper.appendChild(this.ekranKabuguOlustur('working-on', 'Working on', workingText ? `
-            <div class="status-card">
-                <span class="status-dot"></span>
-                <p class="status-text">${this.escapeHtml(workingText)}</p>
+                    <div style="background: var(--bg-card-subtle); border: 1px solid var(--border-soft); border-radius: var(--radius-item); padding: 2cqw 2.5cqw; opacity: 0.65; display: flex; align-items: center; gap: 2cqw;">
+                        <span style="font-size: 1.15rem;">🥊</span>
+                        <div style="overflow: hidden;">
+                            <div style="font-size: var(--cq-fs-pill); font-weight: 600; color: var(--text-primary);">Brawlhalla</div>
+                            <div style="font-size: var(--cq-fs-mono); color: var(--text-tertiary);">Elo & Kupa</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        ` : `<p class="placeholder-text">Henüz durum bilgisi eklenmemiş.</p>`));
+        `;
 
-        // Eğer önceden aktif olan bir alt ekran varsa, yeniden üretilen DOM paneline .active sınıfını ve Router referansını aktar
-        if (activeDetailId) {
-            const restoredPanel = document.getElementById(activeDetailId);
-            if (restoredPanel) {
-                restoredPanel.classList.add('active');
-                if (typeof Router !== 'undefined') {
-                    Router.activeDetailView = restoredPanel;
-                }
-            } else if (typeof Router !== 'undefined') {
-                Router.resetToMainMenu();
-            }
-        }
+        body.innerHTML = mtHtml + gamesPreviewHtml;
 
-        // Eğer sahip modundaysak ve EditManager yüklüyse arka ekran kontrollerini bağla
-        if (typeof isOwner !== 'undefined' && isOwner && typeof EditManager !== 'undefined') {
-            EditManager.BackViews?.init();
+        if (isUserOwner && typeof EditManager !== 'undefined' && EditManager.TrophiesView) {
+            EditManager.TrophiesView.init();
         }
     },
 
