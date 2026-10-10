@@ -1,4 +1,4 @@
-/* #region 1: GÖRSEL DÜZENLEME OVERLAY'LERİ (AVATAR & BANNER) */
+/* #region 1: GÖRSEL DÜZENLEME (AVATAR & BANNER) */
 .banner-box {
     position: relative;
     z-index: 1;
@@ -9,49 +9,13 @@
     z-index: 10;
 }
 
-body.is-owner .image-edit-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(2px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1cqw;
-    opacity: 0;
+body.is-owner .banner-box,
+body.is-owner .avatar-box {
     cursor: pointer;
-    transition: opacity 0.2s ease;
-    color: #ffffff;
 }
 
-body.is-owner .banner-box .image-edit-overlay {
-    z-index: 2;
-    justify-content: center;
-    padding-bottom: 7cqw;
-}
-
-body.is-owner .avatar-box .image-edit-overlay {
-    z-index: 11;
-    border-radius: var(--radius-circle);
-    overflow: hidden;
-}
-
-body.is-owner .banner-box:hover .image-edit-overlay,
-body.is-owner .avatar-box:hover .image-edit-overlay {
-    opacity: 1;
-}
-
-.image-edit-overlay svg {
-    width: 5cqw;
-    height: 5cqw;
-    stroke: #ffffff;
-}
-
-.image-edit-overlay span {
-    font-size: var(--cq-fs-desc);
-    font-weight: 600;
-    letter-spacing: 0.02em;
+body.is-owner .image-edit-overlay {
+    display: none !important;
 }
 /* #endregion */
 
@@ -685,19 +649,12 @@ textarea.inline-form-input {
     user-select: none;
 }
 
-body.is-owner .edit-action-bar {
+body.is-owner.has-unsaved-changes .edit-action-bar {
     bottom: 24px;
 }
 
-body.is-owner:not(.has-unsaved-changes) .edit-bar-btn.save-btn {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-body.is-owner:not(.has-unsaved-changes) .edit-bar-btn.cancel-btn {
-    opacity: 0.5;
-    cursor: not-allowed;
+body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
+    bottom: -90px;
     pointer-events: none;
 }
 
@@ -1736,16 +1693,10 @@ body.is-owner:not(.has-unsaved-changes) .edit-bar-btn.cancel-btn {
 
 /* #region 17: DOKUNMATİK CİHAZ KONTROLLERİ (@media hover: none) */
 @media (hover: none) {
-    body.is-owner .tag-pill .tag-remove-btn,
     body.is-owner .link-item-row .item-delete-btn,
     body.is-owner .top-item-card .item-delete-btn {
         display: flex !important;
         opacity: 0.9;
-    }
-
-    body.is-owner .banner-box .image-edit-overlay,
-    body.is-owner .avatar-box .image-edit-overlay {
-        opacity: 0.8 !important;
     }
 }
 /* #endregion */

@@ -970,33 +970,24 @@ EditManager.Media = {
         const bannerBox = document.querySelector('.banner-box');
         const avatarBox = document.querySelector('.avatar-box');
 
-        const cameraIconSvg = `
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                <circle cx="12" cy="13" r="4"></circle>
-            </svg>
-        `;
-
-        if (bannerBox && !bannerBox.querySelector('.image-edit-overlay')) {
-            const overlay = document.createElement('div');
-            overlay.className = 'image-edit-overlay';
-            overlay.innerHTML = `${cameraIconSvg}<span>Bannerı Değiştir</span>`;
-            overlay.addEventListener('click', () => {
+        if (bannerBox && !bannerBox._bannerClickBound) {
+            bannerBox._bannerClickBound = true;
+            bannerBox.style.cursor = 'pointer';
+            bannerBox.addEventListener('click', (e) => {
+                if (e.target.closest('a') || e.target.closest('button')) return;
                 const input = document.getElementById('banner-file-input');
                 if (input) input.click();
             });
-            bannerBox.appendChild(overlay);
         }
 
-        if (avatarBox && !avatarBox.querySelector('.image-edit-overlay')) {
-            const overlay = document.createElement('div');
-            overlay.className = 'image-edit-overlay';
-            overlay.innerHTML = `${cameraIconSvg}`;
-            overlay.addEventListener('click', () => {
+        if (avatarBox && !avatarBox._avatarClickBound) {
+            avatarBox._avatarClickBound = true;
+            avatarBox.style.cursor = 'pointer';
+            avatarBox.addEventListener('click', (e) => {
+                if (e.target.closest('a') || e.target.closest('button')) return;
                 const input = document.getElementById('pfp-file-input');
                 if (input) input.click();
             });
-            avatarBox.appendChild(overlay);
         }
     },
 
