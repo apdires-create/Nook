@@ -264,80 +264,60 @@ const EditManager = {
             const bar = document.createElement('div');
             bar.id = 'edit-action-bar';
             bar.className = 'edit-action-bar';
-            const currentColor = kartVerisi.theme_config?.primary_color || '#3b5bdb';
             bar.innerHTML = `
-                <div class="edit-action-bar-inner">
-                    <div class="edit-color-picker-wrap">
-                        <button type="button" id="edit-color-trigger" class="edit-bar-color-btn" title="Vurgu Rengini Değiştir">
-                            <span class="edit-color-dot" id="edit-color-dot" style="background: ${currentColor};"></span>
-                            <span>Renk</span>
-                        </button>
-                        <div class="edit-color-popover" id="edit-color-popover" style="display: none;">
-                            <div class="color-presets-row">
-                                <button type="button" class="color-swatch-btn" data-color="#3b5bdb" style="background: #3b5bdb;" title="Sapphire"></button>
-                                <button type="button" class="color-swatch-btn" data-color="#e03131" style="background: #e03131;" title="Ruby"></button>
-                                <button type="button" class="color-swatch-btn" data-color="#2f9e44" style="background: #2f9e44;" title="Emerald"></button>
-                                <button type="button" class="color-swatch-btn" data-color="#f59f00" style="background: #f59f00;" title="Amber"></button>
-                                <button type="button" class="color-swatch-btn" data-color="#9c36b5" style="background: #9c36b5;" title="Amethyst"></button>
-                                <button type="button" class="color-swatch-btn" data-color="#1098ad" style="background: #1098ad;" title="Cyan"></button>
-                                <label class="color-custom-label" title="Özel Renk Seç">
-                                    <input type="color" id="edit-color-input" value="${currentColor}" class="color-native-input">
-                                    <span class="color-custom-wheel">🎨</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="edit-action-btns">
-                        <button type="button" id="edit-cancel-btn" class="edit-bar-btn cancel-btn">Sıfırla</button>
-                        <button type="button" id="edit-save-btn" class="edit-bar-btn save-btn">Kaydet</button>
-                    </div>
+                <div class="edit-action-btns">
+                    <button type="button" id="edit-cancel-btn" class="edit-bar-btn cancel-btn">Sıfırla</button>
+                    <button type="button" id="edit-save-btn" class="edit-bar-btn save-btn">Kaydet</button>
                 </div>
             `;
             document.body.appendChild(bar);
-
-            const colorTrigger = bar.querySelector('#edit-color-trigger');
-            const colorPopover = bar.querySelector('#edit-color-popover');
-            const colorDot = bar.querySelector('#edit-color-dot');
-            const nativeColorInput = bar.querySelector('#edit-color-input');
-
-            if (colorTrigger && colorPopover) {
-                colorTrigger.onclick = (e) => {
-                    e.stopPropagation();
-                    const isShown = colorPopover.style.display !== 'none';
-                    colorPopover.style.display = isShown ? 'none' : 'block';
-                };
-
-                document.addEventListener('click', (e) => {
-                    if (!e.target.closest('.edit-color-picker-wrap')) {
-                        colorPopover.style.display = 'none';
-                    }
-                });
-
-                const applyColor = (color) => {
-                    if (!color) return;
-                    document.documentElement.style.setProperty('--accent-color', color);
-                    if (colorDot) colorDot.style.background = color;
-                    if (nativeColorInput) nativeColorInput.value = color;
-                    if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
-                    kartVerisi.theme_config.primary_color = color;
-                    EditManager.Global.degisiklikYapildi();
-                };
-
-                colorPopover.querySelectorAll('.color-swatch-btn').forEach(btn => {
-                    btn.onclick = (e) => {
-                        e.stopPropagation();
-                        applyColor(btn.dataset.color);
-                        colorPopover.style.display = 'none';
-                    };
-                });
-
-                if (nativeColorInput) {
-                    nativeColorInput.oninput = (e) => {
-                        applyColor(e.target.value);
-                    };
-                }
-            }
         }
+
+        this.initThemeMenu();
+    },
+
+    initThemeMenu() {
+        const themeBtn = document.getElementById('nav-item-theme');
+        const palette = document.getElementById('nav-theme-palette');
+        const themeDot = document.getElementById('nav-theme-dot');
+        const themeWrap = document.getElementById('nav-theme-wrap');
+        const colorInput = document.getElementById('nav-color-input');
+        if (!themeBtn || !palette) return;
+
+        const curColor = kartVerisi.theme_config?.primary_color || '#3b5bdb';
+        if (themeDot) themeDot.style.background = curColor;
+        if (colorInput) colorInput.value = curColor;
+
+        themeBtn.onclick = (e) => {
+            e.stopPropagation();
+            const isShown = palette.style.display !== 'none';
+            palette.style.display = isShown ? 'none' : 'block';
+            if (themeWrap) themeWrap.classList.toggle('is-open', !isShown);
+        };
+
+        const applyThemeColor = (color) => {
+            if (!color) return;
+            document.documentElement.style.setProperty('--accent-color', color);
+            if (themeDot) themeDot.style.background = color;
+            if (colorInput) colorInput.value = color;
+            if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
+            kartVerisi.theme_config.primary_color = color;
+            EditManager.Global.degisiklikYapildi();
+        };
+
+        palette.querySelectorAll('.color-swatch-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                applyThemeColor(btn.dataset.color);
+            };
+        });
+
+        if (colorInput) {
+            colorInput.oninput = (e) => {
+                applyThemeColor(e.target.value);
+            };
+        }
+    },
 
         // 2. Cropper Modal Enjeksiyonu
         if (!document.getElementById('cropper-modal')) {
@@ -710,6 +690,14 @@ EditManager.Global = {
 
         kartVerisi = JSON.parse(JSON.stringify(EditManager.state.orijinalVeri));
 
+        // Vurgu rengini orijinal haline döndür
+        const originalColor = kartVerisi.theme_config?.primary_color || '#3b5bdb';
+        document.documentElement.style.setProperty('--accent-color', originalColor);
+        const themeDot = document.getElementById('nav-theme-dot');
+        const colorInput = document.getElementById('nav-color-input');
+        if (themeDot) themeDot.style.background = originalColor;
+        if (colorInput) colorInput.value = originalColor;
+
         // Eğer o an görüntülenen liste orijinal veride de mevcutsa, kullanıcının bulunduğu sekmede kal
         if (suAnkiAktifListeId && kartVerisi.tops?.listeler?.some(l => l.id === suAnkiAktifListeId)) {
             kartVerisi.tops.aktifListeId = suAnkiAktifListeId;
@@ -723,11 +711,15 @@ EditManager.Global = {
             RenderEngine.menuCiz(kartVerisi);
             RenderEngine.altEkranlariCiz(kartVerisi);
             RenderEngine.companionCiz(kartVerisi.tops);
+            if (typeof RenderEngine.trophiesCiz === 'function') {
+                RenderEngine.trophiesCiz(kartVerisi);
+            }
         }
 
         EditManager.Vitrin.init();
         EditManager.BackViews.init();
         EditManager.CompanionViews?.init();
+        if (EditManager.TrophiesView) EditManager.TrophiesView.init();
     },
 
     async kaydet() {
@@ -1209,6 +1201,7 @@ EditManager.Vitrin = {
                 if (typeof RenderEngine !== 'undefined') {
                     RenderEngine.vitrinCiz(kartVerisi);
                 }
+                EditManager.Vitrin.init();
 
                 if (yeniDeger !== eskiDeger) {
                     EditManager.Global.degisiklikYapildi();
@@ -1237,6 +1230,7 @@ EditManager.Vitrin = {
                     if (typeof RenderEngine !== 'undefined') {
                         RenderEngine.vitrinCiz(kartVerisi);
                     }
+                    EditManager.Vitrin.init();
                 }
             });
         });
@@ -1269,6 +1263,36 @@ EditManager.Vitrin = {
                 pill.appendChild(removeBtn);
             }
         });
+
+        // 6'dan az tag varsa "+ Tag Ekle" hapı ekle (Desktop)
+        const currentTags = Array.isArray(kartVerisi.front_data?.tags) ? kartVerisi.front_data.tags : [];
+        if (currentTags.length < 6 && !tagsGrid.querySelector('.tag-add-pill')) {
+            const addPill = document.createElement('button');
+            addPill.className = 'tag-add-pill';
+            addPill.type = 'button';
+            addPill.textContent = '+ Tag Ekle';
+            addPill.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (EditManager.TagPicker) {
+                    EditManager.TagPicker.ac();
+                }
+            });
+            tagsGrid.appendChild(addPill);
+        }
+
+        // Mobilde etiket bölgesine tıklandığında pop-up aç
+        const tagsZone = document.getElementById('tagsZone');
+        if (tagsZone && !tagsZone._hasMobileListener) {
+            tagsZone._hasMobileListener = true;
+            tagsZone.addEventListener('click', (e) => {
+                if (window.innerWidth < 900 && !e.target.closest('.tag-remove-btn') && !e.target.closest('.tag-add-pill')) {
+                    e.stopPropagation();
+                    if (EditManager.TagPicker) {
+                        EditManager.TagPicker.ac();
+                    }
+                }
+            });
+        }
 
         // Sürükle-Bırak Sistemi (Pointer Reorder: Hover, Grab, Drop)
         EditManager.initPointerSortable(tagsGrid, {
@@ -2481,6 +2505,23 @@ EditManager.TagPicker = {
         const tamHavuzEslesmesi = havuz.some(tag => tag.toLowerCase() === filtreMetni);
         const zatenSeciliMi = mevcutTags.some(tag => tag.toLowerCase() === filtreMetni);
 
+        // 1. Seçili Etiketler Başlığı ve Hapları
+        let activeTagsHtml = '';
+        if (mevcutTags.length > 0) {
+            activeTagsHtml = `
+                <div class="tag-picker-section-title">Seçili Etiketler (${mevcutTags.length}/6)</div>
+                <div class="tag-picker-active-tags">
+                    ${mevcutTags.map(t => `
+                        <span class="tag-picker-active-pill" data-tag="${EditManager.escapeHtml(t)}">
+                            ${EditManager.escapeHtml(t)}
+                            <button type="button" class="tag-picker-remove-btn" title="Kaldır">&times;</button>
+                        </span>
+                    `).join('')}
+                </div>
+                <div class="tag-picker-section-title" style="margin-top: 10px;">Etiket Havuzu</div>
+            `;
+        }
+
         let createItemHtml = '';
         if (temizArama && !tamHavuzEslesmesi && !zatenSeciliMi && temizArama.length <= 20) {
             createItemHtml = `
@@ -2501,16 +2542,23 @@ EditManager.TagPicker = {
             `;
         }).join('');
 
-        if (!createItemHtml && filtrelenmis.length === 0) {
+        if (!createItemHtml && filtrelenmis.length === 0 && mevcutTags.length === 0) {
             wrap.innerHTML = `<div class="tag-pool-empty">Eşleşen etiket bulunamadı.</div>`;
             return;
         }
 
-        wrap.innerHTML = createItemHtml + havuzItemsHtml;
+        wrap.innerHTML = activeTagsHtml + createItemHtml + havuzItemsHtml;
+
+        wrap.querySelectorAll('.tag-picker-active-pill').forEach(pill => {
+            pill.onclick = (e) => {
+                e.stopPropagation();
+                this.etiketSec(pill.dataset.tag);
+            };
+        });
 
         wrap.querySelectorAll('.tag-pool-item').forEach(item => {
-            if (item.classList.contains('is-already-selected')) return;
-            item.onclick = () => {
+            item.onclick = (e) => {
+                e.stopPropagation();
                 const tag = item.dataset.tag;
                 this.etiketSec(tag);
             };
@@ -2530,20 +2578,19 @@ EditManager.TagPicker = {
         if (!kartVerisi.front_data) kartVerisi.front_data = {};
         if (!Array.isArray(kartVerisi.front_data.tags)) kartVerisi.front_data.tags = [];
 
-        if (kartVerisi.front_data.tags.length >= 6) {
-            alert("En fazla 6 etiket seçebilirsiniz!");
-            this.kapat();
-            return;
+        const mevcutIndex = kartVerisi.front_data.tags.findIndex(t => t.toLowerCase() === temizTag.toLowerCase());
+        if (mevcutIndex !== -1) {
+            // Zaten seçiliyse kaldır (toggle)
+            kartVerisi.front_data.tags.splice(mevcutIndex, 1);
+        } else {
+            if (kartVerisi.front_data.tags.length >= 6) {
+                alert("En fazla 6 etiket seçebilirsiniz!");
+                return;
+            }
+            kartVerisi.front_data.tags.push(temizTag);
         }
 
-        if (kartVerisi.front_data.tags.some(t => t.toLowerCase() === temizTag.toLowerCase())) {
-            this.kapat();
-            return;
-        }
-
-        kartVerisi.front_data.tags.push(temizTag);
-        this.kapat();
-
+        this.havuzuCiz(document.getElementById('tag-search-input')?.value || '');
         RenderEngine.vitrinCiz(kartVerisi);
         EditManager.Vitrin.init();
         EditManager.Global.degisiklikYapildi();

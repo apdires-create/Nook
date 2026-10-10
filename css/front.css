@@ -4,92 +4,94 @@
     transform: translateZ(2px);
 }
 
-/* Sağ Üst: Showcase ve Trophies Dikey Bayrakları (Flag Badges) */
+/* Sağ Kenar: Ribbon / Flag Butonları */
 .card-flags-wrapper {
     position: absolute;
-    top: 3.2cqw;
-    right: 3.2cqw;
+    top: 36px;
+    left: 100%;
+    margin-left: -2px;
     display: flex;
-    align-items: center;
-    gap: 1.8cqw;
-    z-index: 20;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 35;
+    pointer-events: auto;
 }
 
 .card-flag-btn {
     position: relative;
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 1.2cqw;
-    padding: 1cqw 2.6cqw;
-    border-radius: var(--radius-pill);
-    font-size: var(--cq-fs-desc);
-    font-weight: 600;
-    font-family: inherit;
+    justify-content: center;
+    width: 38px;
+    height: 42px;
+    padding: 0;
+    border-radius: 0 12px 12px 0;
+    border: none;
     cursor: pointer;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-                background-color 0.22s ease,
-                border-color 0.22s ease,
                 box-shadow 0.22s ease,
-                color 0.22s ease;
+                filter 0.22s ease;
     user-select: none;
+    outline: none;
 }
 
 .card-flag-btn .flag-icon {
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #ffffff;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
 }
 
-.card-flag-btn .flag-label {
-    line-height: 1;
-    letter-spacing: 0.02em;
-}
-
-/* 🟥 Trophies Kırmızı Bayrak */
+/* 🟥 Trophies Canlı Kırmızı/Yakut Ribbon */
 .card-flag-btn.flag-trophies {
-    background: rgba(224, 49, 49, 0.2);
-    border: 1px solid rgba(224, 49, 49, 0.45);
-    color: #ff8787;
+    background: linear-gradient(135deg, #ff3b56 0%, #e03131 65%, #c92a2a 100%);
+    box-shadow: 4px 4px 14px rgba(224, 49, 49, 0.45), 2px 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .card-flag-btn.flag-trophies:hover {
-    background: rgba(224, 49, 49, 0.35);
-    border-color: #ff6b6b;
-    color: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(224, 49, 49, 0.45);
+    transform: translateX(4px) scale(1.04);
+    box-shadow: 6px 4px 20px rgba(255, 59, 86, 0.65), 2px 2px 8px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.1);
 }
 
 .stage.has-companion-open.is-trophies-active .card-flag-btn.flag-trophies {
-    background: #e03131;
-    border-color: #ffa8a8;
-    color: #ffffff;
-    box-shadow: 0 0 20px rgba(224, 49, 49, 0.75);
+    transform: translateX(3px);
+    box-shadow: 0 0 24px rgba(255, 59, 86, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
+    filter: brightness(1.15);
 }
 
-/* 🟦 Showcase Mavi Bayrak */
+/* 🟦 Showcase Canlı Mavi/Safir Ribbon */
 .card-flag-btn.flag-showcase {
-    background: rgba(59, 91, 219, 0.2);
-    border: 1px solid rgba(59, 91, 219, 0.45);
-    color: #748ffc;
+    background: linear-gradient(135deg, #228be6 0%, #1c7ed6 60%, #1864ab 100%);
+    box-shadow: 4px 4px 14px rgba(34, 139, 230, 0.45), 2px 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .card-flag-btn.flag-showcase:hover {
-    background: rgba(59, 91, 219, 0.35);
-    border-color: #91a7ff;
-    color: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(59, 91, 219, 0.45);
+    transform: translateX(4px) scale(1.04);
+    box-shadow: 6px 4px 20px rgba(34, 139, 230, 0.65), 2px 2px 8px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.1);
 }
 
 .stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase {
-    background: #3b5bdb;
-    border-color: #bac8ff;
-    color: #ffffff;
-    box-shadow: 0 0 20px rgba(59, 91, 219, 0.75);
+    transform: translateX(3px);
+    box-shadow: 0 0 24px rgba(34, 139, 230, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
+    filter: brightness(1.15);
+}
+
+@media (max-width: 899px) {
+    .card-flags-wrapper {
+        top: 28px;
+        margin-left: -3px;
+        gap: 8px;
+    }
+    .card-flag-btn {
+        width: 34px;
+        height: 38px;
+        border-radius: 0 10px 10px 0;
+    }
 }
 
 @media (max-width: 360px) {
@@ -216,34 +218,16 @@
     gap: 1.8cqw;
 }
 
-.tag-edit-trigger-btn {
-    display: none;
-    position: absolute;
-    right: 0;
-    bottom: -2px;
-    width: 24px;
-    height: 24px;
-    border-radius: var(--radius-circle);
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    color: var(--text-secondary);
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    z-index: 5;
-    padding: 0;
-}
-
-body.is-owner .tag-edit-trigger-btn {
-    display: inline-flex;
-}
-
-.tag-edit-trigger-btn:hover {
-    background: var(--accent-color);
-    border-color: var(--accent-color);
-    color: #ffffff;
-    transform: scale(1.1);
+@media (max-width: 899px) {
+    body.is-owner .tag-add-pill {
+        display: none !important;
+    }
+    body.is-owner .tag-remove-btn {
+        display: none !important;
+    }
+    body.is-owner .tags-zone {
+        cursor: pointer;
+    }
 }
 
 .tag-pill {

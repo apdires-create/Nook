@@ -243,6 +243,29 @@
                         </svg>
                         Sayfa Linkini Kopyala
                     </button>
+                    <div class="user-theme-dropdown-wrap" id="nav-theme-wrap">
+                        <button type="button" class="user-dropdown-item" id="nav-item-theme">
+                            <span class="user-theme-dot" id="nav-theme-dot"></span>
+                            <span style="flex: 1; text-align: left;">Vurgu Rengi</span>
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="theme-chevron-icon">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                        <div class="user-theme-palette" id="nav-theme-palette" style="display: none;">
+                            <div class="color-presets-row">
+                                <button type="button" class="color-swatch-btn" data-color="#3b5bdb" style="background: #3b5bdb;" title="Sapphire"></button>
+                                <button type="button" class="color-swatch-btn" data-color="#e03131" style="background: #e03131;" title="Ruby"></button>
+                                <button type="button" class="color-swatch-btn" data-color="#2f9e44" style="background: #2f9e44;" title="Emerald"></button>
+                                <button type="button" class="color-swatch-btn" data-color="#f59f00" style="background: #f59f00;" title="Amber"></button>
+                                <button type="button" class="color-swatch-btn" data-color="#9c36b5" style="background: #9c36b5;" title="Amethyst"></button>
+                                <button type="button" class="color-swatch-btn" data-color="#1098ad" style="background: #1098ad;" title="Cyan"></button>
+                                <label class="color-custom-label" title="Özel Renk">
+                                    <input type="color" id="nav-color-input" value="#3b5bdb" class="color-native-input">
+                                    <span class="color-custom-wheel">🎨</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                     <button type="button" class="user-dropdown-item text-danger" id="nav-item-logout">
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -262,38 +285,36 @@
     <!-- Sahne ve 5:7 Kart Kapsayıcısı -->
     <main class="stage" id="profileStage" style="display: none;">
         <div class="card-container" id="cardContainer">
+            <!-- Sağ Kenar: Ribbon / Flag Butonları -->
+            <div class="card-flags-wrapper" id="cardFlagsWrapper">
+                <button type="button" class="card-flag-btn flag-trophies" id="triggerTrophiesBtn" aria-label="Trophies" title="Trophies (Başarılar)">
+                    <span class="flag-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                            <path d="M4 22h16"></path>
+                            <path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"></path>
+                            <path d="M6 4h12a2 2 0 0 1 2 2v3a6 6 0 0 1-12 0V6a2 2 0 0 1 2-2z"></path>
+                        </svg>
+                    </span>
+                </button>
+                <button type="button" class="card-flag-btn flag-showcase" id="triggerShowcaseBtn" aria-label="Showcase" title="Showcase (Vitrin)">
+                    <span class="flag-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 21h8"></path>
+                            <path d="M12 17v4"></path>
+                            <path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
+                            <path d="M7 6H4a2 2 0 0 0-2 2v1a4 4 0 0 0 4 4h1"></path>
+                            <path d="M17 6h3a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-1"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+
             <div class="nook-card" id="nookCard">
                 
                 <!-- ÖN YÜZ (VİTRİN) -->
                 <section class="card-face card-front" id="cardFront">
-                    <!-- Sağ Üst: Showcase ve Trophies Bayrakları -->
-                    <div class="card-flags-wrapper" id="cardFlagsWrapper">
-                        <button class="card-flag-btn flag-trophies" id="triggerTrophiesBtn" aria-label="Trophies" title="Trophies (Başarılar)">
-                            <span class="flag-icon">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-                                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-                                    <path d="M4 22h16"></path>
-                                    <path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"></path>
-                                    <path d="M6 4h12a2 2 0 0 1 2 2v3a6 6 0 0 1-12 0V6a2 2 0 0 1 2-2z"></path>
-                                </svg>
-                            </span>
-                            <span class="flag-label">Trophies</span>
-                        </button>
-                        <button class="card-flag-btn flag-showcase" id="triggerShowcaseBtn" aria-label="Showcase" title="Showcase (Vitrin)">
-                            <span class="flag-icon">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M8 21h8"></path>
-                                    <path d="M12 17v4"></path>
-                                    <path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
-                                    <path d="M7 6H4a2 2 0 0 0-2 2v1a4 4 0 0 0 4 4h1"></path>
-                                    <path d="M17 6h3a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-1"></path>
-                                </svg>
-                            </span>
-                            <span class="flag-label">Showcase</span>
-                        </button>
-                    </div>
-
                     <!-- 1. Bölge: Üst Kimlik -->
                     <header class="identity-zone">
                         <div class="banner-box">
@@ -314,12 +335,6 @@
                     <!-- 3. Bölge: Taban (Tag Izgarası) -->
                     <footer class="tags-zone" id="tagsZone">
                         <div class="tags-grid" id="tagsGrid"></div>
-                        <button type="button" class="tag-edit-trigger-btn" id="tagEditTriggerBtn" title="Etiketleri Düzenle" aria-label="Etiketleri Düzenle">
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 20h9"></path>
-                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                            </svg>
-                        </button>
                     </footer>
                 </section>
 

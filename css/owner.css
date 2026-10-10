@@ -705,68 +705,45 @@ body.is-owner:not(.has-unsaved-changes) .edit-bar-btn.cancel-btn {
     display: none !important;
 }
 
-.edit-action-bar-inner {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
 .edit-action-btns {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-/* Vurgu Rengi Seçici (Color Picker) */
-.edit-color-picker-wrap {
+/* Profil Menüsü İçi Vurgu Rengi Seçici */
+.user-theme-dropdown-wrap {
     position: relative;
-    display: inline-flex;
-    align-items: center;
+    width: 100%;
 }
 
-.edit-bar-color-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 12px;
-    border-radius: var(--radius-pill);
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: var(--text-primary);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.edit-bar-color-btn:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.25);
-}
-
-.edit-color-dot {
-    width: 14px;
-    height: 14px;
+.user-theme-dot {
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
+    background: var(--accent-color, #3b5bdb);
     border: 1.5px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 0 8px var(--accent-glow);
+    box-shadow: 0 0 6px var(--accent-glow, rgba(59, 91, 219, 0.4));
+    margin-right: 8px;
     display: inline-block;
+    vertical-align: middle;
 }
 
-.edit-color-popover {
-    position: absolute;
-    bottom: calc(100% + 10px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(21, 24, 36, 0.96);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    padding: 10px 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
-    z-index: 1001;
-    white-space: nowrap;
+.theme-chevron-icon {
+    opacity: 0.6;
+    transition: transform 0.2s ease;
+}
+
+.user-theme-dropdown-wrap.is-open .theme-chevron-icon {
+    transform: rotate(90deg);
+}
+
+.user-theme-palette {
+    padding: 8px 10px;
+    background: rgba(14, 17, 26, 0.95);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 4px 6px 8px 6px;
 }
 
 .color-presets-row {
@@ -1335,10 +1312,62 @@ body.is-owner:not(.has-unsaved-changes) .edit-bar-btn.cancel-btn {
 }
 
 .tag-pool-item.is-already-selected {
-    opacity: 0.4;
-    cursor: not-allowed;
-    background: rgba(255, 255, 255, 0.02);
-    border-style: dashed;
+    background: rgba(59, 91, 219, 0.25);
+    border-color: var(--accent-color);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.tag-pool-item.is-already-selected:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    color: #ffffff;
+}
+
+.tag-picker-section-title {
+    width: 100%;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.45);
+    margin: 6px 0 2px 0;
+}
+
+.tag-picker-active-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+}
+
+.tag-picker-active-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px 5px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-pill);
+    color: #ffffff;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tag-picker-active-pill:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+}
+
+.tag-picker-active-pill .tag-picker-remove-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
 }
 
 .tag-pool-item.tag-pool-create {
