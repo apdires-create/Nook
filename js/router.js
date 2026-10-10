@@ -300,13 +300,16 @@ const Router = {
 
         const isDesktop = window.innerWidth >= 900;
 
-        // Masaüstünde geçiş sürerken bekle
-        if (isDesktop && this._companionTransitioning) return;
-
-        // Devam eden kapanış/açılış zamanlayıcılarını iptal et (Hızlı / art arda kaydırma desteği)
+        // Devam eden kapanış/açılış zamanlayıcılarını ve Web Animation nesnelerini anında iptal et
         if (this._companionTimer) {
             clearTimeout(this._companionTimer);
             this._companionTimer = null;
+        }
+        if (this._activeCompanionAnim) {
+            try {
+                this._activeCompanionAnim.cancel();
+            } catch (err) {}
+            this._activeCompanionAnim = null;
         }
 
         const isShowcaseOpen = stage.classList.contains('is-showcase-active');
@@ -334,10 +337,12 @@ const Router = {
             // ==========================================
             this._companionTransitioning = true;
 
-            if (isDesktop && otherCompanion) {
+            if (otherCompanion) {
                 otherCompanion.style.display = 'none';
                 otherCompanion.classList.remove('is-closing');
             }
+
+            const wasAnyOpen = stage.classList.contains('has-companion-open');
 
             if (type === 'showcase') {
                 stage.classList.remove('is-trophies-active');
@@ -370,20 +375,25 @@ const Router = {
             }
 
             if (isDesktop && cardContainer) {
-                const firstRect = cardContainer.getBoundingClientRect();
-                stage.classList.add('has-companion-open');
-                const lastRect = cardContainer.getBoundingClientRect();
-                const deltaX = (firstRect.left + firstRect.width / 2) - (lastRect.left + lastRect.width / 2);
-                const deltaY = (firstRect.top + firstRect.height / 2) - (lastRect.top + lastRect.height / 2);
+                // Eğer zaten bir kanat açıksa (Showcase <-> Trophies arası direkt geçiş), profil kartını gereksiz zıplatma
+                if (!wasAnyOpen) {
+                    const firstRect = cardContainer.getBoundingClientRect();
+                    stage.classList.add('has-companion-open');
+                    const lastRect = cardContainer.getBoundingClientRect();
+                    const deltaX = (firstRect.left + firstRect.width / 2) - (lastRect.left + lastRect.width / 2);
+                    const deltaY = (firstRect.top + firstRect.height / 2) - (lastRect.top + lastRect.height / 2);
 
-                if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
-                    cardContainer.animate([
-                        { transform: `translate3d(${deltaX}px, ${deltaY}px, 0)` },
-                        { transform: 'translate3d(0, 0, 0)' }
-                    ], {
-                        duration: 550,
-                        easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
-                    });
+                    if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
+                        this._activeCompanionAnim = cardContainer.animate([
+                            { transform: `translate3d(${deltaX}px, ${deltaY}px, 0)` },
+                            { transform: 'translate3d(0, 0, 0)' }
+                        ], {
+                            duration: 400,
+                            easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                        });
+                    }
+                } else {
+                    stage.classList.add('has-companion-open');
                 }
             } else {
                 stage.classList.remove('is-companion-closing');
@@ -393,14 +403,14 @@ const Router = {
             this._companionTimer = setTimeout(() => {
                 this._companionTransitioning = false;
                 this._companionTimer = null;
-            }, isDesktop ? 550 : 250);
+                this._activeCompanionAnim = null;
+            }, isDesktop ? 400 : 200);
 
         } else {
             // ==========================================
             // KAPANIŞ SEKANSI
             // ==========================================
             this._companionTransitioning = true;
-            let closeAnim = null;
 
             const currentCard = isShowcaseOpen ? topsCard : trophiesCard;
             if (currentCard && isDesktop) currentCard.classList.add('is-closing');
@@ -412,11 +422,11 @@ const Router = {
                 const returnDeltaX = (stageRect.left + stageRect.width / 2) - (cardRect.left + cardRect.width / 2);
                 const returnDeltaY = (stageRect.top + stageRect.height / 2) - (cardRect.top + cardRect.height / 2);
 
-                closeAnim = cardContainer.animate([
+                this._activeCompanionAnim = cardContainer.animate([
                     { transform: 'translate3d(0, 0, 0)' },
                     { transform: `translate3d(${returnDeltaX}px, ${returnDeltaY}px, 0)` }
                 ], {
-                    duration: 500,
+                    duration: 380,
                     easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
                     fill: 'forwards'
                 });
@@ -436,11 +446,14 @@ const Router = {
                         trophiesCard.style.display = 'none';
                     }
                 }
-                if (closeAnim) closeAnim.cancel();
+                if (this._activeCompanionAnim) {
+                    try { this._activeCompanionAnim.cancel(); } catch (err) {}
+                    this._activeCompanionAnim = null;
+                }
                 if (cardContainer && isDesktop) cardContainer.style.transform = '';
                 this._companionTransitioning = false;
                 this._companionTimer = null;
-            }, isDesktop ? 500 : 250);
+            }, isDesktop ? 380 : 200);
         }
     }
 };
