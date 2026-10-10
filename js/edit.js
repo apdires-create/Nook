@@ -796,10 +796,14 @@ EditManager.Global = {
 
             let trophiesPayload = [];
             if (Array.isArray(kartVerisi.trophies)) {
-                trophiesPayload = kartVerisi.trophies;
+                // Diziyi düzleştir ve sadece geçerli düz objeleri filtrele
+                const duzlesmis = kartVerisi.trophies.flat(Infinity);
+                trophiesPayload = duzlesmis.filter(item => item && typeof item === 'object' && !Array.isArray(item));
             } else if (kartVerisi.trophies && typeof kartVerisi.trophies === 'object') {
-                trophiesPayload = Object.values(kartVerisi.trophies).filter(Boolean);
+                const vals = Object.values(kartVerisi.trophies).flat(Infinity);
+                trophiesPayload = vals.filter(item => item && typeof item === 'object' && !Array.isArray(item));
             }
+            kartVerisi.trophies = trophiesPayload;
 
             const { data: guncellenen, error } = await supabaseClient
                 .from('profiles')
@@ -2219,14 +2223,13 @@ EditManager.TrophiesView = {
 
             actionsWrap.querySelector('.mt-remove-btn').onclick = (e) => {
                 e.stopPropagation();
-                if (kartVerisi.trophies) {
+                if (Array.isArray(kartVerisi.trophies)) {
+                    kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== 'monkeytype');
+                } else if (kartVerisi.trophies && typeof kartVerisi.trophies === 'object') {
                     delete kartVerisi.trophies.monkeytype;
-                    if (Array.isArray(kartVerisi.trophies)) {
-                        kartVerisi.trophies = kartVerisi.trophies.filter(x => x.tur !== 'monkeytype');
-                    }
                 }
                 if (Array.isArray(kartVerisi.widgets)) {
-                    kartVerisi.widgets = kartVerisi.widgets.filter(x => x.tur !== 'monkeytype');
+                    kartVerisi.widgets = kartVerisi.widgets.filter(x => x && x.tur !== 'monkeytype');
                 }
                 delete kartVerisi.canli_monkeytype;
                 window._activeTrophyDetail = null;
@@ -2265,7 +2268,8 @@ EditManager.TrophiesView = {
         formWrap.querySelector('.mt-form-cancel').onclick = (e) => {
             e.stopPropagation();
             formWrap.remove();
-            if (!mevcutKullanici && !kartVerisi.trophies?.monkeytype) {
+            const hasCurrentMt = (Array.isArray(kartVerisi.trophies) && kartVerisi.trophies.some(t => t && t.tur === 'monkeytype')) || !!kartVerisi.trophies?.monkeytype;
+            if (!mevcutKullanici && !hasCurrentMt) {
                 window._activeTrophyDetail = null;
                 RenderEngine.trophiesCiz(kartVerisi);
             }
@@ -2292,16 +2296,14 @@ EditManager.TrophiesView = {
                 return;
             }
 
-            if (!kartVerisi.trophies || typeof kartVerisi.trophies !== 'object') {
-                kartVerisi.trophies = {};
+            if (!Array.isArray(kartVerisi.trophies)) {
+                kartVerisi.trophies = [];
             }
-            if (Array.isArray(kartVerisi.trophies)) {
-                kartVerisi.trophies = { items: kartVerisi.trophies };
-            }
-            kartVerisi.trophies.monkeytype = {
+            kartVerisi.trophies = kartVerisi.trophies.filter(x => x && typeof x === 'object' && x.tur !== 'monkeytype');
+            kartVerisi.trophies.push({
                 tur: 'monkeytype',
                 kullanici: yeniUser
-            };
+            });
             if (!Array.isArray(kartVerisi.widgets)) kartVerisi.widgets = [];
             kartVerisi.widgets = kartVerisi.widgets.filter(x => x.tur !== 'monkeytype');
             kartVerisi.widgets.push({ tur: 'monkeytype', kullanici: yeniUser });
@@ -2343,7 +2345,11 @@ EditManager.TrophyPicker = {
         const list = document.getElementById('trophyPickerList');
         if (!modal || !list) return;
 
-        const hasMt = !!(kartVerisi.trophies?.monkeytype || (Array.isArray(kartVerisi.widgets) && kartVerisi.widgets.some(w => w.tur === 'monkeytype')));
+        const hasMt = !!(
+            (Array.isArray(kartVerisi.trophies) && kartVerisi.trophies.some(t => t && t.tur === 'monkeytype')) ||
+            kartVerisi.trophies?.monkeytype ||
+            (Array.isArray(kartVerisi.widgets) && kartVerisi.widgets.some(w => w && w.tur === 'monkeytype'))
+        );
 
         const items = [
             {
@@ -2433,7 +2439,17 @@ EditManager.TrophyPicker = {
 
                 if (trophyType === 'monkeytype') {
                     if (EditManager.TrophiesView) {
-                        const existingUser = kartVerisi.trophies?.monkeytype?.kullanici || '';
+                        let existingUser = '';
+                        if (Array.isArray(kartVerisi.trophies)) {
+                            const mt = kartVerisi.trophies.find(t => t && t.tur === 'monkeytype');
+                            if (mt) existingUser = mt.kullanici || mt.username || '';
+                        } else if (kartVerisi.trophies?.monkeytype) {
+                            existingUser = kartVerisi.trophies.monkeytype.kullanici || '';
+                        }
+                        if (!existingUser && Array.isArray(kartVerisi.widgets)) {
+                            const w = kartVerisi.widgets.find(x => x && x.tur === 'monkeytype');
+                            if (w) existingUser = w.kullanici || w.username || '';
+                        }
                         EditManager.TrophiesView.acMonkeytypeFormu(existingUser);
                     }
                 }
