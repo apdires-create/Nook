@@ -788,46 +788,288 @@ html.is-profile-loading #landing-screen {
     transform: scale(1.08);
 }
 
-/* Çoklu Liste Sekmeleri (Dinamik Esnek Düzen) */
-.companion-tabs-container {
+/* Master & Detail Görünümleri (Drill-Down / İç İçe Sayfa Akışı) */
+.companion-view-master,
+.companion-view-detail {
     width: 100%;
-    box-sizing: border-box;
-    padding: 6px 6px 2px 2px;
-}
-
-.companion-tabs-bar {
-    --tabs-gap: 1.5cqw;
+    height: 100%;
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--tabs-gap);
-    width: 100%;
-    box-sizing: border-box;
-    align-items: center;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
 }
 
-.companion-tab-btn {
-    position: relative;
+.companion-nav-left {
+    display: flex;
+    align-items: center;
+    gap: 2cqw;
+    min-width: 0;
+    flex: 1;
+}
+
+.companion-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.8cqw;
+    flex-shrink: 0;
+}
+
+.companion-back-btn {
+    width: 7cqw;
+    height: 7cqw;
+    min-width: 28px;
+    min-height: 28px;
+    border-radius: var(--radius-circle);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-soft);
+    color: var(--text-secondary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.8cqh 2cqw;
-    min-height: 3.6cqh;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-btn, 8px);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.companion-back-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    transform: translateX(-2px);
+}
+
+.companion-edit-toggle-btn,
+.companion-action-btn {
+    width: 7cqw;
+    height: 7cqw;
+    min-width: 28px;
+    min-height: 28px;
+    border-radius: var(--radius-circle);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-soft);
     color: var(--text-secondary);
-    font-size: var(--cq-fs-desc);
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.companion-edit-toggle-btn:hover {
+    background: rgba(59, 91, 219, 0.2);
+    border-color: var(--accent-color);
+    color: #ffffff;
+}
+
+.companion-card.is-detail-editing .companion-edit-toggle-btn {
+    background: var(--accent-color, #3b5bdb);
+    border-color: var(--accent-color, #3b5bdb);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(59, 91, 219, 0.4);
+}
+
+.companion-action-btn.delete-all-list-btn:hover,
+.companion-action-btn.item-del-trigger-btn:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    color: #ef4444;
+    transform: scale(1.05);
+}
+
+/* Master Ekranında Dikey Liste Satırları */
+.companion-rows-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2cqh;
+    width: 100%;
+}
+
+.companion-row-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2.2cqh 3.5cqw;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--radius-btn, 10px);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     user-select: none;
     box-sizing: border-box;
-    text-align: center;
-    width: auto;
-    flex: 0 1 auto;
-    max-width: calc((100% - (var(--tabs-gap) * 2)) / 3);
+    position: relative;
+}
+
+.companion-row-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.16);
+    transform: translateY(-1px);
+}
+
+.companion-row-item:active {
+    transform: scale(0.99);
+}
+
+.companion-row-left {
+    display: flex;
+    align-items: center;
+    gap: 3cqw;
     min-width: 0;
-    overflow: visible;
+    flex: 1;
+}
+
+.companion-row-icon-wrap {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-light, #748ffc);
+}
+
+.brand-trophies .companion-row-icon-wrap,
+#trophiesCompanionCard .companion-row-icon-wrap {
+    color: #ff8787;
+    background: rgba(224, 49, 49, 0.14);
+}
+
+.companion-row-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.companion-row-title {
+    font-size: var(--cq-fs-desc);
+    font-weight: 650;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.companion-row-sub {
+    font-size: var(--cq-fs-mono);
+    color: var(--text-tertiary);
+}
+
+.companion-row-right {
+    display: flex;
+    align-items: center;
+    gap: 2cqw;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+}
+
+.companion-row-arrow {
+    transition: transform 0.2s ease;
+}
+
+.companion-row-item:hover .companion-row-arrow {
+    transform: translateX(3px);
+    color: var(--text-primary);
+}
+
+/* Master Satırı Silme Butonu (Sahip için) */
+.companion-row-del-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-circle);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-soft);
+    color: var(--text-tertiary);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+body.is-owner .companion-row-del-btn {
+    display: inline-flex;
+}
+
+.companion-row-del-btn:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+/* Master Görünümünde Yeni Ekleme Buton Satırı */
+.companion-add-row-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2cqw;
+    padding: 2cqh 3cqw;
+    width: 100%;
+    background: transparent;
+    border: 1.5px dashed var(--border-highlight);
+    border-radius: var(--radius-btn, 10px);
+    color: var(--text-tertiary);
+    font-size: var(--cq-fs-desc);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.companion-add-row-btn:hover {
+    border-color: var(--accent-color);
+    color: #ffffff;
+    background: rgba(59, 91, 219, 0.1);
+}
+
+/* Detay Düzenleme Durumunda (.is-detail-editing) Afiş & Link Kuralları */
+.companion-card.is-detail-editing .top-item-card {
+    cursor: grab !important;
+}
+
+.companion-card.is-detail-editing .top-item-card:active {
+    cursor: grabbing !important;
+}
+
+/* Normal durumda tekil afiş silme butonları GİZLİ, sadece is-detail-editing açıkken GÖRÜNÜR */
+.top-item-card .item-delete-btn {
+    display: none !important;
+}
+
+.companion-card.is-detail-editing .top-item-card .item-delete-btn {
+    display: flex !important;
+}
+
+.companion-card.is-detail-editing #showcaseDeleteListBtn {
+    display: inline-flex !important;
+}
+
+/* Düzenleme modunda inline link input */
+.companion-footer-edit-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+}
+
+.companion-footer-link-input {
+    width: 90%;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid var(--accent-color);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    color: var(--text-primary);
+    font-size: var(--cq-fs-desc);
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    text-align: center;
 }
 
 .companion-tab-btn:hover {

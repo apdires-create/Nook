@@ -24,7 +24,9 @@ const Router = {
         const triggerShowcaseBtn = document.getElementById('triggerShowcaseBtn') || document.getElementById('topsTriggerBtn');
         const triggerTrophiesBtn = document.getElementById('triggerTrophiesBtn');
         const companionCloseBtn = document.getElementById('companionCloseBtn');
+        const showcaseDetailCloseBtn = document.getElementById('showcaseDetailCloseBtn');
         const trophiesCloseBtn = document.getElementById('trophiesCloseBtn');
+        const trophiesDetailCloseBtn = document.getElementById('trophiesDetailCloseBtn');
         const tagEditTriggerBtn = document.getElementById('tagEditTriggerBtn');
 
         // Flip butonu (Arka yüzden ön yüze)
@@ -57,9 +59,21 @@ const Router = {
                 this.toggleCompanion(false);
             });
         }
+        if (showcaseDetailCloseBtn) {
+            showcaseDetailCloseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleCompanion(false);
+            });
+        }
 
         if (trophiesCloseBtn) {
             trophiesCloseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleCompanion(false);
+            });
+        }
+        if (trophiesDetailCloseBtn) {
+            trophiesDetailCloseBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.toggleCompanion(false);
             });

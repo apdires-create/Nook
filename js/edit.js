@@ -2159,18 +2159,11 @@ EditManager.BackViews = {
 
 EditManager.TrophiesView = {
     init() {
-        const body = document.getElementById('trophiesBody');
-        if (!body) return;
+        const detailBody = document.getElementById('trophiesDetailBody');
+        const masterList = document.getElementById('trophiesMasterList');
+        if (!detailBody && !masterList) return;
 
-        const addBtn = body.querySelector('#trophies-add-mt-btn');
-        if (addBtn) {
-            addBtn.onclick = (e) => {
-                e.stopPropagation();
-                this.acMonkeytypeFormu('');
-            };
-        }
-
-        const mtCard = body.querySelector('.monkeytype-card');
+        const mtCard = detailBody?.querySelector('.monkeytype-card');
         if (mtCard && !mtCard.querySelector('.mt-owner-actions')) {
             const actionsWrap = document.createElement('div');
             actionsWrap.className = 'mt-owner-actions';
@@ -2201,6 +2194,8 @@ EditManager.TrophiesView = {
                 if (Array.isArray(kartVerisi.widgets)) {
                     kartVerisi.widgets = kartVerisi.widgets.filter(x => x.tur !== 'monkeytype');
                 }
+                delete kartVerisi.canli_monkeytype;
+                window._activeTrophyDetail = null;
                 RenderEngine.trophiesCiz(kartVerisi);
                 EditManager.Global.degisiklikYapildi();
             };
@@ -2210,7 +2205,7 @@ EditManager.TrophiesView = {
     },
 
     acMonkeytypeFormu(mevcutKullanici = '') {
-        const body = document.getElementById('trophiesBody');
+        const body = document.getElementById('trophiesDetailBody') || document.getElementById('trophiesMasterList');
         if (!body) return;
 
         const existingForm = body.querySelector('.mt-form-wrap');
@@ -2261,6 +2256,7 @@ EditManager.TrophiesView = {
             kartVerisi.widgets.push({ tur: 'monkeytype', kullanici: yeniUser });
 
             formWrap.remove();
+            window._activeTrophyDetail = 'monkeytype';
             RenderEngine.trophiesCiz(kartVerisi);
             EditManager.Global.degisiklikYapildi();
 
@@ -3037,19 +3033,142 @@ EditManager.MediaSearchModal = {
 // #region 10: TOPS EŞLİKÇİ KART (SHOWCASE WING) DÜZENLEME MOTORU
 EditManager.CompanionViews = {
     init() {
+        const topsCompanion = document.getElementById('topsCompanionCard');
         const companionBody = document.getElementById('companionBody');
-        if (!companionBody) return;
+        const editToggleBtn = document.getElementById('showcaseEditToggleBtn');
+        const deleteListBtn = document.getElementById('showcaseDeleteListBtn');
+        const detailTitle = document.getElementById('companionMetaTitle');
+        const footerEl = document.getElementById('companionFooter');
+        if (!topsCompanion || !companionBody) return;
 
         const tops = kartVerisi.tops || { listeler: [] };
         const listeler = Array.isArray(tops.listeler) ? tops.listeler : [];
-        let aktifListe = listeler.find(l => l.id === tops.aktifListeId);
-        if (!aktifListe && listeler.length > 0) {
-            aktifListe = listeler[0];
-            tops.aktifListeId = aktifListe.id;
+        const aktifListe = listeler.find(l => l.id === tops.aktifListeId);
+
+        // 1. DÜZENLEME MODU TOGGLE BUTONU
+        if (editToggleBtn) {
+            editToggleBtn.onclick = (e) => {
+                e.stopPropagation();
+                const isNowEditing = topsCompanion.classList.toggle('is-detail-editing');
+                editToggleBtn.classList.toggle('is-active', isNowEditing);
+                editToggleBtn.title = isNowEditing ? "Düzenlemeyi Bitir" : "Listeyi Düzenle";
+
+                // Footer link / input'u güncelle
+                RenderEngine.companionCiz(kartVerisi.tops);
+                this.init();
+            };
         }
+
         if (!aktifListe) return;
 
-        // 1. Afiş Ekle Butonuna Tıklanması
+        // 2. TÜM LİSTEYİ SİL BUTONU (Yalnızca düzenleme modu açıkken görünür)
+        if (deleteListBtn) {
+            deleteListBtn.onclick = (e) => {
+                e.stopPropagation();
+                const listName = aktifListe.kategori || 'Liste';
+                if (confirm(`"${listName}" listesini ve içindeki tüm afişleri silmek istediğinizden emin misiniz?`)) {
+                    const idx = tops.listeler.findIndex(l => l.id === aktifListe.id);
+                    if (idx > -1) {
+                        tops.listeler.splice(idx, 1);
+                        tops.aktifListeId = null;
+                        topsCompanion.classList.remove('is-detail-editing');
+                        RenderEngine.companionCiz(kartVerisi.tops);
+                        EditManager.Global.degisiklikYapildi();
+                    }
+                }
+            };
+        }
+
+        // 3. İNLİNE LİSTE BAŞLIĞI DÜZENLEME (Düzenleme modu açıkken başlığa tıklayınca)
+        if (detailTitle) {
+            detailTitle.onclick = (e) => {
+                if (!topsCompanion.classList.contains('is-detail-editing')) return;
+                e.stopPropagation();
+
+                // Zaten input varsa tekrar açma
+                if (detailTitle.querySelector('input')) return;
+
+                const currentTitle = aktifListe.kategori || '';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'companion-title-inline-input';
+                input.value = currentTitle;
+                input.maxLength = 35;
+                input.style.cssText = `
+                    background: rgba(0,0,0,0.5);
+                    border: 1px solid var(--accent-color);
+                    color: var(--text-primary);
+                    font-size: var(--cq-fs-item-title, 1.1rem);
+                    font-weight: 700;
+                    border-radius: 6px;
+                    padding: 2px 8px;
+                    width: 100%;
+                    max-width: 180px;
+                    outline: none;
+                `;
+
+                detailTitle.innerHTML = '';
+                detailTitle.appendChild(input);
+                input.focus();
+                input.select();
+
+                const kaydetBaslik = () => {
+                    const val = input.value.trim();
+                    if (val && val !== aktifListe.kategori) {
+                        aktifListe.kategori = val;
+                        EditManager.Global.degisiklikYapildi();
+                    }
+                    detailTitle.textContent = aktifListe.kategori || 'Liste';
+                };
+
+                input.onblur = kaydetBaslik;
+                input.onkeydown = (ke) => {
+                    if (ke.key === 'Enter') {
+                        ke.preventDefault();
+                        input.blur();
+                    } else if (ke.key === 'Escape') {
+                        detailTitle.textContent = aktifListe.kategori || 'Liste';
+                    }
+                };
+            };
+        }
+
+        // 4. İNLİNE HARİCİ LİNK INPUT'U
+        const linkInput = document.getElementById('companionFooterLinkInput');
+        if (linkInput) {
+            const kaydetLink = () => {
+                const linkVal = linkInput.value.trim();
+                let harici_link = null;
+                if (linkVal) {
+                    let domain = '';
+                    try {
+                        const u = new URL(linkVal.startsWith('http') ? linkVal : 'https://' + linkVal);
+                        domain = u.hostname.replace(/^www\./i, '');
+                    } catch {
+                        domain = 'Bağlantı';
+                    }
+                    harici_link = {
+                        baslik: domain || 'Harici Profil',
+                        url: linkVal
+                    };
+                }
+
+                if (JSON.stringify(aktifListe.harici_link) !== JSON.stringify(harici_link)) {
+                    aktifListe.harici_link = harici_link;
+                    EditManager.Global.degisiklikYapildi();
+                }
+            };
+
+            linkInput.onblur = kaydetLink;
+            linkInput.onkeydown = (ke) => {
+                if (ke.key === 'Enter') {
+                    ke.preventDefault();
+                    linkInput.blur();
+                }
+            };
+        }
+
+        // 5. AFİŞ EKLE BUTONU
         const addPosterCard = companionBody.querySelector('#top-add-poster-btn');
         if (addPosterCard) {
             addPosterCard.onclick = () => {
@@ -3058,7 +3177,7 @@ EditManager.CompanionViews = {
             };
         }
 
-        // 2. Afiş Kartlarına Silme Butonu Eklenmesi
+        // 6. AFİŞ KARTLARINA SİLME BUTONLARININ YERLEŞTİRİLMESİ
         const container = companionBody.querySelector('#tops-container-wrap');
         if (!container) return;
 
@@ -3097,11 +3216,16 @@ EditManager.CompanionViews = {
             }
         });
 
-        // 3. Afiş Kartları Sürükle-Bırak Sistemi (Pointer Sortable)
+        // 7. AFİŞ KARTLARI SÜRÜKLE-BIRAK (Pointer Sortable)
+        // Sıralama her zaman aktif (düzenleme modunda da afiş genişlemeden serbestçe sıralanabilir)
         EditManager.initPointerSortable(container, {
             itemSelector: '.top-item-card',
             axis: 'y',
-            canDrag: (card) => !card.classList.contains('is-expanded') && !container.classList.contains('has-expanded-item'),
+            canDrag: (card) => {
+                const isEditing = topsCompanion.classList.contains('is-detail-editing');
+                if (isEditing) return true; // Düzenleme modunda sıralama her zaman serbest
+                return !card.classList.contains('is-expanded') && !container.classList.contains('has-expanded-item');
+            },
             excludedDragSelectors: '.item-delete-btn, .top-poster-add-card, input, button, a',
             onMove: () => {
                 const currentAddCard = container.querySelector('#top-add-poster-btn');
@@ -3129,50 +3253,18 @@ EditManager.CompanionViews = {
                         aktifListe.ogeler = yeniOgeler;
                         EditManager.Global.degisiklikYapildi();
 
-                        const compCard = document.querySelector('.tops-companion-card');
-                        if (compCard) compCard.classList.add('is-reordered');
+                        const wasEditing = topsCompanion.classList.contains('is-detail-editing');
+                        topsCompanion.classList.add('is-reordered');
 
                         RenderEngine.companionCiz(kartVerisi.tops);
+                        if (wasEditing) topsCompanion.classList.add('is-detail-editing');
                         EditManager.CompanionViews.init();
 
-                        const newCompCard = document.querySelector('.tops-companion-card');
-                        if (newCompCard) newCompCard.classList.add('is-reordered');
+                        topsCompanion.classList.add('is-reordered');
                     }
                 }
             }
         });
-
-        // 4. Liste Sekmeleri Sürükle-Bırak Sistemi (Pointer Sortable)
-        const tabsBar = document.getElementById('companionTabsBar');
-        if (tabsBar) {
-            EditManager.initPointerSortable(tabsBar, {
-                itemSelector: '.companion-tab-btn',
-                axis: 'all',
-                excludedDragSelectors: '.companion-tab-edit-btn, #companionAddListBtn, input, button:not(.companion-tab-btn)',
-                onMove: () => {
-                    const addBtn = tabsBar.querySelector('#companionAddListBtn');
-                    if (addBtn) tabsBar.appendChild(addBtn);
-                },
-                onDrop: () => {
-                    const addBtn = tabsBar.querySelector('#companionAddListBtn');
-                    if (addBtn) tabsBar.appendChild(addBtn);
-
-                    const currentBtns = [...tabsBar.querySelectorAll('.companion-tab-btn')];
-                    const yeniListeler = currentBtns.map(btn => {
-                        const lid = btn.dataset.listId;
-                        return listeler.find(l => l.id === lid);
-                    }).filter(Boolean);
-
-                    if (yeniListeler.length === listeler.length && JSON.stringify(yeniListeler.map(l => l.id)) !== JSON.stringify(listeler.map(l => l.id))) {
-                        kartVerisi.tops.listeler = yeniListeler;
-                        EditManager.Global.degisiklikYapildi();
-
-                        RenderEngine.companionCiz(kartVerisi.tops);
-                        EditManager.CompanionViews.init();
-                    }
-                }
-            });
-        }
     }
 };
 // #endregion
