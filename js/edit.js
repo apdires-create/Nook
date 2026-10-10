@@ -274,50 +274,6 @@ const EditManager = {
         }
 
         this.initThemeMenu();
-    },
-
-    initThemeMenu() {
-        const themeBtn = document.getElementById('nav-item-theme');
-        const palette = document.getElementById('nav-theme-palette');
-        const themeDot = document.getElementById('nav-theme-dot');
-        const themeWrap = document.getElementById('nav-theme-wrap');
-        const colorInput = document.getElementById('nav-color-input');
-        if (!themeBtn || !palette) return;
-
-        const curColor = kartVerisi.theme_config?.primary_color || '#3b5bdb';
-        if (themeDot) themeDot.style.background = curColor;
-        if (colorInput) colorInput.value = curColor;
-
-        themeBtn.onclick = (e) => {
-            e.stopPropagation();
-            const isShown = palette.style.display !== 'none';
-            palette.style.display = isShown ? 'none' : 'block';
-            if (themeWrap) themeWrap.classList.toggle('is-open', !isShown);
-        };
-
-        const applyThemeColor = (color) => {
-            if (!color) return;
-            document.documentElement.style.setProperty('--accent-color', color);
-            if (themeDot) themeDot.style.background = color;
-            if (colorInput) colorInput.value = color;
-            if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
-            kartVerisi.theme_config.primary_color = color;
-            EditManager.Global.degisiklikYapildi();
-        };
-
-        palette.querySelectorAll('.color-swatch-btn').forEach(btn => {
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                applyThemeColor(btn.dataset.color);
-            };
-        });
-
-        if (colorInput) {
-            colorInput.oninput = (e) => {
-                applyThemeColor(e.target.value);
-            };
-        }
-    },
 
         // 2. Cropper Modal Enjeksiyonu
         if (!document.getElementById('cropper-modal')) {
@@ -577,6 +533,49 @@ const EditManager = {
                 </div>
             `;
             document.body.appendChild(searchModal);
+        }
+    },
+
+    initThemeMenu() {
+        const themeBtn = document.getElementById('nav-item-theme');
+        const palette = document.getElementById('nav-theme-palette');
+        const themeDot = document.getElementById('nav-theme-dot');
+        const themeWrap = document.getElementById('nav-theme-wrap');
+        const colorInput = document.getElementById('nav-color-input');
+        if (!themeBtn || !palette) return;
+
+        const curColor = kartVerisi?.theme_config?.primary_color || '#3b5bdb';
+        if (themeDot) themeDot.style.background = curColor;
+        if (colorInput) colorInput.value = curColor;
+
+        themeBtn.onclick = (e) => {
+            e.stopPropagation();
+            const isShown = palette.style.display !== 'none';
+            palette.style.display = isShown ? 'none' : 'block';
+            if (themeWrap) themeWrap.classList.toggle('is-open', !isShown);
+        };
+
+        const applyThemeColor = (color) => {
+            if (!color) return;
+            document.documentElement.style.setProperty('--accent-color', color);
+            if (themeDot) themeDot.style.background = color;
+            if (colorInput) colorInput.value = color;
+            if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
+            kartVerisi.theme_config.primary_color = color;
+            EditManager.Global.degisiklikYapildi();
+        };
+
+        palette.querySelectorAll('.color-swatch-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                applyThemeColor(btn.dataset.color);
+            };
+        });
+
+        if (colorInput) {
+            colorInput.oninput = (e) => {
+                applyThemeColor(e.target.value);
+            };
         }
     }
 };
