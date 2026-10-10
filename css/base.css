@@ -217,6 +217,8 @@ body.is-pointer-dragging * {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
     scrollbar-gutter: stable;
     padding-top: 1cqh;
     padding-bottom: 3.5cqh;
@@ -528,7 +530,7 @@ html.is-profile-loading #landing-screen {
         margin: 0 auto;
         flex-shrink: 0;
         box-sizing: border-box;
-        transition: transform 0.58s cubic-bezier(0.2, 0.9, 0.25, 1), opacity 0.45s ease !important;
+        transition: transform 0.40s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease !important;
         will-change: transform, opacity;
     }
 
@@ -1029,6 +1031,8 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
 .companion-body {
     flex: 1;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
     padding: 1.5cqh 4.5cqw 4.5cqw 4.5cqw;
     display: flex;
     flex-direction: column;

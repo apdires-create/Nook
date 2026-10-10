@@ -27,6 +27,14 @@ const TiltEngine = {
     },
 
     loop() {
+        if (window.innerWidth < 900) {
+            if (this.cardContainer && this.cardContainer.style.transform) {
+                this.cardContainer.style.transform = '';
+            }
+            requestAnimationFrame(() => this.loop());
+            return;
+        }
+
         const stage = document.getElementById('profileStage');
         const isCompanionOpen = stage && stage.classList.contains('has-companion-open');
         const isTransitioning = typeof Router !== 'undefined' && Router._companionTransitioning;

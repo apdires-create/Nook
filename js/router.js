@@ -367,7 +367,7 @@ const Router = {
 
             setTimeout(() => {
                 this._companionTransitioning = false;
-            }, isDesktop ? 550 : 600);
+            }, isDesktop ? 550 : 420);
 
         } else {
             // ==========================================
@@ -411,7 +411,7 @@ const Router = {
                 if (closeAnim) closeAnim.cancel();
                 if (cardContainer && isDesktop) cardContainer.style.transform = '';
                 this._companionTransitioning = false;
-            }, isDesktop ? 500 : 600);
+            }, isDesktop ? 500 : 420);
         }
     }
 };
@@ -423,8 +423,8 @@ const TouchGestureManager = {
     startY: 0,
     startTime: 0,
     isTracking: false,
-    threshold: 45, // Minimum yatay kaydırma eşiği (px)
-    maxVerticalTolerance: 60, // İzin verilen maksimum dikey sapma (px)
+    threshold: 35, // Hızlı ve duyarlı yatay kaydırma eşiği (px)
+    maxVerticalTolerance: 90, // Doğal başparmak kaydırması için esnek dikey tolerans (px)
 
     init() {
         const stage = document.getElementById('profileStage');
@@ -471,8 +471,8 @@ const TouchGestureManager = {
         const deltaX = touch.clientX - this.startX;
         const deltaY = touch.clientY - this.startY;
 
-        // Eğer kullanıcı bariz bir yatay kaydırma yapıyorsa, tarayıcının yerel 'Geri Git' geçmiş navigasyonunu engelle
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+        // Eğer kullanıcı belirgin bir yatay kaydırma yapıyorsa, tarayıcının yerel 'Geri Git' geçmiş navigasyonunu engelle
+        if (Math.abs(deltaX) > Math.abs(deltaY) * 0.8 && Math.abs(deltaX) > 8) {
             if (e.cancelable) {
                 e.preventDefault();
             }
@@ -490,15 +490,15 @@ const TouchGestureManager = {
         const deltaY = touch.clientY - this.startY;
         const elapsed = Date.now() - this.startTime;
 
-        // Çok uzun süren (örn. 800ms+) basılı tutmalar swipe sayılmaz
-        if (elapsed > 800) return;
+        // Çok uzun süren (örn. 850ms+) basılı tutmalar swipe sayılmaz
+        if (elapsed > 850) return;
 
         const absX = Math.abs(deltaX);
         const absY = Math.abs(deltaY);
 
-        // Yatay hareket dikey hareketten belirgin biçimde büyük olmalı
+        // Yatay hareket eşiği ve doğal başparmak açısı kontrolü
         if (absX < this.threshold) return;
-        if (absY > this.maxVerticalTolerance || absY > absX * 0.8) return;
+        if (absY > this.maxVerticalTolerance || absY > absX * 1.1) return;
 
         const stage = document.getElementById('profileStage');
         const isShowcaseOpen = stage && stage.classList.contains('is-showcase-active');
