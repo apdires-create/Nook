@@ -75,7 +75,7 @@ let kartVerisi = {
         }
     ],
     tops: {
-        aktifListeId: "list_default_1",
+        aktifListeId: null,
         listeler: [
             {
                 id: "list_default_1",

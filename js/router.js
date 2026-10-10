@@ -342,6 +342,11 @@ const Router = {
             if (type === 'showcase') {
                 stage.classList.remove('is-trophies-active');
                 stage.classList.add('is-showcase-active');
+                if (kartVerisi?.tops) {
+                    kartVerisi.tops.aktifListeId = null;
+                }
+                const topsCompanion = document.getElementById('topsCompanionCard');
+                if (topsCompanion) topsCompanion.classList.remove('is-detail-editing');
                 if (typeof RenderEngine !== 'undefined') {
                     RenderEngine.companionCiz(kartVerisi.tops);
                 }

@@ -90,7 +90,7 @@ async function tumVerileriCek() {
                     yazar: item.yazar || null
                 })) : []
             }));
-            normalizeTops.aktifListeId = rawTops.aktifListeId || normalizeTops.listeler[0]?.id || null;
+            normalizeTops.aktifListeId = null;
         } else if (rawTops && (rawTops.kategori || Array.isArray(rawTops.ogeler))) {
             // Eski tekil tops formatını yeni çoklu listeler formatına göç ettir
             const tekilListe = {
