@@ -15,7 +15,53 @@ body.is-owner .avatar-box {
 }
 
 body.is-owner .image-edit-overlay {
-    display: none !important;
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(3px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5cqw;
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity 0.22s ease;
+    color: #ffffff;
+    pointer-events: none;
+}
+
+body.is-owner .banner-box .image-edit-overlay {
+    z-index: 2;
+    justify-content: center;
+    padding-bottom: 7cqw;
+}
+
+body.is-owner .avatar-box .image-edit-overlay {
+    z-index: 11;
+    border-radius: var(--radius-circle);
+    overflow: hidden;
+}
+
+body.is-owner .banner-box:hover .image-edit-overlay,
+body.is-owner .avatar-box:hover .image-edit-overlay {
+    opacity: 1;
+}
+
+.image-edit-overlay svg {
+    width: 5cqw;
+    height: 5cqw;
+    min-width: 18px;
+    min-height: 18px;
+    stroke: #ffffff;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+.image-edit-overlay span {
+    font-size: var(--cq-fs-desc, 0.85rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 /* #endregion */
 

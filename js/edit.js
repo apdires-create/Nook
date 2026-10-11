@@ -1076,24 +1076,49 @@ EditManager.Media = {
         const bannerBox = document.querySelector('.banner-box');
         const avatarBox = document.querySelector('.avatar-box');
 
-        if (bannerBox && !bannerBox._bannerClickBound) {
-            bannerBox._bannerClickBound = true;
-            bannerBox.style.cursor = 'pointer';
-            bannerBox.addEventListener('click', (e) => {
-                if (e.target.closest('a') || e.target.closest('button')) return;
-                const input = document.getElementById('banner-file-input');
-                if (input) input.click();
-            });
+        const cameraIconSvg = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+        `;
+
+        if (bannerBox) {
+            let overlay = bannerBox.querySelector('.image-edit-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'image-edit-overlay';
+                overlay.innerHTML = `${cameraIconSvg}<span>Kapağı Değiştir</span>`;
+                bannerBox.appendChild(overlay);
+            }
+            if (!bannerBox._bannerClickBound) {
+                bannerBox._bannerClickBound = true;
+                bannerBox.addEventListener('click', (e) => {
+                    if (e.target.closest('a, button')) return;
+                    e.stopPropagation();
+                    const input = document.getElementById('banner-file-input');
+                    if (input) input.click();
+                });
+            }
         }
 
-        if (avatarBox && !avatarBox._avatarClickBound) {
-            avatarBox._avatarClickBound = true;
-            avatarBox.style.cursor = 'pointer';
-            avatarBox.addEventListener('click', (e) => {
-                if (e.target.closest('a') || e.target.closest('button')) return;
-                const input = document.getElementById('pfp-file-input');
-                if (input) input.click();
-            });
+        if (avatarBox) {
+            let overlay = avatarBox.querySelector('.image-edit-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.className = 'image-edit-overlay';
+                overlay.innerHTML = `${cameraIconSvg}`;
+                avatarBox.appendChild(overlay);
+            }
+            if (!avatarBox._avatarClickBound) {
+                avatarBox._avatarClickBound = true;
+                avatarBox.addEventListener('click', (e) => {
+                    if (e.target.closest('a, button')) return;
+                    e.stopPropagation();
+                    const input = document.getElementById('pfp-file-input');
+                    if (input) input.click();
+                });
+            }
         }
     },
 

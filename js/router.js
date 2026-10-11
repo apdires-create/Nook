@@ -133,6 +133,10 @@ const Router = {
                     '.nook-link-row',
                     '.top-item-card',
                     '.status-card',
+                    '.banner-box',
+                    '.avatar-box',
+                    '.banner-img',
+                    '.avatar-img',
                     '.profile-edit-avatar-wrap',
                     '.profile-edit-banner-wrap'
                 ].join(', ');
