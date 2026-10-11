@@ -2819,12 +2819,38 @@ EditManager.TagPicker = {
 
         wrap.innerHTML = activeTagsHtml + createItemHtml + havuzItemsHtml;
 
-        wrap.querySelectorAll('.tag-picker-active-pill').forEach(pill => {
-            pill.onclick = (e) => {
-                e.stopPropagation();
-                this.etiketSec(pill.dataset.tag);
-            };
-        });
+        // Seçili Etiketleri Sürükle-Bırak ile Sıralama (Sortable)
+        const activeContainer = wrap.querySelector('.tag-picker-active-tags');
+        if (activeContainer) {
+            EditManager.initPointerSortable(activeContainer, {
+                itemSelector: '.tag-picker-active-pill',
+                axis: 'all',
+                excludedDragSelectors: '.tag-picker-remove-btn',
+                onDrop: () => {
+                    const yeniSira = [...activeContainer.querySelectorAll('.tag-picker-active-pill')]
+                        .map(pill => pill.dataset.tag)
+                        .filter(Boolean);
+
+                    if (!kartVerisi.front_data) kartVerisi.front_data = {};
+                    kartVerisi.front_data.tags = yeniSira;
+
+                    RenderEngine.vitrinCiz(kartVerisi);
+                    EditManager.Vitrin.init();
+                    EditManager.Global.degisiklikYapildi();
+                }
+            });
+
+            // Kaldır butonuna basıldığında etiketi kaldır
+            activeContainer.querySelectorAll('.tag-picker-remove-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const pill = btn.closest('.tag-picker-active-pill');
+                    if (pill && pill.dataset.tag) {
+                        this.etiketSec(pill.dataset.tag);
+                    }
+                };
+            });
+        }
 
         wrap.querySelectorAll('.tag-pool-item').forEach(item => {
             item.onclick = (e) => {

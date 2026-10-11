@@ -1333,29 +1333,44 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 5px 10px 5px 12px;
-    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--radius-pill);
     color: #ffffff;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
-.tag-picker-active-pill:hover {
-    background: rgba(239, 68, 68, 0.25);
-    border-color: #ef4444;
+.tag-picker-active-pill:active {
+    cursor: grabbing;
+}
+
+.tag-picker-active-pill.is-dragging {
+    opacity: 0.35 !important;
 }
 
 .tag-picker-active-pill .tag-picker-remove-btn {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 1.1rem;
     line-height: 1;
     cursor: pointer;
-    padding: 0;
+    padding: 0 0 0 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease;
+}
+
+.tag-picker-active-pill .tag-picker-remove-btn:hover {
+    color: #ef4444;
 }
 
 .tag-pool-item.tag-pool-create {
