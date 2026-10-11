@@ -1395,6 +1395,13 @@ EditManager.Vitrin = {
             itemSelector: '.tag-pill:not(.tag-add-pill)',
             axis: 'x',
             excludedDragSelectors: '.tag-remove-btn, .tag-add-pill, input, button',
+            canDrag: () => {
+                // Mobilde istemsiz tag sürüklenmesini önlemek için dokunmatik ekranda yalnızca düzenleme modu varsa veya masaüstündeyse izin ver
+                if (window.innerWidth < 900 && !document.body.classList.contains('has-unsaved-changes')) {
+                    return false;
+                }
+                return true;
+            },
             onDrop: () => {
                 const yeniTagler = [...tagsGrid.querySelectorAll('.tag-pill:not(.tag-add-pill)')]
                     .map(p => {
@@ -1549,13 +1556,13 @@ EditManager.BackViews = {
         wrapper.querySelectorAll('.nook-link-row.is-expanded').forEach(openRow => {
             const idx = parseInt(openRow.dataset.index, 10);
             const linkData = (typeof kartVerisi !== 'undefined' && Array.isArray(kartVerisi.links)) ? kartVerisi.links[idx] : null;
-            const urlInput = openRow.querySelector('.edit-url-input');
-
-            // Eğer geçersiz URL varsa açık bırak
-            if (urlInput && urlInput.value.trim() && !this.urlGecerliMi(urlInput.value.trim())) {
-                urlInput.style.borderColor = "#ef4444";
-                const errorEl = openRow.querySelector('.inline-url-error');
-                if (errorEl) errorEl.style.display = "block";
+            // Eğer geçerli bir URL yoksa akordeonun kapanmasına izin verme
+            if (!urlInput || !this.urlGecerliMi(urlInput.value.trim())) {
+                if (urlInput) {
+                    urlInput.style.borderColor = "#ef4444";
+                    const errorEl = openRow.querySelector('.inline-url-error');
+                    if (errorEl) errorEl.style.display = "block";
+                }
                 return;
             }
 
@@ -1634,7 +1641,8 @@ EditManager.BackViews = {
                 const currentUrl = urlInput.value.trim();
                 const errorEl = rowEl.querySelector('.inline-url-error');
 
-                if (currentUrl && !this.urlGecerliMi(currentUrl)) {
+                // Geçerli bir link girilmeden kapatılmasına izin verme
+                if (!currentUrl || !this.urlGecerliMi(currentUrl)) {
                     urlInput.style.borderColor = "#ef4444";
                     if (errorEl) errorEl.style.display = "block";
                     return false;
@@ -1659,7 +1667,7 @@ EditManager.BackViews = {
                 const nameInput = rowEl.querySelector('.edit-isim-input');
                 const nameDisplay = rowEl.querySelector('.nook-link-name');
                 if (nameDisplay && nameInput) {
-                    nameDisplay.textContent = nameInput.value.trim() || 'Yeni bağlantı';
+                    nameDisplay.textContent = nameInput.value.trim() || currentUrl || 'Bağlantı';
                 }
 
                 const domainDisplay = rowEl.querySelector('.nook-link-domain');
@@ -2710,7 +2718,8 @@ EditManager.TagPicker = {
         this.havuzuCiz('');
         modal.classList.add('is-open');
 
-        if (searchInput) {
+        // Mobilde sanal klavyenin ekranı kapatıp aramayı tetiklememesi için focus'u yalnızca masaüstünde yap
+        if (searchInput && window.innerWidth >= 900) {
             setTimeout(() => searchInput.focus(), 50);
         }
     },

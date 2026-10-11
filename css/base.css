@@ -684,7 +684,9 @@ html.is-profile-loading #landing-screen {
 }
 
 .tops-companion-card.is-reordered .top-item-card,
-.tops-companion-card.is-reordered .top-add-poster-card {
+.tops-companion-card.is-reordered .top-add-poster-card,
+.companion-card.is-detail-editing .top-item-card,
+.companion-card.is-detail-editing .top-add-poster-card {
     animation: none !important;
 }
 

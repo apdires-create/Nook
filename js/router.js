@@ -543,8 +543,13 @@ const TouchGestureManager = {
         // 900ms üzeri uzun dokunuşlar swipe sayılmaz
         if (elapsed > 900) return;
 
-        const absX = Math.abs(deltaX);
-        const absY = Math.abs(deltaY);
+        // [0. Mobilde Linkler Açıkken Dikey Kaydırma -> Ön Yüze Dönüş]
+        if (Router.isFlipped && !isAnyOpen) {
+            if (absY > 40 && absY > absX * 1.1) {
+                Router.setFlipped(false);
+                return;
+            }
+        }
 
         // Yatay hareket eşiği ve doğal başparmak açısı kontrolü
         if (absX < this.threshold) return;

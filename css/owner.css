@@ -518,6 +518,10 @@ body.is-owner .top-item-card.is-expanded .item-delete-btn {
 }
 
 body.is-owner .top-item-card .top-item-header-row {
+    padding-right: 0;
+}
+
+.companion-card.is-detail-editing .top-item-card .top-item-header-row {
     padding-right: 32px;
 }
 
@@ -1675,8 +1679,14 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
 
 /* #region 17: DOKUNMATİK CİHAZ KONTROLLERİ (@media hover: none) */
 @media (hover: none) {
-    body.is-owner .link-item-row .item-delete-btn,
+    body.is-owner .link-item-row .item-delete-btn {
+        display: flex !important;
+        opacity: 0.9;
+    }
     body.is-owner .top-item-card .item-delete-btn {
+        display: none !important;
+    }
+    .companion-card.is-detail-editing .top-item-card .item-delete-btn {
         display: flex !important;
         opacity: 0.9;
     }
