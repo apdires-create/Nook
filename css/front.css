@@ -15,6 +15,10 @@
     gap: 10px;
     z-index: 35;
     pointer-events: auto;
+    transition: left 0.32s var(--ease-spring),
+                right 0.32s var(--ease-spring),
+                transform 0.32s var(--ease-spring),
+                opacity 0.25s ease;
 }
 
 .card-flag-btn {
@@ -30,7 +34,10 @@
     cursor: pointer;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    transition: transform 0.32s var(--ease-spring),
+                border-radius 0.32s var(--ease-smooth),
+                width 0.32s var(--ease-spring),
+                height 0.32s var(--ease-spring),
                 box-shadow 0.22s ease,
                 filter 0.22s ease;
     user-select: none;
@@ -43,6 +50,7 @@
     justify-content: center;
     color: #ffffff;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+    transition: transform 0.3s ease;
 }
 
 /* 🟥 Trophies Canlı Kırmızı/Yakut Ribbon */
@@ -81,25 +89,47 @@
     filter: brightness(1.15);
 }
 
+/* 🔄 FLIP DURUMU 1: Masaüstü (Taşma Yokken) -> Havada Asılı Dairesel Forma Dönüşüm */
+.card-container.is-flipped:not(.flags-inward) .card-flags-wrapper {
+    transform: translateX(12px) translateZ(40px);
+}
+
+.card-container.is-flipped:not(.flags-inward) .card-flag-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+.card-container.is-flipped:not(.flags-inward) .card-flag-btn:hover {
+    transform: scale(1.12);
+}
+
+/* 📐 TAŞMA / DAR EKRAN DURUMU (KART İÇİNE DOĞRU DÖNÜŞ) */
+.card-container.flags-inward .card-flags-wrapper,
 @media (max-width: 899px) {
     .card-flags-wrapper {
-        top: 28px;
-        margin-left: -3px;
+        left: auto;
+        right: 12px;
+        top: 24px;
+        margin-left: 0;
         gap: 8px;
     }
     .card-flag-btn {
-        width: 34px;
-        height: 38px;
-        border-radius: 0 10px 10px 0;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
     }
 }
 
-@media (max-width: 360px) {
-    .card-flag-btn .flag-label {
-        display: none;
-    }
-    .card-flag-btn {
-        padding: 1.4cqw 2cqw;
+/* 🔄 FLIP DURUMU 2: Mobil / Taşma Durumunda Kart Döndüğünde Arkada Kalma */
+.card-container.is-flipped.flags-inward .card-flags-wrapper,
+@media (max-width: 899px) {
+    .card-container.is-flipped .card-flags-wrapper {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateZ(-20px) scale(0.9);
     }
 }
 /* #endregion */

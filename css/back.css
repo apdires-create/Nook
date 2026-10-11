@@ -876,6 +876,97 @@ body.is-owner .top-item-card:active {
     gap: 1.5cqw;
 }
 
+/* 👑 HERO KART & ALTIN-GÜMÜŞ-BRONZ HİYERARŞİSİ (PLAN.md Madde 6) */
+.top-item-card.is-hero {
+    border-color: var(--color-tier-gold-border, rgba(245, 158, 11, 0.55));
+    box-shadow: 0 4px 18px var(--color-tier-gold-glow, rgba(245, 158, 11, 0.25));
+    padding: 2.6cqw 3.2cqw;
+}
+
+.top-item-card.is-hero .top-item-thumb {
+    width: 17cqw;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.top-hero-crown {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-tier-gold, #f59e0b);
+    filter: drop-shadow(0 2px 4px var(--color-tier-gold-glow));
+    margin-right: 2px;
+}
+
+/* Altın Sıra ve Rozet */
+.top-item-card.tier-gold {
+    border-color: var(--color-tier-gold-border);
+}
+.top-item-rank.tier-gold {
+    color: var(--color-tier-gold);
+    background: var(--color-tier-gold-bg);
+}
+
+/* Gümüş Sıra ve Rozet */
+.top-item-card.tier-silver {
+    border-color: var(--color-tier-silver-border);
+}
+.top-item-rank.tier-silver {
+    color: var(--color-tier-silver);
+    background: var(--color-tier-silver-bg);
+}
+
+/* Bronz Sıra ve Rozet */
+.top-item-card.tier-bronze {
+    border-color: var(--color-tier-bronze-border);
+}
+.top-item-rank.tier-bronze {
+    color: var(--color-tier-bronze);
+    background: var(--color-tier-bronze-bg);
+}
+
+/* 📝 GENİŞLETİLMİŞ KARTTA KULLANICI YORUMU (PLAN.md Madde 6) */
+.top-item-user-review {
+    display: none;
+    margin-top: 1.4cqh;
+    padding: 1.2cqh 2cqw;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.top-item-card.is-expanded .top-item-user-review {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5cqh;
+    animation: fadeInReview 0.3s var(--ease-smooth);
+}
+
+@keyframes fadeInReview {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.user-review-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: calc(var(--cq-fs-desc) * 0.92);
+    color: var(--accent-light, #748ffc);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-review-text {
+    font-size: var(--cq-fs-desc);
+    color: var(--text-primary);
+    line-height: 1.5;
+    margin: 0;
+    font-style: italic;
+}
+
 .top-item-rank {
     font-size: var(--cq-fs-desc);
     font-weight: 700;

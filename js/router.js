@@ -536,9 +536,9 @@ const TouchGestureManager = {
             return;
         }
 
-        // 1. Dokunuş kaydırılabilir bir iç scroll alanı (link listesi, eşlikçi kart gövdesi vb.) içinde mi başladı?
+        // 1. Dokunuş kaydırılabilir bir iç scroll alanı içinde ve aşağı kaymış durumda mı başladı?
         const scroller = touchTarget.closest('.scrollable-fade, .companion-body');
-        this.startedInScroller = !!scroller && scroller.scrollHeight > scroller.clientHeight;
+        this.startedInScroller = !!scroller && scroller.scrollHeight > scroller.clientHeight && scroller.scrollTop > 8;
 
         const touch = e.touches[0];
         this.startX = touch.clientX;
@@ -616,6 +616,32 @@ const TouchGestureManager = {
         const isShowcaseOpen = stage && stage.classList.contains('is-showcase-active');
         const isTrophiesOpen = stage && stage.classList.contains('is-trophies-active');
         const isAnyOpen = stage && stage.classList.contains('has-companion-open');
+
+        // [PLAN.md Madde 5: Showcase ve Trophies'te Yukarı Kaydırma (Swipe-Up) ile Geri Dönüş]
+        if (isAnyOpen && !this.startedInScroller && absY >= 60 && absY > absX * 1.3 && deltaY < 0) {
+            this.hasSwiped = true;
+            if (isShowcaseOpen) {
+                // Eğer Showcase detayındaysa (aktif liste varsa) önce master listeye dön
+                if (typeof kartVerisi !== 'undefined' && kartVerisi.tops && kartVerisi.tops.aktifListeId) {
+                    kartVerisi.tops.aktifListeId = null;
+                    if (typeof RenderEngine !== 'undefined') RenderEngine.companionCiz(kartVerisi.tops);
+                    return;
+                }
+                // Master'daysa eşlikçi kartı kapatıp profil kartına dön
+                Router.toggleCompanion(false);
+                return;
+            } else if (isTrophiesOpen) {
+                // Eğer Trophies detayındaysa önce master listeye dön
+                if (window._activeTrophyDetail) {
+                    window._activeTrophyDetail = null;
+                    if (typeof RenderEngine !== 'undefined') RenderEngine.trophiesCiz(kartVerisi);
+                    return;
+                }
+                // Master'daysa eşlikçi kartı kapatıp profil kartına dön
+                Router.toggleCompanion(false);
+                return;
+            }
+        }
 
         // [0. Mobilde Linkler Açıkken Dikey Kaydırma -> Ön Yüze Dönüş]
         // EĞER dokunuş linkler gibi aktif bir scroller içinde başladıysa kartı ASLA ön yüze çevirme!

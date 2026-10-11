@@ -695,13 +695,24 @@ const RenderEngine = {
 
             const ogeler = Array.isArray(aktifListe.ogeler) ? aktifListe.ogeler : [];
 
-            // Afiş Kartları (Maksimum 3 adet)
+            // Afiş Kartları (Maksimum 3 adet — Madde 2 ve Madde 6)
             const kartlarHtml = ogeler.slice(0, 3).map((item, idx) => {
                 const rawAfis = item.afis_url || item.gorsel_url;
                 const safeAfis = this.getGorselUrl(rawAfis);
                 const itemId = item.id || item.kimlik || ('top_' + (idx + 1));
+                const tierName = idx === 0 ? 'gold' : (idx === 1 ? 'silver' : 'bronze');
+                const isHero = idx === 0;
+
+                const crownHtml = isHero ? `
+                    <span class="top-hero-crown" title="1. Sıra - Vitrin Tacı">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                            <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/>
+                        </svg>
+                    </span>
+                ` : '';
+
                 const thumbHtml = (safeAfis && safeAfis !== '#')
-                    ? `<img class="top-item-thumb" src="${safeAfis}" alt="${this.escapeHtml(item.baslik || '')}" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.style.display='none'">`
+                    ? `<div class="top-item-thumb skeleton-shimmer"><img class="lazy-img" src="${safeAfis}" alt="${this.escapeHtml(item.baslik || '')}" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onload="this.classList.add('is-loaded'); if(this.parentElement) this.parentElement.classList.remove('skeleton-shimmer');" onerror="this.style.display='none'; if(this.parentElement) this.parentElement.classList.remove('skeleton-shimmer');"></div>`
                     : `<div class="top-item-thumb"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></div>`;
 
                 const scoreBadge = item.skor
@@ -733,17 +744,30 @@ const RenderEngine = {
                     ? `<div class="top-item-meta-footer">${bottomMetaBadges.join('')}</div>`
                     : '';
 
+                const userReviewContent = item.yorum || item.kullanici_notu || item.not || item.aciklama || '';
+                const userReviewHtml = `
+                    <div class="top-item-user-review">
+                        <div class="user-review-header">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            <span>Küratörün Notu</span>
+                        </div>
+                        <p class="user-review-text">${this.escapeHtml(userReviewContent || 'Bu yapım için özel bir not belirtilmedi.')}</p>
+                    </div>
+                `;
+
                 return `
-                    <div class="top-item-card" data-index="${idx}" data-original-index="${idx}" data-id="${this.escapeHtml(itemId)}" role="button" tabindex="0">
+                    <div class="top-item-card tier-${tierName} ${isHero ? 'is-hero' : ''}" data-index="${idx}" data-original-index="${idx}" data-id="${this.escapeHtml(itemId)}" role="button" tabindex="0">
                         ${thumbHtml}
                         <div class="top-item-content">
                             <div class="top-item-header-row">
-                                <span class="top-item-rank">#${idx + 1}</span>
+                                ${crownHtml}
+                                <span class="top-item-rank tier-${tierName}">#${idx + 1}</span>
                                 <h4 class="top-item-title">${this.escapeHtml(item.baslik)}</h4>
                                 ${headerMetaHtml}
                             </div>
                             <p class="top-item-desc">${this.escapeHtml(item.aciklama || '')}</p>
                             ${footerMetaHtml}
+                            ${userReviewHtml}
                         </div>
                     </div>
                 `;

@@ -147,3 +147,38 @@
 }
 /* #endregion */
 
+/* #region 6: HİYERARŞİ, SHOWCASE VE ANİMASYON TOKENLARI */
+:root {
+    /* Altın, Gümüş, Bronz Hiyerarşi & Madalya Tokenları */
+    --color-tier-gold: #f59e0b;
+    --color-tier-gold-glow: rgba(245, 158, 11, 0.35);
+    --color-tier-gold-border: rgba(245, 158, 11, 0.55);
+    --color-tier-gold-bg: rgba(245, 158, 11, 0.12);
+
+    --color-tier-silver: #94a3b8;
+    --color-tier-silver-glow: rgba(148, 163, 184, 0.28);
+    --color-tier-silver-border: rgba(148, 163, 184, 0.45);
+    --color-tier-silver-bg: rgba(148, 163, 184, 0.10);
+
+    --color-tier-bronze: #d97706;
+    --color-tier-bronze-glow: rgba(217, 119, 6, 0.28);
+    --color-tier-bronze-border: rgba(217, 119, 6, 0.45);
+    --color-tier-bronze-bg: rgba(217, 119, 6, 0.10);
+
+    /* Skeleton & Shimmer */
+    --skeleton-base-bg: rgba(255, 255, 255, 0.04);
+    --skeleton-shimmer-bg: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.02) 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.02) 100%
+    );
+    --skeleton-radius: 12px;
+
+    /* Düzenleme ve Geçiş Tokenları */
+    --transition-edit-enter: 0.32s var(--ease-spring);
+    --transition-edit-exit: 0.22s var(--ease-smooth);
+    --transition-morph: 0.36s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* #endregion */
+

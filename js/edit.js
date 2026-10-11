@@ -92,9 +92,62 @@ const EditManager = {
         let portalLeft = 0;
         let portalTop = 0;
         let hasMoved = false;
+        let longPressTimer = null;
+        let pointerType = 'mouse';
+
+        const startDraggingEngine = (clientX, clientY) => {
+            if (!draggedItem || isDragging) return;
+            isDragging = true;
+
+            // Container Query uyumluluğu için kart veya eşlikçi kart konteynerini baz alan portal oluştur
+            const scopeContainer = draggedItem.closest('.tops-companion-card') || draggedItem.closest('.card-container');
+            const cRect = scopeContainer ? scopeContainer.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+            portalLeft = cRect.left;
+            portalTop = cRect.top;
+
+            dragPortal = document.createElement('div');
+            dragPortal.className = 'drag-clone-portal';
+            dragPortal.style.cssText = `
+                position: fixed;
+                left: ${cRect.left}px;
+                top: ${cRect.top}px;
+                width: ${cRect.width}px;
+                height: ${cRect.height}px;
+                container-type: size;
+                pointer-events: none;
+                z-index: 100000;
+                overflow: visible;
+            `;
+
+            const itemRect = draggedItem.getBoundingClientRect();
+            dragOffsetX = clientX - itemRect.left;
+            dragOffsetY = clientY - itemRect.top;
+
+            // Havada süzülen görsel klon oluştur
+            dragClone = draggedItem.cloneNode(true);
+            dragClone.classList.add('is-drag-clone');
+            dragClone.classList.remove('is-dragging', 'is-drag-placeholder', 'is-longpressed');
+            dragClone.style.cssText = `
+                position: absolute;
+                left: ${clientX - dragOffsetX - portalLeft}px;
+                top: ${clientY - dragOffsetY - portalTop}px;
+                width: ${itemRect.width}px;
+                height: ${itemRect.height}px;
+                margin: 0;
+                box-sizing: border-box;
+            `;
+
+            dragPortal.appendChild(dragClone);
+            document.body.appendChild(dragPortal);
+
+            // Listedeki asıl öğeyi yer tutucu (placeholder) yap
+            draggedItem.classList.add('is-dragging', 'is-drag-placeholder');
+            draggedItem.style.pointerEvents = 'none';
+            document.body.classList.add('is-pointer-dragging');
+        };
 
         const onPointerDown = (e) => {
-            if (e.button !== 0) return;
+            if (e.button !== 0 && e.pointerType === 'mouse') return;
             if (e.target.closest(excludedDragSelectors)) return;
 
             const item = e.target.closest(itemSelector);
@@ -107,6 +160,19 @@ const EditManager = {
             isDragging = false;
             hasMoved = false;
             draggedItem = item;
+            pointerType = e.pointerType || 'mouse';
+
+            if (pointerType === 'touch') {
+                // Mobilde basılı tutma (350ms long-press) ile başlat
+                longPressTimer = setTimeout(() => {
+                    if (!draggedItem) return;
+                    draggedItem.classList.add('is-longpressed');
+                    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                        try { navigator.vibrate(40); } catch(err) {}
+                    }
+                    startDraggingEngine(startX, startY);
+                }, 350);
+            }
 
             window.addEventListener('pointermove', onPointerMove, { passive: false });
             window.addEventListener('pointerup', onPointerUp);
@@ -118,54 +184,16 @@ const EditManager = {
 
             if (!isDragging) {
                 const dist = Math.hypot(e.clientX - startX, e.clientY - startY);
+                if (pointerType === 'touch') {
+                    // Mobilde parmak 10px'den fazla oynarsa basılı tutmayı iptal et (normal sayfa kaydırma devam eder)
+                    if (dist > 10 && longPressTimer) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                    }
+                    return;
+                }
                 if (dist > 4) {
-                    isDragging = true;
-
-                    // Container Query uyumluluğu için kart veya eşlikçi kart konteynerini baz alan portal oluştur
-                    const scopeContainer = draggedItem.closest('.tops-companion-card') || draggedItem.closest('.card-container');
-                    const cRect = scopeContainer ? scopeContainer.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
-                    portalLeft = cRect.left;
-                    portalTop = cRect.top;
-
-                    dragPortal = document.createElement('div');
-                    dragPortal.className = 'drag-clone-portal';
-                    dragPortal.style.cssText = `
-                        position: fixed;
-                        left: ${cRect.left}px;
-                        top: ${cRect.top}px;
-                        width: ${cRect.width}px;
-                        height: ${cRect.height}px;
-                        container-type: size;
-                        pointer-events: none;
-                        z-index: 100000;
-                        overflow: visible;
-                    `;
-
-                    const itemRect = draggedItem.getBoundingClientRect();
-                    dragOffsetX = startX - itemRect.left;
-                    dragOffsetY = startY - itemRect.top;
-
-                    // Havada süzülen görsel klon oluştur
-                    dragClone = draggedItem.cloneNode(true);
-                    dragClone.classList.add('is-drag-clone');
-                    dragClone.classList.remove('is-dragging', 'is-drag-placeholder');
-                    dragClone.style.cssText = `
-                        position: absolute;
-                        left: ${e.clientX - dragOffsetX - portalLeft}px;
-                        top: ${e.clientY - dragOffsetY - portalTop}px;
-                        width: ${itemRect.width}px;
-                        height: ${itemRect.height}px;
-                        margin: 0;
-                        box-sizing: border-box;
-                    `;
-
-                    dragPortal.appendChild(dragClone);
-                    document.body.appendChild(dragPortal);
-
-                    // Listedeki asıl öğeyi yer tutucu (placeholder) yap
-                    draggedItem.classList.add('is-dragging', 'is-drag-placeholder');
-                    draggedItem.style.pointerEvents = 'none';
-                    document.body.classList.add('is-pointer-dragging');
+                    startDraggingEngine(e.clientX, e.clientY);
                 } else {
                     return;
                 }
@@ -216,6 +244,11 @@ const EditManager = {
         };
 
         const onPointerUp = () => {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+
             window.removeEventListener('pointermove', onPointerMove);
             window.removeEventListener('pointerup', onPointerUp);
             window.removeEventListener('pointercancel', onPointerUp);
@@ -228,7 +261,7 @@ const EditManager = {
 
             if (draggedItem) {
                 draggedItem.style.pointerEvents = '';
-                draggedItem.classList.remove('is-dragging', 'is-drag-placeholder');
+                draggedItem.classList.remove('is-dragging', 'is-drag-placeholder', 'is-longpressed');
             }
             document.body.classList.remove('is-pointer-dragging');
 
@@ -3350,10 +3383,19 @@ EditManager.CompanionViews = {
         const listeler = Array.isArray(tops.listeler) ? tops.listeler : [];
         const aktifListe = listeler.find(l => l.id === tops.aktifListeId);
 
-        // 1. DÜZENLEME MODU TOGGLE BUTONU
+        // 1. DÜZENLEME MODU TOGGLE BUTONU (PLAN.md Madde 3)
         if (editToggleBtn) {
             editToggleBtn.onclick = (e) => {
                 e.stopPropagation();
+
+                // Eğer açık/genişletilmiş bir kart varsa flicker olmadan yumuşakça (ease-out) orijinal boyuta daralsın
+                const topsContainer = document.getElementById('tops-container-wrap');
+                const expandedCard = topsContainer ? topsContainer.querySelector('.top-item-card.is-expanded') : null;
+                if (expandedCard) {
+                    expandedCard.classList.remove('is-expanded');
+                    topsContainer.classList.remove('has-expanded-item');
+                }
+
                 const isNowEditing = topsCompanion.classList.toggle('is-detail-editing');
                 editToggleBtn.classList.toggle('is-active', isNowEditing);
                 editToggleBtn.title = isNowEditing ? "Düzenlemeyi Bitir" : "Listeyi Düzenle";
@@ -3363,6 +3405,9 @@ EditManager.CompanionViews = {
                 this.init();
             };
         }
+
+        // Master Liste ve Trophies Sıralama Motorunu Başlat (Madde 5)
+        this.initMasterListReorder();
 
         if (!aktifListe) return;
 
@@ -3578,6 +3623,139 @@ EditManager.CompanionViews = {
                 }
             }
         });
+
+        // 8. Sola Kaydırarak Silme Jestini Başlat (PLAN.md Madde 4)
+        if (topsCompanion.classList.contains('is-detail-editing')) {
+            this.initSwipeToDelete(container, aktifListe);
+        }
+    },
+
+    /**
+     * Sola Kaydırarak Silme (Swipe to Delete - PLAN.md Madde 4)
+     * Mobilde düzenleme modundayken kartı sola çekerek silme aksiyonunu tetikler.
+     */
+    initSwipeToDelete(container, aktifListe) {
+        if (!container) return;
+        const topsCompanion = document.getElementById('topsCompanionCard');
+
+        container.querySelectorAll('.top-item-card').forEach(card => {
+            if (card._swipeInit) return;
+            card._swipeInit = true;
+
+            let startX = 0;
+            let startY = 0;
+            let isSwiping = false;
+
+            card.addEventListener('touchstart', (e) => {
+                if (e.touches.length !== 1) return;
+                if (!topsCompanion || !topsCompanion.classList.contains('is-detail-editing')) return;
+
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isSwiping = false;
+                card.classList.remove('is-swipe-pending');
+            }, { passive: true });
+
+            card.addEventListener('touchmove', (e) => {
+                if (!topsCompanion || !topsCompanion.classList.contains('is-detail-editing')) return;
+
+                const currentX = e.touches[0].clientX;
+                const currentY = e.touches[0].clientY;
+                const diffX = currentX - startX;
+                const diffY = currentY - startY;
+
+                // Sola doğru yatay çekiş baskın olduğunda tetikle
+                if (diffX < -15 && Math.abs(diffX) > Math.abs(diffY)) {
+                    isSwiping = true;
+                    card.classList.add('is-swiping-delete');
+                    const clampedX = Math.max(-120, diffX);
+                    card.style.transform = `translateX(${clampedX}px)`;
+                    if (e.cancelable) e.preventDefault();
+                }
+            }, { passive: false });
+
+            card.addEventListener('touchend', (e) => {
+                if (!isSwiping) return;
+                isSwiping = false;
+                card.classList.remove('is-swiping-delete');
+                card.classList.add('is-swipe-pending');
+
+                const currentX = e.changedTouches[0].clientX;
+                const diffX = currentX - startX;
+
+                if (diffX < -85) {
+                    // Yeterince sola çekildi -> sil
+                    card.style.transform = 'translateX(-105%)';
+                    const cardId = card.dataset.id;
+                    const idx = parseInt(card.dataset.index, 10);
+                    setTimeout(() => {
+                        if (aktifListe && Array.isArray(aktifListe.ogeler)) {
+                            if (cardId) {
+                                aktifListe.ogeler = aktifListe.ogeler.filter(x => (x.id || x.kimlik) !== cardId);
+                            } else {
+                                aktifListe.ogeler.splice(idx, 1);
+                            }
+                            RenderEngine.companionCiz(kartVerisi.tops);
+                            EditManager.CompanionViews.init();
+                            EditManager.Global.degisiklikYapildi();
+                        }
+                    }, 240);
+                } else {
+                    // Geri bırakıldı -> yerine yaylan
+                    card.style.transform = '';
+                }
+            }, { passive: true });
+        });
+    },
+
+    /**
+     * Master Liste & Trophies Sıralama Motoru (PLAN.md Madde 5)
+     * Yalnızca düzenleme modu açıkken listelerin ve başarımların reorder edilmesini sağlar.
+     */
+    initMasterListReorder() {
+        if (typeof isOwner === 'undefined' || !isOwner) return;
+
+        // 1. Showcase Master Listeleri Reorder
+        const showcaseMasterList = document.getElementById('showcaseMasterList');
+        if (showcaseMasterList && !showcaseMasterList._reorderInit) {
+            showcaseMasterList._reorderInit = true;
+            EditManager.initPointerSortable(showcaseMasterList, {
+                itemSelector: '.companion-row-item',
+                axis: 'y',
+                canDrag: () => typeof isOwner !== 'undefined' && isOwner,
+                excludedDragSelectors: '.companion-row-del-btn, button, input, a',
+                onDrop: () => {
+                    if (kartVerisi.tops && Array.isArray(kartVerisi.tops.listeler)) {
+                        const rows = Array.from(showcaseMasterList.querySelectorAll('.companion-row-item'));
+                        const newOrder = [];
+                        rows.forEach(r => {
+                            const lId = r.dataset.listId;
+                            const found = kartVerisi.tops.listeler.find(l => l.id === lId);
+                            if (found) newOrder.push(found);
+                        });
+                        if (newOrder.length === kartVerisi.tops.listeler.length) {
+                            kartVerisi.tops.listeler = newOrder;
+                            EditManager.Global.degisiklikYapildi();
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Trophies Master Listesi Reorder
+        const trophiesMasterList = document.getElementById('trophiesMasterList');
+        if (trophiesMasterList && !trophiesMasterList._reorderInit) {
+            trophiesMasterList._reorderInit = true;
+            EditManager.initPointerSortable(trophiesMasterList, {
+                itemSelector: '.companion-row-item',
+                axis: 'y',
+                canDrag: () => typeof isOwner !== 'undefined' && isOwner,
+                excludedDragSelectors: '.companion-row-del-btn, button, input, a',
+                onDrop: () => {
+                    EditManager.Global.degisiklikYapildi();
+                }
+            });
+        }
     }
 };
 // #endregion

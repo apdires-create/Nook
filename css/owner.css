@@ -1754,3 +1754,77 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
 }
 /* #endregion */
 
+/* #region 18: KOMPAKT AFİŞ / SIRALAMA DÜZENLEME MODU (PLAN.md Madde 4 & 5) */
+/* Düzenleme modunda açıklamaları, rozetleri ve yorumları gizleyip sadece poster, sıra ve isim bırak */
+.companion-card.is-detail-editing .top-item-card {
+    padding: 2cqw 2.6cqw;
+    min-height: 52px;
+    align-items: center;
+    transition: transform var(--transition-edit-enter),
+                padding var(--transition-edit-enter),
+                border-color var(--transition-edit-exit);
+}
+
+.companion-card.is-detail-editing .top-item-card .top-item-desc,
+.companion-card.is-detail-editing .top-item-card .top-item-meta-footer,
+.companion-card.is-detail-editing .top-item-card .top-item-user-review,
+.companion-card.is-detail-editing .top-item-card .top-meta-badge.is-extra,
+.companion-card.is-detail-editing .top-item-card .top-meta-badge.is-series {
+    display: none !important;
+}
+
+.companion-card.is-detail-editing .top-item-card .top-item-thumb {
+    width: 13cqw !important;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.companion-card.is-detail-editing .top-item-card .top-item-header-row {
+    padding-right: 34px;
+    gap: 1.8cqw;
+}
+
+/* Yarı saydam kırmızı çöp kutusu ikonu (Sağ üst köşe) */
+.companion-card.is-detail-editing .top-item-card .item-delete-btn {
+    display: flex !important;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+    background: rgba(239, 68, 68, 0.18) !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+    color: #ef4444 !important;
+    border-radius: var(--radius-circle);
+    opacity: 0.88;
+    backdrop-filter: blur(4px);
+    transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+}
+
+.companion-card.is-detail-editing .top-item-card .item-delete-btn:hover {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    opacity: 1;
+    transform: scale(1.12);
+}
+
+/* 📱 Sola Kaydırarak Silme (Swipe to Delete) Durumları */
+.top-item-card.is-swiping-delete {
+    transition: none !important;
+    will-change: transform;
+}
+
+.top-item-card.is-swipe-pending {
+    transition: transform 0.28s var(--ease-spring);
+}
+
+/* 🖐 Long-Press (Basılı Tutma) Kaldırma & Parlama Efekti */
+.top-item-card.is-longpressed {
+    transform: scale(1.035) translateZ(24px) !important;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.8), 0 0 24px var(--accent-glow) !important;
+    border-color: var(--accent-color) !important;
+    z-index: 60 !important;
+    transition: transform 0.22s cubic-bezier(0.34, 1.3, 0.64, 1), box-shadow 0.22s ease !important;
+}
+/* #endregion */
+

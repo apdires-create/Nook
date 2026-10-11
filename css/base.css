@@ -1414,4 +1414,38 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
     box-shadow: var(--toast-success-shadow) !important;
 }
 
+/* #region 12: NON-BLOCKING FAST-OPEN SKELETON & LAZY IMAGE (PLAN.md Madde 2) */
+@keyframes shimmerAnim {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.skeleton-shimmer {
+    position: relative;
+    background: var(--skeleton-base-bg, rgba(255, 255, 255, 0.04));
+    overflow: hidden;
+    border-radius: var(--skeleton-radius, 12px);
+}
+
+.skeleton-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: var(--skeleton-shimmer-bg);
+    animation: shimmerAnim 1.6s infinite ease-in-out;
+}
+
+.lazy-img {
+    opacity: 0;
+    transition: opacity 0.35s ease, filter 0.35s ease;
+    filter: blur(6px);
+}
+
+.lazy-img.is-loaded {
+    opacity: 1;
+    filter: blur(0);
+}
+/* #endregion */
+
 
