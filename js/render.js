@@ -252,14 +252,21 @@ const RenderEngine = {
                     const trophyId = delBtn.dataset.delTrophy;
                     if (trophyId === 'monkeytype') {
                         if (confirm("Monkeytype rekorunu kaldırmak istediğinize emin misiniz?")) {
-                            if (kartVerisi.trophies) delete kartVerisi.trophies.monkeytype;
+                            if (Array.isArray(kartVerisi.trophies)) {
+                                kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== 'monkeytype');
+                            } else if (kartVerisi.trophies) {
+                                delete kartVerisi.trophies.monkeytype;
+                            }
                             if (Array.isArray(kartVerisi.widgets)) {
-                                kartVerisi.widgets = kartVerisi.widgets.filter(x => x.tur !== 'monkeytype');
+                                kartVerisi.widgets = kartVerisi.widgets.filter(x => x && x.tur !== 'monkeytype');
                             }
                             delete kartVerisi.canli_monkeytype;
                             this.trophiesCiz(kartVerisi);
                             if (typeof EditManager !== 'undefined') {
                                 EditManager.Global.degisiklikYapildi();
+                            }
+                            if (typeof window.toastBildirimiGoster === 'function') {
+                                window.toastBildirimiGoster("Monkeytype rekoru kaldırıldı.", 3000, 'success');
                             }
                         }
                     }
@@ -299,15 +306,22 @@ const RenderEngine = {
             if (deleteActiveBtn) {
                 deleteActiveBtn.onclick = () => {
                     if (confirm("Monkeytype rekorunu kaldırmak istediğinize emin misiniz?")) {
-                        if (kartVerisi.trophies) delete kartVerisi.trophies.monkeytype;
+                        if (Array.isArray(kartVerisi.trophies)) {
+                            kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== 'monkeytype');
+                        } else if (kartVerisi.trophies) {
+                            delete kartVerisi.trophies.monkeytype;
+                        }
                         if (Array.isArray(kartVerisi.widgets)) {
-                            kartVerisi.widgets = kartVerisi.widgets.filter(x => x.tur !== 'monkeytype');
+                            kartVerisi.widgets = kartVerisi.widgets.filter(x => x && x.tur !== 'monkeytype');
                         }
                         delete kartVerisi.canli_monkeytype;
                         window._activeTrophyDetail = null;
                         this.trophiesCiz(kartVerisi);
                         if (typeof EditManager !== 'undefined') {
                             EditManager.Global.degisiklikYapildi();
+                        }
+                        if (typeof window.toastBildirimiGoster === 'function') {
+                            window.toastBildirimiGoster("Monkeytype rekoru kaldırıldı.", 3000, 'success');
                         }
                     }
                 };
@@ -597,6 +611,9 @@ const RenderEngine = {
                             this.companionCiz(tops);
                             if (typeof EditManager !== 'undefined') {
                                 EditManager.Global.degisiklikYapildi();
+                            }
+                            if (typeof window.toastBildirimiGoster === 'function') {
+                                window.toastBildirimiGoster(`"${listTitle}" listesi silindi.`, 3000, 'success');
                             }
                         }
                     }

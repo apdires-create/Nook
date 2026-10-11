@@ -361,6 +361,7 @@ const Router = {
             } else {
                 stage.classList.remove('is-showcase-active');
                 stage.classList.add('is-trophies-active');
+                window._activeTrophyDetail = null;
                 if (typeof RenderEngine !== 'undefined') {
                     RenderEngine.trophiesCiz(kartVerisi);
                 }
@@ -446,6 +447,14 @@ const Router = {
                         trophiesCard.style.display = 'none';
                     }
                 }
+                // Bir sonraki açılış için her iki kartın da durumunu master listeye sıfırla
+                if (kartVerisi?.tops) {
+                    kartVerisi.tops.aktifListeId = null;
+                }
+                window._activeTrophyDetail = null;
+                const topsComp = document.getElementById('topsCompanionCard');
+                if (topsComp) topsComp.classList.remove('is-detail-editing');
+
                 if (this._activeCompanionAnim) {
                     try { this._activeCompanionAnim.cancel(); } catch (err) {}
                     this._activeCompanionAnim = null;

@@ -846,10 +846,10 @@ EditManager.Global = {
                 if (typeof oturumSuresiDolduUyarisi === 'function') {
                     oturumSuresiDolduUyarisi("Oturum süreniz dolduğu için değişiklikler kaydedilemedi. Lütfen tekrar giriş yapın; formdaki değişiklikleriniz korunuyor.");
                 } else {
-                    alert("Oturum süreniz doldu. Lütfen sayfayı yenilemeden tekrar giriş yapın.");
+                    this.toastGoster("Oturum süreniz doldu. Lütfen sayfayı yenilemeden tekrar giriş yapın.", 'warning');
                 }
             } else {
-                alert("Kaydedilirken bir hata oluştu: " + err.message);
+                this.toastGoster("Kaydedilirken bir hata oluştu: " + err.message, 'error');
             }
         } finally {
             if (saveBtn) {
@@ -1087,7 +1087,7 @@ EditManager.Media = {
                 .upload(dosyaYolu, blob, { contentType: 'image/webp', upsert: true });
 
             if (uploadErr) {
-                alert("Görsel yüklenemedi, lütfen tekrar deneyin.");
+                EditManager.Global.toastGoster("Görsel yüklenemedi, lütfen tekrar deneyin.", 'error');
                 return;
             }
 
@@ -1112,7 +1112,7 @@ EditManager.Media = {
 
             EditManager.state.hasUnsavedChanges = true;
             document.body.classList.add('has-unsaved-changes');
-            EditManager.Global.toastGoster("Görsel hazırlandı. Kaydetmek için 'Kaydet' butonuna basın.");
+            EditManager.Global.toastGoster("Görsel hazırlandı. Kaydetmek için 'Kaydet' butonuna basın.", 'success');
         } catch (err) {
             console.error("Görsel yükleme hatası:", err);
             const errStr = (err.message || '').toLowerCase();
@@ -1120,10 +1120,10 @@ EditManager.Media = {
                 if (typeof oturumSuresiDolduUyarisi === 'function') {
                     oturumSuresiDolduUyarisi("Oturum süreniz dolduğu için görsel yüklenemedi. Lütfen tekrar giriş yapın.");
                 } else {
-                    alert("Oturum süreniz doldu. Lütfen tekrar giriş yapın.");
+                    EditManager.Global.toastGoster("Oturum süreniz doldu. Lütfen tekrar giriş yapın.", 'warning');
                 }
             } else {
-                alert("Görsel yüklenemedi: " + err.message);
+                EditManager.Global.toastGoster("Görsel yüklenemedi: " + err.message, 'error');
             }
         }
     }
@@ -1845,7 +1845,7 @@ EditManager.BackViews = {
             e.stopPropagation();
             if (!Array.isArray(kartVerisi.links)) kartVerisi.links = [];
             if (kartVerisi.links.length >= 15) {
-                alert("Maksimum bağlantı sayısına ulaşıldı.");
+                EditManager.Global.toastGoster("Maksimum bağlantı sayısına ulaşıldı (en fazla 15).", 'warning');
                 return;
             }
 
@@ -1968,7 +1968,7 @@ EditManager.BackViews = {
         form.querySelector('.working-save-btn').onclick = () => {
             const metin = form.querySelector('.working-text-input').value.trim().slice(0, 160);
             if (!metin) {
-                alert("Lütfen durum metni girin!");
+                EditManager.Global.toastGoster("Lütfen durum metni girin!", 'warning');
                 return;
             }
 
@@ -2092,11 +2092,11 @@ EditManager.BackViews = {
         form.querySelector('.widget-save-btn').onclick = () => {
             const yeniUser = form.querySelector('.widget-user-input').value.trim();
             if (!yeniUser) {
-                alert("Lütfen Monkeytype kullanıcı adınızı girin!");
+                EditManager.Global.toastGoster("Lütfen Monkeytype kullanıcı adınızı girin!", 'warning');
                 return;
             }
             if (!/^[a-zA-Z0-9_]{1,30}$/.test(yeniUser)) {
-                alert("Monkeytype kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir (en fazla 30 karakter).");
+                EditManager.Global.toastGoster("Monkeytype kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir (en fazla 30 karakter).", 'warning');
                 return;
             }
 
@@ -2235,6 +2235,7 @@ EditManager.TrophiesView = {
                 window._activeTrophyDetail = null;
                 RenderEngine.trophiesCiz(kartVerisi);
                 EditManager.Global.degisiklikYapildi();
+                EditManager.Global.toastGoster("Monkeytype rekoru kaldırıldı.", 'success');
             };
 
             mtCard.appendChild(actionsWrap);
@@ -2280,19 +2281,11 @@ EditManager.TrophiesView = {
             const input = formWrap.querySelector('.mt-user-input');
             const yeniUser = input.value.trim();
             if (!yeniUser) {
-                if (typeof window.toastBildirimiGoster === 'function') {
-                    window.toastBildirimiGoster("Lütfen Monkeytype kullanıcı adınızı girin!", 3000, 'warning');
-                } else {
-                    alert("Lütfen Monkeytype kullanıcı adınızı girin!");
-                }
+                EditManager.Global.toastGoster("Lütfen Monkeytype kullanıcı adınızı girin!", 'warning');
                 return;
             }
             if (!/^[a-zA-Z0-9_]{1,30}$/.test(yeniUser)) {
-                if (typeof window.toastBildirimiGoster === 'function') {
-                    window.toastBildirimiGoster("Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir (en fazla 30 karakter).", 3500, 'warning');
-                } else {
-                    alert("Monkeytype kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir (en fazla 30 karakter).");
-                }
+                EditManager.Global.toastGoster("Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir (en fazla 30 karakter).", 'warning');
                 return;
             }
 
@@ -2746,7 +2739,7 @@ EditManager.TagPicker = {
         if (!temizTag) return;
 
         if (temizTag.length > 20) {
-            alert("Etiket en fazla 20 karakter olabilir!");
+            EditManager.Global.toastGoster("Etiket en fazla 20 karakter olabilir!", 'warning');
             return;
         }
 
@@ -2759,7 +2752,7 @@ EditManager.TagPicker = {
             kartVerisi.front_data.tags.splice(mevcutIndex, 1);
         } else {
             if (kartVerisi.front_data.tags.length >= 6) {
-                alert("En fazla 6 etiket seçebilirsiniz!");
+                EditManager.Global.toastGoster("En fazla 6 etiket seçebilirsiniz!", 'warning');
                 return;
             }
             kartVerisi.front_data.tags.push(temizTag);
@@ -2850,10 +2843,11 @@ EditManager.TopsModal = {
                         const idx = kartVerisi.tops.listeler.findIndex(l => l.id === targetId);
                         if (idx > -1) {
                             kartVerisi.tops.listeler.splice(idx, 1);
-                            kartVerisi.tops.aktifListeId = kartVerisi.tops.listeler[0]?.id || null;
+                            kartVerisi.tops.aktifListeId = null;
                             RenderEngine.companionCiz(kartVerisi.tops);
                             EditManager.CompanionViews?.init();
                             EditManager.Global.degisiklikYapildi();
+                            EditManager.Global.toastGoster(`"${listName}" listesi başarıyla kaldırıldı.`, 'success');
                         }
                     };
                 }
@@ -2901,7 +2895,7 @@ EditManager.TopsModal = {
         } else {
             // YENİ LİSTE OLUŞTURMA MODU: Kategori türü seçilebilir
             if (kartVerisi.tops.listeler.length >= 6) {
-                alert("En fazla 6 adet kürasyon listesi oluşturabilirsiniz!");
+                EditManager.Global.toastGoster("En fazla 6 adet kürasyon listesi oluşturabilirsiniz!", 'warning');
                 return;
             }
 
@@ -2941,7 +2935,7 @@ EditManager.TopsModal = {
 
         const yeniBaslik = nameInput ? nameInput.value.trim() : '';
         if (!yeniBaslik) {
-            alert("Lütfen bir liste ismi girin!");
+            EditManager.Global.toastGoster("Lütfen bir liste ismi girin!", 'warning');
             return;
         }
 
@@ -2973,7 +2967,7 @@ EditManager.TopsModal = {
             }
         } else {
             if (kartVerisi.tops.listeler.length >= 6) {
-                alert("En fazla 6 adet kürasyon listesi oluşturabilirsiniz!");
+                EditManager.Global.toastGoster("En fazla 6 adet kürasyon listesi oluşturabilirsiniz!", 'warning');
                 return;
             }
             const yeniId = 'list_' + Date.now();
@@ -3185,7 +3179,7 @@ EditManager.MediaSearchModal = {
         }
 
         if (aktifListe.ogeler.length >= 3) {
-            alert("Bu listeye en fazla 3 adet vitrin afişi ekleyebilirsiniz!");
+            EditManager.Global.toastGoster("Bu listeye en fazla 3 adet vitrin afişi ekleyebilirsiniz!", 'warning');
             this.kapat();
             return;
         }
@@ -3263,6 +3257,7 @@ EditManager.CompanionViews = {
                         topsCompanion.classList.remove('is-detail-editing');
                         RenderEngine.companionCiz(kartVerisi.tops);
                         EditManager.Global.degisiklikYapildi();
+                        EditManager.Global.toastGoster(`"${listName}" listesi başarıyla silindi.`, 'success');
                     }
                 }
             };
