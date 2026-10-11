@@ -658,29 +658,17 @@ html.is-profile-loading #landing-screen {
 
 
 
-/* 4. KART İÇİ AKICI KADEMELİ GİRİŞ (STAGGERED REVEAL) */
-.tops-companion-card .companion-header {
-    animation: companionSubFadeIn 0.36s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both;
+/* 4. KART İÇİ AKICI KADEMELİ GİRİŞ (Yalnızca ilk kanat açılışında) */
+.stage:not(.has-companion-open) .top-item-card,
+.stage:not(.has-companion-open) .top-add-poster-card {
+    animation: none !important;
 }
 
-.tops-companion-card .companion-list-meta {
-    animation: companionSubFadeIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both;
-}
-
-.tops-companion-card:not(.is-reordered) .top-item-card:nth-child(1) {
-    animation: companionItemSlideIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
-}
-
-.tops-companion-card:not(.is-reordered) .top-item-card:nth-child(2) {
-    animation: companionItemSlideIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.21s both;
-}
-
-.tops-companion-card:not(.is-reordered) .top-item-card:nth-child(3) {
-    animation: companionItemSlideIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both;
-}
-
-.tops-companion-card:not(.is-reordered) .top-add-poster-card {
-    animation: companionItemSlideIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both;
+.companion-card.is-detail-editing .top-item-card,
+.companion-card.is-detail-editing .top-add-poster-card,
+.tops-companion-card.is-reordered .top-item-card,
+.tops-companion-card.is-reordered .top-add-poster-card {
+    animation: none !important;
 }
 
 .tops-companion-card.is-reordered .top-item-card,

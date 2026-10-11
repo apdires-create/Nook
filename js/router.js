@@ -344,6 +344,11 @@ const Router = {
 
             const wasAnyOpen = stage.classList.contains('has-companion-open');
 
+            // Kullanıcı profilin arka yüzündeyken Showcase veya Trophies'e geçerse profil kartını otomatik ön yüzüne çevir
+            if (this.isFlipped) {
+                this.setFlipped(false);
+            }
+
             if (type === 'showcase') {
                 stage.classList.remove('is-trophies-active');
                 stage.classList.add('is-showcase-active');
@@ -498,9 +503,13 @@ const TouchGestureManager = {
         if (window.innerWidth >= 900) return;
         if (document.body.classList.contains('is-pointer-dragging')) return;
 
-        // Modal açıkken swipe çalışmasın
-        const activeModal = document.querySelector('.nook-modal.is-active, .auth-modal.is-active, .modal.is-open');
-        if (activeModal) return;
+        // Düzenleme modu veya modal açıkken sahne swipe'ı çalışmasın (içerik sürüklemeyi ve kaydırmayı engellemesin)
+        const activeModal = document.querySelector('.nook-modal.is-active, .auth-modal.is-active, .modal.is-open, .tops-modal-panel, .section-picker-panel');
+        const isEditingActive = document.querySelector('.companion-card.is-detail-editing') || document.body.classList.contains('has-unsaved-changes');
+        if (activeModal || isEditingActive) {
+            this.isTracking = false;
+            return;
+        }
 
         if (e.touches.length !== 1) {
             this.isTracking = false;
@@ -521,8 +530,8 @@ const TouchGestureManager = {
         const deltaX = touch.clientX - this.startX;
         const deltaY = touch.clientY - this.startY;
 
-        // Eğer kullanıcı belirgin bir yatay kaydırma yapıyorsa, tarayıcının yerel 'Geri Git' geçmiş navigasyonunu engelle
-        if (Math.abs(deltaX) > Math.abs(deltaY) * 0.7 && Math.abs(deltaX) > 6) {
+        // Eğer kullanıcı belirgin bir yatay kaydırma yapıyorsa ve olay iptal edilebilir ise tarayıcı geçmiş hareketini durdur
+        if (Math.abs(deltaX) > Math.abs(deltaY) * 0.7 && Math.abs(deltaX) > 10) {
             if (e.cancelable) {
                 e.preventDefault();
             }
