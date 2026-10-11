@@ -442,15 +442,13 @@ const Router = {
 
             this._companionTimer = setTimeout(() => {
                 stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-showcase-active', 'is-trophies-active');
-                if (isDesktop) {
-                    if (topsCard) {
-                        topsCard.classList.remove('is-closing');
-                        topsCard.style.display = 'none';
-                    }
-                    if (trophiesCard) {
-                        trophiesCard.classList.remove('is-closing');
-                        trophiesCard.style.display = 'none';
-                    }
+                if (topsCard) {
+                    topsCard.classList.remove('is-closing');
+                    if (isDesktop) topsCard.style.display = 'none';
+                }
+                if (trophiesCard) {
+                    trophiesCard.classList.remove('is-closing');
+                    if (isDesktop) trophiesCard.style.display = 'none';
                 }
                 // Bir sonraki açılış için her iki kartın da durumunu master listeye sıfırla
                 if (kartVerisi?.tops) {
@@ -478,33 +476,51 @@ const TouchGestureManager = {
     startX: 0,
     startY: 0,
     startTime: 0,
+    lastX: 0,
+    lastY: 0,
     isTracking: false,
-    threshold: 30, // Hızlı ve anında tepki veren yatay kaydırma eşiği (px)
-    maxVerticalTolerance: 100, // Doğal başparmak açısı toleransı (px)
+    hasSwiped: false,
+    startedInScroller: false,
+    lockedAxis: null, // 'x' | 'y' | null (İlk ~10px harekette kilitlenir)
+    threshold: 50, // Yanlışlıkla tetiklenmeyen sağlam yatay kaydırma eşiği (px)
+    maxVerticalTolerance: 90, // Doğal başparmak açısı üst toleransı (px)
 
     init() {
         const stage = document.getElementById('profileStage');
         if (!stage) return;
 
-        // Dokunma başlangıcı
-        stage.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
-        
-        // Tarayıcının ekran kenarından geri/ileri gitme (edge swipe history) hareketini engellemek için touchmove
-        stage.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+        // Dokunma olaylarını doğrudan pencere üzerinden dinle
+        window.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
+        window.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+        window.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: true });
+        window.addEventListener('touchcancel', (e) => this.handleTouchCancel(e), { passive: true });
+    },
 
-        // Dokunma sonu (karar anı)
-        stage.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: true });
-        // Dokunma iptali (örn. sistem jesti)
-        stage.addEventListener('touchcancel', () => { this.isTracking = false; }, { passive: true });
+    isTouchDevice() {
+        // matchMedia pointer: coarse ile yatay telefonlar ve tabletleri de kapsar
+        return window.innerWidth < 900 || window.matchMedia('(pointer: coarse)').matches;
     },
 
     handleTouchStart(e) {
-        // Masaüstünde devre dışı
-        if (window.innerWidth >= 900) return;
+        if (!this.isTouchDevice()) return;
         if (document.body.classList.contains('is-pointer-dragging')) return;
 
-        // Düzenleme modu veya modal açıkken sahne swipe'ı çalışmasın (içerik sürüklemeyi ve kaydırmayı engellemesin)
-        const activeModal = document.querySelector('.nook-modal.is-active, .auth-modal.is-active, .modal.is-open, .tops-modal-panel, .section-picker-panel');
+        // Yalnızca sahne veya kartlar içerisindeki dokunuşları takip et
+        const stage = document.getElementById('profileStage');
+        if (!stage) return;
+        const touchTarget = e.target;
+        if (!stage.contains(touchTarget) && touchTarget !== stage) {
+            this.isTracking = false;
+            return;
+        }
+
+        // Açık aktif modal veya düzenleme modu kontrolü
+        // (Sadece açık .is-open / .is-active sınıflarını kontrol et; DOM'da gizli duran panelleri yanlışlıkla yakalama)
+        const activeModal = document.querySelector(
+            '.nook-modal.is-active, .auth-modal.is-open, .image-cropper-modal.is-open, ' +
+            '.add-section-modal.is-open, .tag-picker-modal.is-open, .tops-setup-modal.is-open, ' +
+            '.tops-search-modal.is-open, .block-delete-modal.is-open, .trophy-picker-modal.is-open, .modal.is-open'
+        );
         const isEditingActive = document.querySelector('.companion-card.is-detail-editing') || document.body.classList.contains('has-unsaved-changes');
         if (activeModal || isEditingActive) {
             this.isTracking = false;
@@ -516,58 +532,105 @@ const TouchGestureManager = {
             return;
         }
 
+        // 1. Dokunuş kaydırılabilir bir iç scroll alanı (link listesi, eşlikçi kart gövdesi vb.) içinde mi başladı?
+        const scroller = touchTarget.closest('.scrollable-fade, .companion-body');
+        this.startedInScroller = !!scroller && scroller.scrollHeight > scroller.clientHeight;
+
         const touch = e.touches[0];
         this.startX = touch.clientX;
         this.startY = touch.clientY;
+        this.lastX = touch.clientX;
+        this.lastY = touch.clientY;
         this.startTime = Date.now();
         this.isTracking = true;
+        this.hasSwiped = false;
+        this.lockedAxis = null;
     },
 
     handleTouchMove(e) {
         if (!this.isTracking || e.touches.length !== 1) return;
 
         const touch = e.touches[0];
+        this.lastX = touch.clientX;
+        this.lastY = touch.clientY;
         const deltaX = touch.clientX - this.startX;
         const deltaY = touch.clientY - this.startY;
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
 
-        // Eğer kullanıcı belirgin bir yatay kaydırma yapıyorsa ve olay iptal edilebilir ise tarayıcı geçmiş hareketini durdur
-        if (Math.abs(deltaX) > Math.abs(deltaY) * 0.7 && Math.abs(deltaX) > 10) {
+        // 3. İlk ~10px harekette ekseni kilitle (axis lock: 'x' | 'y')
+        if (!this.lockedAxis && (absX > 10 || absY > 10)) {
+            if (absX >= absY) {
+                this.lockedAxis = 'x';
+            } else {
+                this.lockedAxis = 'y';
+            }
+        }
+
+        // Yalnızca X ekseni kilitlendiyse ve belirgin yatay hareket varsa tarayıcı yerel geçmişini engelle
+        if (this.lockedAxis === 'x' && absX > 12) {
             if (e.cancelable) {
                 e.preventDefault();
             }
         }
     },
 
+    handleTouchCancel(e) {
+        if (!this.isTracking) return;
+        this.evaluateSwipe(this.lastX - this.startX, this.lastY - this.startY);
+        this.isTracking = false;
+        this.lockedAxis = null;
+    },
+
     handleTouchEnd(e) {
         if (!this.isTracking) return;
         this.isTracking = false;
 
-        if (e.changedTouches.length !== 1) return;
-
-        const touch = e.changedTouches[0];
-        const deltaX = touch.clientX - this.startX;
-        const deltaY = touch.clientY - this.startY;
-        const elapsed = Date.now() - this.startTime;
-
-        // 900ms üzeri uzun dokunuşlar swipe sayılmaz
-        if (elapsed > 900) return;
-
-        // [0. Mobilde Linkler Açıkken Dikey Kaydırma -> Ön Yüze Dönüş]
-        if (Router.isFlipped && !isAnyOpen) {
-            if (absY > 40 && absY > absX * 1.1) {
-                Router.setFlipped(false);
-                return;
-            }
+        let endX = this.lastX;
+        let endY = this.lastY;
+        if (e.changedTouches && e.changedTouches.length === 1) {
+            endX = e.changedTouches[0].clientX;
+            endY = e.changedTouches[0].clientY;
         }
 
-        // Yatay hareket eşiği ve doğal başparmak açısı kontrolü
-        if (absX < this.threshold) return;
-        if (absY > this.maxVerticalTolerance || absY > absX * 1.3) return;
+        const deltaX = endX - this.startX;
+        const deltaY = endY - this.startY;
+        this.evaluateSwipe(deltaX, deltaY);
+        this.lockedAxis = null;
+    },
+
+    evaluateSwipe(deltaX, deltaY) {
+        if (this.hasSwiped) return;
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+        const elapsed = Date.now() - this.startTime;
+
+        // 800ms üzeri uzun dokunuşlar swipe sayılmaz
+        if (elapsed > 800) return;
 
         const stage = document.getElementById('profileStage');
         const isShowcaseOpen = stage && stage.classList.contains('is-showcase-active');
         const isTrophiesOpen = stage && stage.classList.contains('is-trophies-active');
         const isAnyOpen = stage && stage.classList.contains('has-companion-open');
+
+        // [0. Mobilde Linkler Açıkken Dikey Kaydırma -> Ön Yüze Dönüş]
+        // EĞER dokunuş linkler gibi aktif bir scroller içinde başladıysa kartı ASLA ön yüze çevirme!
+        if (Router.isFlipped && !isAnyOpen) {
+            if (!this.startedInScroller && absY > 50 && absY > absX * 1.5) {
+                this.hasSwiped = true;
+                Router.setFlipped(false);
+                return;
+            }
+        }
+
+        // Eğer eksen Y olarak kilitlendiyse veya yatay eşik aşılmadıysa yatay swipe çalıştırma
+        if (this.lockedAxis === 'y') return;
+
+        // 2. Yatay swipe eşiği: threshold (50px) ve absX > absY * 1.5 sıkı oran kontrolü
+        if (absX < this.threshold) return;
+        if (absY > this.maxVerticalTolerance || absX < absY * 1.5) return;
+
+        this.hasSwiped = true;
 
         if (!isAnyOpen) {
             // [1. Profil Kartı Merkezde]:
@@ -585,7 +648,7 @@ const TouchGestureManager = {
             if (deltaX > this.threshold) {
                 Router.toggleCompanion(false);
             }
-            // Sola kaydırma (Swipe Left) -> Tekrar profil kartına dönerek akışı koru
+            // Sola kaydırma (Swipe Left) -> Profil Kartına dön
             else if (deltaX < -this.threshold) {
                 Router.toggleCompanion(false);
             }
@@ -595,7 +658,7 @@ const TouchGestureManager = {
             if (deltaX < -this.threshold) {
                 Router.toggleCompanion(false);
             }
-            // Sağa kaydırma (Swipe Right) -> Tekrar profil kartına dönerek akışı koru
+            // Sağa kaydırma (Swipe Right) -> Profil Kartına dön
             else if (deltaX > this.threshold) {
                 Router.toggleCompanion(false);
             }

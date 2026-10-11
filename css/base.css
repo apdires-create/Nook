@@ -151,6 +151,7 @@ body.is-pointer-dragging * {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    transform: translateZ(0);
 }
 
 .card-front {
@@ -219,6 +220,8 @@ body.is-pointer-dragging * {
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    transform: translateZ(0);
     scrollbar-gutter: stable;
     padding-top: 1cqh;
     padding-bottom: 3.5cqh;
@@ -250,6 +253,7 @@ body.is-pointer-dragging * {
     inset: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     background-color: #000000;
     z-index: 9999;
     display: none;
@@ -511,6 +515,7 @@ html.is-profile-loading #landing-screen {
         overflow: hidden !important;
         padding: 0;
         box-sizing: border-box;
+        touch-action: pan-y;
     }
 
     /* Sabit 5:7 Geometrisi */
