@@ -874,8 +874,76 @@ EditManager.Global = {
         toast._timeout = setTimeout(() => {
             toast.classList.remove('is-visible');
         }, 3500);
+    },
+
+    confirmGoster(secenekler = {}) {
+        return new Promise((resolve) => {
+            const {
+                baslik = 'Onay Gerekli',
+                aciklama = 'Bu işlemi gerçekleştirmek istediğinizden emin misiniz?',
+                onayMetni = 'Sil',
+                iptalMetni = 'İptal',
+                tehlikeliMi = true
+            } = secenekler;
+
+            const modal = document.getElementById('block-delete-modal');
+            const titleEl = document.getElementById('block-delete-title');
+            const descEl = document.getElementById('block-delete-desc');
+            const confirmBtn = document.getElementById('block-delete-confirm');
+            const cancelBtn = document.getElementById('block-delete-cancel');
+            const backdrop = document.getElementById('block-delete-backdrop');
+
+            if (!modal) {
+                // Fallback (eğer DOM henüz hazır değilse)
+                const sonuc = window.confirm(aciklama);
+                return resolve(sonuc);
+            }
+
+            if (titleEl) titleEl.textContent = baslik;
+            if (descEl) descEl.textContent = aciklama;
+            if (confirmBtn) {
+                confirmBtn.textContent = onayMetni;
+                confirmBtn.className = `block-delete-btn confirm ${tehlikeliMi ? 'is-danger' : ''}`;
+            }
+            if (cancelBtn) cancelBtn.textContent = iptalMetni;
+
+            const temizle = () => {
+                modal.classList.remove('is-open');
+                modal._targetCat = null;
+                if (confirmBtn) confirmBtn.onclick = null;
+                if (cancelBtn) cancelBtn.onclick = null;
+                if (backdrop) backdrop.onclick = null;
+            };
+
+            if (confirmBtn) {
+                confirmBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    temizle();
+                    resolve(true);
+                };
+            }
+
+            if (cancelBtn) {
+                cancelBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    temizle();
+                    resolve(false);
+                };
+            }
+
+            if (backdrop) {
+                backdrop.onclick = (e) => {
+                    e.stopPropagation();
+                    temizle();
+                    resolve(false);
+                };
+            }
+
+            modal.classList.add('is-open');
+        });
     }
 };
+window.onayPopupiGoster = (secenekler) => EditManager.Global.confirmGoster(secenekler);
 // #endregion
 
 // #region 3: MEDYA YÖNETİMİ VE GÖRSEL KIRPMA (AVATAR & BANNER CROPPER)
@@ -2819,7 +2887,7 @@ EditManager.TopsModal = {
         }
 
         if (deleteBtn) {
-            deleteBtn.onclick = () => {
+            deleteBtn.onclick = async () => {
                 const targetId = this.targetListId;
                 if (!targetId || !kartVerisi.tops?.listeler) return;
                 const targetList = kartVerisi.tops.listeler.find(l => l.id === targetId);
@@ -2827,29 +2895,23 @@ EditManager.TopsModal = {
 
                 this.kapat();
 
-                // Özel Onay Modalı (block-delete-modal) ile sor
-                const blockModal = document.getElementById('block-delete-modal');
-                const blockTitle = document.getElementById('block-delete-title');
-                const blockDesc = document.getElementById('block-delete-desc');
-                const confirmBtn = document.getElementById('block-delete-confirm');
+                const onay = await EditManager.Global.confirmGoster({
+                    baslik: `"${listName}" Listesini Sil`,
+                    aciklama: "Bu kürasyon listesini ve içindeki tüm afişleri kaldırmak istediğinizden emin misiniz?",
+                    onayMetni: "Listeyi Sil",
+                    tehlikeliMi: true
+                });
 
-                if (blockModal && blockTitle && blockDesc && confirmBtn) {
-                    blockTitle.textContent = `"${listName}" Listesini Sil`;
-                    blockDesc.textContent = "Bu kürasyon listesini ve içindeki tüm afişleri kaldırmak istediğinizden emin misiniz?";
-                    blockModal.classList.add('is-open');
-
-                    confirmBtn.onclick = () => {
-                        blockModal.classList.remove('is-open');
-                        const idx = kartVerisi.tops.listeler.findIndex(l => l.id === targetId);
-                        if (idx > -1) {
-                            kartVerisi.tops.listeler.splice(idx, 1);
-                            kartVerisi.tops.aktifListeId = null;
-                            RenderEngine.companionCiz(kartVerisi.tops);
-                            EditManager.CompanionViews?.init();
-                            EditManager.Global.degisiklikYapildi();
-                            EditManager.Global.toastGoster(`"${listName}" listesi başarıyla kaldırıldı.`, 'success');
-                        }
-                    };
+                if (onay) {
+                    const idx = kartVerisi.tops.listeler.findIndex(l => l.id === targetId);
+                    if (idx > -1) {
+                        kartVerisi.tops.listeler.splice(idx, 1);
+                        kartVerisi.tops.aktifListeId = null;
+                        RenderEngine.companionCiz(kartVerisi.tops);
+                        EditManager.CompanionViews?.init();
+                        EditManager.Global.degisiklikYapildi();
+                        EditManager.Global.toastGoster(`"${listName}" listesi başarıyla kaldırıldı.`, 'success');
+                    }
                 }
             };
         }
@@ -3246,10 +3308,17 @@ EditManager.CompanionViews = {
 
         // 2. TÜM LİSTEYİ SİL BUTONU (Yalnızca düzenleme modu açıkken görünür)
         if (deleteListBtn) {
-            deleteListBtn.onclick = (e) => {
+            deleteListBtn.onclick = async (e) => {
                 e.stopPropagation();
                 const listName = aktifListe.kategori || 'Liste';
-                if (confirm(`"${listName}" listesini ve içindeki tüm afişleri silmek istediğinizden emin misiniz?`)) {
+                const onay = await EditManager.Global.confirmGoster({
+                    baslik: `"${listName}" Listesini Sil`,
+                    aciklama: `"${listName}" listesini ve içindeki tüm afişleri silmek istediğinizden emin misiniz?`,
+                    onayMetni: "Listeyi Sil",
+                    tehlikeliMi: true
+                });
+
+                if (onay) {
                     const idx = tops.listeler.findIndex(l => l.id === aktifListe.id);
                     if (idx > -1) {
                         tops.listeler.splice(idx, 1);

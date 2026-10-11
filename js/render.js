@@ -247,11 +247,23 @@ const RenderEngine = {
 
             // Master satır silme tıklamaları
             masterList.querySelectorAll('.companion-row-del-btn').forEach(delBtn => {
-                delBtn.onclick = (e) => {
+                delBtn.onclick = async (e) => {
                     e.stopPropagation();
                     const trophyId = delBtn.dataset.delTrophy;
                     if (trophyId === 'monkeytype') {
-                        if (confirm("Monkeytype rekorunu kaldırmak istediğinize emin misiniz?")) {
+                        let onay = false;
+                        if (typeof window.onayPopupiGoster === 'function') {
+                            onay = await window.onayPopupiGoster({
+                                baslik: "Monkeytype Rekorunu Kaldır",
+                                aciklama: "Monkeytype rekorunu vitrinden kaldırmak istediğinize emin misiniz?",
+                                onayMetni: "Rekoru Kaldır",
+                                tehlikeliMi: true
+                            });
+                        } else {
+                            onay = confirm("Monkeytype rekorunu kaldırmak istediğinize emin misiniz?");
+                        }
+
+                        if (onay) {
                             if (Array.isArray(kartVerisi.trophies)) {
                                 kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== 'monkeytype');
                             } else if (kartVerisi.trophies) {
@@ -304,8 +316,20 @@ const RenderEngine = {
             }
 
             if (deleteActiveBtn) {
-                deleteActiveBtn.onclick = () => {
-                    if (confirm("Monkeytype rekorunu kaldırmak istediğinize emin misiniz?")) {
+                deleteActiveBtn.onclick = async () => {
+                    let onay = false;
+                    if (typeof window.onayPopupiGoster === 'function') {
+                        onay = await window.onayPopupiGoster({
+                            baslik: "Monkeytype Rekorunu Kaldır",
+                            aciklama: "Monkeytype rekorunu vitrinden kaldırmak istediğinize emin misiniz?",
+                            onayMetni: "Rekoru Kaldır",
+                            tehlikeliMi: true
+                        });
+                    } else {
+                        onay = confirm("Monkeytype rekorunu kaldırmak istediğinize emin misiniz?");
+                    }
+
+                    if (onay) {
                         if (Array.isArray(kartVerisi.trophies)) {
                             kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== 'monkeytype');
                         } else if (kartVerisi.trophies) {
@@ -599,11 +623,24 @@ const RenderEngine = {
 
             // Master satır silme tıklamaları
             masterList.querySelectorAll('.companion-row-del-btn').forEach(delBtn => {
-                delBtn.onclick = (e) => {
+                delBtn.onclick = async (e) => {
                     e.stopPropagation();
                     const listId = delBtn.dataset.delList;
                     const listTitle = delBtn.dataset.listTitle || 'Liste';
-                    if (confirm(`"${listTitle}" listesini ve içindeki tüm afişleri silmek istediğinize emin misiniz?`)) {
+
+                    let onay = false;
+                    if (typeof window.onayPopupiGoster === 'function') {
+                        onay = await window.onayPopupiGoster({
+                            baslik: `"${listTitle}" Listesini Sil`,
+                            aciklama: `"${listTitle}" listesini ve içindeki tüm afişleri silmek istediğinize emin misiniz?`,
+                            onayMetni: "Listeyi Sil",
+                            tehlikeliMi: true
+                        });
+                    } else {
+                        onay = confirm(`"${listTitle}" listesini ve içindeki tüm afişleri silmek istediğinize emin misiniz?`);
+                    }
+
+                    if (onay) {
                         const idx = tops.listeler.findIndex(l => l.id === listId);
                         if (idx > -1) {
                             tops.listeler.splice(idx, 1);

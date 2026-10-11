@@ -131,6 +131,19 @@
     --modal-item-beta-bg: rgba(12, 14, 20, 0.65);
     --modal-item-beta-border: 1px solid rgba(255, 255, 255, 0.05);
     --modal-item-beta-opacity: 0.45;
+
+    /* Onay / Uyarı Pop-up Tokenları (Confirm Modal) */
+    --confirm-icon-bg: rgba(239, 68, 68, 0.12);
+    --confirm-icon-color: #ef4444;
+    --confirm-icon-border: 1px solid rgba(239, 68, 68, 0.25);
+    --confirm-btn-danger-bg: #ef4444;
+    --confirm-btn-danger-border: 1px solid #dc2626;
+    --confirm-btn-danger-hover: #dc2626;
+    --confirm-btn-danger-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
+    --confirm-btn-danger-hover-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
+    --confirm-btn-cancel-bg: rgba(255, 255, 255, 0.08);
+    --confirm-btn-cancel-border: 1px solid var(--border-soft);
+    --confirm-btn-cancel-hover: rgba(255, 255, 255, 0.14);
 }
 /* #endregion */
 
