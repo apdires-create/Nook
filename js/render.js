@@ -744,14 +744,24 @@ const RenderEngine = {
                     ? `<div class="top-item-meta-footer">${bottomMetaBadges.join('')}</div>`
                     : '';
 
-                const userReviewContent = item.yorum || item.kullanici_notu || item.not || item.aciklama || '';
+                const savedNote = (kartVerisi?.kullanici_notlari && kartVerisi.kullanici_notlari[itemId]) || item.yorum || item.kullanici_notu || item.not || '';
+                const commentBadgeHtml = savedNote.trim()
+                    ? `<span class="has-comment-badge" title="Kullanıcı yorumu mevcut">💬</span>`
+                    : '';
+
                 const userReviewHtml = `
                     <div class="top-item-user-review">
                         <div class="user-review-header">
                             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                            <span>Küratörün Notu</span>
+                            <span>Kullanıcı Yorumu</span>
                         </div>
-                        <p class="user-review-text">${this.escapeHtml(userReviewContent || 'Bu yapım için özel bir not belirtilmedi.')}</p>
+                        <p class="user-review-text" id="user-review-text-${this.escapeHtml(itemId)}">${this.escapeHtml(savedNote || 'Bu içerik için henüz bir kullanıcı yorumu girilmedi.')}</p>
+                        ${isUserOwner ? `
+                            <div class="user-review-edit-wrap">
+                                <textarea class="user-review-textarea" data-item-id="${this.escapeHtml(itemId)}" maxlength="150" placeholder="Bu yapım için kısa bir kullanıcı yorumu ekle (maks. 150 karakter)...">${this.escapeHtml(savedNote)}</textarea>
+                                <div class="user-review-char-count">${savedNote.length} / 150</div>
+                            </div>
+                        ` : ''}
                     </div>
                 `;
 
@@ -763,6 +773,7 @@ const RenderEngine = {
                                 ${crownHtml}
                                 <span class="top-item-rank tier-${tierName}">#${idx + 1}</span>
                                 <h4 class="top-item-title">${this.escapeHtml(item.baslik)}</h4>
+                                ${commentBadgeHtml}
                                 ${headerMetaHtml}
                             </div>
                             <p class="top-item-desc">${this.escapeHtml(item.aciklama || '')}</p>

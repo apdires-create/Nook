@@ -163,20 +163,29 @@ const EditManager = {
             pointerType = e.pointerType || 'mouse';
 
             if (pointerType === 'touch') {
-                // Mobilde basılı tutma (350ms long-press) ile başlat
+                if (e.pointerId && item.setPointerCapture) {
+                    try { item.setPointerCapture(e.pointerId); } catch(err) {}
+                }
+                // Mobilde basılı tutma (320ms long-press) ile başlat
                 longPressTimer = setTimeout(() => {
+                    longPressTimer = null;
                     if (!draggedItem) return;
                     draggedItem.classList.add('is-longpressed');
                     if (typeof navigator !== 'undefined' && navigator.vibrate) {
                         try { navigator.vibrate(40); } catch(err) {}
                     }
                     startDraggingEngine(startX, startY);
-                }, 350);
+                }, 320);
             }
+
+            const onPointerCancel = (ev) => {
+                if (isDragging) return; // Sürükleme başladıysa tarayıcı cancel'ına takılma
+                onPointerUp(ev);
+            };
 
             window.addEventListener('pointermove', onPointerMove, { passive: false });
             window.addEventListener('pointerup', onPointerUp);
-            window.addEventListener('pointercancel', onPointerUp);
+            window.addEventListener('pointercancel', onPointerCancel);
         };
 
         const onPointerMove = (e) => {
@@ -847,7 +856,8 @@ EditManager.Global = {
                     trophies: trophiesPayload,
                     widgets: Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets : [],
                     working_on: workingOnPayload,
-                    theme_config: guvenliObje(kartVerisi.theme_config)
+                    theme_config: guvenliObje(kartVerisi.theme_config),
+                    kullanici_notlari: guvenliObje(kartVerisi.kullanici_notlari)
                 })
                 .eq('auth_id', kartVerisi.auth_id)
                 .select('id');
@@ -1605,8 +1615,8 @@ EditManager.BackViews = {
         return /^https?:\/\/[^"'\s<>]+$/.test(string.trim());
     },
 
-    kapatTumLinkAkordeonlari() {
-        const wrapper = document.getElementById('links-wrapper');
+    kapatTumLinkAkordeonlari(forceDiscardInvalid = false) {
+        const wrapper = document.getElementById('linksListWrapper') || document.getElementById('links-wrapper');
         if (!wrapper) return;
 
         const KALEM_IKONU = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`;
@@ -1614,8 +1624,24 @@ EditManager.BackViews = {
         wrapper.querySelectorAll('.nook-link-row.is-expanded').forEach(openRow => {
             const idx = parseInt(openRow.dataset.index, 10);
             const linkData = (typeof kartVerisi !== 'undefined' && Array.isArray(kartVerisi.links)) ? kartVerisi.links[idx] : null;
-            // Eğer geçerli bir URL yoksa akordeonun kapanmasına izin verme
-            if (!urlInput || !this.urlGecerliMi(urlInput.value.trim())) {
+            const urlInput = openRow.querySelector('.edit-url-input');
+
+            // Eğer dışarı tıklanmışsa (forceDiscardInvalid) ve URL geçersizse:
+            if (forceDiscardInvalid && (!urlInput || !this.urlGecerliMi(urlInput.value.trim()))) {
+                // Eğer daha önce kaydedilmiş bir URL yoksa bu yeni boş satırı doğrudan kaldır
+                if (!linkData || !linkData.url) {
+                    if (Array.isArray(kartVerisi.links)) {
+                        kartVerisi.links.splice(idx, 1);
+                        EditManager.Global.degisiklikYapildi();
+                        EditManager.BackViews.linksDuzenlemeKur();
+                    }
+                    return;
+                } else {
+                    // Önceden var olan geçerli linkse eski URL'sine geri al
+                    urlInput.value = linkData.url;
+                }
+            } else if (!urlInput || !this.urlGecerliMi(urlInput.value.trim())) {
+                // Normal manuel butona basarak kapatmaya çalıştıysa uyarı göster
                 if (urlInput) {
                     urlInput.style.borderColor = "#ef4444";
                     const errorEl = openRow.querySelector('.inline-url-error');
@@ -2001,16 +2027,22 @@ EditManager.BackViews = {
             }
         };
 
-        // Tıklama dışı akordeon kapatma (Click outside)
+        // Tıklama dışı akordeon kapatma (Click outside & ESC - Revizyon Madde 3)
         if (!window._linksClickOutsideBound) {
             window._linksClickOutsideBound = true;
-            document.addEventListener('mousedown', (e) => {
+            document.addEventListener('pointerdown', (e) => {
                 if (!e.target.closest('.nook-link-row.is-expanded') && !e.target.closest('.links-add-btn') && !e.target.closest('#edit-action-bar')) {
                     const expanded = wrapper.querySelectorAll('.nook-link-row.is-expanded');
                     if (expanded.length > 0) {
                         window._linkAccordionJustClosed = Date.now();
+                        EditManager.BackViews.kapatTumLinkAkordeonlari(true);
                     }
-                    EditManager.BackViews.kapatTumLinkAkordeonlari();
+                }
+            }, true);
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    EditManager.BackViews.kapatTumLinkAkordeonlari(true);
                 }
             });
         }
@@ -3628,6 +3660,53 @@ EditManager.CompanionViews = {
         if (topsCompanion.classList.contains('is-detail-editing')) {
             this.initSwipeToDelete(container, aktifListe);
         }
+
+        // 9. Kullanıcı Yorumu (Textarea) Dinleyicilerini Bağla (Revizyon Madde 1)
+        container.querySelectorAll('.user-review-textarea').forEach(textarea => {
+            const itemId = textarea.dataset.itemId;
+            const cardEl = textarea.closest('.top-item-card');
+            const countEl = cardEl ? cardEl.querySelector('.user-review-char-count') : null;
+            const textDisplay = cardEl ? cardEl.querySelector('.user-review-text') : null;
+
+            textarea.addEventListener('input', () => {
+                const val = textarea.value.slice(0, 150);
+                if (textarea.value.length > 150) textarea.value = val;
+                if (countEl) countEl.textContent = `${val.length} / 150`;
+
+                if (!kartVerisi.kullanici_notlari) kartVerisi.kullanici_notlari = {};
+                if (val.trim()) {
+                    kartVerisi.kullanici_notlari[itemId] = val.trim();
+                } else {
+                    delete kartVerisi.kullanici_notlari[itemId];
+                }
+
+                if (textDisplay) {
+                    textDisplay.textContent = val.trim() || 'Bu içerik için henüz bir kullanıcı yorumu girilmedi.';
+                }
+
+                // Başlıktaki 💬 rozetini anlık senkronize et
+                const headerRow = cardEl ? cardEl.querySelector('.top-item-header-row') : null;
+                let badge = headerRow ? headerRow.querySelector('.has-comment-badge') : null;
+                if (val.trim()) {
+                    if (!badge && headerRow) {
+                        badge = document.createElement('span');
+                        badge.className = 'has-comment-badge';
+                        badge.title = 'Kullanıcı yorumu mevcut';
+                        badge.textContent = '💬';
+                        const titleEl = headerRow.querySelector('.top-item-title');
+                        if (titleEl) titleEl.insertAdjacentElement('afterend', badge);
+                    }
+                } else if (badge) {
+                    badge.remove();
+                }
+
+                EditManager.Global.degisiklikYapildi();
+            });
+
+            textarea.addEventListener('pointerdown', (e) => e.stopPropagation());
+            textarea.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+            textarea.addEventListener('click', (e) => e.stopPropagation());
+        });
     },
 
     /**

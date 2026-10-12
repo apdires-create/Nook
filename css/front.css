@@ -105,31 +105,31 @@
     transform: scale(1.12);
 }
 
-/* 📐 TAŞMA / DAR EKRAN DURUMU (KART İÇİNE DOĞRU DÖNÜŞ) */
-.card-container.flags-inward .card-flags-wrapper,
-@media (max-width: 899px) {
-    .card-flags-wrapper {
-        left: auto;
-        right: 12px;
-        top: 24px;
-        margin-left: 0;
-        gap: 8px;
-    }
-    .card-flag-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 12px;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-    }
+/* 📐 TAŞMA DURUMU (Masaüstünde Pencere Daraldığında KART İÇİNE DOĞRU DÖNÜŞ) */
+.card-container.flags-inward .card-flags-wrapper {
+    left: auto;
+    right: 12px;
+    top: 24px;
+    margin-left: 0;
+    gap: 8px;
+}
+.card-container.flags-inward .card-flag-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
-/* 🔄 FLIP DURUMU 2: Mobil / Taşma Durumunda Kart Döndüğünde Arkada Kalma */
-.card-container.is-flipped.flags-inward .card-flags-wrapper,
+.card-container.is-flipped.flags-inward .card-flags-wrapper {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateZ(-20px) scale(0.9);
+}
+
+/* 📱 MOBİL (<= 899px): Ribbon butonlar tamamen gizlenir, yerini 3 nokta göstergesine bırakır */
 @media (max-width: 899px) {
-    .card-container.is-flipped .card-flags-wrapper {
-        opacity: 0;
-        pointer-events: none;
-        transform: translateZ(-20px) scale(0.9);
+    .card-flags-wrapper {
+        display: none !important;
     }
 }
 /* #endregion */

@@ -94,6 +94,9 @@ const Router = {
             TouchGestureManager.init();
         }
 
+        // Mobilde 3 nokta ve alt dokunma navigasyonunu başlat (Revizyon Madde 2)
+        this.initMobileNav();
+
         // Ön yüzde aktif düzenleme açıkken dışarıya tıklandığını en erken fazda (capture) yakala
         document.addEventListener('pointerdown', (e) => {
             const activeEdit = document.querySelector('.editable-hover.is-input-active');
@@ -410,6 +413,8 @@ const Router = {
                 stage.classList.add('has-companion-open');
             }
 
+            this.updateMobileDots();
+
             this._companionTimer = setTimeout(() => {
                 this._companionTransitioning = false;
                 this._companionTimer = null;
@@ -444,6 +449,8 @@ const Router = {
                 stage.classList.remove('has-companion-open');
             }
 
+            this.updateMobileDots();
+
             this._companionTimer = setTimeout(() => {
                 stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-showcase-active', 'is-trophies-active');
                 if (topsCard) {
@@ -469,8 +476,88 @@ const Router = {
                 if (cardContainer && isDesktop) cardContainer.style.transform = '';
                 this._companionTransitioning = false;
                 this._companionTimer = null;
+                this.updateMobileDots();
             }, isDesktop ? 380 : 200);
         }
+    },
+
+    /**
+     * Mobilde 3 Beyaz Nokta (Pagination) Aktiflik Güncelleyici (Revizyon Madde 2)
+     */
+    updateMobileDots() {
+        const stage = document.getElementById('profileStage');
+        const dotTrophies = document.getElementById('dot-trophies');
+        const dotProfile = document.getElementById('dot-profile');
+        const dotShowcase = document.getElementById('dot-showcase');
+        if (!dotTrophies || !dotProfile || !dotShowcase) return;
+
+        dotTrophies.classList.remove('is-active');
+        dotProfile.classList.remove('is-active');
+        dotShowcase.classList.remove('is-active');
+
+        if (stage?.classList.contains('is-trophies-active')) {
+            dotTrophies.classList.add('is-active');
+        } else if (stage?.classList.contains('is-showcase-active')) {
+            dotShowcase.classList.add('is-active');
+        } else {
+            dotProfile.classList.add('is-active');
+        }
+    },
+
+    /**
+     * Mobilde 3 Nokta & Alt Dokunma Alanları Başlatıcı (Revizyon Madde 2)
+     */
+    initMobileNav() {
+        const dotTrophies = document.getElementById('dot-trophies');
+        const dotProfile = document.getElementById('dot-profile');
+        const dotShowcase = document.getElementById('dot-showcase');
+        const tapLeft = document.getElementById('mobileTapLeft');
+        const tapRight = document.getElementById('mobileTapRight');
+
+        if (dotTrophies) {
+            dotTrophies.onclick = (e) => {
+                e.stopPropagation();
+                this.toggleCompanion(true, 'trophies');
+            };
+        }
+        if (dotProfile) {
+            dotProfile.onclick = (e) => {
+                e.stopPropagation();
+                this.toggleCompanion(false);
+            };
+        }
+        if (dotShowcase) {
+            dotShowcase.onclick = (e) => {
+                e.stopPropagation();
+                this.toggleCompanion(true, 'showcase');
+            };
+        }
+
+        // Ekranın alt sol ve alt sağ dokunmatik boşluklarına dokunarak yönlü geçiş
+        if (tapLeft) {
+            tapLeft.onclick = (e) => {
+                e.stopPropagation();
+                const stage = document.getElementById('profileStage');
+                if (stage?.classList.contains('is-showcase-active')) {
+                    this.toggleCompanion(false);
+                } else if (!stage?.classList.contains('has-companion-open')) {
+                    this.toggleCompanion(true, 'trophies');
+                }
+            };
+        }
+        if (tapRight) {
+            tapRight.onclick = (e) => {
+                e.stopPropagation();
+                const stage = document.getElementById('profileStage');
+                if (stage?.classList.contains('is-trophies-active')) {
+                    this.toggleCompanion(false);
+                } else if (!stage?.classList.contains('has-companion-open')) {
+                    this.toggleCompanion(true, 'showcase');
+                }
+            };
+        }
+
+        this.updateMobileDots();
     }
 };
 // #endregion

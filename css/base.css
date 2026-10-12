@@ -68,6 +68,7 @@ html, body {
     perspective: 1200px;
     z-index: 1;
     padding: 20px;
+    gap: max(var(--stage-min-gap, 24px), var(--stage-gap));
 }
 /* #endregion */
 
@@ -708,10 +709,10 @@ html.is-profile-loading #landing-screen {
 /* Companion Card Header */
 .companion-header {
     flex-shrink: 0;
-    padding: 3cqw 4cqw 1.8cqw 4cqw;
+    padding: var(--companion-padding-top, 28px) 4.5cqw 2.2cqh 4.5cqw;
     display: flex;
     flex-direction: column;
-    gap: 1.6cqh;
+    gap: var(--companion-header-gap, 14px);
     border-bottom: 1px solid var(--border-soft);
     background: rgba(255, 255, 255, 0.015);
 }
@@ -1269,10 +1270,10 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
-    padding: 1.5cqh 4.5cqw 4.5cqw 4.5cqw;
+    padding: var(--companion-body-gap, 14px) 4.5cqw 4.5cqw 4.5cqw;
     display: flex;
     flex-direction: column;
-    gap: 1.8cqh;
+    gap: var(--companion-body-gap, 14px);
 }
 
 .companion-empty-state {
@@ -1447,5 +1448,84 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
     filter: blur(0);
 }
 /* #endregion */
+
+/* #region 13: MOBİL 3 NOKTA & ALT DOKUNMA NAVİGASYONU (Revizyon Madde 2) */
+.mobile-nav-container {
+    display: none;
+}
+
+@media (max-width: 899px) {
+    .mobile-nav-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        bottom: 16px;
+        left: 0;
+        right: 0;
+        height: 44px;
+        z-index: 100;
+        pointer-events: none;
+    }
+
+    .mobile-dots-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--mobile-dots-gap, 8px);
+        padding: 6px 14px;
+        background: rgba(12, 14, 20, 0.65);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius-pill);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        pointer-events: auto;
+    }
+
+    .mobile-dot {
+        width: var(--mobile-dot-size, 7px);
+        height: var(--mobile-dot-size, 7px);
+        border-radius: var(--radius-circle);
+        background: var(--mobile-dot-color, rgba(255, 255, 255, 0.32));
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        outline: none;
+        transition: width 0.28s var(--ease-spring),
+                    border-radius 0.28s var(--ease-spring),
+                    background-color 0.2s ease,
+                    box-shadow 0.2s ease;
+    }
+
+    .mobile-dot.is-active {
+        width: var(--mobile-dot-active-width, 22px);
+        border-radius: 6px;
+        background: var(--mobile-dot-active-color, #ffffff);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.75);
+    }
+
+    /* Alt sol ve sağ dokunmatik alanlar */
+    .mobile-tap-zone {
+        position: fixed;
+        bottom: 0;
+        height: 60px;
+        width: 32vw;
+        z-index: 90;
+        pointer-events: auto;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-tap-zone.tap-left {
+        left: 0;
+    }
+
+    .mobile-tap-zone.tap-right {
+        right: 0;
+    }
+}
+/* #endregion */
+
 
 
