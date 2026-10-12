@@ -100,7 +100,7 @@ const EditManager = {
             isDragging = true;
 
             // Container Query uyumluluğu için kart veya eşlikçi kart konteynerini baz alan portal oluştur
-            const scopeContainer = draggedItem.closest('.tops-companion-card') || draggedItem.closest('.card-container');
+            const scopeContainer = draggedItem.closest('.companion-card') || draggedItem.closest('.tops-companion-card') || draggedItem.closest('.trophies-companion-card') || draggedItem.closest('.card-container');
             const cRect = scopeContainer ? scopeContainer.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
             portalLeft = cRect.left;
             portalTop = cRect.top;

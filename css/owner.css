@@ -316,18 +316,20 @@ body.is-owner .companion-tab-btn:active {
 
 .nav-item-btn.is-dragging,
 .link-item-row.is-dragging,
-.top-item-card.is-dragging {
-    opacity: 0.45;
-    transform: scale(0.97);
-    border-style: dashed !important;
-    border-color: var(--accent-color) !important;
-    box-shadow: 0 0 12px rgba(59, 91, 219, 0.35);
+.top-item-card.is-dragging,
+.companion-row-item.is-dragging {
+    opacity: var(--companion-row-drag-opacity, 0.45);
+    transform: var(--companion-row-drag-transform, scale(0.97));
+    border: var(--companion-row-drag-border, dashed 1px var(--accent-color)) !important;
+    background: var(--companion-row-drag-bg, rgba(59, 91, 219, 0.08)) !important;
+    box-shadow: var(--companion-row-drag-shadow, 0 0 12px rgba(59, 91, 219, 0.35));
     z-index: 10;
 }
 
 .nav-item-btn.is-dragging *,
 .link-item-row.is-dragging *,
-.top-item-card.is-dragging * {
+.top-item-card.is-dragging *,
+.companion-row-item.is-dragging * {
     pointer-events: none;
 }
 
@@ -355,7 +357,8 @@ body.is-owner .companion-tab-btn:active {
 .is-drag-clone .item-delete-btn,
 .is-drag-clone .tag-remove-btn,
 .is-drag-clone .nook-link-actions,
-.is-drag-clone .card-del-btn {
+.is-drag-clone .card-del-btn,
+.is-drag-clone .companion-row-del-btn {
     display: none !important;
 }
 

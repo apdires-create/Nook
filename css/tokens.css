@@ -99,6 +99,24 @@
     --companion-header-gap: clamp(14px, 2.2cqh, 22px);
     --companion-body-gap: clamp(12px, 1.8cqh, 18px);
 
+    /* Eşlikçi Kart Liste & Başarım Satırları Tokenları (.companion-row-item) */
+    --companion-row-bg: rgba(255, 255, 255, 0.03);
+    --companion-row-border: 1px solid rgba(255, 255, 255, 0.07);
+    --companion-row-border-color: rgba(255, 255, 255, 0.07);
+    --companion-row-radius: var(--radius-btn, 10px);
+    --companion-row-padding: 2.2cqh 3.5cqw;
+    --companion-row-hover-bg: rgba(255, 255, 255, 0.07);
+    --companion-row-hover-border-color: rgba(255, 255, 255, 0.16);
+    --companion-row-hover-transform: translateY(-1px);
+    --companion-row-active-transform: scale(0.99);
+
+    /* Sürükleme / Taşınma (Drag & Drop) Tokenları */
+    --companion-row-drag-opacity: 0.45;
+    --companion-row-drag-transform: scale(0.97);
+    --companion-row-drag-bg: rgba(59, 91, 219, 0.08);
+    --companion-row-drag-border: dashed 1px var(--accent-color);
+    --companion-row-drag-shadow: 0 0 12px rgba(59, 91, 219, 0.35);
+
     /* Mobil 3 Nokta (Pagination Dots) Navigasyon Tokenları */
     --mobile-dots-gap: 8px;
     --mobile-dot-size: 7px;
