@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const landingScreen = document.getElementById('landing-screen');
-    const profileLayoutWrapper = document.getElementById('profileLayoutWrapper');
     const profileStage = document.getElementById('profileStage');
     const profileTopNav = document.getElementById('profileTopNav');
     const ambientBg = document.getElementById('ambientBackground');
@@ -24,7 +23,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!KULLANICI_ADI) {
         document.title = 'Nook';
         document.documentElement.classList.remove('is-profile-loading');
-        if (profileLayoutWrapper) profileLayoutWrapper.style.display = 'none';
         if (profileStage) profileStage.style.display = 'none';
         if (profileTopNav) profileTopNav.style.display = 'none';
         if (ambientBg) ambientBg.style.display = 'none';
@@ -42,7 +40,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ========================================================
     document.title = `Nook - @${KULLANICI_ADI}`;
     if (landingScreen) landingScreen.style.display = 'none';
-    if (profileLayoutWrapper) profileLayoutWrapper.style.display = 'none';
     if (profileStage) profileStage.style.display = 'none';
     if (profileTopNav) profileTopNav.style.display = 'none';
     if (ambientBg) ambientBg.style.display = 'none';
@@ -80,7 +77,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (basarili) {
         // Sahneyi ve kontrolleri yumuşakça aç
-        if (profileLayoutWrapper) profileLayoutWrapper.style.display = '';
         if (profileStage) profileStage.style.display = 'flex';
         if (profileTopNav) profileTopNav.style.display = 'flex';
         if (ambientBg) ambientBg.style.display = 'block';

@@ -430,10 +430,6 @@ html.is-profile-loading #landing-screen {
 /* #endregion */
 
 /* #region 5: SHOWCASE WING (TOPS COMPANION CARD) SAHNE MİMARİSİ */
-.profile-layout-wrapper {
-    display: contents;
-}
-
 .stage {
     perspective: 1200px;
     transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
@@ -502,60 +498,31 @@ html.is-profile-loading #landing-screen {
     }
 
     body {
-        display: block;
+        display: flex;
+        flex-direction: column;
         min-height: 100vh;
         min-height: 100dvh;
     }
 
-    /* 3 SATIRLI MOBİL GRİDBOX MİMARİSİ: Üst Butonlar -> Kartlar -> 3 Nokta */
-    .profile-layout-wrapper {
-        display: grid !important;
-        grid-template-rows: auto 1fr auto !important;
-        row-gap: var(--mobile-stage-gap) !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        height: 100dvh !important;
-        padding: clamp(8px, 1.8vh, 16px) 16px !important;
-        box-sizing: border-box !important;
-        overflow: hidden !important;
-        position: relative !important;
-        z-index: 5 !important;
-    }
-
-    .top-nav {
-        position: relative !important;
-        top: auto !important;
-        left: auto !important;
-        right: auto !important;
-        height: 42px !important;
-        padding: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        width: 100% !important;
-        z-index: var(--z-nav) !important;
-    }
-
     .stage {
-        position: relative !important;
-        width: 100% !important;
-        height: 100% !important;
-        min-height: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         perspective: 1200px;
         overflow: hidden !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
+        padding: 0;
+        box-sizing: border-box;
         touch-action: pan-y;
     }
 
-    /* Sabit 5:7 Geometrisi — Kalan 1fr dikey alana mükemmel orantılanır */
+    /* Sabit 5:7 Geometrisi */
     .stage .card-container,
     .stage .companion-card {
-        --mobile-card-max-h: 100%;
+        --mobile-card-max-h: min(var(--card-height), calc(100dvh - 84px));
         --mobile-card-w: min(
             var(--card-narrow-width),
             calc(100vw - 32px),
@@ -565,8 +532,8 @@ html.is-profile-loading #landing-screen {
         height: calc(var(--mobile-card-w) * 7 / 5);
         aspect-ratio: var(--card-aspect-ratio);
         max-width: 100%;
-        max-height: 100%;
-        margin: auto;
+        max-height: none;
+        margin: 0 auto;
         flex-shrink: 0;
         box-sizing: border-box;
         transition: transform 0.40s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease !important;
@@ -596,12 +563,9 @@ html.is-profile-loading #landing-screen {
         pointer-events: none !important;
     }
 
-    /* Showcase Kartı: Normalde sağda ekran dışında, açılınca tam merkezde */
+    /* Showcase Kartı: Normalde sağda ekran dışında */
     .stage #topsCompanionCard {
         position: absolute;
-        top: 0;
-        bottom: 0;
-        margin: auto;
         z-index: 6;
         transform: translate3d(calc(100vw + 40px), 0, 0);
         opacity: 0;
@@ -616,12 +580,9 @@ html.is-profile-loading #landing-screen {
         pointer-events: auto !important;
     }
 
-    /* Trophies Kartı: Normalde solda ekran dışında, açılınca tam merkezde */
+    /* Trophies Kartı: Normalde solda ekran dışında */
     .stage #trophiesCompanionCard {
         position: absolute;
-        top: 0;
-        bottom: 0;
-        margin: auto;
         z-index: 6;
         transform: translate3d(calc(-100vw - 40px), 0, 0);
         opacity: 0;
@@ -1498,100 +1459,3 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
     filter: blur(0);
 }
 /* #endregion */
-
-/* #region 13: MOBİL 3 NOKTA & ALT DOKUNMA NAVİGASYONU (Revizyon Madde 2) */
-.mobile-nav-container {
-    display: none;
-}
-
-@media (max-width: 899px) {
-    .mobile-nav-container {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        position: relative !important;
-        bottom: auto !important;
-        left: auto !important;
-        right: auto !important;
-        margin: 0 auto !important;
-        width: max-content !important;
-        height: auto !important;
-        z-index: 50 !important;
-        pointer-events: auto !important;
-    }
-
-    .mobile-dots-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--mobile-dots-gap, 8px);
-        padding: 6px 14px;
-        background: rgba(12, 14, 20, 0.65);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: var(--radius-pill);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-        pointer-events: auto;
-    }
-
-    .mobile-dot {
-        width: var(--mobile-dot-size, 7px);
-        height: var(--mobile-dot-size, 7px);
-        border-radius: var(--radius-circle);
-        background: var(--mobile-dot-color, rgba(255, 255, 255, 0.32));
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        outline: none;
-        transition: width 0.28s var(--ease-spring),
-                    border-radius 0.28s var(--ease-spring),
-                    background-color 0.2s ease,
-                    box-shadow 0.2s ease;
-    }
-
-    .mobile-dot.is-active {
-        width: var(--mobile-dot-active-width, 22px);
-        border-radius: 6px;
-        background: var(--mobile-dot-active-color, #ffffff);
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.75);
-    }
-
-    /* Alt sol ve sağ dokunmatik alanlar */
-    .mobile-tap-zone {
-        position: fixed;
-        bottom: 0;
-        height: 60px;
-        width: 32vw;
-        z-index: 90;
-        pointer-events: auto;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    .mobile-tap-zone.tap-left {
-        left: 0;
-    }
-
-    .mobile-tap-zone.tap-right {
-        right: 0;
-    }
-
-    @media (max-height: 560px) {
-        .mobile-dots-wrapper {
-            padding: 4px 10px !important;
-            gap: 6px !important;
-        }
-        .mobile-dot {
-            width: 6px !important;
-            height: 6px !important;
-        }
-        .mobile-dot.is-active {
-            width: 18px !important;
-        }
-    }
-}
-/* #endregion */
-
-
-

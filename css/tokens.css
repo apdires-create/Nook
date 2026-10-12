@@ -117,12 +117,6 @@
     --companion-row-drag-border: dashed 1px var(--accent-color);
     --companion-row-drag-shadow: 0 0 12px rgba(59, 91, 219, 0.35);
 
-    /* Mobil 3 Nokta (Pagination Dots) Navigasyon Tokenları */
-    --mobile-dots-gap: 8px;
-    --mobile-dot-size: 7px;
-    --mobile-dot-active-width: 22px;
-    --mobile-dot-color: rgba(255, 255, 255, 0.32);
-    --mobile-dot-active-color: #ffffff;
 }
 /* #endregion */
 
