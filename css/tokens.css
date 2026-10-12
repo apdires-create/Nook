@@ -178,23 +178,23 @@
        ALTIN, GÜMÜŞ, BRONZ HİYERARŞİ & MADALYA RENKLERİ
        (İstediğiniz zaman bu hex ve rgba değerlerini doğrudan değiştirebilirsiniz)
        ======================================================== */
-    /* 1. ALTIN (GOLD - 1. Sıra & Hero) */
-    --color-tier-gold: #ffb703;
-    --color-tier-gold-glow: rgba(255, 183, 3, 0.40);
-    --color-tier-gold-border: rgba(255, 183, 3, 0.65);
-    --color-tier-gold-bg: rgba(255, 183, 3, 0.14);
+    /* 1. ALTIN (Champagne Gold) */
+    --color-tier-gold: #f59e0b;
+    --color-tier-gold-glow: rgba(245, 158, 11, 0.45);
+    --color-tier-gold-border: rgba(245, 158, 11, 0.75);
+    --color-tier-gold-bg: rgba(245, 158, 11, 0.08);
 
-    /* 2. GÜMÜŞ (SILVER - 2. Sıra) */
-    --color-tier-silver: #c5ced9;
-    --color-tier-silver-glow: rgba(197, 206, 217, 0.35);
-    --color-tier-silver-border: rgba(197, 206, 217, 0.55);
-    --color-tier-silver-bg: rgba(197, 206, 217, 0.12);
+    /* 2. PLATİN / GÜMÜŞ (Cyan/Ice Tinted Silver) */
+    --color-tier-silver: #94a3b8; /* veya hafif parıltılı #38bdf8 */
+    --color-tier-silver-glow: rgba(148, 163, 184, 0.35);
+    --color-tier-silver-border: rgba(186, 204, 226, 0.65);
+    --color-tier-silver-bg: rgba(148, 163, 184, 0.08);
 
-    /* 3. BRONZ (BRONZE - 3. Sıra) */
-    --color-tier-bronze: #cd7f32;
-    --color-tier-bronze-glow: rgba(205, 127, 50, 0.35);
-    --color-tier-bronze-border: rgba(205, 127, 50, 0.55);
-    --color-tier-bronze-bg: rgba(205, 127, 50, 0.12);
+    /* 3. BAKIR / BRONZ (Deep Copper) */
+    --color-tier-bronze: #ea580c;
+    --color-tier-bronze-glow: rgba(234, 88, 12, 0.35);
+    --color-tier-bronze-border: rgba(234, 88, 12, 0.60);
+    --color-tier-bronze-bg: rgba(234, 88, 12, 0.08);
 
     /* Skeleton & Shimmer */
     --skeleton-base-bg: rgba(255, 255, 255, 0.04);
