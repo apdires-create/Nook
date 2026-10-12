@@ -1771,6 +1771,12 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
                 border-color var(--transition-edit-exit);
 }
 
+/* Düzenleme modunda dönen ışıltı kenarlığı durdurulur / gizlenir, sabit altın kenarlık kalır */
+.companion-card.is-detail-editing .top-item-card.is-hero::before {
+    display: none !important;
+    animation: none !important;
+}
+
 .companion-card.is-detail-editing .top-item-card .top-item-desc,
 .companion-card.is-detail-editing .top-item-card .top-item-meta-footer,
 .companion-card.is-detail-editing .top-item-card .top-item-user-review,

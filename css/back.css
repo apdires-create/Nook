@@ -723,7 +723,7 @@ body.is-owner .nook-link-row.is-expanded input {
 .tops-container-wrap {
     display: flex;
     flex-direction: column;
-    gap: 1.6cqh;
+    gap: var(--tops-gap, clamp(14px, 2.2cqh, 20px));
     width: 100%;
 }
 
@@ -902,14 +902,57 @@ body.is-owner .top-item-unit:active {
 
 /* 👑 HERO KART & ALTIN-GÜMÜŞ-BRONZ HİYERARŞİSİ (PLAN.md Madde 6) */
 .top-item-card.is-hero {
-    border-color: var(--color-tier-gold-border, rgba(245, 158, 11, 0.55));
-    box-shadow: 0 4px 18px var(--color-tier-gold-glow, rgba(245, 158, 11, 0.25));
-    padding: 2.6cqw 3.2cqw;
+    position: relative;
+    border-color: var(--color-tier-gold-border, rgba(245, 158, 11, 0.75));
+    box-shadow: 0 6px 24px var(--color-tier-gold-glow, rgba(245, 158, 11, 0.25)),
+                inset 0 0 16px rgba(245, 158, 11, 0.05);
+    padding: 3.2cqw 3.6cqw;
+    min-height: 108px;
+    z-index: 1;
+}
+
+/* 🌟 Dönen Işıltılı Kenarlık (Border Beam) Efekti */
+.top-item-card.is-hero::before {
+    content: '';
+    position: absolute;
+    inset: -1.5px;
+    border-radius: calc(var(--radius-item) + 1.5px);
+    padding: 1.5px;
+    background: conic-gradient(
+        from var(--beam-angle, 0deg),
+        transparent 0deg,
+        transparent 210deg,
+        rgba(245, 158, 11, 0.3) 260deg,
+        rgba(245, 158, 11, 0.85) 310deg,
+        #ffffff 345deg,
+        rgba(255, 255, 255, 0.95) 355deg,
+        rgba(245, 158, 11, 0.4) 360deg
+    );
+    -webkit-mask: 
+        linear-gradient(#000 0 0) content-box, 
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: beamRotate 4.2s linear infinite;
+    pointer-events: none;
+    z-index: 2;
 }
 
 .top-item-card.is-hero .top-item-thumb {
-    width: 17cqw;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    width: 20cqw;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    border-color: rgba(245, 158, 11, 0.35);
+}
+
+.top-item-card.is-hero .top-item-title {
+    font-size: calc(var(--cq-fs-item-title) * 1.06);
+    font-weight: 700;
+}
+
+.top-item-card.is-hero .top-item-desc {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    font-size: calc(var(--cq-fs-desc) * 1.02);
 }
 
 .top-hero-crown {
@@ -917,7 +960,7 @@ body.is-owner .top-item-unit:active {
     align-items: center;
     justify-content: center;
     color: var(--color-tier-gold, #f59e0b);
-    filter: drop-shadow(0 2px 4px var(--color-tier-gold-glow));
+    filter: drop-shadow(0 2px 5px var(--color-tier-gold-glow));
     margin-right: 2px;
 }
 

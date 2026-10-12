@@ -213,6 +213,25 @@
 
     /* Mobil Sahne Dikey Düzen Tokenları (Tek Kaynak Clamp Boşluğu) */
     --mobile-stage-gap: clamp(8px, 2vh, 18px);
+
+    /* Vitrin Kartları Arası Dikey Gap Tokenı */
+    --tops-gap: clamp(14px, 2.2cqh, 20px);
+}
+
+/* 🌟 Dönen Işıltılı Kenarlık (Border Beam) İçin Açı Değişkeni */
+@property --beam-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+@keyframes beamRotate {
+    0% {
+        --beam-angle: 0deg;
+    }
+    100% {
+        --beam-angle: 360deg;
+    }
 }
 /* #endregion */
 
