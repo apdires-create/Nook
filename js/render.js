@@ -853,6 +853,58 @@ const RenderEngine = {
                         }
                     });
                 });
+
+                // Kullanıcı Yorumu (Textarea) Dinleyicileri — Normal veya düzenleme modunda anında motoru tetikler
+                topsContainer.querySelectorAll('.user-review-textarea').forEach(textarea => {
+                    const itemId = textarea.dataset.itemId;
+                    const unitEl = textarea.closest('.top-item-unit');
+                    const cardEl = unitEl ? unitEl.querySelector('.top-item-card') : null;
+                    const countEl = unitEl ? unitEl.querySelector('.user-review-char-count') : null;
+                    const textDisplay = unitEl ? unitEl.querySelector('.user-review-text') : null;
+
+                    textarea.addEventListener('input', () => {
+                        const val = textarea.value.slice(0, 150);
+                        if (textarea.value.length > 150) textarea.value = val;
+                        if (countEl) countEl.textContent = `${val.length} / 150`;
+
+                        if (typeof kartVerisi !== 'undefined') {
+                            if (!kartVerisi.kullanici_notlari) kartVerisi.kullanici_notlari = {};
+                            if (val.trim()) {
+                                kartVerisi.kullanici_notlari[itemId] = val.trim();
+                            } else {
+                                delete kartVerisi.kullanici_notlari[itemId];
+                            }
+                        }
+
+                        if (textDisplay) {
+                            textDisplay.textContent = val.trim() || 'Bu içerik için henüz bir kullanıcı yorumu girilmedi.';
+                        }
+
+                        // Başlıktaki 💬 rozetini anlık senkronize et
+                        const headerRow = cardEl ? cardEl.querySelector('.top-item-header-row') : null;
+                        let badge = headerRow ? headerRow.querySelector('.has-comment-badge') : null;
+                        if (val.trim()) {
+                            if (!badge && headerRow) {
+                                badge = document.createElement('span');
+                                badge.className = 'has-comment-badge';
+                                badge.title = 'Kullanıcı yorumu mevcut';
+                                badge.textContent = '💬';
+                                const titleEl = headerRow.querySelector('.top-item-title');
+                                if (titleEl) titleEl.insertAdjacentElement('afterend', badge);
+                            }
+                        } else if (badge) {
+                            badge.remove();
+                        }
+
+                        if (typeof EditManager !== 'undefined' && EditManager.Global?.degisiklikYapildi) {
+                            EditManager.Global.degisiklikYapildi();
+                        }
+                    });
+
+                    textarea.addEventListener('pointerdown', (e) => e.stopPropagation());
+                    textarea.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+                    textarea.addEventListener('click', (e) => e.stopPropagation());
+                });
             }
 
             // Harici Link Çizimi

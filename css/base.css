@@ -430,6 +430,10 @@ html.is-profile-loading #landing-screen {
 /* #endregion */
 
 /* #region 5: SHOWCASE WING (TOPS COMPANION CARD) SAHNE MİMARİSİ */
+.profile-layout-wrapper {
+    display: contents;
+}
+
 .stage {
     perspective: 1200px;
     transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
@@ -498,32 +502,60 @@ html.is-profile-loading #landing-screen {
     }
 
     body {
-        display: flex;
-        flex-direction: column;
+        display: block;
         min-height: 100vh;
         min-height: 100dvh;
     }
 
+    /* 3 SATIRLI MOBİL GRİDBOX MİMARİSİ: Üst Butonlar -> Kartlar -> 3 Nokta */
+    .profile-layout-wrapper {
+        display: grid !important;
+        grid-template-rows: auto 1fr auto !important;
+        row-gap: var(--mobile-stage-gap) !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        padding: clamp(8px, 1.8vh, 16px) 16px !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        position: relative !important;
+        z-index: 5 !important;
+    }
+
+    .top-nav {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        height: 42px !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        z-index: var(--z-nav) !important;
+    }
+
     .stage {
-        position: relative;
-        width: 100vw;
-        height: 100vh;
-        height: 100dvh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        position: relative !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         perspective: 1200px;
         overflow: hidden !important;
-        padding: 0;
-        box-sizing: border-box;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
         touch-action: pan-y;
     }
 
-    /* Sabit 5:7 Geometrisi */
+    /* Sabit 5:7 Geometrisi — Kalan 1fr dikey alana mükemmel orantılanır */
     .stage .card-container,
     .stage .companion-card {
-        --mobile-dots-reserved-space: 88px;
-        --mobile-card-max-h: min(var(--card-height), calc(100dvh - var(--mobile-dots-reserved-space)));
+        --mobile-card-max-h: 100%;
         --mobile-card-w: min(
             var(--card-narrow-width),
             calc(100vw - 32px),
@@ -533,8 +565,8 @@ html.is-profile-loading #landing-screen {
         height: calc(var(--mobile-card-w) * 7 / 5);
         aspect-ratio: var(--card-aspect-ratio);
         max-width: 100%;
-        max-height: none;
-        margin: 0 auto;
+        max-height: 100%;
+        margin: auto;
         flex-shrink: 0;
         box-sizing: border-box;
         transition: transform 0.40s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease !important;
@@ -564,11 +596,11 @@ html.is-profile-loading #landing-screen {
         pointer-events: none !important;
     }
 
-    /* Showcase Kartı: Normalde sağda ekran dışında */
+    /* Showcase Kartı: Normalde sağda ekran dışında, açılınca tam merkezde */
     .stage #topsCompanionCard {
         position: absolute;
         top: 0;
-        bottom: 56px;
+        bottom: 0;
         margin: auto;
         z-index: 6;
         transform: translate3d(calc(100vw + 40px), 0, 0);
@@ -584,11 +616,11 @@ html.is-profile-loading #landing-screen {
         pointer-events: auto !important;
     }
 
-    /* Trophies Kartı: Normalde solda ekran dışında */
+    /* Trophies Kartı: Normalde solda ekran dışında, açılınca tam merkezde */
     .stage #trophiesCompanionCard {
         position: absolute;
         top: 0;
-        bottom: 56px;
+        bottom: 0;
         margin: auto;
         z-index: 6;
         transform: translate3d(calc(-100vw - 40px), 0, 0);
@@ -1462,28 +1494,19 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
 }
 
 @media (max-width: 899px) {
-    .stage {
-        flex-direction: column !important;
-        justify-content: center !important;
-        align-items: center !important;
-        gap: 0 !important;
-        padding-bottom: 56px !important;
-        box-sizing: border-box !important;
-    }
-
     .mobile-nav-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: absolute !important;
-        bottom: 14px !important;
-        left: 0 !important;
-        right: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+        bottom: auto !important;
+        left: auto !important;
+        right: auto !important;
         margin: 0 auto !important;
-        width: max-content;
-        height: auto;
-        z-index: 50;
-        pointer-events: auto;
+        width: max-content !important;
+        height: auto !important;
+        z-index: 50 !important;
+        pointer-events: auto !important;
     }
 
     .mobile-dots-wrapper {
@@ -1544,20 +1567,6 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
     }
 
     @media (max-height: 560px) {
-        .stage {
-            padding-bottom: 44px !important;
-        }
-        .stage .card-container,
-        .stage .companion-card {
-            --mobile-dots-reserved-space: 68px;
-        }
-        .stage #topsCompanionCard,
-        .stage #trophiesCompanionCard {
-            bottom: 44px !important;
-        }
-        .mobile-nav-container {
-            bottom: 8px !important;
-        }
         .mobile-dots-wrapper {
             padding: 4px 10px !important;
             gap: 6px !important;

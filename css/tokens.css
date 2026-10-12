@@ -198,6 +198,9 @@
     --transition-edit-enter: 0.32s var(--ease-spring);
     --transition-edit-exit: 0.22s var(--ease-smooth);
     --transition-morph: 0.36s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    /* Mobil Sahne Dikey Düzen Tokenları (Tek Kaynak Clamp Boşluğu) */
+    --mobile-stage-gap: clamp(8px, 2vh, 18px);
 }
 /* #endregion */
 

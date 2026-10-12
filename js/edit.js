@@ -854,7 +854,6 @@ EditManager.Global = {
                     links: temizLinkler,
                     tops: guvenliObje(kartVerisi.tops),
                     trophies: trophiesPayload,
-                    widgets: Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets : [],
                     working_on: workingOnPayload,
                     theme_config: guvenliObje(kartVerisi.theme_config),
                     kullanici_notlari: guvenliObje(kartVerisi.kullanici_notlari)
