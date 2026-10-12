@@ -766,18 +766,22 @@ const RenderEngine = {
                 `;
 
                 return `
-                    <div class="top-item-card tier-${tierName} ${isHero ? 'is-hero' : ''}" data-index="${idx}" data-original-index="${idx}" data-id="${this.escapeHtml(itemId)}" role="button" tabindex="0">
-                        ${thumbHtml}
-                        <div class="top-item-content">
-                            <div class="top-item-header-row">
-                                ${crownHtml}
-                                <span class="top-item-rank tier-${tierName}">#${idx + 1}</span>
-                                <h4 class="top-item-title">${this.escapeHtml(item.baslik)}</h4>
-                                ${commentBadgeHtml}
-                                ${headerMetaHtml}
+                    <div class="top-item-unit tier-${tierName} ${isHero ? 'is-hero' : ''}" data-index="${idx}" data-original-index="${idx}" data-id="${this.escapeHtml(itemId)}">
+                        <div class="top-item-card tier-${tierName} ${isHero ? 'is-hero' : ''}" role="button" tabindex="0">
+                            ${thumbHtml}
+                            <div class="top-item-content">
+                                <div class="top-item-header-row">
+                                    ${crownHtml}
+                                    <span class="top-item-rank tier-${tierName}">#${idx + 1}</span>
+                                    <h4 class="top-item-title">${this.escapeHtml(item.baslik)}</h4>
+                                    ${commentBadgeHtml}
+                                    ${headerMetaHtml}
+                                </div>
+                                <p class="top-item-desc">${this.escapeHtml(item.aciklama || '')}</p>
+                                ${footerMetaHtml}
                             </div>
-                            <p class="top-item-desc">${this.escapeHtml(item.aciklama || '')}</p>
-                            ${footerMetaHtml}
+                        </div>
+                        <div class="top-item-review-drawer" data-for-id="${this.escapeHtml(itemId)}">
                             ${userReviewHtml}
                         </div>
                     </div>
@@ -817,7 +821,10 @@ const RenderEngine = {
             // Afiş Genişleme (Expand & Focus) — Sadece düzenleme modu KAPALIYKEN çalışır!
             const topsContainer = companionBody.querySelector('#tops-container-wrap');
             if (topsContainer) {
-                topsContainer.querySelectorAll('.top-item-card').forEach(card => {
+                topsContainer.querySelectorAll('.top-item-unit').forEach(unit => {
+                    const card = unit.querySelector('.top-item-card');
+                    if (!card) return;
+
                     card.addEventListener('click', (e) => {
                         const compCard = document.getElementById('topsCompanionCard');
                         if (compCard && compCard.classList.contains('is-detail-editing')) {
@@ -830,15 +837,18 @@ const RenderEngine = {
                             return;
                         }
 
-                        const isAlreadyExpanded = card.classList.contains('is-expanded');
-                        topsContainer.querySelectorAll('.top-item-card').forEach(c => {
-                            c.classList.remove('is-expanded');
+                        const isAlreadyExpanded = unit.classList.contains('is-expanded');
+                        topsContainer.querySelectorAll('.top-item-unit').forEach(u => {
+                            u.classList.remove('is-expanded');
+                            const c = u.querySelector('.top-item-card');
+                            if (c) c.classList.remove('is-expanded');
                         });
 
                         if (isAlreadyExpanded) {
                             topsContainer.classList.remove('has-expanded-item');
                         } else {
                             topsContainer.classList.add('has-expanded-item');
+                            unit.classList.add('is-expanded');
                             card.classList.add('is-expanded');
                         }
                     });

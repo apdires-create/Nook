@@ -1869,12 +1869,24 @@ EditManager.BackViews = {
                 const errorEl = row.querySelector('.inline-url-error');
                 const anchor = row.querySelector('.nook-link-anchor');
 
-                // Tıklanabilir iç kontrollerin mousedown ve dragstart olayını durdur ki kart sürüklenmeye başlamasın
-                [toggleBtn, testBtn, nameInput, urlInput, anchor].forEach(el => {
+                // Form kontrolleri ve aksiyon butonlarında sürüklemeyi engelle
+                [toggleBtn, testBtn, nameInput, urlInput].forEach(el => {
                     if (!el) return;
                     el.addEventListener('mousedown', (e) => e.stopPropagation());
+                    el.addEventListener('pointerdown', (e) => e.stopPropagation());
                     el.addEventListener('dragstart', (e) => { e.preventDefault(); e.stopPropagation(); });
                 });
+
+                if (anchor) {
+                    anchor.setAttribute('draggable', 'false');
+                    anchor.addEventListener('dragstart', (e) => { e.preventDefault(); e.stopPropagation(); });
+                    anchor.addEventListener('click', (e) => {
+                        if (window._suruklemeBitti && Date.now() - window._suruklemeBitti < 350) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }
+                    });
+                }
 
                 const autoSave = () => {
                     let val = urlInput.value.trim();
@@ -2052,16 +2064,22 @@ EditManager.BackViews = {
             itemSelector: '.nook-link-row',
             axis: 'y',
             canDrag: (row) => !row.classList.contains('is-expanded'),
-            excludedDragSelectors: '.nook-link-anchor, .nook-link-actions, .nook-action-btn, input, button, a',
+            excludedDragSelectors: '.nook-action-btn, input, textarea, button, .nook-link-collapse',
             onDrop: () => {
                 if (Array.isArray(kartVerisi.links)) {
-                    const yeniSiraIndices = [...wrapper.querySelectorAll('.nook-link-row')].map(r => parseInt(r.dataset.index, 10));
-                    const yeniLinks = yeniSiraIndices.map(i => kartVerisi.links[i]).filter(Boolean);
+                    const rows = [...wrapper.querySelectorAll('.nook-link-row')];
+                    const yeniLinks = [];
+                    rows.forEach((r, newIdx) => {
+                        const oldIdx = parseInt(r.dataset.index, 10);
+                        if (!isNaN(oldIdx) && kartVerisi.links[oldIdx]) {
+                            yeniLinks.push(kartVerisi.links[oldIdx]);
+                        }
+                        r.dataset.index = newIdx;
+                    });
 
-                    if (JSON.stringify(yeniLinks) !== JSON.stringify(kartVerisi.links)) {
+                    if (yeniLinks.length === kartVerisi.links.length && JSON.stringify(yeniLinks) !== JSON.stringify(kartVerisi.links)) {
                         kartVerisi.links = yeniLinks;
                         EditManager.Global.degisiklikYapildi();
-                        renderLinks();
                     }
                 }
             }
@@ -3609,14 +3627,14 @@ EditManager.CompanionViews = {
         // 7. AFİŞ KARTLARI SÜRÜKLE-BIRAK (Pointer Sortable)
         // Sıralama her zaman aktif (düzenleme modunda da afiş genişlemeden serbestçe sıralanabilir)
         EditManager.initPointerSortable(container, {
-            itemSelector: '.top-item-card',
+            itemSelector: '.top-item-unit',
             axis: 'y',
-            canDrag: (card) => {
+            canDrag: (unit) => {
                 const isEditing = topsCompanion.classList.contains('is-detail-editing');
                 if (isEditing) return true; // Düzenleme modunda sıralama her zaman serbest
-                return !card.classList.contains('is-expanded') && !container.classList.contains('has-expanded-item');
+                return !unit.classList.contains('is-expanded') && !container.classList.contains('has-expanded-item');
             },
-            excludedDragSelectors: '.item-delete-btn, .top-poster-add-card, input, button, a',
+            excludedDragSelectors: '.item-delete-btn, .top-poster-add-card, .top-item-review-drawer, textarea, input, button, a',
             onMove: () => {
                 const currentAddCard = container.querySelector('#top-add-poster-btn');
                 if (currentAddCard) container.appendChild(currentAddCard);
@@ -3626,13 +3644,13 @@ EditManager.CompanionViews = {
                 if (currentAddCard) container.appendChild(currentAddCard);
 
                 if (aktifListe && Array.isArray(aktifListe.ogeler)) {
-                    const cards = [...container.querySelectorAll('.top-item-card')];
-                    const yeniOgeler = cards.map(c => {
-                        const origIdx = parseInt(c.dataset.originalIndex, 10);
+                    const units = [...container.querySelectorAll('.top-item-unit')];
+                    const yeniOgeler = units.map(u => {
+                        const origIdx = parseInt(u.dataset.originalIndex, 10);
                         if (!isNaN(origIdx) && aktifListe.ogeler[origIdx]) {
                             return aktifListe.ogeler[origIdx];
                         }
-                        const cid = c.dataset.id;
+                        const cid = u.dataset.id;
                         if (cid) {
                             return aktifListe.ogeler.find(x => (x.id || x.kimlik) === cid);
                         }
@@ -3664,9 +3682,10 @@ EditManager.CompanionViews = {
         // 9. Kullanıcı Yorumu (Textarea) Dinleyicilerini Bağla (Revizyon Madde 1)
         container.querySelectorAll('.user-review-textarea').forEach(textarea => {
             const itemId = textarea.dataset.itemId;
-            const cardEl = textarea.closest('.top-item-card');
-            const countEl = cardEl ? cardEl.querySelector('.user-review-char-count') : null;
-            const textDisplay = cardEl ? cardEl.querySelector('.user-review-text') : null;
+            const unitEl = textarea.closest('.top-item-unit');
+            const cardEl = unitEl ? unitEl.querySelector('.top-item-card') : null;
+            const countEl = unitEl ? unitEl.querySelector('.user-review-char-count') : null;
+            const textDisplay = unitEl ? unitEl.querySelector('.user-review-text') : null;
 
             textarea.addEventListener('input', () => {
                 const val = textarea.value.slice(0, 150);

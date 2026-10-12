@@ -324,6 +324,13 @@
     position: relative;
     user-select: none;
     -webkit-user-select: none;
+    touch-action: none;
+}
+
+.nook-link-anchor {
+    touch-action: none;
+    -webkit-user-drag: none;
+    user-drag: none;
 }
 
 .nook-link-row:hover {
@@ -720,6 +727,26 @@ body.is-owner .nook-link-row.is-expanded input {
     width: 100%;
 }
 
+.top-item-unit {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                margin 0.3s ease;
+}
+
+body.is-owner .top-item-unit {
+    cursor: grab;
+}
+
+body.is-owner .top-item-unit:active {
+    cursor: grabbing;
+}
+
 .top-item-card {
     position: relative;
     display: flex;
@@ -730,6 +757,8 @@ body.is-owner .nook-link-row.is-expanded input {
     border-radius: var(--radius-item);
     cursor: pointer;
     user-select: none;
+    width: 100%;
+    box-sizing: border-box;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
                 opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
                 max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
@@ -739,16 +768,8 @@ body.is-owner .nook-link-row.is-expanded input {
                 box-shadow 0.25s ease;
 }
 
-body.is-owner .top-item-card {
-    cursor: grab;
-}
-
-body.is-owner .top-item-card:active {
-    cursor: grabbing;
-}
-
-/* Bir kart genişletildiğinde diğer kartların ve ekleme butonunun yok olması */
-.tops-container-wrap.has-expanded-item .top-item-card:not(.is-expanded),
+/* Bir kart genişletildiğinde diğer birimlerin ve ekleme butonunun yok olması */
+.tops-container-wrap.has-expanded-item .top-item-unit:not(.is-expanded),
 .tops-container-wrap.has-expanded-item .top-poster-add-card {
     opacity: 0 !important;
     max-height: 0 !important;
@@ -762,15 +783,18 @@ body.is-owner .top-item-card:active {
     transform: scale(0.96) !important;
 }
 
+.top-item-unit.is-expanded {
+    order: -1;
+}
+
 /* Seçilen ve Genişleyen Kart (Seçenek A Düzeni) */
 .top-item-card.is-expanded {
-    order: -1;
     cursor: pointer;
     background: rgba(255, 255, 255, 0.04);
     border-color: var(--accent-color, #3b5bdb);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 16px rgba(59, 91, 219, 0.25);
     padding: 3cqw 3.5cqw;
-    min-height: 38cqh;
+    min-height: 28cqh;
     align-items: flex-start;
 }
 
@@ -924,23 +948,34 @@ body.is-owner .top-item-card:active {
     background: var(--color-tier-bronze-bg);
 }
 
-/* 📝 GENİŞLETİLMİŞ KARTTA KULLANICI YORUMU (PLAN.md Madde 6) */
-.top-item-user-review {
+/* 📝 BAĞIMSIZ KULLANICI YORUMU ÇEKMECESİ (DRAWER) */
+.top-item-review-drawer {
     display: none;
-    margin-top: 1.4cqh;
-    padding: 1.2cqh 2cqw;
-    background: rgba(255, 255, 255, 0.035);
-    border: 1px solid var(--border-soft);
-    border-radius: 10px;
     width: 100%;
     box-sizing: border-box;
+    margin-top: 8px;
+    padding: 12px 14px;
+    background: rgba(12, 14, 20, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    cursor: default;
 }
 
-.top-item-card.is-expanded .top-item-user-review {
+.top-item-unit.is-expanded .top-item-review-drawer {
     display: flex;
     flex-direction: column;
-    gap: 0.5cqh;
-    animation: fadeInReview 0.3s var(--ease-smooth);
+    animation: fadeInReview 0.28s var(--ease-smooth);
+}
+
+.top-item-user-review {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 @keyframes fadeInReview {
