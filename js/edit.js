@@ -719,6 +719,7 @@ EditManager.Global = {
             working_on = { metin: veri.working_on.metin.trim() };
         }
         const theme_config = veri.theme_config || {};
+        const kullanici_notlari = (veri.kullanici_notlari && typeof veri.kullanici_notlari === 'object') ? veri.kullanici_notlari : {};
         return {
             front_data: front,
             links,
@@ -726,7 +727,8 @@ EditManager.Global = {
             trophies,
             widgets,
             working_on,
-            theme_config
+            theme_config,
+            kullanici_notlari
         };
     },
 
@@ -854,6 +856,7 @@ EditManager.Global = {
                     links: temizLinkler,
                     tops: guvenliObje(kartVerisi.tops),
                     trophies: trophiesPayload,
+                    widgets: Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets : [],
                     working_on: workingOnPayload,
                     theme_config: guvenliObje(kartVerisi.theme_config),
                     kullanici_notlari: guvenliObje(kartVerisi.kullanici_notlari)
