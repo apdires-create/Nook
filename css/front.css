@@ -182,6 +182,7 @@
 .profile-name {
     margin-top: 2cqh;
     width: 90%;
+    font-family: var(--font-display, var(--font-sans));
     font-size: 6.8cqw;
     font-weight: 750;
     color: var(--text-primary);

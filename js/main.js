@@ -65,6 +65,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const basarili = await tumVerileriCek();
 
+    // 3.1: Kullanıcı Temasını Enjekte Et ve Yükle
+    if (basarili && typeof ThemeManager !== 'undefined') {
+        const themeConfig = (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config) || {};
+        const userThemeId = themeConfig.theme_id || themeConfig.theme || null;
+        if (userThemeId) {
+            await ThemeManager.applyTheme(userThemeId, themeConfig);
+        } else {
+            ThemeManager.clearTheme();
+        }
+    }
+
     // Bekleme süresini tamamla
     const gecen = Date.now() - baslangic;
     const kalan = Math.max(0, MIN_BEKLEME_MS - gecen);
@@ -83,10 +94,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (cardContainer) cardContainer.style.display = 'block';
 
         if (appLoadingEl) {
-            appLoadingEl.classList.add('is-hidden');
+            appLoadingEl.classList.add('is-revealed');
             setTimeout(() => {
                 appLoadingEl.style.display = 'none';
-            }, 400);
+                appLoadingEl.classList.remove('is-revealed');
+            }, 450);
         }
 
         // 4. Ribbon Taşma İzleyicisi (Madde 1)
