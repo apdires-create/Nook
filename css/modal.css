@@ -381,6 +381,118 @@
     background: rgba(255, 255, 255, 0.15);
 }
 
+/* #region 6: CANLI ÖNİZLEME YÜZEN BARI (LIVE PREVIEW BAR) */
+.theme-preview-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    z-index: var(--z-modal, 10000);
+    width: auto;
+    max-width: 90vw;
+    background: rgba(15, 18, 28, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-highlight);
+    border-radius: var(--radius-pill);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 20px var(--accent-glow);
+    padding: 8px 14px 8px 18px;
+    animation: previewBarSlideUp 0.3s var(--ease-spring);
+}
+
+@keyframes previewBarSlideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.theme-preview-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.theme-preview-bar-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-preview-pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #38bdf8;
+    box-shadow: 0 0 10px #38bdf8;
+    animation: previewDotPulse 1.8s infinite;
+}
+
+@keyframes previewDotPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.theme-preview-bar-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.theme-preview-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-preview-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.theme-preview-btn.is-cancel {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-soft);
+}
+
+.theme-preview-btn.is-cancel:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+}
+
+.theme-preview-btn.is-action {
+    background: var(--accent-color);
+    color: #ffffff;
+    box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.theme-preview-btn.is-action:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.theme-preview-btn.is-apply-action {
+    background: #10b981;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+/* #endregion */
+
 /* #region 4: KATMAN İSTİSNALARI + SCROLL KİLİDİ */
 .tops-search-modal { z-index: var(--z-modal-stacked); }
 .block-delete-modal { z-index: var(--z-confirm); }

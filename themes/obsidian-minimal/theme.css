@@ -1,0 +1,242 @@
+/* ==========================================================================
+   NOOK — OBSIDIAN MINIMAL TEMA PAKETİ
+   Referans: THEME_SPEC.md 6. Adım MVP Tema
+   Karakter: Lüks editoryal monokrom, mat obsidiyen yüzeyler, serifi-sans kontrastı
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* 1. KÖK DEĞİŞKENLER VE TOKEN GEÇERSİZ KILMALARI (SCOPED OVERRIDES) */
+[data-theme="obsidian-minimal"],
+:root[data-theme="obsidian-minimal"] {
+    /* ----------------------------------------------------
+       1. TİPOGRAFİ (EDITORIAL SERIF & PRECISION SANS)
+       ---------------------------------------------------- */
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* ----------------------------------------------------
+       2. RENK, IŞIK VE MAT OBSİDİYEN PALETİ
+       ---------------------------------------------------- */
+    --bg-stage: #050507;
+    --bg-card: #0b0c10;
+    --bg-card-subtle: #12131a;
+    --bg-pill: rgba(255, 255, 255, 0.04);
+    --bg-pill-hover: rgba(255, 255, 255, 0.1);
+
+    --text-primary: #fcfcfd;
+    --text-secondary: rgba(255, 255, 255, 0.62);
+    --text-tertiary: rgba(255, 255, 255, 0.38);
+
+    /* Vurgu: Platin & Titanyum Işıltısı */
+    --accent-color: #f4f4f5;
+    --accent-glow: rgba(255, 255, 255, 0.12);
+    --border-soft: rgba(255, 255, 255, 0.09);
+    --border-highlight: rgba(255, 255, 255, 0.2);
+
+    /* ----------------------------------------------------
+       3. GEOMETRİ VE KENAR DİLİ (JAPON MİNİMALİZMİ)
+       ---------------------------------------------------- */
+    --card-radius: 18px;
+    --nook-card-radius: 18px;
+    --radius-btn: 6px;
+    --radius-item: 8px;
+    --radius-pill: 6px;
+    --radius-input: 8px;
+
+    /* Lüks Derinlik ve İnce Gölgeler */
+    --shadow-card: 
+        0 12px 40px -10px rgba(0, 0, 0, 0.85),
+        0 30px 70px -20px rgba(0, 0, 0, 0.95),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+
+    --card-shadow: var(--shadow-card);
+    --card-border: 1px solid rgba(255, 255, 255, 0.1);
+
+    /* ----------------------------------------------------
+       4. DOKU VE KAPLAMA (MICRO GRAIN OVERLAY)
+       ---------------------------------------------------- */
+    --theme-overlay-opacity: 0.045;
+    --theme-overlay-blend: soft-light;
+
+    /* ----------------------------------------------------
+       6. HAREKET VE FİZİK KİMLİĞİ (DELIBERATE EDITORIAL EASE)
+       ---------------------------------------------------- */
+    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ----------------------------------------------------
+   2. SAHNE & ATMOSFER (STAGE AMBIENCE)
+   ---------------------------------------------------- */
+[data-theme="obsidian-minimal"] body {
+    background-color: var(--bg-stage);
+}
+
+[data-theme="obsidian-minimal"] .ambient-background {
+    background: radial-gradient(circle at 50% 38%, #14151b 0%, #08080b 60%, #030305 100%) !important;
+    opacity: 0.95;
+}
+
+/* ----------------------------------------------------
+   3. DOKU OVERLAY (INLINE MICRO NOISE GRAIN)
+   ---------------------------------------------------- */
+[data-theme="obsidian-minimal"] .theme-overlay {
+    background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px),
+        radial-gradient(rgba(0, 0, 0, 0.3) 1px, transparent 1px);
+    background-size: 8px 8px, 12px 12px;
+    background-position: 0 0, 4px 4px;
+    opacity: var(--theme-overlay-opacity);
+    mix-blend-mode: var(--theme-overlay-blend);
+    pointer-events: none;
+}
+
+/* ----------------------------------------------------
+   4. TİPOGRAFİ VE EDİTORYAL KART BAŞLIKLARI
+   ---------------------------------------------------- */
+[data-theme="obsidian-minimal"] .profile-name {
+    font-family: var(--font-display) !important;
+    font-weight: 600 !important;
+    font-size: clamp(2rem, 7cqw, 2.6rem) !important;
+    letter-spacing: -0.015em !important;
+    color: #ffffff !important;
+    line-height: 1.15 !important;
+}
+
+[data-theme="obsidian-minimal"] .profile-title {
+    font-family: var(--font-body) !important;
+    font-size: 0.76rem !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    font-weight: 500 !important;
+    color: var(--text-secondary) !important;
+    margin-top: 6px !important;
+}
+
+[data-theme="obsidian-minimal"] .profile-bio {
+    font-family: var(--font-body) !important;
+    font-weight: 400 !important;
+    line-height: 1.65 !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    letter-spacing: 0.01em !important;
+}
+
+[data-theme="obsidian-minimal"] .back-links-title,
+[data-theme="obsidian-minimal"] .companion-title {
+    font-family: var(--font-display) !important;
+    letter-spacing: 0.05em !important;
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+}
+
+/* ----------------------------------------------------
+   5. BİLEŞENLER, TAG'LER & BUTONLAR
+   ---------------------------------------------------- */
+/* Tag Hapları -> Zarif Dikdörtgen Plakalar */
+[data-theme="obsidian-minimal"] .tag-pill,
+[data-theme="obsidian-minimal"] .nook-tag {
+    border-radius: var(--radius-pill) !important;
+    background: rgba(255, 255, 255, 0.035) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    transition: all 0.25s var(--ease-smooth) !important;
+}
+
+[data-theme="obsidian-minimal"] .tag-pill:hover,
+[data-theme="obsidian-minimal"] .nook-tag:hover {
+    background: rgba(255, 255, 255, 0.09) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+/* Arka Yüz Bağlantı Satırları */
+[data-theme="obsidian-minimal"] .nook-link-row,
+[data-theme="obsidian-minimal"] .link-item {
+    border-radius: var(--radius-item) !important;
+    background: rgba(255, 255, 255, 0.025) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    transition: all 0.22s var(--ease-smooth) !important;
+}
+
+[data-theme="obsidian-minimal"] .nook-link-row:hover,
+[data-theme="obsidian-minimal"] .link-item:hover {
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #0b0c10 !important;
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="obsidian-minimal"] .nook-link-row:hover *,
+[data-theme="obsidian-minimal"] .link-item:hover * {
+    color: #0b0c10 !important;
+}
+
+/* ----------------------------------------------------
+   6. SAĞ KENAR KULAKÇIKLARI (RIBBON FLAGS)
+   ---------------------------------------------------- */
+[data-theme="obsidian-minimal"] .card-flag-btn {
+    border-radius: 0 8px 8px 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-left: none !important;
+    background: #111218 !important;
+    box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="obsidian-minimal"] .card-flag-btn.flag-trophies {
+    background: #13141b !important;
+    color: #ffffff !important;
+}
+
+[data-theme="obsidian-minimal"] .card-flag-btn.flag-showcase {
+    background: #171822 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="obsidian-minimal"] .card-flag-btn:hover {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="obsidian-minimal"] .card-flag-btn:hover .flag-icon svg {
+    stroke: #000000 !important;
+}
+
+/* ----------------------------------------------------
+   7. COMPANION KARTLAR (TROPHIES & SHOWCASE)
+   ---------------------------------------------------- */
+[data-theme="obsidian-minimal"] .companion-card {
+    background: #0b0c10 !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+}
+
+[data-theme="obsidian-minimal"] .companion-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+[data-theme="obsidian-minimal"] .icon-trophies,
+[data-theme="obsidian-minimal"] .icon-showcase {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* ----------------------------------------------------
+   8. AVATAR & BANNER DOKUNUŞLARI
+   ---------------------------------------------------- */
+[data-theme="obsidian-minimal"] .avatar-box {
+    border: 2px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="obsidian-minimal"] .banner-box {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}

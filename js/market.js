@@ -20,19 +20,12 @@ const ThemeMarket = {
             description: 'Mat siyah zemin, monokrom tipografi, keskin hatlar ve lüks editoryal kart estetiği.',
             price_cents: 500,
             is_active: true,
-            checkout_url: 'https://nook.lemonsqueezy.com/buy/obsidian-minimal', // Lemon Squeezy linki
+            checkout_url: 'https://nook-page.lemonsqueezy.com/checkout/buy/5de6573b-eab6-45f6-aed5-dce07fa7eea9',
+            variant_id: '2243559',
+            product_id: '5de6573b-eab6-45f6-aed5-dce07fa7eea9',
             banner_icon: '🖤',
-            font: 'Inter, sans-serif'
-        },
-        {
-            id: 'terminal',
-            name: 'Terminal Matrix',
-            description: 'CRT scanline kaplaması, yeşil fosfor monospaced karakterler ve hacker konsolu kimliği.',
-            price_cents: 500,
-            is_active: true,
-            checkout_url: 'https://nook.lemonsqueezy.com/buy/terminal',
-            banner_icon: '📟',
-            font: 'Courier New, monospace'
+            font: 'Cormorant Garamond & Plus Jakarta Sans',
+            font_url: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
         },
         {
             id: 'default',
@@ -45,12 +38,16 @@ const ThemeMarket = {
         }
     ],
 
+    previewBarEl: null,
+    originalThemeId: null,
+
     init() {
         this.modalEl = document.getElementById('theme-market-modal');
         this.gridEl = document.getElementById('theme-market-grid');
         this.catalogViewEl = document.getElementById('theme-market-catalog-view');
         this.detailViewEl = document.getElementById('theme-market-detail-view');
         this.detailBodyEl = document.getElementById('theme-detail-body');
+        this.previewBarEl = document.getElementById('theme-preview-bar');
 
         if (!this.modalEl || !this.gridEl) return;
 
@@ -75,10 +72,20 @@ const ThemeMarket = {
             backBtn.onclick = () => this.katalogGoster();
         }
 
+        // Önizleme Barı Butonları
+        const cancelPreviewBtn = document.getElementById('preview-btn-cancel');
+        if (cancelPreviewBtn) {
+            cancelPreviewBtn.onclick = () => this.onizlemeyiBitir();
+        }
+
         // ESC tuşu ile kapatma
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.modalEl.classList.contains('is-open')) {
-                this.kapat();
+            if (e.key === 'Escape') {
+                if (this.modalEl.classList.contains('is-open')) {
+                    this.kapat();
+                } else if (this.previewBarEl && this.previewBarEl.style.display !== 'none') {
+                    this.onizlemeyiBitir();
+                }
             }
         });
     },
@@ -89,12 +96,53 @@ const ThemeMarket = {
         this.katalogCiz();
         this.modalEl.classList.add('is-open');
 
-        // Kullanıcının envanterini yükle ve tekrar güncelle
+        // Veritabanından güncel temaları ve kullanıcının envanterini yükle
         try {
+            await this.temalariVeritabanindanYukle();
             await this.kullaniciEnvanteriniYukle();
             this.katalogCiz();
         } catch (e) {
-            console.warn('[ThemeMarket] Envanter yükleme hatası:', e);
+            console.warn('[ThemeMarket] Katalog/Envanter yükleme hatası:', e);
+        }
+    },
+
+    /**
+     * Supabase public.themes tablosundan aktif temaları çeker
+     */
+    async temalariVeritabanindanYukle() {
+        const client = (typeof supabaseClient !== 'undefined' && supabaseClient) 
+            || (typeof supabaseIstemcisi !== 'undefined' && supabaseIstemcisi) 
+            || null;
+
+        if (!client) return;
+
+        try {
+            const { data, error } = await client
+                .from('themes')
+                .select('*')
+                .eq('is_active', true);
+
+            if (!error && Array.isArray(data) && data.length > 0) {
+                data.forEach(remoteTheme => {
+                    const localIdx = this.themesCatalog.findIndex(t => t.id === remoteTheme.id);
+                    if (localIdx >= 0) {
+                        this.themesCatalog[localIdx] = {
+                            ...this.themesCatalog[localIdx],
+                            ...remoteTheme,
+                            checkout_url: this.themesCatalog[localIdx].checkout_url || remoteTheme.checkout_url,
+                            variant_id: this.themesCatalog[localIdx].variant_id || remoteTheme.variant_id,
+                            banner_icon: this.themesCatalog[localIdx].banner_icon || remoteTheme.banner_icon
+                        };
+                    } else {
+                        this.themesCatalog.push({
+                            ...remoteTheme,
+                            banner_icon: '🎨'
+                        });
+                    }
+                });
+            }
+        } catch (err) {
+            console.warn('[ThemeMarket] Veritabanından tema kataloğu çekilemedi (yerel katalog devrede):', err);
         }
     },
 
@@ -216,14 +264,7 @@ const ThemeMarket = {
         const applyBtn = document.getElementById('theme-btn-apply');
 
         if (previewBtn) {
-            previewBtn.onclick = () => {
-                if (typeof ThemeManager !== 'undefined') {
-                    ThemeManager.applyTheme(theme.id);
-                    if (typeof window.toastBildirimiGoster === 'function') {
-                        window.toastBildirimiGoster(`"${theme.name}" teması önizleniyor.`, 2500, 'success');
-                    }
-                }
-            };
+            previewBtn.onclick = () => this.onizlemeBaslat(theme);
         }
 
         if (buyBtn) {
@@ -233,6 +274,78 @@ const ThemeMarket = {
         if (applyBtn) {
             applyBtn.onclick = () => this.temayiUygula(theme);
         }
+    },
+
+    /**
+     * Canlı Önizleme Motoru (5. Adım)
+     * Kartın state'ini geçici olarak ezer ve yüzen önizleme barını açar
+     */
+    async onizlemeBaslat(theme) {
+        // O anki gerçek tema ID'sini kaydet
+        if (!this.originalThemeId) {
+            this.originalThemeId = kartVerisi?.theme_config?.theme_id || 'default';
+        }
+
+        // Modalı kapat ki kullanıcı kartı tam görebilsin
+        this.kapat();
+
+        // Temayı geçici uygula
+        if (typeof ThemeManager !== 'undefined') {
+            await ThemeManager.applyTheme(theme.id, { fontUrl: theme.font_url || theme.fontUrl });
+        }
+
+        // Yüzen Önizleme Barını Göster ve Güncelle
+        if (this.previewBarEl) {
+            const titleEl = document.getElementById('preview-bar-theme-name');
+            const actionBtn = document.getElementById('preview-btn-action');
+
+            if (titleEl) {
+                titleEl.textContent = `"${theme.name}" Önizleniyor`;
+            }
+
+            if (actionBtn) {
+                const isOwned = this.userInventory.has(theme.id) || theme.price_cents === 0;
+                if (isOwned) {
+                    actionBtn.textContent = 'Temayı Uygula';
+                    actionBtn.className = 'theme-preview-btn is-apply-action';
+                    actionBtn.onclick = () => {
+                        this.onizlemeyiBitir(false);
+                        this.temayiUygula(theme);
+                    };
+                } else {
+                    actionBtn.textContent = `Satın Al ($${(theme.price_cents / 100).toFixed(2)})`;
+                    actionBtn.className = 'theme-preview-btn is-action';
+                    actionBtn.onclick = () => this.satinAl(theme);
+                }
+            }
+
+            this.previewBarEl.style.display = 'block';
+        }
+
+        if (typeof window.toastBildirimiGoster === 'function') {
+            window.toastBildirimiGoster(`"${theme.name}" teması önizleniyor.`, 2500, 'success');
+        }
+    },
+
+    /**
+     * Önizleme Modundan Çıkış ve Eski Temaya Geri Dönüş
+     */
+    async onizlemeyiBitir(revertToOriginal = true) {
+        if (this.previewBarEl) {
+            this.previewBarEl.style.display = 'none';
+        }
+
+        if (revertToOriginal && this.originalThemeId) {
+            if (typeof ThemeManager !== 'undefined') {
+                const origTheme = this.themesCatalog.find(t => t.id === this.originalThemeId);
+                await ThemeManager.applyTheme(this.originalThemeId, { fontUrl: origTheme?.font_url || origTheme?.fontUrl });
+            }
+            if (typeof window.toastBildirimiGoster === 'function') {
+                window.toastBildirimiGoster("Orijinal temaya dönüldü.", 2000, 'info');
+            }
+        }
+
+        this.originalThemeId = null;
     },
 
     /**
@@ -293,7 +406,7 @@ const ThemeMarket = {
 
             // Temayı uygula
             if (typeof ThemeManager !== 'undefined') {
-                await ThemeManager.applyTheme(theme.id);
+                await ThemeManager.applyTheme(theme.id, { fontUrl: theme.font_url || theme.fontUrl });
             }
 
             if (typeof window.toastBildirimiGoster === 'function') {
