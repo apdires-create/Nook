@@ -6,7 +6,8 @@
 .tops-setup-modal,
 .tops-search-modal,
 .block-delete-modal,
-.trophy-picker-modal {
+.trophy-picker-modal,
+.theme-market-modal {
     position: fixed;
     inset: 0;
     z-index: var(--z-modal);
@@ -21,7 +22,8 @@
 }
 
 :is(.auth-modal, .image-cropper-modal, .add-section-modal, .tag-picker-modal,
-    .tops-setup-modal, .tops-search-modal, .block-delete-modal, .trophy-picker-modal).is-open {
+    .tops-setup-modal, .tops-search-modal, .block-delete-modal, .trophy-picker-modal,
+    .theme-market-modal).is-open {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -36,7 +38,8 @@
 .tag-picker-backdrop,
 .tops-modal-backdrop,
 .block-delete-backdrop,
-.trophy-picker-backdrop {
+.trophy-picker-backdrop,
+.theme-market-backdrop {
     position: absolute;
     inset: 0;
     background: var(--modal-backdrop);
@@ -52,7 +55,8 @@
 .tag-picker-panel,
 .tops-modal-panel,
 .block-delete-panel,
-.trophy-picker-panel {
+.trophy-picker-panel,
+.theme-market-box {
     position: relative;
     z-index: 1;
     box-sizing: border-box;
@@ -78,9 +82,11 @@
 }
 
 :is(.auth-modal, .image-cropper-modal, .add-section-modal, .tag-picker-modal,
-    .tops-setup-modal, .tops-search-modal, .block-delete-modal, .trophy-picker-modal).is-open
+    .tops-setup-modal, .tops-search-modal, .block-delete-modal, .trophy-picker-modal,
+    .theme-market-modal).is-open
 :is(.auth-modal-box, .cropper-box, .section-picker-panel,
-    .tag-picker-panel, .tops-modal-panel, .block-delete-panel, .trophy-picker-panel) {
+    .tag-picker-panel, .tops-modal-panel, .block-delete-panel, .trophy-picker-panel,
+    .theme-market-box) {
     transform: none;
     transition: transform var(--modal-dur, 0.2s) var(--ease-spring);
 }
@@ -93,6 +99,7 @@
 .tag-picker-panel     { --modal-w: var(--modal-w-md); }
 .block-delete-panel   { --modal-w: var(--modal-w-sm); }
 .trophy-picker-panel  { --modal-w: var(--modal-w-lg); }
+.theme-market-box     { --modal-w: min(640px, 94vw); }
 
 @media (max-width: 480px) {
     :root {
@@ -105,13 +112,274 @@
     .tag-picker-panel,
     .tops-modal-panel,
     .block-delete-panel,
-    .trophy-picker-panel {
+    .trophy-picker-panel,
+    .theme-market-box {
         max-height: 94vh;
         max-height: 94dvh;
         border-radius: 18px;
     }
 }
 /* #endregion */
+
+/* #region 5: TEMA MARKETİ ÖZEL STİLLERİ */
+.theme-market-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.theme-market-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+}
+
+.theme-market-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.theme-market-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: 1.6rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.theme-market-close-btn:hover {
+    color: #ffffff;
+    transform: scale(1.15);
+}
+
+.theme-market-content {
+    padding: 18px;
+}
+
+.theme-market-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+/* Tema Paket Kartı */
+.theme-market-card {
+    background: var(--bg-card-subtle);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-item, 14px);
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.22s var(--ease-spring), border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.theme-market-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent-color);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow);
+}
+
+.theme-card-banner {
+    width: 100%;
+    height: 105px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.4) 100%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.theme-card-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.theme-card-banner-placeholder {
+    font-size: 2.2rem;
+    opacity: 0.85;
+}
+
+.theme-card-body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 6px;
+}
+
+.theme-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.theme-card-name {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.theme-card-price {
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    background: rgba(59, 91, 219, 0.18);
+    color: var(--accent-light, #748ffc);
+    border: 1px solid rgba(59, 91, 219, 0.35);
+}
+
+.theme-card-price.is-free {
+    background: rgba(16, 185, 129, 0.18);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.35);
+}
+
+.theme-card-desc {
+    font-size: 0.82rem;
+    color: var(--text-tertiary);
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Detay Görünümü */
+.theme-market-detail-view {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.theme-detail-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s ease, transform 0.15s ease;
+    align-self: flex-start;
+}
+
+.theme-detail-back-btn:hover {
+    color: #ffffff;
+    transform: translateX(-3px);
+}
+
+.theme-detail-hero {
+    width: 100%;
+    height: 160px;
+    border-radius: var(--radius-item);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.6) 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-soft);
+}
+
+.theme-detail-hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.theme-detail-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.theme-detail-title {
+    font-size: 1.25rem;
+    font-weight: 750;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.theme-detail-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.theme-detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.theme-detail-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border-radius: var(--radius-btn, 12px);
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.theme-detail-btn.is-buy {
+    background: var(--accent-color);
+    color: #ffffff;
+    box-shadow: 0 4px 14px var(--accent-glow);
+}
+
+.theme-detail-btn.is-buy:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.theme-detail-btn.is-apply {
+    background: #10b981;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+}
+
+.theme-detail-btn.is-apply:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.theme-detail-btn.is-preview {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    border: 1px solid var(--border-highlight);
+}
+
+.theme-detail-btn.is-preview:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
 
 /* #region 4: KATMAN İSTİSNALARI + SCROLL KİLİDİ */
 .tops-search-modal { z-index: var(--z-modal-stacked); }

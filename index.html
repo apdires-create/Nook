@@ -88,6 +88,15 @@
             </a>
             
             <div class="landing-nav-actions">
+                <button type="button" class="landing-nav-login-btn nav-market-trigger-btn" id="landing-market-btn" style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--landing-text-primary); display: inline-flex; align-items: center; gap: 6px;">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <span>Market</span>
+                </button>
+
                 <button id="hero-login-btn" class="landing-nav-login-btn">Giriş Yap</button>
                 
                 <div id="landing-user-menu" class="landing-nav-user-menu" style="display: none;">
@@ -207,6 +216,16 @@
             <span class="nav-brand-text">Nook</span>
         </a>
         <div class="top-nav-actions">
+            <!-- Market Butonu -->
+            <button class="top-nav-btn nav-market-trigger-btn" id="nav-market-trigger" title="Tema Marketi">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                <span class="login-text">Market</span>
+            </button>
+
             <!-- Giriş yapılmadığında görünen buton -->
             <button class="top-nav-btn" id="auth-login-trigger" title="Giriş Yap">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -633,6 +652,46 @@
         </div>
     </div>
 
+    <!-- 4. TEMA MARKETİ MODALI (THEME MARKET) -->
+    <div class="theme-market-modal" id="theme-market-modal" role="dialog" aria-modal="true" aria-labelledby="market-modal-title">
+        <div class="theme-market-backdrop" id="theme-market-backdrop"></div>
+        <div class="theme-market-box" id="theme-market-box">
+            <!-- Modal Başlık Çubuğu -->
+            <div class="theme-market-header">
+                <div class="theme-market-title-wrap">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    <h2 class="theme-market-title" id="market-modal-title">Tema Marketi</h2>
+                </div>
+                <button type="button" class="theme-market-close-btn" id="theme-market-close-btn" aria-label="Kapat">&times;</button>
+            </div>
+
+            <!-- Liste Görünümü (Yan yana paket kartları) -->
+            <div class="theme-market-content" id="theme-market-catalog-view">
+                <div class="theme-market-grid" id="theme-market-grid">
+                    <!-- Dinamik olarak JS (market.js) tarafından doldurulacak -->
+                </div>
+            </div>
+
+            <!-- Ürün Detay Görünümü -->
+            <div class="theme-market-detail-view" id="theme-market-detail-view" style="display: none;">
+                <button type="button" class="theme-detail-back-btn" id="theme-detail-back-btn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    <span>Kataloğa Dön</span>
+                </button>
+                <div class="theme-detail-body" id="theme-detail-body">
+                    <!-- Detay içeriği JS ile doldurulur -->
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1/dist/umd/supabase.js" integrity="sha384-Tgoms7a53eyQOCcKXlBrA1X967mm3BHK43f3979dACl74tZlLW+O85pmfCuhfUtx" crossorigin="anonymous"></script>
@@ -647,6 +706,7 @@
     <script src="js/tilt.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/landing.js"></script>
+    <script src="js/market.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

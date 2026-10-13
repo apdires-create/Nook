@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         await oturumuKontrolEt();
     }
 
+    // 2.5: Tema Marketi'ni başlat
+    if (typeof ThemeMarket !== 'undefined') {
+        ThemeMarket.init();
+    }
+
     const landingScreen = document.getElementById('landing-screen');
     const profileStage = document.getElementById('profileStage');
     const profileTopNav = document.getElementById('profileTopNav');
