@@ -1,6 +1,6 @@
 /**
  * Nook - ThemeMarket (Tema Marketi & Satın Alım Akışı)
- * THEME_SPEC.md 4. Adım
+ * THEME_SPEC.md 4. Adım — Güvenlik ve Rol Kısıtlamaları Entegre
  */
 
 const ThemeMarket = {
@@ -12,7 +12,7 @@ const ThemeMarket = {
     selectedTheme: null,
     userInventory: new Set(['default']), // Varsayılan temaya herkes sahiptir
 
-    // Varsayılan / Fallback Katalog Verileri
+    // Varsayılan / Fallback Katalog Verileri (Sadece gerçek tema ürünleri listelenir)
     themesCatalog: [
         {
             id: 'obsidian-minimal',
@@ -24,15 +24,6 @@ const ThemeMarket = {
             banner_icon: '🖤',
             font: 'Cormorant Garamond & Plus Jakarta Sans',
             font_url: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
-        },
-        {
-            id: 'default',
-            name: 'Nook Orijinal',
-            description: 'Klasik, zarif ve dengeli varsayılan Nook kart deneyimi.',
-            price_cents: 0,
-            is_active: true,
-            banner_icon: '✨',
-            font: 'Montserrat, sans-serif'
         }
     ],
 
@@ -70,7 +61,7 @@ const ThemeMarket = {
             backBtn.onclick = () => this.katalogGoster();
         }
 
-        // Önizleme Barı Butonları
+        // Önizleme Barı İptal Butonu
         const cancelPreviewBtn = document.getElementById('preview-btn-cancel');
         if (cancelPreviewBtn) {
             cancelPreviewBtn.onclick = () => this.onizlemeyiBitir();
@@ -113,8 +104,8 @@ const ThemeMarket = {
                     window.toastBildirimiGoster(`Tebrikler! "${themeName}" teması envanterinize eklendi.`, 5000, 'success');
                 }
 
-                // Otomatik olarak temayı uygula
-                if (theme) {
+                // Kullanıcı profil sahibiyse otomatik olarak temayı uygula
+                if (theme && typeof isOwner !== 'undefined' && isOwner) {
                     await this.temayiUygula(theme);
                 }
             }, 1500);
@@ -124,7 +115,6 @@ const ThemeMarket = {
     async ac() {
         if (!this.modalEl) return;
         this.katalogGoster();
-        this.katalogCiz();
         this.modalEl.classList.add('is-open');
 
         // Veritabanından güncel temaları ve kullanıcının envanterini yükle
@@ -134,6 +124,7 @@ const ThemeMarket = {
             this.katalogCiz();
         } catch (e) {
             console.warn('[ThemeMarket] Katalog/Envanter yükleme hatası:', e);
+            this.katalogCiz();
         }
     },
 
@@ -151,7 +142,9 @@ const ThemeMarket = {
             const { data, error } = await client
                 .from('themes')
                 .select('*')
-                .eq('is_active', true);
+                .eq('is_active', true)
+                .neq('id', 'default')
+                .neq('id', '_template');
 
             if (!error && Array.isArray(data) && data.length > 0) {
                 data.forEach(remoteTheme => {
@@ -219,16 +212,40 @@ const ThemeMarket = {
     katalogCiz() {
         if (!this.gridEl) return;
 
-        this.gridEl.innerHTML = this.themesCatalog.map(theme => {
+        // Kullanıcının şu anki aktif temasını belirle
+        const activeThemeId = (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.theme_id) || 'default';
+
+        // Sıralama: Kullanıcının kullandığı tema varsa EN YUKARI çıkar, yoksa standart sırada kalır
+        const listToRender = [...this.themesCatalog].sort((a, b) => {
+            if (a.id === activeThemeId) return -1;
+            if (b.id === activeThemeId) return 1;
+            return 0;
+        });
+
+        this.gridEl.innerHTML = listToRender.map(theme => {
+            const isCurrentActive = (theme.id === activeThemeId);
             const isOwned = this.userInventory.has(theme.id);
             const isFree = theme.price_cents === 0;
-            const priceLabel = isOwned ? 'Sahipsin' : (isFree ? 'Ücretsiz' : `$${(theme.price_cents / 100).toFixed(2)}`);
-            const priceClass = (isOwned || isFree) ? 'is-free' : '';
+
+            let priceLabel = `$${(theme.price_cents / 100).toFixed(2)}`;
+            let priceClass = '';
+
+            if (isCurrentActive) {
+                priceLabel = 'Kullanımda';
+                priceClass = 'is-active-theme';
+            } else if (isOwned) {
+                priceLabel = 'Sahipsin';
+                priceClass = 'is-free';
+            } else if (isFree) {
+                priceLabel = 'Ücretsiz';
+                priceClass = 'is-free';
+            }
 
             return `
-                <div class="theme-market-card" data-theme-id="${theme.id}" role="button" tabindex="0">
+                <div class="theme-market-card ${isCurrentActive ? 'is-active' : ''}" data-theme-id="${theme.id}" role="button" tabindex="0">
                     <div class="theme-card-banner">
                         <span class="theme-card-banner-placeholder">${theme.banner_icon || '🎨'}</span>
+                        ${isCurrentActive ? '<span class="theme-active-badge">Kullanımda</span>' : ''}
                     </div>
                     <div class="theme-card-body">
                         <div class="theme-card-header">
@@ -258,19 +275,30 @@ const ThemeMarket = {
         this.catalogViewEl.style.display = 'none';
         this.detailViewEl.style.display = 'flex';
 
+        const isUserOwner = typeof isOwner !== 'undefined' && isOwner;
+        const isLanding = typeof KULLANICI_ADI === 'undefined' || !KULLANICI_ADI;
         const isOwned = this.userInventory.has(theme.id);
         const isFree = theme.price_cents === 0;
-        const currentActiveTheme = kartVerisi?.theme_config?.theme_id || 'default';
+        const currentActiveTheme = (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.theme_id) || 'default';
         const isCurrentActive = currentActiveTheme === theme.id;
 
         let actionBtnHtml = '';
+
         if (isCurrentActive) {
             actionBtnHtml = `<button type="button" class="theme-detail-btn" style="background: rgba(255,255,255,0.08); color: var(--text-tertiary); cursor: default;" disabled>Kullanımda</button>`;
         } else if (isOwned || isFree) {
-            actionBtnHtml = `<button type="button" class="theme-detail-btn is-apply" id="theme-btn-apply">Temayı Uygula</button>`;
+            if (isUserOwner) {
+                actionBtnHtml = `<button type="button" class="theme-detail-btn is-apply" id="theme-btn-apply">Temayı Uygula</button>`;
+            } else {
+                actionBtnHtml = `<button type="button" class="theme-detail-btn" style="background: rgba(255,255,255,0.08); color: var(--text-tertiary); cursor: default;" disabled>Sahipsin</button>`;
+            }
         } else {
             actionBtnHtml = `<button type="button" class="theme-detail-btn is-buy" id="theme-btn-buy">Satın Al — $${(theme.price_cents / 100).toFixed(2)}</button>`;
         }
+
+        // Önizleme butonu sadece sayfa sahibi kendi profilindeyken görünür (Landing ve ziyaretçilerde YOKTUR)
+        const canPreview = isUserOwner && !isLanding;
+        const previewBtnHtml = canPreview ? `<button type="button" class="theme-detail-btn is-preview" id="theme-btn-preview">Canlı Önizle</button>` : '';
 
         this.detailBodyEl.innerHTML = `
             <div class="theme-detail-hero">
@@ -279,12 +307,12 @@ const ThemeMarket = {
             <div class="theme-detail-meta">
                 <h3 class="theme-detail-title">${theme.name}</h3>
                 <span class="theme-card-price ${isOwned || isFree ? 'is-free' : ''}">
-                    ${isOwned ? 'Sahipsin' : (isFree ? 'Ücretsiz' : `$${(theme.price_cents / 100).toFixed(2)}`)}
+                    ${isCurrentActive ? 'Kullanımda' : (isOwned ? 'Sahipsin' : (isFree ? 'Ücretsiz' : `$${(theme.price_cents / 100).toFixed(2)}`))}
                 </span>
             </div>
             <p class="theme-detail-desc">${theme.description}</p>
             <div class="theme-detail-actions">
-                <button type="button" class="theme-detail-btn is-preview" id="theme-btn-preview">Canlı Önizle</button>
+                ${previewBtnHtml}
                 ${actionBtnHtml}
             </div>
         `;
@@ -308,17 +336,21 @@ const ThemeMarket = {
     },
 
     /**
-     * Canlı Önizleme Motoru (5. Adım)
+     * Canlı Önizleme Motoru
      * Kartın state'ini geçici olarak ezer ve yüzen önizleme barını açar
      */
     async onizlemeBaslat(theme) {
-        // O anki gerçek tema ID'sini kaydet
         if (!this.originalThemeId) {
             this.originalThemeId = kartVerisi?.theme_config?.theme_id || 'default';
         }
 
         // Modalı kapat ki kullanıcı kartı tam görebilsin
         this.kapat();
+
+        // Kart düzenleme araçlarını dondur (inceleme modu)
+        if (typeof EditManager !== 'undefined' && EditManager.Appearance) {
+            EditManager.Appearance.freezeEditMode();
+        }
 
         // Temayı geçici uygula
         if (typeof ThemeManager !== 'undefined') {
@@ -329,19 +361,24 @@ const ThemeMarket = {
         if (this.previewBarEl) {
             const titleEl = document.getElementById('preview-bar-theme-name');
             const actionBtn = document.getElementById('preview-btn-action');
+            const cancelBtn = document.getElementById('preview-btn-cancel');
 
             if (titleEl) {
                 titleEl.textContent = `"${theme.name}" Önizleniyor`;
             }
 
+            if (cancelBtn) {
+                cancelBtn.onclick = () => this.onizlemeyiBitir(true);
+            }
+
             if (actionBtn) {
                 const isOwned = this.userInventory.has(theme.id) || theme.price_cents === 0;
                 if (isOwned) {
-                    actionBtn.textContent = 'Temayı Uygula';
+                    actionBtn.textContent = 'Kaydet';
                     actionBtn.className = 'theme-preview-btn is-apply-action';
-                    actionBtn.onclick = () => {
-                        this.onizlemeyiBitir(false);
-                        this.temayiUygula(theme);
+                    actionBtn.onclick = async () => {
+                        await this.onizlemeyiBitir(false);
+                        await this.temayiUygula(theme);
                     };
                 } else {
                     actionBtn.textContent = `Satın Al ($${(theme.price_cents / 100).toFixed(2)})`;
@@ -354,7 +391,7 @@ const ThemeMarket = {
         }
 
         if (typeof window.toastBildirimiGoster === 'function') {
-            window.toastBildirimiGoster(`"${theme.name}" teması önizleniyor.`, 2500, 'success');
+            window.toastBildirimiGoster(`"${theme.name}" teması önizleniyor.`, 2500, 'info');
         }
     },
 
@@ -366,10 +403,18 @@ const ThemeMarket = {
             this.previewBarEl.style.display = 'none';
         }
 
+        // Kart düzenleme dondurmasını kaldır
+        if (typeof EditManager !== 'undefined' && EditManager.Appearance) {
+            EditManager.Appearance.unfreezeEditMode();
+        }
+
         if (revertToOriginal && this.originalThemeId) {
             if (typeof ThemeManager !== 'undefined') {
                 const origTheme = this.themesCatalog.find(t => t.id === this.originalThemeId);
-                await ThemeManager.applyTheme(this.originalThemeId, { fontUrl: origTheme?.font_url || origTheme?.fontUrl });
+                await ThemeManager.applyTheme(this.originalThemeId, { 
+                    fontUrl: origTheme?.font_url || origTheme?.fontUrl,
+                    primaryColor: kartVerisi?.theme_config?.primary_color
+                });
             }
             if (typeof window.toastBildirimiGoster === 'function') {
                 window.toastBildirimiGoster("Orijinal temaya dönüldü.", 2000, 'info');
@@ -381,8 +426,6 @@ const ThemeMarket = {
 
     /**
      * Gumroad Satın Alma Yönlendirmesi
-     * Gumroad URL parametrelerini otomatik olarak Ping (Webhook) verisine ekler:
-     * https://apdires.gumroad.com/l/obsidian-minimal?user_id=UUID&theme_id=THEME_ID
      */
     satinAl(theme) {
         const checkoutUrl = this.satinAlmaLinkiniUret(theme.checkout_url || 'https://apdires.gumroad.com/l/obsidian-minimal', theme.id);
@@ -403,8 +446,6 @@ const ThemeMarket = {
 
         const userId = aktifKullaniciOturumu.user.id;
         const url = new URL(checkoutBaseUrl);
-        
-        // Gumroad'ın Ping webhook'una geri ileteceği özel veriler
         url.searchParams.set('user_id', userId);
         url.searchParams.set('theme_id', themeId);
         
@@ -412,10 +453,15 @@ const ThemeMarket = {
     },
 
     async temayiUygula(theme) {
-        if (!aktifKullaniciOturumu?.user?.id) return;
+        // Güvenlik: Sadece sayfa sahibi kendi profilindeyken tema uygulayabilir!
+        if (typeof isOwner === 'undefined' || !isOwner || !aktifKullaniciOturumu?.user?.id) {
+            if (typeof window.toastBildirimiGoster === 'function') {
+                window.toastBildirimiGoster("Tema sadece profil sahibi tarafından uygulanabilir.", 3500, 'warning');
+            }
+            return;
+        }
 
         try {
-            // Profil tablosuna kaydet
             const client = (typeof supabaseClient !== 'undefined' && supabaseClient) 
                 || (typeof supabaseIstemcisi !== 'undefined' && supabaseIstemcisi) 
                 || null;
@@ -434,11 +480,19 @@ const ThemeMarket = {
                 }
 
                 kartVerisi.theme_config = newConfig;
+
+                // EditManager state'ini eşitle
+                if (typeof EditManager !== 'undefined' && EditManager.state && EditManager.state.orijinalVeri) {
+                    EditManager.state.orijinalVeri.theme_config = JSON.parse(JSON.stringify(newConfig));
+                }
             }
 
             // Temayı uygula
             if (typeof ThemeManager !== 'undefined') {
-                await ThemeManager.applyTheme(theme.id, { fontUrl: theme.font_url || theme.fontUrl });
+                await ThemeManager.applyTheme(theme.id, { 
+                    fontUrl: theme.font_url || theme.fontUrl,
+                    primaryColor: kartVerisi?.theme_config?.primary_color
+                });
             }
 
             if (typeof window.toastBildirimiGoster === 'function') {

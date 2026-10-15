@@ -316,7 +316,9 @@ const EditManager = {
             document.body.appendChild(bar);
         }
 
-        this.initThemeMenu();
+        if (this.Appearance) {
+            this.Appearance.init();
+        }
 
         // 2. Cropper Modal Enjeksiyonu
         if (!document.getElementById('cropper-modal')) {
@@ -600,46 +602,332 @@ const EditManager = {
         }
     },
 
-    initThemeMenu() {
-        const themeBtn = document.getElementById('nav-item-theme');
-        const palette = document.getElementById('nav-theme-palette');
-        const themeDot = document.getElementById('nav-theme-dot');
-        const themeWrap = document.getElementById('nav-theme-wrap');
-        const colorInput = document.getElementById('nav-color-input');
-        if (!themeBtn || !palette) return;
+        if (this.Appearance) {
+            this.Appearance.init();
+        }
+    }
+};
 
+// #region 1.5: GÖRÜNÜM & TEMA DÜZENLEME KONTROLCÜSÜ (APPEARANCE & THEME MANAGER)
+EditManager.Appearance = {
+    modalEl: null,
+    themeCardsEl: null,
+    colorPaletteEl: null,
+    colorHexEl: null,
+    colorInputEl: null,
+    previewBarEl: null,
+    originalState: null,
+    tempState: null,
+    isPreviewActive: false,
+
+    availableThemes: [
+        {
+            id: 'default',
+            name: 'Nook Orijinal',
+            description: 'Klasik, dengeli ve zarif varsayılan Nook kart deneyimi.',
+            banner_icon: '✨'
+        },
+        {
+            id: 'obsidian-minimal',
+            name: 'Obsidian Minimal',
+            description: 'Mat siyah zemin, monokrom tipografi, keskin hatlar ve lüks editoryal kart estetiği.',
+            banner_icon: '🖤',
+            font_url: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
+        }
+    ],
+
+    init() {
+        this.modalEl = document.getElementById('theme-appearance-modal');
+        this.themeCardsEl = document.getElementById('appearance-theme-cards');
+        this.colorPaletteEl = document.getElementById('appearance-color-palette');
+        this.colorHexEl = document.getElementById('appearance-color-hex');
+        this.colorInputEl = document.getElementById('appearance-color-input');
+        this.previewBarEl = document.getElementById('theme-preview-bar');
+
+        const triggerBtn = document.getElementById('nav-item-appearance');
+        const themeDot = document.getElementById('nav-theme-dot');
         const curColor = kartVerisi?.theme_config?.primary_color || '#3b5bdb';
         if (themeDot) themeDot.style.background = curColor;
-        if (colorInput) colorInput.value = curColor;
 
-        themeBtn.onclick = (e) => {
-            e.stopPropagation();
-            const isShown = palette.style.display !== 'none';
-            palette.style.display = isShown ? 'none' : 'block';
-            if (themeWrap) themeWrap.classList.toggle('is-open', !isShown);
-        };
-
-        const applyThemeColor = (color) => {
-            if (!color) return;
-            document.documentElement.style.setProperty('--accent-color', color);
-            if (themeDot) themeDot.style.background = color;
-            if (colorInput) colorInput.value = color;
-            if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
-            kartVerisi.theme_config.primary_color = color;
-            EditManager.Global.degisiklikYapildi();
-        };
-
-        palette.querySelectorAll('.color-swatch-btn').forEach(btn => {
-            btn.onclick = (e) => {
+        if (triggerBtn) {
+            triggerBtn.onclick = (e) => {
+                e.preventDefault();
                 e.stopPropagation();
-                applyThemeColor(btn.dataset.color);
+                // Profil dropdown'ını kapat
+                const userDropdown = document.getElementById('profile-user-dropdown');
+                if (userDropdown) userDropdown.style.display = 'none';
+                this.ac();
+            };
+        }
+
+        // Kapatma ve İptal Butonları
+        const closeBtn = document.getElementById('theme-appearance-close-btn');
+        const backdrop = document.getElementById('theme-appearance-backdrop');
+        const cancelBtn = document.getElementById('appearance-btn-cancel');
+        const saveBtn = document.getElementById('appearance-btn-save');
+        const previewBtn = document.getElementById('appearance-btn-preview');
+
+        if (closeBtn) closeBtn.onclick = () => this.kapat();
+        if (backdrop) backdrop.onclick = () => this.kapat();
+        if (cancelBtn) cancelBtn.onclick = () => this.kapat();
+        if (saveBtn) saveBtn.onclick = () => this.kaydet();
+        if (previewBtn) previewBtn.onclick = () => this.onizlemeBaslat();
+
+        // Renk Swatch Tıklamaları
+        if (this.colorPaletteEl) {
+            this.colorPaletteEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.renkSec(btn.dataset.color);
+                };
+            });
+        }
+
+        if (this.colorInputEl) {
+            this.colorInputEl.oninput = (e) => {
+                this.renkSec(e.target.value);
+            };
+        }
+    },
+
+    ac() {
+        if (!this.modalEl) return;
+
+        // Orijinal ve Geçici Durumları Başlat
+        const currentThemeId = kartVerisi?.theme_config?.theme_id || 'default';
+        const currentPrimaryColor = kartVerisi?.theme_config?.primary_color || '#3b5bdb';
+
+        this.originalState = {
+            themeId: currentThemeId,
+            primaryColor: currentPrimaryColor
+        };
+        this.tempState = {
+            themeId: currentThemeId,
+            primaryColor: currentPrimaryColor
+        };
+
+        this.temalariCiz();
+        this.renkSec(this.tempState.primaryColor, false);
+
+        this.modalEl.style.display = 'flex';
+        this.modalEl.classList.add('is-open');
+    },
+
+    kapat() {
+        if (!this.modalEl) return;
+        // Eğer geçici değişiklikler yapılmışsa ve kaydedilmemişse geri al
+        if (this.originalState) {
+            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor);
+        }
+        this.modalEl.classList.remove('is-open');
+        this.modalEl.style.display = 'none';
+    },
+
+    temalariCiz() {
+        if (!this.themeCardsEl) return;
+
+        // Kullanıcının envanterini ThemeMarket üzerinden kontrol et
+        const inventory = (typeof ThemeMarket !== 'undefined' && ThemeMarket.userInventory)
+            ? ThemeMarket.userInventory
+            : new Set(['default']);
+
+        // Kullanıcının sahip olduğu temaları filtrele (default her zaman vardır)
+        const userThemes = this.availableThemes.filter(t => t.id === 'default' || inventory.has(t.id));
+
+        this.themeCardsEl.innerHTML = userThemes.map(t => {
+            const isSelected = (t.id === this.tempState.themeId);
+            return `
+                <div class="appearance-theme-card ${isSelected ? 'is-selected' : ''}" data-theme-id="${t.id}" role="button" tabindex="0">
+                    <div class="appearance-card-icon">${t.banner_icon || '🎨'}</div>
+                    <div class="appearance-card-info">
+                        <div class="appearance-card-title">${t.name}</div>
+                        <div class="appearance-card-desc">${t.description}</div>
+                    </div>
+                    <div class="appearance-card-check">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        this.themeCardsEl.querySelectorAll('.appearance-theme-card').forEach(card => {
+            card.onclick = () => {
+                const themeId = card.dataset.themeId;
+                this.temaSec(themeId);
             };
         });
+    },
 
-        if (colorInput) {
-            colorInput.oninput = (e) => {
-                applyThemeColor(e.target.value);
-            };
+    temaSec(themeId) {
+        this.tempState.themeId = themeId;
+        this.temalariCiz();
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
+    },
+
+    renkSec(color, apply = true) {
+        if (!color) return;
+        this.tempState.primaryColor = color;
+        if (this.colorHexEl) this.colorHexEl.textContent = color.toUpperCase();
+        if (this.colorInputEl) this.colorInputEl.value = color;
+
+        if (this.colorPaletteEl) {
+            this.colorPaletteEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.color.toLowerCase() === color.toLowerCase());
+            });
+        }
+
+        const themeDot = document.getElementById('nav-theme-dot');
+        if (themeDot) themeDot.style.background = color;
+
+        if (apply) {
+            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
+        }
+    },
+
+    geciciUygula(themeId, color) {
+        if (typeof ThemeManager !== 'undefined') {
+            const themeObj = this.availableThemes.find(t => t.id === themeId);
+            ThemeManager.applyTheme(themeId, {
+                fontUrl: themeObj?.font_url,
+                primaryColor: color
+            });
+        }
+    },
+
+    onizlemeBaslat() {
+        if (!this.modalEl) return;
+        this.isPreviewActive = true;
+
+        // Modalı gizle
+        this.modalEl.style.display = 'none';
+        this.modalEl.classList.remove('is-open');
+
+        // Kart sahnesini düzenlemeye karşı dondur
+        this.freezeEditMode();
+
+        // Önizleme barını göster ve yapılandır
+        if (this.previewBarEl) {
+            const titleEl = document.getElementById('preview-bar-theme-name');
+            const cancelBtn = document.getElementById('preview-btn-cancel');
+            const actionBtn = document.getElementById('preview-btn-action');
+            const cancelText = document.getElementById('preview-btn-cancel-text');
+            const actionText = document.getElementById('preview-btn-action-text');
+
+            const themeObj = this.availableThemes.find(t => t.id === this.tempState.themeId);
+            const themeName = themeObj ? themeObj.name : 'Yeni Tema';
+
+            if (titleEl) titleEl.textContent = `"${themeName}" Önizleniyor`;
+            if (cancelText) cancelText.textContent = 'Geri Dön';
+            if (actionText) actionText.textContent = 'Kaydet';
+
+            if (cancelBtn) {
+                cancelBtn.onclick = () => this.onizlemeGeriDon();
+            }
+
+            if (actionBtn) {
+                actionBtn.onclick = () => this.onizlemeKaydet();
+            }
+
+            this.previewBarEl.style.display = 'block';
+        }
+
+        if (typeof window.toastBildirimiGoster === 'function') {
+            window.toastBildirimiGoster("Önizleme modu aktif. Kartı serbestçe inceleyebilirsiniz.", 3000, 'info');
+        }
+    },
+
+    onizlemeGeriDon() {
+        this.isPreviewActive = false;
+        if (this.previewBarEl) this.previewBarEl.style.display = 'none';
+
+        // Orijinal temaya dön
+        if (this.originalState) {
+            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor);
+        }
+
+        this.unfreezeEditMode();
+
+        // Pop-up'ı geri aç
+        this.ac();
+    },
+
+    async onizlemeKaydet() {
+        this.isPreviewActive = false;
+        if (this.previewBarEl) this.previewBarEl.style.display = 'none';
+        this.unfreezeEditMode();
+
+        await this.kaydet();
+        this.ac();
+    },
+
+    freezeEditMode() {
+        document.body.classList.add('is-preview-locked');
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.setAttribute('data-was-editable', 'true');
+            el.setAttribute('contenteditable', 'false');
+        });
+    },
+
+    unfreezeEditMode() {
+        document.body.classList.remove('is-preview-locked');
+        document.querySelectorAll('[data-was-editable="true"]').forEach(el => {
+            el.removeAttribute('data-was-editable');
+            el.setAttribute('contenteditable', 'true');
+        });
+    },
+
+    async kaydet() {
+        if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
+        kartVerisi.theme_config.theme_id = this.tempState.themeId;
+        kartVerisi.theme_config.primary_color = this.tempState.primaryColor;
+
+        // Orijinal state'i güncelle
+        this.originalState = {
+            themeId: this.tempState.themeId,
+            primaryColor: this.tempState.primaryColor
+        };
+
+        const client = (typeof supabaseClient !== 'undefined' && supabaseClient) 
+            || (typeof supabaseIstemcisi !== 'undefined' && supabaseIstemcisi) 
+            || null;
+
+        if (client && aktifKullaniciOturumu?.user?.id) {
+            try {
+                const { error } = await client
+                    .from('profiles')
+                    .update({ theme_config: kartVerisi.theme_config })
+                    .eq('auth_id', aktifKullaniciOturumu.user.id);
+
+                if (error) throw error;
+
+                // EditManager orijinalVeri'sini de güncelle ki Sıfırla çakışmasın
+                if (EditManager.state && EditManager.state.orijinalVeri) {
+                    if (!EditManager.state.orijinalVeri.theme_config) EditManager.state.orijinalVeri.theme_config = {};
+                    EditManager.state.orijinalVeri.theme_config.theme_id = this.tempState.themeId;
+                    EditManager.state.orijinalVeri.theme_config.primary_color = this.tempState.primaryColor;
+                }
+
+                // Yerel önbelleği güncelle
+                if (typeof yerelOnbellekKaydet === 'function') {
+                    yerelOnbellekKaydet(kartVerisi);
+                }
+
+                if (typeof window.toastBildirimiGoster === 'function') {
+                    window.toastBildirimiGoster("Görünüm ayarları kaydedildi!", 3000, 'success');
+                }
+            } catch (err) {
+                console.error("[Appearance] Kaydedilemedi:", err);
+                if (typeof window.toastBildirimiGoster === 'function') {
+                    window.toastBildirimiGoster("Görünüm kaydedilemedi: " + (err.message || "Hata"), 4000, 'error');
+                }
+            }
+        }
+
+        // Temayı kalıcı uygula
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
+        if (this.modalEl) {
+            this.modalEl.classList.remove('is-open');
+            this.modalEl.style.display = 'none';
         }
     }
 };
@@ -760,13 +1048,20 @@ EditManager.Global = {
 
         kartVerisi = JSON.parse(JSON.stringify(EditManager.state.orijinalVeri));
 
-        // Vurgu rengini orijinal haline döndür
+        // Vurgu rengini ve temayı orijinal haline döndür
         const originalColor = kartVerisi.theme_config?.primary_color || '#3b5bdb';
+        const originalThemeId = kartVerisi.theme_config?.theme_id || 'default';
         document.documentElement.style.setProperty('--accent-color', originalColor);
         const themeDot = document.getElementById('nav-theme-dot');
         const colorInput = document.getElementById('nav-color-input');
         if (themeDot) themeDot.style.background = originalColor;
         if (colorInput) colorInput.value = originalColor;
+
+        if (typeof ThemeManager !== 'undefined') {
+            ThemeManager.applyTheme(originalThemeId, {
+                primaryColor: originalColor
+            });
+        }
 
         // Eğer o an görüntülenen liste orijinal veride de mevcutsa, kullanıcının bulunduğu sekmede kal
         if (suAnkiAktifListeId && kartVerisi.tops?.listeler?.some(l => l.id === suAnkiAktifListeId)) {

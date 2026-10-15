@@ -1,6 +1,6 @@
 /**
  * Nook - ThemeManager (Runtime CSS & Font Injection Motoru)
- * THEME_SPEC.md 2. Adım Mimarisi
+ * THEME_SPEC.md 2. Adım Mimarisi & Sıfır İsraf Font Yükleme
  */
 
 const ThemeManager = {
@@ -9,23 +9,30 @@ const ThemeManager = {
     linkElementId: 'nook-theme-stylesheet',
     fontLinkElementId: 'nook-theme-fonts',
 
+    // Bilinen temalar için font fallback haritası (DB'den fontUrl gelmese dahi sıçramayı önler)
+    knownThemeFonts: {
+        'default': 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;700&display=swap',
+        'obsidian-minimal': 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
+    },
+
     /**
      * Tema stil ve fontlarını dinamik olarak sayfaya enjekte eder
-     * @param {string} themeId - Tema kimliği (örn: 'obsidian-minimal', '_template')
-     * @param {Object} options - Ek tema yapılandırması (fontUrl, cdnPrefix vb.)
+     * @param {string} themeId - Tema kimliği (örn: 'obsidian-minimal', '_template', 'default')
+     * @param {Object} options - Ek tema yapılandırması (fontUrl, primaryColor, cdnPrefix vb.)
      * @returns {Promise<boolean>} Yükleme durumu
      */
     async applyTheme(themeId, options = {}) {
         // Eğer tema belirtilmemişse veya 'default' ise temizle ve varsayılana dön
         if (!themeId || themeId === 'default') {
-            this.clearTheme();
+            this.clearTheme(options);
             return true;
         }
 
         try {
-            // 1. Font gereksinimi varsa önce fontları yükle
-            if (options.fontUrl) {
-                this._injectFont(options.fontUrl);
+            // 1. Font gereksinimi: options'ta yoksa bilinenler tablosundan al
+            const fontUrl = options.fontUrl || options.font_url || this.knownThemeFonts[themeId] || null;
+            if (fontUrl) {
+                this._injectFont(fontUrl);
             }
 
             // 2. Tema CSS URL'ini belirle (CDN prefix varsa oradan, yoksa yerel themes/{id}/)
@@ -34,11 +41,17 @@ const ThemeManager = {
             // 3. CSS dosyasını yükle ve bekle
             await this._injectStylesheet(cssUrl, themeId);
 
-            // 4. HTML ve Body üzerine data-theme ataması yap
+            // 4. HTML üzerine data-theme ataması yap
             document.documentElement.setAttribute('data-theme', themeId);
             this.currentThemeId = themeId;
 
-            // 5. Konsol veya event bildirimi
+            // 5. Vurgu rengini koru / uygula (Kullanıcının tercihi temaya hükmeder)
+            const primaryColor = options.primaryColor || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.primary_color);
+            if (primaryColor) {
+                document.documentElement.style.setProperty('--accent-color', primaryColor);
+            }
+
+            // 6. Konsol veya event bildirimi
             window.dispatchEvent(new CustomEvent('nook:theme-applied', {
                 detail: { themeId, options }
             }));
@@ -46,7 +59,7 @@ const ThemeManager = {
             return true;
         } catch (error) {
             console.warn(`[ThemeManager] "${themeId}" teması yüklenemedi, varsayılan stile dönülüyor:`, error);
-            this.clearTheme();
+            this.clearTheme(options);
             return false;
         }
     },
@@ -54,25 +67,32 @@ const ThemeManager = {
     /**
      * Özel temayı kaldırır, varsayılan Nook görünümüne döner
      */
-    clearTheme() {
+    clearTheme(options = {}) {
         const existingLink = document.getElementById(this.linkElementId);
         if (existingLink) {
             existingLink.remove();
         }
 
-        const existingFontLink = document.getElementById(this.fontLinkElementId);
-        if (existingFontLink) {
-            existingFontLink.remove();
+        // Varsayılan Nook fontunu yükle
+        const defaultFontUrl = this.knownThemeFonts['default'];
+        if (defaultFontUrl) {
+            this._injectFont(defaultFontUrl);
         }
 
         document.documentElement.removeAttribute('data-theme');
         this.currentThemeId = null;
 
+        // Vurgu rengini koru / sıfırla
+        const primaryColor = options.primaryColor || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.primary_color);
+        if (primaryColor) {
+            document.documentElement.style.setProperty('--accent-color', primaryColor);
+        }
+
         window.dispatchEvent(new CustomEvent('nook:theme-cleared'));
     },
 
     /**
-     * Canlı önizleme için temayı geçici uygular (5. Adım için hazır)
+     * Canlı önizleme için temayı geçici uygular
      */
     async previewTheme(themeId, options = {}) {
         return await this.applyTheme(themeId, { ...options, isPreview: true });
@@ -108,16 +128,17 @@ const ThemeManager = {
                 reject(new Error(`CSS yüklenemedi: ${url}`));
             };
 
-            // Cache bust veya doğrudan URL
             link.href = url;
         });
     },
 
     /**
-     * Font <link> etiketlerini optimize şekilde ekler
+     * Google Fonts preconnect ve font stylesheet etiketlerini optimize şekilde ekler
      * @private
      */
     _injectFont(fontUrl) {
+        this._ensurePreconnect();
+
         let fontLink = document.getElementById(this.fontLinkElementId);
         if (!fontLink) {
             fontLink = document.createElement('link');
@@ -125,7 +146,31 @@ const ThemeManager = {
             fontLink.rel = 'stylesheet';
             document.head.appendChild(fontLink);
         }
-        fontLink.href = fontUrl;
+        if (fontLink.href !== fontUrl) {
+            fontLink.href = fontUrl;
+        }
+    },
+
+    /**
+     * Google Fonts için preconnect etiketlerinin head'de olmasını garanti eder
+     * @private
+     */
+    _ensurePreconnect() {
+        if (!document.getElementById('nook-fonts-preconnect-api')) {
+            const preconnect1 = document.createElement('link');
+            preconnect1.id = 'nook-fonts-preconnect-api';
+            preconnect1.rel = 'preconnect';
+            preconnect1.href = 'https://fonts.googleapis.com';
+            document.head.appendChild(preconnect1);
+        }
+        if (!document.getElementById('nook-fonts-preconnect-static')) {
+            const preconnect2 = document.createElement('link');
+            preconnect2.id = 'nook-fonts-preconnect-static';
+            preconnect2.rel = 'preconnect';
+            preconnect2.href = 'https://fonts.gstatic.com';
+            preconnect2.crossOrigin = 'anonymous';
+            document.head.appendChild(preconnect2);
+        }
     }
 };
 

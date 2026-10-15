@@ -6,7 +6,55 @@
     <title>Nook</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Erken Tema & Font Bootstrap (Zero Waste Critical Asset Loading) -->
+    <script>
+        (function() {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                var user = params.get('user');
+                var themeId = 'default';
+                var fontUrl = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap';
+                var primaryColor = null;
+
+                if (user) {
+                    var cached = localStorage.getItem('nook_profile_' + user) || localStorage.getItem('nook_profile_' + user.toLowerCase());
+                    if (cached) {
+                        var parsed = JSON.parse(cached);
+                        if (parsed && parsed.theme_config) {
+                            if (parsed.theme_config.theme_id && parsed.theme_config.theme_id !== 'default') {
+                                themeId = parsed.theme_config.theme_id;
+                            }
+                            if (parsed.theme_config.primary_color) {
+                                primaryColor = parsed.theme_config.primary_color;
+                            }
+                        }
+                    }
+                }
+
+                if (themeId === 'obsidian-minimal') {
+                    fontUrl = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap';
+                    document.documentElement.setAttribute('data-theme', themeId);
+                    
+                    var themeLink = document.createElement('link');
+                    themeLink.id = 'nook-theme-stylesheet';
+                    themeLink.rel = 'stylesheet';
+                    themeLink.setAttribute('data-loaded-theme', themeId);
+                    themeLink.href = 'themes/obsidian-minimal/theme.css';
+                    document.head.appendChild(themeLink);
+                }
+
+                if (primaryColor) {
+                    document.documentElement.style.setProperty('--accent-color', primaryColor);
+                }
+
+                var fontLink = document.createElement('link');
+                fontLink.id = 'nook-theme-fonts';
+                fontLink.rel = 'stylesheet';
+                fontLink.href = fontUrl;
+                document.head.appendChild(fontLink);
+            } catch(e) {}
+        })();
+    </script>
     <meta name="description" content="Sana ait kişisel bir köşe: sevdiğin yapımları sırala, rekorlarını sergile ve kimliğini tek bir kartta paylaş.">
     <meta name="theme-color" content="#0b0e14">
     <meta name="referrer" content="no-referrer-when-downgrade">
@@ -262,29 +310,14 @@
                         </svg>
                         Sayfa Linkini Kopyala
                     </button>
-                    <div class="user-theme-dropdown-wrap" id="nav-theme-wrap">
-                        <button type="button" class="user-dropdown-item" id="nav-item-theme">
-                            <span class="user-theme-dot" id="nav-theme-dot"></span>
-                            <span style="flex: 1; text-align: left;">Vurgu Rengi</span>
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="theme-chevron-icon">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
-                        </button>
-                        <div class="user-theme-palette" id="nav-theme-palette" style="display: none;">
-                            <div class="color-presets-row">
-                                <button type="button" class="color-swatch-btn" data-color="#3b5bdb" style="background: #3b5bdb;" title="Sapphire"></button>
-                                <button type="button" class="color-swatch-btn" data-color="#e03131" style="background: #e03131;" title="Ruby"></button>
-                                <button type="button" class="color-swatch-btn" data-color="#2f9e44" style="background: #2f9e44;" title="Emerald"></button>
-                                <button type="button" class="color-swatch-btn" data-color="#f59f00" style="background: #f59f00;" title="Amber"></button>
-                                <button type="button" class="color-swatch-btn" data-color="#9c36b5" style="background: #9c36b5;" title="Amethyst"></button>
-                                <button type="button" class="color-swatch-btn" data-color="#1098ad" style="background: #1098ad;" title="Cyan"></button>
-                                <label class="color-custom-label" title="Özel Renk">
-                                    <input type="color" id="nav-color-input" value="#3b5bdb" class="color-native-input">
-                                    <span class="color-custom-wheel">🎨</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+                    <button type="button" class="user-dropdown-item" id="nav-item-appearance">
+                        <span class="user-theme-dot" id="nav-theme-dot"></span>
+                        <span style="flex: 1; text-align: left;">Görünüm & Tema</span>
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.65;">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </button>
                     <button type="button" class="user-dropdown-item text-danger" id="nav-item-logout">
                         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -692,20 +725,84 @@
         </div>
     </div>
 
+    <!-- 4.1 GÖRÜNÜM & TEMA DÜZENLEME MODALI (APPEARANCE & THEME MODAL) -->
+    <div class="theme-appearance-modal" id="theme-appearance-modal" role="dialog" aria-modal="true" aria-labelledby="appearance-modal-title" style="display: none;">
+        <div class="theme-appearance-backdrop" id="theme-appearance-backdrop"></div>
+        <div class="theme-appearance-box" id="theme-appearance-box">
+            <div class="theme-appearance-header">
+                <div class="theme-appearance-title-wrap">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    <h2 class="theme-appearance-title" id="appearance-modal-title">Görünüm & Tema</h2>
+                </div>
+                <button type="button" class="theme-appearance-close-btn" id="theme-appearance-close-btn" aria-label="Kapat">&times;</button>
+            </div>
+
+            <div class="theme-appearance-content">
+                <!-- 1. Bölüm: Tema Seçimi -->
+                <div class="appearance-section">
+                    <label class="appearance-section-label">Aktif Kart Teması</label>
+                    <div class="appearance-theme-cards" id="appearance-theme-cards">
+                        <!-- JS ile envanterdeki temalar doldurulacak -->
+                    </div>
+                </div>
+
+                <!-- 2. Bölüm: Vurgu Rengi (Accent Color) -->
+                <div class="appearance-section">
+                    <div class="appearance-section-header">
+                        <label class="appearance-section-label">Vurgu Rengi</label>
+                        <span class="appearance-color-hex" id="appearance-color-hex">#3b5bdb</span>
+                    </div>
+                    <div class="appearance-color-palette" id="appearance-color-palette">
+                        <button type="button" class="color-swatch-btn" data-color="#3b5bdb" style="background: #3b5bdb;" title="Sapphire"></button>
+                        <button type="button" class="color-swatch-btn" data-color="#e03131" style="background: #e03131;" title="Ruby"></button>
+                        <button type="button" class="color-swatch-btn" data-color="#2f9e44" style="background: #2f9e44;" title="Emerald"></button>
+                        <button type="button" class="color-swatch-btn" data-color="#f59f00" style="background: #f59f00;" title="Amber"></button>
+                        <button type="button" class="color-swatch-btn" data-color="#9c36b5" style="background: #9c36b5;" title="Amethyst"></button>
+                        <button type="button" class="color-swatch-btn" data-color="#1098ad" style="background: #1098ad;" title="Cyan"></button>
+                        <button type="button" class="color-swatch-btn" data-color="#f4f4f5" style="background: #f4f4f5;" title="Platinum"></button>
+                        <label class="color-custom-label" title="Özel Renk Seç">
+                            <input type="color" id="appearance-color-input" value="#3b5bdb" class="color-native-input">
+                            <span class="color-custom-wheel">🎨</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theme-appearance-footer">
+                <button type="button" class="appearance-btn is-preview" id="appearance-btn-preview">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span>Önizle</span>
+                </button>
+                <div class="appearance-footer-actions">
+                    <button type="button" class="appearance-btn is-cancel" id="appearance-btn-cancel">İptal</button>
+                    <button type="button" class="appearance-btn is-save" id="appearance-btn-save">Değişiklikleri Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 5. CANLI ÖNİZLEME YÜZEN BARI (FLOATING LIVE PREVIEW BAR) -->
     <aside class="theme-preview-bar" id="theme-preview-bar" style="display: none;" aria-label="Tema Önizleme Modu">
         <div class="theme-preview-bar-inner">
             <div class="theme-preview-bar-info">
                 <span class="theme-preview-pulse-dot" aria-hidden="true"></span>
                 <span class="theme-preview-bar-title" id="preview-bar-theme-name">"Obsidian Minimal" Önizleniyor</span>
+                <span class="theme-preview-bar-hint">(Düzenleme donduruldu • İnceleme modu)</span>
             </div>
             <div class="theme-preview-bar-actions">
                 <button type="button" class="theme-preview-btn is-cancel" id="preview-btn-cancel">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    <span>Vazgeç</span>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    <span id="preview-btn-cancel-text">Geri Dön</span>
                 </button>
                 <button type="button" class="theme-preview-btn is-action" id="preview-btn-action">
-                    <span>Satın Al</span>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <span id="preview-btn-action-text">Kaydet</span>
                 </button>
             </div>
         </div>

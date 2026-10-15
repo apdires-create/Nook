@@ -127,8 +127,13 @@ async function tumVerileriCek() {
             document.body.classList.remove('is-owner');
         }
 
-        // Tema rengini uygula (varsa)
-        if (kartVerisi.theme_config?.primary_color) {
+        // Tema ve rengini veritabanı verisiyle kesinleştir
+        if (typeof ThemeManager !== 'undefined') {
+            const userThemeId = kartVerisi.theme_config?.theme_id || 'default';
+            ThemeManager.applyTheme(userThemeId, {
+                primaryColor: kartVerisi.theme_config?.primary_color
+            });
+        } else if (kartVerisi.theme_config?.primary_color) {
             document.documentElement.style.setProperty('--accent-color', kartVerisi.theme_config.primary_color);
         }
 
@@ -325,8 +330,13 @@ function yerelOnbellekYukle() {
             document.body.classList.remove('is-owner');
         }
 
-        // Tema rengini uygula (varsa)
-        if (kartVerisi.theme_config?.primary_color) {
+        // Tema ve rengini önbellekten hemen uygula (FOUC önleyici 0ms)
+        if (typeof ThemeManager !== 'undefined') {
+            const userThemeId = kartVerisi.theme_config?.theme_id || 'default';
+            ThemeManager.applyTheme(userThemeId, {
+                primaryColor: kartVerisi.theme_config?.primary_color
+            });
+        } else if (kartVerisi.theme_config?.primary_color) {
             document.documentElement.style.setProperty('--accent-color', kartVerisi.theme_config.primary_color);
         }
 

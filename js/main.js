@@ -74,10 +74,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (basarili && typeof ThemeManager !== 'undefined') {
         const themeConfig = (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config) || {};
         const userThemeId = themeConfig.theme_id || themeConfig.theme || null;
-        if (userThemeId) {
-            await ThemeManager.applyTheme(userThemeId, themeConfig);
+        if (userThemeId && userThemeId !== 'default') {
+            await ThemeManager.applyTheme(userThemeId, {
+                ...themeConfig,
+                primaryColor: themeConfig.primary_color
+            });
         } else {
-            ThemeManager.clearTheme();
+            ThemeManager.clearTheme({ primaryColor: themeConfig.primary_color });
         }
     }
 
