@@ -600,11 +600,6 @@ const EditManager = {
             `;
             document.body.appendChild(trophyModal);
         }
-    },
-
-        if (this.Appearance) {
-            this.Appearance.init();
-        }
     }
 };
 
