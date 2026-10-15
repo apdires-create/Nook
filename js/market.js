@@ -20,9 +20,7 @@ const ThemeMarket = {
             description: 'Mat siyah zemin, monokrom tipografi, keskin hatlar ve lüks editoryal kart estetiği.',
             price_cents: 500,
             is_active: true,
-            checkout_url: 'https://nook-page.lemonsqueezy.com/checkout/buy/5de6573b-eab6-45f6-aed5-dce07fa7eea9',
-            variant_id: '2243559',
-            product_id: '5de6573b-eab6-45f6-aed5-dce07fa7eea9',
+            checkout_url: 'https://apdires.gumroad.com/l/obsidian-minimal',
             banner_icon: '🖤',
             font: 'Cormorant Garamond & Plus Jakarta Sans',
             font_url: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
@@ -88,6 +86,39 @@ const ThemeMarket = {
                 }
             }
         });
+
+        // Ödeme sonrası geri dönüş kontrolü (?payment=success&theme=...)
+        this.odemeSonrasiKontrol();
+    },
+
+    /**
+     * Gumroad'dan satın alım tamamlanıp siteye dönüldüğünde envanteri tazele ve bildir
+     */
+    async odemeSonrasiKontrol() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('payment') === 'success') {
+            const themeId = params.get('theme');
+            
+            // URL'deki parametreleri temizle (tarayıcı geçmişini kirletmesin)
+            const cleanUrl = window.location.origin + window.location.pathname + (params.get('user') ? `?user=${params.get('user')}` : '');
+            window.history.replaceState({}, document.title, cleanUrl);
+
+            // Kısa bir bekleme (Webhook'un veritabanına yazması için ~1.5 sn)
+            setTimeout(async () => {
+                await this.kullaniciEnvanteriniYukle();
+                const theme = this.themesCatalog.find(t => t.id === themeId);
+                const themeName = theme ? theme.name : 'Yeni';
+                
+                if (typeof window.toastBildirimiGoster === 'function') {
+                    window.toastBildirimiGoster(`Tebrikler! "${themeName}" teması envanterinize eklendi.`, 5000, 'success');
+                }
+
+                // Otomatik olarak temayı uygula
+                if (theme) {
+                    await this.temayiUygula(theme);
+                }
+            }, 1500);
+        }
     },
 
     async ac() {
@@ -349,11 +380,12 @@ const ThemeMarket = {
     },
 
     /**
-     * Lemon Squeezy yönlendirmesi
-     * Referans: yönlendirme fonksiyonu.txt
+     * Gumroad Satın Alma Yönlendirmesi
+     * Gumroad URL parametrelerini otomatik olarak Ping (Webhook) verisine ekler:
+     * https://apdires.gumroad.com/l/obsidian-minimal?user_id=UUID&theme_id=THEME_ID
      */
     satinAl(theme) {
-        const checkoutUrl = this.satinAlmaLinkiniUret(theme.checkout_url || 'https://nook.lemonsqueezy.com/buy/demo', theme.id);
+        const checkoutUrl = this.satinAlmaLinkiniUret(theme.checkout_url || 'https://apdires.gumroad.com/l/obsidian-minimal', theme.id);
         if (checkoutUrl) {
             window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
         }
@@ -372,9 +404,9 @@ const ThemeMarket = {
         const userId = aktifKullaniciOturumu.user.id;
         const url = new URL(checkoutBaseUrl);
         
-        // Lemon Squeezy'nin webhook'a geri ileteceği özel veriler
-        url.searchParams.set('checkout[custom][user_id]', userId);
-        url.searchParams.set('checkout[custom][theme_id]', themeId);
+        // Gumroad'ın Ping webhook'una geri ileteceği özel veriler
+        url.searchParams.set('user_id', userId);
+        url.searchParams.set('theme_id', themeId);
         
         return url.toString();
     },
