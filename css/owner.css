@@ -1840,39 +1840,5 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
 }
 /* #endregion */
 
-/* ========================================================
-   ÖNİZLEME MODU KİLİDİ (READ-ONLY PREVIEW FREEZE)
-   Önizleme barı etkinken kartta hiçbir düzenleme yapılamaz.
-   Kart çevrilebilir ve sekmeler incelenebilir.
-   ======================================================== */
-body.is-preview-locked .edit-btn,
-body.is-preview-locked .photo-edit-btn,
-body.is-preview-locked .companion-add-row-btn,
-body.is-preview-locked .companion-row-del-btn,
-body.is-preview-locked .item-delete-btn,
-body.is-preview-locked .edit-action-bar,
-body.is-preview-locked .card-flag-btn[title*="Ekle"],
-body.is-preview-locked .card-flag-btn[title*="Düzenle"],
-body.is-preview-locked .drag-handle,
-body.is-preview-locked .user-dropdown-wrapper {
-    display: none !important;
-    pointer-events: none !important;
-}
-
-body.is-preview-locked [contenteditable] {
-    pointer-events: none !important;
-    user-select: none !important;
-    -webkit-user-select: none !important;
-    cursor: default !important;
-}
-
-body.is-preview-locked .card-flag-btn,
-body.is-preview-locked .companion-card,
-body.is-preview-locked .flip-trigger-btn,
-body.is-preview-locked .back-nav-pill,
-body.is-preview-locked .showcase-tab,
-body.is-preview-locked .companion-row-item {
-    pointer-events: auto !important;
-}
 
 

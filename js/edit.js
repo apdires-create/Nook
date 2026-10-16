@@ -28,6 +28,7 @@ const EditManager = {
         this.CompanionViews.init();
         if (this.TrophyPicker) this.TrophyPicker.init();
         if (this.TrophiesView) this.TrophiesView.init();
+        if (this.Appearance) this.Appearance.init();
 
         document.body.classList.add('global-edit-mode');
     },
@@ -147,6 +148,7 @@ const EditManager = {
         };
 
         const onPointerDown = (e) => {
+            if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
             if (e.button !== 0 && e.pointerType === 'mouse') return;
             if (e.target.closest(excludedDragSelectors)) return;
 
@@ -632,6 +634,9 @@ EditManager.Appearance = {
     ],
 
     init() {
+        if (this._initialized) return;
+        this._initialized = true;
+
         this.modalEl = document.getElementById('theme-appearance-modal');
         this.themeCardsEl = document.getElementById('appearance-theme-cards');
         this.colorPaletteEl = document.getElementById('appearance-color-palette');
@@ -683,6 +688,17 @@ EditManager.Appearance = {
                 this.renkSec(e.target.value);
             };
         }
+
+        // ESC tuşu ile güvenli çıkış
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (this.isPreviewActive) {
+                    this.onizlemeGeriDon();
+                } else if (this.modalEl && this.modalEl.classList.contains('is-open')) {
+                    this.kapat();
+                }
+            }
+        });
     },
 
     ac() {
@@ -710,10 +726,20 @@ EditManager.Appearance = {
 
     kapat() {
         if (!this.modalEl) return;
-        // Eğer geçici değişiklikler yapılmışsa ve kaydedilmemişse geri al
+
+        // Pop-up kapanırken önizleme modu hala açıksa kesinlikle deaktive et ve temizle
+        if (this.isPreviewActive) {
+            this.unfreezeEditMode();
+            if (this.previewBarEl) {
+                this.previewBarEl.style.display = 'none';
+            }
+        }
+
+        // Eğer geçici değişiklikler yapılmışsa ve kaydedilmemişse orijinal temaya/renge geri dön
         if (this.originalState) {
             this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor);
         }
+
         this.modalEl.classList.remove('is-open');
         this.modalEl.style.display = 'none';
     },
@@ -797,8 +823,11 @@ EditManager.Appearance = {
         this.modalEl.style.display = 'none';
         this.modalEl.classList.remove('is-open');
 
-        // Kart sahnesini düzenlemeye karşı dondur
+        // Kart sahnesini düzenlemeye karşı dondur (Owner modunu deaktive et)
         this.freezeEditMode();
+
+        // Temayı ve rengi geçici uygula
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
 
         // Önizleme barını göster ve yapılandır
         if (this.previewBarEl) {
@@ -827,7 +856,7 @@ EditManager.Appearance = {
         }
 
         if (typeof window.toastBildirimiGoster === 'function') {
-            window.toastBildirimiGoster("Önizleme modu aktif. Kartı serbestçe inceleyebilirsiniz.", 3000, 'info');
+            window.toastBildirimiGoster("Önizleme modu aktif. Kartı ziyaretçi gözüyle inceleyebilirsiniz.", 3000, 'info');
         }
     },
 
@@ -835,11 +864,12 @@ EditManager.Appearance = {
         this.isPreviewActive = false;
         if (this.previewBarEl) this.previewBarEl.style.display = 'none';
 
-        // Orijinal temaya dön
+        // Orijinal temaya ve renge geri dön
         if (this.originalState) {
             this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor);
         }
 
+        // Owner modunu tekrar aktive et
         this.unfreezeEditMode();
 
         // Pop-up'ı geri aç
@@ -849,26 +879,99 @@ EditManager.Appearance = {
     async onizlemeKaydet() {
         this.isPreviewActive = false;
         if (this.previewBarEl) this.previewBarEl.style.display = 'none';
+
+        // Owner modunu tekrar aktive et
         this.unfreezeEditMode();
 
+        // Değişiklikleri veritabanına ve state'e kaydet
         await this.kaydet();
+
+        // Pop-up'ı geri aç
         this.ac();
     },
 
     freezeEditMode() {
-        document.body.classList.add('is-preview-locked');
-        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
-            el.setAttribute('data-was-editable', 'true');
-            el.setAttribute('contenteditable', 'false');
-        });
+        this.isPreviewActive = true;
+        this._actualOwner = (typeof isOwner !== 'undefined' && isOwner);
+
+        // Global isOwner'ı false yap (ziyaretçi moduna geç)
+        if (typeof isOwner !== 'undefined') {
+            isOwner = false;
+        }
+
+        // Body'den owner ve düzenleme sınıflarını temizle
+        document.body.classList.remove('is-owner', 'global-edit-mode', 'has-unsaved-changes');
+
+        // Küresel işlem çubuğunu (Kaydet / Sıfırla) gizle
+        const actionBar = document.getElementById('edit-action-bar');
+        if (actionBar) actionBar.style.display = 'none';
+
+        // Vitrindeki hover sınıflarını ve başlıkları temizle
+        const nameEl = document.getElementById('profileName');
+        const titleEl = document.getElementById('profileTitle');
+        const bioEl = document.getElementById('profileBio');
+        if (nameEl) {
+            nameEl.classList.remove('editable-hover', 'is-input-active');
+            nameEl.removeAttribute('title');
+        }
+        if (titleEl) {
+            titleEl.classList.remove('editable-hover', 'is-input-active');
+            titleEl.removeAttribute('title');
+        }
+        if (bioEl) {
+            bioEl.classList.remove('editable-hover', 'is-input-active');
+            bioEl.removeAttribute('title');
+        }
+
+        // Kamera butonlarını (overlay) sahneden kaldır
+        document.querySelectorAll('.image-edit-overlay').forEach(ov => ov.remove());
+
+        // RenderEngine'i saf ziyaretçi modunda çiz (isOwner=false olduğu için tüm düzenleme UI'ı temizlenir)
+        if (typeof RenderEngine !== 'undefined') {
+            RenderEngine.vitrinCiz(kartVerisi);
+            RenderEngine.linklerCiz(kartVerisi);
+            if (kartVerisi?.tops) RenderEngine.companionCiz(kartVerisi.tops);
+            if (typeof RenderEngine.trophiesCiz === 'function' && kartVerisi?.trophies) {
+                RenderEngine.trophiesCiz(kartVerisi);
+            }
+        }
     },
 
     unfreezeEditMode() {
-        document.body.classList.remove('is-preview-locked');
-        document.querySelectorAll('[data-was-editable="true"]').forEach(el => {
-            el.removeAttribute('data-was-editable');
-            el.setAttribute('contenteditable', 'true');
-        });
+        this.isPreviewActive = false;
+
+        // Global isOwner'ı eski durumuna getir
+        if (this._actualOwner) {
+            isOwner = true;
+        }
+
+        if (typeof isOwner !== 'undefined' && isOwner) {
+            document.body.classList.add('is-owner', 'global-edit-mode');
+
+            if (EditManager.state && EditManager.state.hasUnsavedChanges) {
+                document.body.classList.add('has-unsaved-changes');
+                const actionBar = document.getElementById('edit-action-bar');
+                if (actionBar) actionBar.style.display = 'flex';
+            }
+
+            // Sahip modunda RenderEngine ve EditManager'ı yeniden bağla
+            if (typeof RenderEngine !== 'undefined') {
+                RenderEngine.vitrinCiz(kartVerisi);
+                RenderEngine.linklerCiz(kartVerisi);
+                if (kartVerisi?.tops) RenderEngine.companionCiz(kartVerisi.tops);
+                if (typeof RenderEngine.trophiesCiz === 'function' && kartVerisi?.trophies) {
+                    RenderEngine.trophiesCiz(kartVerisi);
+                }
+            }
+
+            if (typeof EditManager !== 'undefined') {
+                EditManager.Vitrin?.init();
+                EditManager.Media?.overlayleriYerlestir();
+                EditManager.BackViews?.init();
+                EditManager.CompanionViews?.init();
+                if (EditManager.SectionPicker) EditManager.SectionPicker.bagla();
+            }
+        }
     },
 
     async kaydet() {
@@ -1408,6 +1511,7 @@ EditManager.Media = {
     },
 
     overlayleriYerlestir() {
+        if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
         const bannerBox = document.querySelector('.banner-box');
         const avatarBox = document.querySelector('.avatar-box');
 
@@ -1429,6 +1533,7 @@ EditManager.Media = {
             if (!bannerBox._bannerClickBound) {
                 bannerBox._bannerClickBound = true;
                 bannerBox.addEventListener('click', (e) => {
+                    if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
                     if (e.target.closest('a, button')) return;
                     e.stopPropagation();
                     const input = document.getElementById('banner-file-input');
@@ -1448,6 +1553,7 @@ EditManager.Media = {
             if (!avatarBox._avatarClickBound) {
                 avatarBox._avatarClickBound = true;
                 avatarBox.addEventListener('click', (e) => {
+                    if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
                     if (e.target.closest('a, button')) return;
                     e.stopPropagation();
                     const input = document.getElementById('pfp-file-input');
@@ -1561,6 +1667,7 @@ EditManager.Media = {
 // #region 4: ÖN YÜZ İNLINE METİN VE TAG DÜZENLEME (VITRIN EDIT)
 EditManager.Vitrin = {
     init() {
+        if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
         this.metinDuzenlemeKur('profileName', 'gorunen_isim', 30, false);
         this.metinDuzenlemeKur('profileTitle', 'unvan', 50, false);
         this.metinDuzenlemeKur('profileBio', 'aciklama', 160, true);
@@ -1578,6 +1685,7 @@ EditManager.Vitrin = {
         el._duzenlemeBagli = true;
 
         el.addEventListener('click', (e) => {
+            if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
             if (el.querySelector('input, textarea') || e.target.closest('a') || e.target.closest('button')) return;
             e.stopPropagation();
 
@@ -1707,6 +1815,7 @@ EditManager.Vitrin = {
                 removeBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
                 removeBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
                 removeBtn.addEventListener('click', (e) => {
+                    if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
                     e.stopPropagation();
                     e.preventDefault();
                     const tags = Array.isArray(kartVerisi.front_data?.tags) ? kartVerisi.front_data.tags : [];
@@ -1728,6 +1837,7 @@ EditManager.Vitrin = {
             addPill.type = 'button';
             addPill.textContent = '+ Tag Ekle';
             addPill.addEventListener('click', (e) => {
+                if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
                 e.stopPropagation();
                 if (EditManager.TagPicker) {
                     EditManager.TagPicker.ac();
@@ -1741,6 +1851,7 @@ EditManager.Vitrin = {
         if (tagsZone && !tagsZone._hasMobileListener) {
             tagsZone._hasMobileListener = true;
             tagsZone.addEventListener('click', (e) => {
+                if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
                 if (window.innerWidth < 900 && !e.target.closest('.tag-remove-btn') && !e.target.closest('.tag-add-pill')) {
                     e.stopPropagation();
                     if (EditManager.TagPicker) {
@@ -1789,6 +1900,7 @@ EditManager.Vitrin = {
 // #region 5: ARKA YÜZ PANEL DÜZENLEMELERİ (BACK VIEWS EDIT)
 EditManager.BackViews = {
     init() {
+        if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
         this.menuSurukleBirakKur();
         this.blokSilmeDinleyicileriniBagla();
         this.linksDuzenlemeKur();
@@ -2673,6 +2785,7 @@ EditManager.BackViews = {
 
 EditManager.TrophiesView = {
     init() {
+        if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
         const detailBody = document.getElementById('trophiesDetailBody');
         const masterList = document.getElementById('trophiesMasterList');
         if (!detailBody && !masterList) return;
@@ -2949,6 +3062,7 @@ EditManager.SectionPicker = {
     bagla() {
         document.querySelectorAll('#open-add-section-modal').forEach(btn => {
             btn.onclick = (e) => {
+                if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
                 e.stopPropagation();
                 this.ac();
             };
@@ -3713,6 +3827,7 @@ EditManager.MediaSearchModal = {
 // #region 10: TOPS EŞLİKÇİ KART (SHOWCASE WING) DÜZENLEME MOTORU
 EditManager.CompanionViews = {
     init() {
+        if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
         const topsCompanion = document.getElementById('topsCompanionCard');
         const companionBody = document.getElementById('companionBody');
         const editToggleBtn = document.getElementById('showcaseEditToggleBtn');
