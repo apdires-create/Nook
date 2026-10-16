@@ -258,12 +258,27 @@ const ThemeMarket = {
             `;
         }).join('');
 
-        // Tıklayınca detay aç
+        // Tıklayınca detay aç veya sahip olunan temada doğrudan Görünüm & Tema modalına yönlendir
         this.gridEl.querySelectorAll('.theme-market-card').forEach(card => {
             card.onclick = () => {
                 const themeId = card.dataset.themeId;
                 const theme = this.themesCatalog.find(t => t.id === themeId);
-                if (theme) this.detayGoster(theme);
+                if (!theme) return;
+
+                const isUserOwner = typeof isOwner !== 'undefined' && isOwner;
+                const isOwned = this.userInventory.has(theme.id) || theme.price_cents === 0;
+
+                // Kullanıcı sahip olduğu bir temaya tıkladığında market detayını açma, doğrudan Görünüm & Tema pop-up'ına yönlendir
+                if (isUserOwner && isOwned) {
+                    this.kapat();
+                    if (typeof EditManager !== 'undefined' && EditManager.Appearance) {
+                        EditManager.Appearance.ac();
+                        EditManager.Appearance.temaSec(theme.id);
+                    }
+                    return;
+                }
+
+                this.detayGoster(theme);
             };
         });
     },
@@ -271,14 +286,24 @@ const ThemeMarket = {
     detayGoster(theme) {
         if (!this.catalogViewEl || !this.detailViewEl || !this.detailBodyEl) return;
 
+        const isUserOwner = typeof isOwner !== 'undefined' && isOwner;
+        const isLanding = typeof KULLANICI_ADI === 'undefined' || !KULLANICI_ADI;
+        const isOwned = this.userInventory.has(theme.id) || theme.price_cents === 0;
+
+        // Kullanıcı sahip olduğu bir temada detay açmak isterse Görünüm modalına yönlendir
+        if (isUserOwner && isOwned) {
+            this.kapat();
+            if (typeof EditManager !== 'undefined' && EditManager.Appearance) {
+                EditManager.Appearance.ac();
+                EditManager.Appearance.temaSec(theme.id);
+            }
+            return;
+        }
+
         this.selectedTheme = theme;
         this.catalogViewEl.style.display = 'none';
         this.detailViewEl.style.display = 'flex';
 
-        const isUserOwner = typeof isOwner !== 'undefined' && isOwner;
-        const isLanding = typeof KULLANICI_ADI === 'undefined' || !KULLANICI_ADI;
-        const isOwned = this.userInventory.has(theme.id);
-        const isFree = theme.price_cents === 0;
         const currentActiveTheme = (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.theme_id) || 'default';
         const isCurrentActive = currentActiveTheme === theme.id;
 
@@ -286,12 +311,8 @@ const ThemeMarket = {
 
         if (isCurrentActive) {
             actionBtnHtml = `<button type="button" class="theme-detail-btn" style="background: rgba(255,255,255,0.08); color: var(--text-tertiary); cursor: default;" disabled>Kullanımda</button>`;
-        } else if (isOwned || isFree) {
-            if (isUserOwner) {
-                actionBtnHtml = `<button type="button" class="theme-detail-btn is-apply" id="theme-btn-apply">Temayı Uygula</button>`;
-            } else {
-                actionBtnHtml = `<button type="button" class="theme-detail-btn" style="background: rgba(255,255,255,0.08); color: var(--text-tertiary); cursor: default;" disabled>Sahipsin</button>`;
-            }
+        } else if (isOwned) {
+            actionBtnHtml = `<button type="button" class="theme-detail-btn" style="background: rgba(255,255,255,0.08); color: var(--text-tertiary); cursor: default;" disabled>Sahipsin</button>`;
         } else {
             actionBtnHtml = `<button type="button" class="theme-detail-btn is-buy" id="theme-btn-buy">Satın Al — $${(theme.price_cents / 100).toFixed(2)}</button>`;
         }
@@ -306,8 +327,8 @@ const ThemeMarket = {
             </div>
             <div class="theme-detail-meta">
                 <h3 class="theme-detail-title">${theme.name}</h3>
-                <span class="theme-card-price ${isOwned || isFree ? 'is-free' : ''}">
-                    ${isCurrentActive ? 'Kullanımda' : (isOwned ? 'Sahipsin' : (isFree ? 'Ücretsiz' : `$${(theme.price_cents / 100).toFixed(2)}`))}
+                <span class="theme-card-price ${isOwned ? 'is-free' : ''}">
+                    ${isCurrentActive ? 'Kullanımda' : (isOwned ? 'Sahipsin' : `$${(theme.price_cents / 100).toFixed(2)}`)}
                 </span>
             </div>
             <p class="theme-detail-desc">${theme.description}</p>
@@ -320,7 +341,6 @@ const ThemeMarket = {
         // Aksiyon Butonları Bağlantıları
         const previewBtn = document.getElementById('theme-btn-preview');
         const buyBtn = document.getElementById('theme-btn-buy');
-        const applyBtn = document.getElementById('theme-btn-apply');
 
         if (previewBtn) {
             previewBtn.onclick = () => this.onizlemeBaslat(theme);
@@ -328,10 +348,6 @@ const ThemeMarket = {
 
         if (buyBtn) {
             buyBtn.onclick = () => this.satinAl(theme);
-        }
-
-        if (applyBtn) {
-            applyBtn.onclick = () => this.temayiUygula(theme);
         }
     },
 
@@ -374,11 +390,14 @@ const ThemeMarket = {
             if (actionBtn) {
                 const isOwned = this.userInventory.has(theme.id) || theme.price_cents === 0;
                 if (isOwned) {
-                    actionBtn.textContent = 'Kaydet';
+                    actionBtn.textContent = 'Görünümde Düzenle';
                     actionBtn.className = 'theme-preview-btn is-apply-action';
                     actionBtn.onclick = async () => {
                         await this.onizlemeyiBitir(false);
-                        await this.temayiUygula(theme);
+                        if (typeof EditManager !== 'undefined' && EditManager.Appearance) {
+                            EditManager.Appearance.ac();
+                            EditManager.Appearance.temaSec(theme.id);
+                        }
                     };
                 } else {
                     actionBtn.textContent = `Satın Al ($${(theme.price_cents / 100).toFixed(2)})`;
