@@ -66,45 +66,12 @@ const EditManager = {
         }
     },
 
-    // #region TEMAYA ÖZEL SÜRÜKLEME MOTORLARI (STRATEGY REGISTRY)
-    dragEngines: {},
-    registerDragEngine(themeId, engineFactory) {
-        if (!themeId || typeof engineFactory !== 'function') return;
-        this.dragEngines[themeId] = engineFactory;
-    },
-    getActiveDragEngine() {
-        const currentTheme = (typeof ThemeManager !== 'undefined' && ThemeManager?.currentThemeId) || document.documentElement.getAttribute('data-theme');
-        if (currentTheme && this.dragEngines[currentTheme]) {
-            return this.dragEngines[currentTheme];
-        }
-        return null;
-    },
-    refreshAllSortables() {
-        document.querySelectorAll('*').forEach(el => {
-            if (el._sortableOptions && typeof el._pointerSortableCleanup === 'function') {
-                this.initPointerSortable(el, el._sortableOptions);
-            }
-        });
-    },
-    // #endregion
-
     // #region EVRENSEL POINTER REORDER MOTORU (SORTABLE)
     initPointerSortable(container, options) {
         if (!container) return;
-        container._sortableOptions = options;
         if (container._pointerSortableCleanup) {
             container._pointerSortableCleanup();
             container._pointerSortableCleanup = null;
-        }
-
-        // Temaya özel kayıtlı bir motor varsa öncelikli olarak işi ona devret
-        const customEngine = this.getActiveDragEngine();
-        if (customEngine) {
-            const cleanup = customEngine(container, options, this);
-            if (typeof cleanup === 'function') {
-                container._pointerSortableCleanup = cleanup;
-                return;
-            }
         }
 
         const {
@@ -757,6 +724,13 @@ EditManager.Appearance = {
         this.temalariCiz();
         this.renkSec(this.tempState.primaryColor, false);
 
+        // Arka planda veritabanı envanterini de tazele ve kartları yeniden çiz
+        if (typeof ThemeMarket !== 'undefined' && typeof ThemeMarket.kullaniciEnvanteriniYukle === 'function') {
+            ThemeMarket.kullaniciEnvanteriniYukle().then(() => {
+                this.temalariCiz();
+            }).catch(() => {});
+        }
+
         this.modalEl.style.display = 'flex';
         this.modalEl.classList.add('is-open');
     },
@@ -791,6 +765,12 @@ EditManager.Appearance = {
         const inventory = (typeof ThemeMarket !== 'undefined' && ThemeMarket.userInventory)
             ? ThemeMarket.userInventory
             : new Set(['default']);
+
+        // Aktif kayıtlı temayı da envanterde garanti et (kullanıcı zaten bu temaya sahip)
+        const currentSavedTheme = kartVerisi?.theme_config?.theme_id;
+        if (currentSavedTheme) {
+            inventory.add(currentSavedTheme);
+        }
 
         // Kullanıcının sahip olduğu temaları filtrele (default her zaman vardır)
         const userThemes = this.availableThemes.filter(t => t.id === 'default' || inventory.has(t.id));

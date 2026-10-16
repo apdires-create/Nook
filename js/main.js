@@ -115,6 +115,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 5. Sayfa Sahibi İse Düzenleme Modunu Lazy-Load Et
         if (typeof isOwner !== 'undefined' && isOwner) {
+            // Kullanıcı tema envanterini peşinen yükle
+            if (typeof ThemeMarket !== 'undefined' && typeof ThemeMarket.kullaniciEnvanteriniYukle === 'function') {
+                ThemeMarket.kullaniciEnvanteriniYukle().catch(() => {});
+            }
+
             await editModunuYukle();
             if (typeof EditManager !== 'undefined') {
                 EditManager.init();

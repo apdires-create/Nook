@@ -8,7 +8,6 @@ const ThemeManager = {
     basePath: 'themes/',
     linkElementId: 'nook-theme-stylesheet',
     fontLinkElementId: 'nook-theme-fonts',
-    dragEngineScriptId: 'nook-theme-drag-engine',
 
     // Bilinen temalar için font fallback haritası (DB'den fontUrl gelmese dahi sıçramayı önler)
     knownThemeFonts: {
@@ -52,11 +51,6 @@ const ThemeManager = {
                 document.documentElement.style.setProperty('--accent-color', primaryColor);
             }
 
-            // 5.5. Düzenleme modunda (isOwner) temanın özel drag motoru varsa yükle
-            if (typeof isOwner !== 'undefined' && isOwner) {
-                this._loadThemeDragEngine(themeId);
-            }
-
             // 6. Konsol veya event bildirimi
             window.dispatchEvent(new CustomEvent('nook:theme-applied', {
                 detail: { themeId, options }
@@ -77,15 +71,6 @@ const ThemeManager = {
         const existingLink = document.getElementById(this.linkElementId);
         if (existingLink) {
             existingLink.remove();
-        }
-
-        // Temanın özel drag motoru yüklüyse kaldır
-        const existingEngine = document.getElementById(this.dragEngineScriptId);
-        if (existingEngine) {
-            existingEngine.remove();
-        }
-        if (typeof EditManager !== 'undefined' && EditManager.refreshAllSortables) {
-            EditManager.refreshAllSortables();
         }
 
         // Varsayılan Nook fontunu yükle
@@ -186,32 +171,6 @@ const ThemeManager = {
             preconnect2.crossOrigin = 'anonymous';
             document.head.appendChild(preconnect2);
         }
-    },
-
-    /**
-     * Temaya özel sürükleme motorunu dinamik olarak yükler
-     * @private
-     */
-    _loadThemeDragEngine(themeId) {
-        const existingScript = document.getElementById(this.dragEngineScriptId);
-        if (existingScript) existingScript.remove();
-
-        const scriptUrl = `${this.basePath}${themeId}/drag-engine.js`;
-        const script = document.createElement('script');
-        script.id = this.dragEngineScriptId;
-        script.src = scriptUrl;
-        script.onload = () => {
-            if (typeof EditManager !== 'undefined' && EditManager.refreshAllSortables) {
-                EditManager.refreshAllSortables();
-            }
-        };
-        script.onerror = () => {
-            script.remove();
-            if (typeof EditManager !== 'undefined' && EditManager.refreshAllSortables) {
-                EditManager.refreshAllSortables();
-            }
-        };
-        document.head.appendChild(script);
     }
 };
 
