@@ -66,11 +66,45 @@ const EditManager = {
         }
     },
 
+    // #region TEMAYA ÖZEL SÜRÜKLEME MOTORLARI (STRATEGY REGISTRY)
+    dragEngines: {},
+    registerDragEngine(themeId, engineFactory) {
+        if (!themeId || typeof engineFactory !== 'function') return;
+        this.dragEngines[themeId] = engineFactory;
+    },
+    getActiveDragEngine() {
+        const currentTheme = (typeof ThemeManager !== 'undefined' && ThemeManager?.currentThemeId) || document.documentElement.getAttribute('data-theme');
+        if (currentTheme && this.dragEngines[currentTheme]) {
+            return this.dragEngines[currentTheme];
+        }
+        return null;
+    },
+    refreshAllSortables() {
+        document.querySelectorAll('*').forEach(el => {
+            if (el._sortableOptions && typeof el._pointerSortableCleanup === 'function') {
+                this.initPointerSortable(el, el._sortableOptions);
+            }
+        });
+    },
+    // #endregion
+
     // #region EVRENSEL POINTER REORDER MOTORU (SORTABLE)
     initPointerSortable(container, options) {
         if (!container) return;
+        container._sortableOptions = options;
         if (container._pointerSortableCleanup) {
             container._pointerSortableCleanup();
+            container._pointerSortableCleanup = null;
+        }
+
+        // Temaya özel kayıtlı bir motor varsa öncelikli olarak işi ona devret
+        const customEngine = this.getActiveDragEngine();
+        if (customEngine) {
+            const cleanup = customEngine(container, options, this);
+            if (typeof cleanup === 'function') {
+                container._pointerSortableCleanup = cleanup;
+                return;
+            }
         }
 
         const {

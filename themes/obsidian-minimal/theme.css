@@ -242,16 +242,28 @@
 }
 
 /* ----------------------------------------------------
-   9. SÜRÜKLE-BIRAK (POINTER DRAG) GEÇİŞ SABİTLEME
+   9. OBSIDIAN ÖZEL SÜRÜKLEME FİZİĞİ & GEÇİŞLERİ
    ---------------------------------------------------- */
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .tag-pill,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .tag-pill:hover,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .nook-tag,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .nook-tag:hover,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .nook-link-row,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .nook-link-row:hover,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .link-item,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .link-item:hover {
+/* Havaya kalkan aktif öğe: gölgesiz, temiz, hafif platin kenarlık */
+[data-theme="obsidian-minimal"] .is-obsidian-elevated {
+    z-index: 25 !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+    pointer-events: none;
+}
+
+/* Alttan geçen yerinden edilen öğe */
+[data-theme="obsidian-minimal"] .is-obsidian-displaced {
+    z-index: 1 !important;
+    pointer-events: none;
+}
+
+/* Sürükleme esnasında diğer sakin elemanların hover tetikleyicilerini dondur */
+body.is-pointer-dragging [data-theme="obsidian-minimal"] .tag-pill:not(.is-obsidian-elevated):not(.is-obsidian-displaced):hover,
+body.is-pointer-dragging [data-theme="obsidian-minimal"] .nook-tag:not(.is-obsidian-elevated):not(.is-obsidian-displaced):hover,
+body.is-pointer-dragging [data-theme="obsidian-minimal"] .nook-link-row:not(.is-obsidian-elevated):not(.is-obsidian-displaced):hover,
+body.is-pointer-dragging [data-theme="obsidian-minimal"] .link-item:not(.is-obsidian-elevated):not(.is-obsidian-displaced):hover {
     transition: none !important;
     transform: none !important;
 }
