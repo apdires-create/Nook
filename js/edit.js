@@ -653,9 +653,12 @@ EditManager.Appearance = {
             triggerBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                // Profil dropdown'ını kapat
+                // Profil dropdown'ını kapat (CSS sınıfı üzerinden, display ezmeden)
                 const userDropdown = document.getElementById('profile-user-dropdown');
-                if (userDropdown) userDropdown.style.display = 'none';
+                if (userDropdown) {
+                    userDropdown.classList.remove('is-open');
+                    userDropdown.style.display = '';
+                }
                 this.ac();
             };
         }
@@ -739,6 +742,9 @@ EditManager.Appearance = {
         if (this.originalState) {
             this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor);
         }
+
+        const userDropdown = document.getElementById('profile-user-dropdown');
+        if (userDropdown) userDropdown.style.display = '';
 
         this.modalEl.classList.remove('is-open');
         this.modalEl.style.display = 'none';
@@ -952,6 +958,11 @@ EditManager.Appearance = {
             const actionBar = document.getElementById('edit-action-bar');
             if (actionBar) {
                 actionBar.style.display = '';
+            }
+
+            const userDropdown = document.getElementById('profile-user-dropdown');
+            if (userDropdown) {
+                userDropdown.style.display = '';
             }
 
             if (EditManager.state && EditManager.state.hasUnsavedChanges) {
