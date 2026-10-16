@@ -208,11 +208,13 @@
 /* #region 3: 2. BÖLGE — ESNEK GÖVDE (BİO / ALINTI) */
 .bio-zone {
     flex: 1;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2cqh 3cqw;
+    padding: 1.5cqh 3cqw;
     text-align: center;
+    overflow: hidden;
 }
 
 .profile-bio {
@@ -229,7 +231,8 @@
     -webkit-line-clamp: 5;
     line-clamp: 5;
     max-height: calc(1.6em * 5 + 4px);
-    padding-bottom: 2px;
+    padding: 2px 8px;
+    box-sizing: border-box;
     overflow: hidden;
 }
 /* #endregion */
