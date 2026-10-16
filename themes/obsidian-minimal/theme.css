@@ -100,35 +100,30 @@
 [data-theme="obsidian-minimal"] .profile-name {
     font-family: var(--font-display) !important;
     font-weight: 600 !important;
-    font-size: clamp(2rem, 7cqw, 2.6rem) !important;
     letter-spacing: -0.015em !important;
     color: #ffffff !important;
-    line-height: 1.15 !important;
 }
 
 [data-theme="obsidian-minimal"] .profile-title {
     font-family: var(--font-body) !important;
-    font-size: 0.76rem !important;
-    letter-spacing: 0.14em !important;
+    letter-spacing: 0.12em !important;
     text-transform: uppercase !important;
     font-weight: 500 !important;
     color: var(--text-secondary) !important;
-    margin-top: 6px !important;
 }
 
 [data-theme="obsidian-minimal"] .profile-bio {
     font-family: var(--font-body) !important;
     font-weight: 400 !important;
-    line-height: 1.65 !important;
-    color: rgba(255, 255, 255, 0.7) !important;
+    line-height: 1.6 !important;
+    color: rgba(255, 255, 255, 0.72) !important;
     letter-spacing: 0.01em !important;
 }
 
 [data-theme="obsidian-minimal"] .back-links-title,
 [data-theme="obsidian-minimal"] .companion-title {
     font-family: var(--font-display) !important;
-    letter-spacing: 0.05em !important;
-    font-size: 1.25rem !important;
+    letter-spacing: 0.04em !important;
     font-weight: 600 !important;
 }
 
