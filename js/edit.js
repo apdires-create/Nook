@@ -923,8 +923,8 @@ EditManager.Appearance = {
             bioEl.removeAttribute('title');
         }
 
-        // Kamera butonlarını (overlay) sahneden kaldır
-        document.querySelectorAll('.image-edit-overlay').forEach(ov => ov.remove());
+        // Sahnedeki kamera butonlarını ve tüm ekleme butonlarını kaldır
+        document.querySelectorAll('.image-edit-overlay, .view-add-btn, .tag-add-pill, .tag-remove-btn').forEach(ov => ov.remove());
 
         // RenderEngine'i saf ziyaretçi modunda çiz (isOwner=false olduğu için tüm düzenleme UI'ı temizlenir)
         if (typeof RenderEngine !== 'undefined') {
@@ -948,10 +948,16 @@ EditManager.Appearance = {
         if (typeof isOwner !== 'undefined' && isOwner) {
             document.body.classList.add('is-owner', 'global-edit-mode');
 
+            // #edit-action-bar inline display'ini kesinlikle temizle (CSS akışına döndür)
+            const actionBar = document.getElementById('edit-action-bar');
+            if (actionBar) {
+                actionBar.style.display = '';
+            }
+
             if (EditManager.state && EditManager.state.hasUnsavedChanges) {
                 document.body.classList.add('has-unsaved-changes');
-                const actionBar = document.getElementById('edit-action-bar');
-                if (actionBar) actionBar.style.display = 'flex';
+            } else {
+                document.body.classList.remove('has-unsaved-changes');
             }
 
             // Sahip modunda RenderEngine ve EditManager'ı yeniden bağla
@@ -1136,6 +1142,12 @@ EditManager.Global = {
         }
 
         document.body.classList.toggle('has-unsaved-changes', EditManager.state.hasUnsavedChanges);
+
+        // Herhangi bir değişiklik olduğunda inline display: none kalmışsa temizle
+        const actionBar = document.getElementById('edit-action-bar');
+        if (actionBar && actionBar.style.display === 'none' && !EditManager.Appearance?.isPreviewActive) {
+            actionBar.style.display = '';
+        }
     },
 
     sifirla() {
@@ -2418,6 +2430,7 @@ EditManager.BackViews = {
         }
 
         addBtn.onclick = (e) => {
+            if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
             e.stopPropagation();
             if (!Array.isArray(kartVerisi.links)) kartVerisi.links = [];
             if (kartVerisi.links.length >= 15) {
@@ -2627,6 +2640,7 @@ EditManager.BackViews = {
                 <span>Durum Bildirimi Ekle</span>
             `;
             addBtn.onclick = () => {
+                if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
                 this.acWorkingFormu();
             };
             scrollWrap.appendChild(addBtn);
@@ -2776,6 +2790,7 @@ EditManager.BackViews = {
                 <span>Monkeytype Widget'ı Ekle</span>
             `;
             addBtn.onclick = () => {
+                if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
                 this.acWidgetFormu();
             };
             scrollWrap.appendChild(addBtn);

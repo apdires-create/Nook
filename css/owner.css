@@ -714,6 +714,17 @@ body.is-owner:not(.has-unsaved-changes) .edit-action-bar {
     pointer-events: none;
 }
 
+body:not(.is-owner) .edit-action-bar,
+body:not(.is-owner) .view-add-btn,
+body:not(.is-owner) .image-edit-overlay,
+body:not(.is-owner) .tag-add-pill,
+body:not(.is-owner) .tag-remove-btn,
+body:not(.is-owner) .companion-row-del-btn,
+body:not(.is-owner) .companion-add-row-btn,
+body:not(.is-owner) .top-add-form {
+    display: none !important;
+}
+
 .edit-action-status {
     display: none !important;
 }
