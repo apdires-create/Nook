@@ -15,50 +15,67 @@ const ThemeManager = {
         'obsidian-minimal': 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
     },
 
+    isValidThemeId(themeId) {
+        return typeof themeId === 'string' && /^[a-z0-9_-]{1,50}$/i.test(themeId);
+    },
+
+    isValidHexColor(color) {
+        return typeof color === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(color.trim());
+    },
+
+    isValidFontUrl(url) {
+        return typeof url === 'string' && url.startsWith('https://fonts.googleapis.com/');
+    },
+
     /**
      * Tema stil ve fontlarını dinamik olarak sayfaya enjekte eder
      * @param {string} themeId - Tema kimliği (örn: 'obsidian-minimal', '_template', 'default')
-     * @param {Object} options - Ek tema yapılandırması (fontUrl, primaryColor, cdnPrefix vb.)
+     * @param {Object} options - Ek tema yapılandırması (fontUrl, primaryColor vb.)
      * @returns {Promise<boolean>} Yükleme durumu
      */
     async applyTheme(themeId, options = {}) {
-        // Eğer tema belirtilmemişse veya 'default' ise temizle ve varsayılana dön
-        if (!themeId || themeId === 'default') {
+        // Eğer tema belirtilmemişse, 'default' ise veya güvenli formatta değilse temizle ve varsayılana dön
+        if (!themeId || themeId === 'default' || !this.isValidThemeId(themeId)) {
             this.clearTheme(options);
             return true;
         }
 
+        const safeThemeId = themeId.trim();
+
         try {
-            // 1. Font gereksinimi: options'ta yoksa bilinenler tablosundan al
-            const fontUrl = options.fontUrl || options.font_url || this.knownThemeFonts[themeId] || null;
+            // 1. Font gereksinimi: options'ta güvenli Google Fonts URL'i varsa onu, yoksa bilinenler tablosunu kullan
+            const candidateFontUrl = options.fontUrl || options.font_url || null;
+            const fontUrl = (candidateFontUrl && this.isValidFontUrl(candidateFontUrl))
+                ? candidateFontUrl
+                : (this.knownThemeFonts[safeThemeId] || null);
             if (fontUrl) {
                 this._injectFont(fontUrl);
             }
 
-            // 2. Tema CSS URL'ini belirle (CDN prefix varsa oradan, yoksa yerel themes/{id}/)
-            const cssUrl = options.cssUrl || `${this.basePath}${themeId}/theme.css`;
+            // 2. Tema CSS URL'ini her zaman yerel güvenli dizinden oluştur (Harici cssUrl enjeksiyonuna kapalı)
+            const cssUrl = `${this.basePath}${safeThemeId}/theme.css`;
 
             // 3. CSS dosyasını yükle ve bekle
-            await this._injectStylesheet(cssUrl, themeId);
+            await this._injectStylesheet(cssUrl, safeThemeId);
 
             // 4. HTML üzerine data-theme ataması yap
-            document.documentElement.setAttribute('data-theme', themeId);
-            this.currentThemeId = themeId;
+            document.documentElement.setAttribute('data-theme', safeThemeId);
+            this.currentThemeId = safeThemeId;
 
             // 5. Vurgu rengini koru / uygula (Kullanıcının tercihi temaya hükmeder)
             const primaryColor = options.primaryColor || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.primary_color);
-            if (primaryColor) {
-                document.documentElement.style.setProperty('--accent-color', primaryColor);
+            if (this.isValidHexColor(primaryColor)) {
+                document.documentElement.style.setProperty('--accent-color', primaryColor.trim());
             }
 
             // 6. Konsol veya event bildirimi
             window.dispatchEvent(new CustomEvent('nook:theme-applied', {
-                detail: { themeId, options }
+                detail: { themeId: safeThemeId, options }
             }));
 
             return true;
         } catch (error) {
-            console.warn(`[ThemeManager] "${themeId}" teması yüklenemedi, varsayılan stile dönülüyor:`, error);
+            console.warn(`[ThemeManager] "${safeThemeId}" teması yüklenemedi, varsayılan stile dönülüyor:`, error);
             this.clearTheme(options);
             return false;
         }
@@ -84,8 +101,8 @@ const ThemeManager = {
 
         // Vurgu rengini koru / sıfırla
         const primaryColor = options.primaryColor || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.primary_color);
-        if (primaryColor) {
-            document.documentElement.style.setProperty('--accent-color', primaryColor);
+        if (this.isValidHexColor(primaryColor)) {
+            document.documentElement.style.setProperty('--accent-color', primaryColor.trim());
         }
 
         window.dispatchEvent(new CustomEvent('nook:theme-cleared'));

@@ -21,11 +21,13 @@
                     if (cached) {
                         var parsed = JSON.parse(cached);
                         if (parsed && parsed.theme_config) {
-                            if (parsed.theme_config.theme_id && parsed.theme_config.theme_id !== 'default') {
-                                themeId = parsed.theme_config.theme_id;
+                            var rawThemeId = parsed.theme_config.theme_id;
+                            if (rawThemeId && rawThemeId !== 'default' && /^[a-z0-9_-]{1,50}$/i.test(rawThemeId)) {
+                                themeId = rawThemeId;
                             }
-                            if (parsed.theme_config.primary_color) {
-                                primaryColor = parsed.theme_config.primary_color;
+                            var rawColor = parsed.theme_config.primary_color;
+                            if (typeof rawColor === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(rawColor.trim())) {
+                                primaryColor = rawColor.trim();
                             }
                         }
                     }
@@ -33,13 +35,16 @@
 
                 if (themeId === 'obsidian-minimal') {
                     fontUrl = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap';
+                }
+
+                if (themeId !== 'default') {
                     document.documentElement.setAttribute('data-theme', themeId);
                     
                     var themeLink = document.createElement('link');
                     themeLink.id = 'nook-theme-stylesheet';
                     themeLink.rel = 'stylesheet';
                     themeLink.setAttribute('data-loaded-theme', themeId);
-                    themeLink.href = 'themes/obsidian-minimal/theme.css';
+                    themeLink.href = 'themes/' + themeId + '/theme.css';
                     document.head.appendChild(themeLink);
                 }
 

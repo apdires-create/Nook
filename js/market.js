@@ -128,13 +128,24 @@ const ThemeMarket = {
         }
     },
 
+    escapeHtml(str) {
+        if (typeof RenderEngine !== 'undefined' && typeof RenderEngine.escapeHtml === 'function') {
+            return RenderEngine.escapeHtml(str);
+        }
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    },
+
     /**
      * Supabase public.themes tablosundan aktif temaları çeker
      */
     async temalariVeritabanindanYukle() {
-        const client = (typeof supabaseClient !== 'undefined' && supabaseClient) 
-            || (typeof supabaseIstemcisi !== 'undefined' && supabaseIstemcisi) 
-            || null;
+        const client = (typeof supabaseClient !== 'undefined' && supabaseClient) || null;
 
         if (!client) return;
 
@@ -155,7 +166,7 @@ const ThemeMarket = {
                             ...remoteTheme,
                             checkout_url: this.themesCatalog[localIdx].checkout_url || remoteTheme.checkout_url,
                             variant_id: this.themesCatalog[localIdx].variant_id || remoteTheme.variant_id,
-                            banner_icon: this.themesCatalog[localIdx].banner_icon || remoteTheme.banner_icon
+                            banner_icon: this.themesCatalog[localIdx].banner_icon
                         };
                     } else {
                         this.themesCatalog.push({
@@ -184,9 +195,7 @@ const ThemeMarket = {
     async kullaniciEnvanteriniYukle() {
         this.userInventory = new Set(['default']);
 
-        const client = (typeof supabaseClient !== 'undefined' && supabaseClient) 
-            || (typeof supabaseIstemcisi !== 'undefined' && supabaseIstemcisi) 
-            || null;
+        const client = (typeof supabaseClient !== 'undefined' && supabaseClient) || null;
 
         if (!client || typeof aktifKullaniciOturumu === 'undefined') {
             return;
@@ -227,7 +236,7 @@ const ThemeMarket = {
             const isOwned = this.userInventory.has(theme.id);
             const isFree = theme.price_cents === 0;
 
-            let priceLabel = `$${(theme.price_cents / 100).toFixed(2)}`;
+            let priceLabel = `$${(Number(theme.price_cents || 0) / 100).toFixed(2)}`;
             let priceClass = '';
 
             if (isCurrentActive) {
@@ -241,18 +250,23 @@ const ThemeMarket = {
                 priceClass = 'is-free';
             }
 
+            const safeId = this.escapeHtml(theme.id);
+            const safeName = this.escapeHtml(theme.name);
+            const safeDesc = this.escapeHtml(theme.description || '');
+            const safeIcon = this.escapeHtml(theme.banner_icon || '🎨');
+
             return `
-                <div class="theme-market-card ${isCurrentActive ? 'is-active' : ''}" data-theme-id="${theme.id}" role="button" tabindex="0">
+                <div class="theme-market-card ${isCurrentActive ? 'is-active' : ''}" data-theme-id="${safeId}" role="button" tabindex="0">
                     <div class="theme-card-banner">
-                        <span class="theme-card-banner-placeholder">${theme.banner_icon || '🎨'}</span>
+                        <span class="theme-card-banner-placeholder">${safeIcon}</span>
                         ${isCurrentActive ? '<span class="theme-active-badge">Kullanımda</span>' : ''}
                     </div>
                     <div class="theme-card-body">
                         <div class="theme-card-header">
-                            <h3 class="theme-card-name">${theme.name}</h3>
+                            <h3 class="theme-card-name">${safeName}</h3>
                             <span class="theme-card-price ${priceClass}">${priceLabel}</span>
                         </div>
-                        <p class="theme-card-desc">${theme.description}</p>
+                        <p class="theme-card-desc">${safeDesc}</p>
                     </div>
                 </div>
             `;
@@ -321,17 +335,21 @@ const ThemeMarket = {
         const canPreview = isUserOwner && !isLanding;
         const previewBtnHtml = canPreview ? `<button type="button" class="theme-detail-btn is-preview" id="theme-btn-preview">Canlı Önizle</button>` : '';
 
+        const safeName = this.escapeHtml(theme.name);
+        const safeDesc = this.escapeHtml(theme.description || '');
+        const safeIcon = this.escapeHtml(theme.banner_icon || '🎨');
+
         this.detailBodyEl.innerHTML = `
             <div class="theme-detail-hero">
-                <span style="font-size: 3.5rem;">${theme.banner_icon || '🎨'}</span>
+                <span style="font-size: 3.5rem;">${safeIcon}</span>
             </div>
             <div class="theme-detail-meta">
-                <h3 class="theme-detail-title">${theme.name}</h3>
+                <h3 class="theme-detail-title">${safeName}</h3>
                 <span class="theme-card-price ${isOwned ? 'is-free' : ''}">
-                    ${isCurrentActive ? 'Kullanımda' : (isOwned ? 'Sahipsin' : `$${(theme.price_cents / 100).toFixed(2)}`)}
+                    ${isCurrentActive ? 'Kullanımda' : (isOwned ? 'Sahipsin' : `$${(Number(theme.price_cents || 0) / 100).toFixed(2)}`)}
                 </span>
             </div>
-            <p class="theme-detail-desc">${theme.description}</p>
+            <p class="theme-detail-desc">${safeDesc}</p>
             <div class="theme-detail-actions">
                 ${previewBtnHtml}
                 ${actionBtnHtml}
@@ -400,7 +418,7 @@ const ThemeMarket = {
                         }
                     };
                 } else {
-                    actionBtn.textContent = `Satın Al ($${(theme.price_cents / 100).toFixed(2)})`;
+                    actionBtn.textContent = `Satın Al ($${(Number(theme.price_cents || 0) / 100).toFixed(2)})`;
                     actionBtn.className = 'theme-preview-btn is-action';
                     actionBtn.onclick = () => this.satinAl(theme);
                 }
@@ -481,9 +499,7 @@ const ThemeMarket = {
         }
 
         try {
-            const client = (typeof supabaseClient !== 'undefined' && supabaseClient) 
-                || (typeof supabaseIstemcisi !== 'undefined' && supabaseIstemcisi) 
-                || null;
+            const client = (typeof supabaseClient !== 'undefined' && supabaseClient) || null;
 
             if (client) {
                 const currentConfig = kartVerisi.theme_config || {};

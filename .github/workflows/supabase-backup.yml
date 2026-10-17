@@ -30,24 +30,27 @@ jobs:
           BUCKET: avatars-and-banners
         run: |
           mkdir -p backup/storage
-          klasorler=$(curl -s -X POST "$SB_URL/storage/v1/object/list/$BUCKET" \
+          curl -s -X POST "$SB_URL/storage/v1/object/list/$BUCKET" \
             -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
             -H "Content-Type: application/json" \
-            -d '{"prefix":"","limit":1000}' | jq -r '.[].name')
-
-          for klasor in $klasorler; do
-            dosyalar=$(curl -s -X POST "$SB_URL/storage/v1/object/list/$BUCKET" \
-              -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
-              -H "Content-Type: application/json" \
-              -d "{\"prefix\":\"$klasor/\",\"limit\":1000}" | jq -r '.[].name')
-
-            mkdir -p "backup/storage/$klasor"
-            for dosya in $dosyalar; do
-              curl -s -o "backup/storage/$klasor/$dosya" \
+            -d '{"prefix":"","limit":1000}' | jq -r '.[].name // empty' | while IFS= read -r klasor; do
+              if [[ -z "$klasor" || "$klasor" == *".."* || "$klasor" == *"/"* ]]; then
+                continue
+              fi
+              payload=$(jq -n --arg prefix "${klasor}/" '{prefix: $prefix, limit: 1000}')
+              mkdir -p "backup/storage/$klasor"
+              curl -s -X POST "$SB_URL/storage/v1/object/list/$BUCKET" \
                 -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
-                "$SB_URL/storage/v1/object/$BUCKET/$klasor/$dosya"
+                -H "Content-Type: application/json" \
+                -d "$payload" | jq -r '.[].name // empty' | while IFS= read -r dosya; do
+                  if [[ -z "$dosya" || "$dosya" == *".."* || "$dosya" == *"/"* ]]; then
+                    continue
+                  fi
+                  curl -s -o "backup/storage/$klasor/$dosya" \
+                    -H "apikey: $SB_KEY" -H "Authorization: Bearer $SB_KEY" \
+                    "$SB_URL/storage/v1/object/$BUCKET/$klasor/$dosya"
+                done
             done
-          done
         shell: bash
 
       - name: Private repoya gönder

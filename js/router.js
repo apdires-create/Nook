@@ -2,32 +2,26 @@
 const Router = {
     cardContainer: null,
     cardElement: null,
-    viewMenu: null,
-    viewsWrapper: null,
     isFlipped: false,
     isFlipping: false,
     _flipTimeout: null,
     _cancelPending: null,
-    activeDetailView: null,
 
     init() {
         this.cardContainer = document.getElementById('cardContainer');
         this.cardElement = document.getElementById('nookCard') || this.cardContainer?.querySelector('.nook-card');
-        this.viewMenu = document.getElementById('viewMenu');
-        this.viewsWrapper = document.getElementById('viewsWrapper');
 
         // Başlangıçta arka yüzü inert yap (klavye ve ekran okuyucu erişimini kapat)
         const back = this.cardElement?.querySelector('.card-back');
         if (back) back.inert = true;
 
         const flipToFrontBtn = document.getElementById('flipToFrontBtn');
-        const triggerShowcaseBtn = document.getElementById('triggerShowcaseBtn') || document.getElementById('topsTriggerBtn');
+        const triggerShowcaseBtn = document.getElementById('triggerShowcaseBtn');
         const triggerTrophiesBtn = document.getElementById('triggerTrophiesBtn');
         const companionCloseBtn = document.getElementById('companionCloseBtn');
         const showcaseDetailCloseBtn = document.getElementById('showcaseDetailCloseBtn');
         const trophiesCloseBtn = document.getElementById('trophiesCloseBtn');
         const trophiesDetailCloseBtn = document.getElementById('trophiesDetailCloseBtn');
-        const tagEditTriggerBtn = document.getElementById('tagEditTriggerBtn');
 
         // Flip butonu (Arka yüzden ön yüze)
         if (flipToFrontBtn) {
@@ -79,16 +73,6 @@ const Router = {
             });
         }
 
-        // Tag Düzenleme Tetikleyicisi
-        if (tagEditTriggerBtn) {
-            tagEditTriggerBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (window.EditManager?.TagPicker) {
-                    window.EditManager.TagPicker.ac();
-                }
-            });
-        }
-
         // Dokunmatik yatay swipe (kaydırma) motorunu başlat
         if (typeof TouchGestureManager !== 'undefined') {
             TouchGestureManager.init();
@@ -117,22 +101,16 @@ const Router = {
                     '.editable-hover',
                     '.image-edit-overlay',
                     '.edit-action-bar',
-                    '.cropper-modal',
                     '.image-cropper-modal',
                     '.tag-picker-modal',
-                    '.add-section-modal',
                     '.nook-toast',
                     '.inline-form-card',
                     '.inline-form-input',
                     '.form-btn-sm',
                     '.item-delete-btn',
-                    '.nav-item-btn',
-                    '.add-section-nav-btn',
-                    '.add-section-big-btn',
                     '.view-add-btn',
                     '.nook-link-row',
                     '.top-item-card',
-                    '.status-card',
                     '.banner-box',
                     '.avatar-box',
                     '.banner-img',
@@ -190,16 +168,12 @@ const Router = {
             if (e.key === 'Escape') {
                 // 1. En üstteki açık modalı öncelikle kapat (Z-index hiyerarşisine göre)
                 const activeModals = Array.from(document.querySelectorAll(
-                    '.image-cropper-modal.is-open, .block-delete-modal.is-open, .tops-search-modal.is-open, .tops-setup-modal.is-open, .tag-picker-modal.is-open, .add-section-modal.is-open, .trophy-picker-modal.is-open, .auth-modal.is-open'
+                    '.image-cropper-modal.is-open, .tops-search-modal.is-open, .tops-setup-modal.is-open, .tag-picker-modal.is-open, .trophy-picker-modal.is-open, .block-delete-modal.is-open, .auth-modal.is-open'
                 ));
                 if (activeModals.length > 0) {
                     const topModal = activeModals[activeModals.length - 1];
                     if (topModal.id === 'cropper-modal') {
                         const cancelBtn = document.getElementById('cropper-cancel-btn');
-                        if (cancelBtn) cancelBtn.click();
-                        else topModal.classList.remove('is-open');
-                    } else if (topModal.id === 'block-delete-modal') {
-                        const cancelBtn = document.getElementById('block-delete-cancel');
                         if (cancelBtn) cancelBtn.click();
                         else topModal.classList.remove('is-open');
                     } else if (topModal.id === 'trophy-picker-modal') {
@@ -214,8 +188,9 @@ const Router = {
                     } else if (topModal.id === 'tag-picker-modal') {
                         if (window.EditManager?.TagPicker) window.EditManager.TagPicker.kapat();
                         else topModal.classList.remove('is-open');
-                    } else if (topModal.id === 'add-section-modal') {
-                        if (window.EditManager?.SectionPicker) window.EditManager.SectionPicker.kapat();
+                    } else if (topModal.id === 'block-delete-modal') {
+                        const cancelBtn = document.getElementById('block-delete-cancel');
+                        if (cancelBtn) cancelBtn.click();
                         else topModal.classList.remove('is-open');
                     } else {
                         topModal.classList.remove('is-open');
@@ -250,6 +225,10 @@ const Router = {
         const card = this.cardElement;
         if (!container || !card) return;
 
+        if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
+            TiltEngine.wake();
+        }
+
         const front = card.querySelector('.card-front');
         const back = card.querySelector('.card-back');
 
@@ -269,8 +248,6 @@ const Router = {
             this._cancelPending?.();
             this.isFlipping = false;
             container.classList.remove('is-flipping');
-
-            if (!flipped) this.resetToMainMenu();
         };
 
         const onEnd = (e) => {
@@ -287,20 +264,16 @@ const Router = {
         };
     },
 
-    openDetailView(targetId) {
-        // Geriye dönük uyumluluk: Arka yüz artık saf linklerdir
-    },
-
-    resetToMainMenu() {
-        // Geriye dönük uyumluluk: Arka yüz artık saf linklerdir
-    },
-
     toggleCompanion(forceState, type = 'showcase') {
         const stage = document.getElementById('profileStage');
         const topsCard = document.getElementById('topsCompanionCard');
         const trophiesCard = document.getElementById('trophiesCompanionCard');
         const cardContainer = this.cardContainer || document.getElementById('cardContainer');
         if (!stage) return;
+
+        if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
+            TiltEngine.wake();
+        }
 
         const isDesktop = window.innerWidth >= 900;
 
@@ -414,6 +387,9 @@ const Router = {
                 this._companionTransitioning = false;
                 this._companionTimer = null;
                 this._activeCompanionAnim = null;
+                if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
+                    TiltEngine.wake();
+                }
             }, isDesktop ? 400 : 200);
 
         } else {
@@ -469,6 +445,9 @@ const Router = {
                 if (cardContainer && isDesktop) cardContainer.style.transform = '';
                 this._companionTransitioning = false;
                 this._companionTimer = null;
+                if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
+                    TiltEngine.wake();
+                }
             }, isDesktop ? 380 : 200);
         }
     }
@@ -522,8 +501,8 @@ const TouchGestureManager = {
         // (Sadece açık .is-open / .is-active sınıflarını kontrol et; DOM'da gizli duran panelleri yanlışlıkla yakalama)
         const activeModal = document.querySelector(
             '.nook-modal.is-active, .auth-modal.is-open, .image-cropper-modal.is-open, ' +
-            '.add-section-modal.is-open, .tag-picker-modal.is-open, .tops-setup-modal.is-open, ' +
-            '.tops-search-modal.is-open, .block-delete-modal.is-open, .trophy-picker-modal.is-open, .modal.is-open'
+            '.tag-picker-modal.is-open, .block-delete-modal.is-open, .tops-setup-modal.is-open, ' +
+            '.tops-search-modal.is-open, .trophy-picker-modal.is-open, .modal.is-open'
         );
         const isEditingActive = document.querySelector('.companion-card.is-detail-editing') || document.body.classList.contains('has-unsaved-changes');
         if (activeModal || isEditingActive) {

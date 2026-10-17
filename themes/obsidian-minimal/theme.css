@@ -4,8 +4,6 @@
    Karakter: Lüks editoryal monokrom, mat obsidiyen yüzeyler, serifi-sans kontrastı
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
 /* 1. KÖK DEĞİŞKENLER VE TOKEN GEÇERSİZ KILMALARI (SCOPED OVERRIDES) */
 [data-theme="obsidian-minimal"],
 :root[data-theme="obsidian-minimal"] {
@@ -239,14 +237,14 @@
 /* ----------------------------------------------------
    9. SÜRÜKLE-BIRAK (POINTER DRAG) GEÇİŞ SABİTLEME
    ---------------------------------------------------- */
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .tag-pill,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .tag-pill:hover,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .nook-tag,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .nook-tag:hover,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .nook-link-row,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .nook-link-row:hover,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .link-item,
-body.is-pointer-dragging [data-theme="obsidian-minimal"] .link-item:hover {
+[data-theme="obsidian-minimal"] body.is-pointer-dragging .tag-pill,
+[data-theme="obsidian-minimal"] body.is-pointer-dragging .tag-pill:hover,
+[data-theme="obsidian-minimal"] body.is-pointer-dragging .nook-tag,
+[data-theme="obsidian-minimal"] body.is-pointer-dragging .nook-tag:hover,
+[data-theme="obsidian-minimal"] body.is-pointer-dragging .nook-link-row,
+[data-theme="obsidian-minimal"] body.is-pointer-dragging .nook-link-row:hover,
+[data-theme="obsidian-minimal"] body.is-pointer-dragging .link-item,
+[data-theme="obsidian-minimal"] body.is-pointer-dragging .link-item:hover {
     transition: none !important;
     transform: none !important;
 }

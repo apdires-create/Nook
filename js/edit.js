@@ -21,14 +21,12 @@ const EditManager = {
         this.Media.init();
         this.Vitrin.init();
         this.BackViews.init();
-        this.SectionPicker.init();
         this.TagPicker.init();
         this.TopsModal.init();
         this.MediaSearchModal.init();
         this.CompanionViews.init();
         if (this.TrophyPicker) this.TrophyPicker.init();
         if (this.TrophiesView) this.TrophiesView.init();
-        if (this.Appearance) this.Appearance.init();
 
         document.body.classList.add('global-edit-mode');
     },
@@ -57,11 +55,8 @@ const EditManager = {
 
         if (degisiklik) {
             if (typeof RenderEngine !== 'undefined') {
-                RenderEngine.menuCiz(kartVerisi);
-                RenderEngine.altEkranlariCiz(kartVerisi);
+                RenderEngine.linklerCiz(kartVerisi);
             }
-            if (this.BackViews) this.BackViews.init();
-            if (this.SectionPicker) this.SectionPicker.bagla();
             if (!sessiz && this.Global) this.Global.degisiklikYapildi();
         }
     },
@@ -80,7 +75,7 @@ const EditManager = {
             canDrag = null,
             onMove = null,
             onDrop = null,
-            excludedDragSelectors = 'input, textarea, select, button, a, .item-delete-btn, .tag-remove-btn, .nook-action-btn, .nook-link-toggle, .nook-link-test-btn, .tops-add-btn, .top-add-form, .category-icon-badge, .add-section-nav-btn, .add-section-big-btn'
+            excludedDragSelectors = 'input, textarea, select, button, a, .item-delete-btn, .tag-remove-btn, .nook-action-btn, .nook-link-toggle, .nook-link-test-btn, .tops-add-btn, .top-add-form'
         } = options;
 
         let startX = 0;
@@ -224,7 +219,7 @@ const EditManager = {
 
             const targetItem = hit.closest(itemSelector);
             if (targetItem && targetItem !== draggedItem && container.contains(targetItem)) {
-                if (targetItem.closest('.tag-add-pill, .tops-add-btn, .top-add-form, .add-section-nav-btn, .add-section-big-btn')) return;
+                if (targetItem.closest('.tag-add-pill, .tops-add-btn, .top-add-form')) return;
 
                 const box = targetItem.getBoundingClientRect();
                 if (axis === 'x') {
@@ -396,27 +391,6 @@ const EditManager = {
             toast.id = 'nook-toast';
             toast.className = 'nook-toast';
             document.body.appendChild(toast);
-        }
-
-        // 5. İçerik Ekleme Pop-up Modalı (Section Picker Modal)
-        if (!document.getElementById('add-section-modal')) {
-            const modal = document.createElement('div');
-            modal.id = 'add-section-modal';
-            modal.className = 'add-section-modal';
-            modal.innerHTML = `
-                <div class="add-section-backdrop" id="add-section-backdrop"></div>
-                <div class="section-picker-panel">
-                    <div class="section-picker-header">
-                        <div>
-                            <h3 class="section-picker-title">İçerik Ekle</h3>
-                            <p class="section-picker-desc">Kartının arka yüzünde sergilemek istediğin bir içeriği seç.</p>
-                        </div>
-                        <button type="button" class="section-picker-close" id="add-section-close">&times;</button>
-                    </div>
-                    <div class="section-picker-list" id="sectionPickerList"></div>
-                </div>
-            `;
-            document.body.appendChild(modal);
         }
 
         // 6. Etiket Seçici Modalı (Tag Picker Modal)
@@ -777,12 +751,16 @@ EditManager.Appearance = {
 
         this.themeCardsEl.innerHTML = userThemes.map(t => {
             const isSelected = (t.id === this.tempState.themeId);
+            const safeId = EditManager.escapeHtml(t.id || '');
+            const safeIcon = EditManager.escapeHtml(t.banner_icon || '🎨');
+            const safeName = EditManager.escapeHtml(t.name || '');
+            const safeDesc = EditManager.escapeHtml(t.description || '');
             return `
-                <div class="appearance-theme-card ${isSelected ? 'is-selected' : ''}" data-theme-id="${t.id}" role="button" tabindex="0">
-                    <div class="appearance-card-icon">${t.banner_icon || '🎨'}</div>
+                <div class="appearance-theme-card ${isSelected ? 'is-selected' : ''}" data-theme-id="${safeId}" role="button" tabindex="0">
+                    <div class="appearance-card-icon">${safeIcon}</div>
                     <div class="appearance-card-info">
-                        <div class="appearance-card-title">${t.name}</div>
-                        <div class="appearance-card-desc">${t.description}</div>
+                        <div class="appearance-card-title">${safeName}</div>
+                        <div class="appearance-card-desc">${safeDesc}</div>
                     </div>
                     <div class="appearance-card-check">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -998,9 +976,6 @@ EditManager.Appearance = {
             if (typeof EditManager !== 'undefined') {
                 EditManager.Vitrin?.init();
                 EditManager.Media?.overlayleriYerlestir();
-                EditManager.BackViews?.init();
-                EditManager.CompanionViews?.init();
-                if (EditManager.SectionPicker) EditManager.SectionPicker.bagla();
             }
         }
     },
@@ -1016,9 +991,7 @@ EditManager.Appearance = {
             primaryColor: this.tempState.primaryColor
         };
 
-        const client = (typeof supabaseClient !== 'undefined' && supabaseClient) 
-            || (typeof supabaseIstemcisi !== 'undefined' && supabaseIstemcisi) 
-            || null;
+        const client = (typeof supabaseClient !== 'undefined' && supabaseClient) || null;
 
         if (client && aktifKullaniciOturumu?.user?.id) {
             try {
@@ -1149,7 +1122,20 @@ EditManager.Global = {
         };
     },
 
+    _degisiklikTimer: null,
+
+    degisiklikYapildiDebounced(delay = 200) {
+        clearTimeout(this._degisiklikTimer);
+        this._degisiklikTimer = setTimeout(() => {
+            this._degisiklikTimer = null;
+            this.degisiklikYapildi();
+        }, delay);
+    },
+
     degisiklikYapildi() {
+        clearTimeout(this._degisiklikTimer);
+        this._degisiklikTimer = null;
+
         if (EditManager.state.orijinalVeri) {
             const guncelVeri = this.getTemizVeri(kartVerisi);
             const orijVeri = this.getTemizVeri(EditManager.state.orijinalVeri);
@@ -1176,6 +1162,9 @@ EditManager.Global = {
     },
 
     sifirla() {
+        clearTimeout(this._degisiklikTimer);
+        this._degisiklikTimer = null;
+
         if (!EditManager.state.orijinalVeri) return;
 
         // O an kullanıcının görüntülediği aktif showcase sekmesini koru
@@ -1188,9 +1177,7 @@ EditManager.Global = {
         const originalThemeId = kartVerisi.theme_config?.theme_id || 'default';
         document.documentElement.style.setProperty('--accent-color', originalColor);
         const themeDot = document.getElementById('nav-theme-dot');
-        const colorInput = document.getElementById('nav-color-input');
         if (themeDot) themeDot.style.background = originalColor;
-        if (colorInput) colorInput.value = originalColor;
 
         if (typeof ThemeManager !== 'undefined') {
             ThemeManager.applyTheme(originalThemeId, {
@@ -1208,8 +1195,7 @@ EditManager.Global = {
 
         if (typeof RenderEngine !== 'undefined') {
             RenderEngine.vitrinCiz(kartVerisi);
-            RenderEngine.menuCiz(kartVerisi);
-            RenderEngine.altEkranlariCiz(kartVerisi);
+            RenderEngine.linklerCiz(kartVerisi);
             RenderEngine.companionCiz(kartVerisi.tops);
             if (typeof RenderEngine.trophiesCiz === 'function') {
                 RenderEngine.trophiesCiz(kartVerisi);
@@ -1217,12 +1203,13 @@ EditManager.Global = {
         }
 
         EditManager.Vitrin.init();
-        EditManager.BackViews.init();
-        EditManager.CompanionViews?.init();
         if (EditManager.TrophiesView) EditManager.TrophiesView.init();
     },
 
     async kaydet() {
+        if (this._degisiklikTimer) {
+            this.degisiklikYapildi();
+        }
         if (!EditManager.state.hasUnsavedChanges || !supabaseClient) return;
 
         // Açık olan tüm link akordeonlarını kaydet ve kapat (küçült)
@@ -1428,7 +1415,6 @@ EditManager.Media = {
 
         const bannerInput = document.getElementById('banner-file-input');
         const pfpInput = document.getElementById('pfp-file-input');
-        const modalCloseBtn = document.getElementById('cropper-modal-close');
         const modalCancelBtn = document.getElementById('cropper-cancel-btn');
         const modalSaveBtn = document.getElementById('cropper-save-btn');
         const backdrop = document.getElementById('cropper-modal-backdrop');
@@ -1480,7 +1466,6 @@ EditManager.Media = {
             });
         }
 
-        if (modalCloseBtn) modalCloseBtn.addEventListener('click', modaliKapat);
         if (modalCancelBtn) modalCancelBtn.addEventListener('click', modaliKapat);
         if (backdrop) backdrop.addEventListener('click', modaliKapat);
 
@@ -1937,116 +1922,7 @@ EditManager.Vitrin = {
 EditManager.BackViews = {
     init() {
         if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
-        this.menuSurukleBirakKur();
-        this.blokSilmeDinleyicileriniBagla();
         this.linksDuzenlemeKur();
-        this.workingOnDuzenlemeKur();
-        this.widgetsDuzenlemeKur();
-    },
-
-    menuSurukleBirakKur() {
-        const menuNav = document.getElementById('menuNav');
-        if (!menuNav) return;
-
-        EditManager.initPointerSortable(menuNav, {
-            itemSelector: '.nav-item-btn',
-            axis: 'y',
-            onMove: () => {
-                const addSectionBtn = menuNav.querySelector('.add-section-nav-btn');
-                if (addSectionBtn) menuNav.appendChild(addSectionBtn);
-            },
-            onDrop: () => {
-                const addSectionBtn = menuNav.querySelector('.add-section-nav-btn');
-                if (addSectionBtn) menuNav.appendChild(addSectionBtn);
-
-                const yeniSira = [...menuNav.querySelectorAll('.nav-item-btn')].map(b => b.dataset.target).filter(Boolean);
-                if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
-                const eskiSira = kartVerisi.theme_config.menu_order || [];
-
-                if (JSON.stringify(yeniSira) !== JSON.stringify(eskiSira)) {
-                    kartVerisi.theme_config.menu_order = yeniSira;
-                    EditManager.Global.degisiklikYapildi();
-                    RenderEngine.menuCiz(kartVerisi);
-                    EditManager.BackViews.init();
-                }
-            }
-        });
-    },
-
-    blokSilmeModaliniKur() {
-        const modal = document.getElementById('block-delete-modal');
-        if (!modal || modal._bound) return;
-        modal._bound = true;
-
-        const backdrop = document.getElementById('block-delete-backdrop');
-        const cancelBtn = document.getElementById('block-delete-cancel');
-        const confirmBtn = document.getElementById('block-delete-confirm');
-
-        const kapat = () => {
-            modal.classList.remove('is-open');
-            modal._targetCat = null;
-        };
-
-        if (backdrop) backdrop.onclick = kapat;
-        if (cancelBtn) cancelBtn.onclick = kapat;
-
-        if (confirmBtn) {
-            confirmBtn.onclick = () => {
-                const catId = modal._targetCat;
-                kapat();
-                if (!catId) return;
-
-                if (catId === 'links') {
-                    delete kartVerisi.links;
-                } else if (catId === 'widgets') {
-                    delete kartVerisi.widgets;
-                } else if (catId === 'working-on') {
-                    kartVerisi.working_on = {};
-                    delete kartVerisi.working_on;
-                } else if (catId === 'trophies') {
-                    delete kartVerisi.trophies;
-                }
-
-                if (kartVerisi.theme_config && Array.isArray(kartVerisi.theme_config.menu_order)) {
-                    kartVerisi.theme_config.menu_order = kartVerisi.theme_config.menu_order.filter(id => id !== catId);
-                }
-
-                EditManager.Global.degisiklikYapildi();
-
-                if (typeof Router !== 'undefined' && Router.activeDetailView) {
-                    Router.resetToMainMenu();
-                }
-
-                RenderEngine.menuCiz(kartVerisi);
-                RenderEngine.altEkranlariCiz(kartVerisi);
-                EditManager.BackViews.init();
-                if (EditManager.SectionPicker) EditManager.SectionPicker.bagla();
-            };
-        }
-    },
-
-    blokSilmeDinleyicileriniBagla() {
-        this.blokSilmeModaliniKur();
-
-        const modal = document.getElementById('block-delete-modal');
-        const titleEl = document.getElementById('block-delete-title');
-        const descEl = document.getElementById('block-delete-desc');
-
-        document.querySelectorAll('.delete-section-btn').forEach(btn => {
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-
-                const catId = btn.dataset.sectionId;
-                const catTitle = btn.dataset.sectionTitle || catId;
-                if (!catId || !modal) return;
-
-                modal._targetCat = catId;
-                if (titleEl) titleEl.textContent = `${catTitle} Bloğunu Sil`;
-                if (descEl) descEl.textContent = `"${catTitle}" bloğunu ve içindeki tüm içerikleri kalıcı olarak silmek istediğinizden emin misiniz?`;
-                modal.classList.add('is-open');
-            };
-        });
     },
 
     // --- Links ---
@@ -2328,7 +2204,7 @@ EditManager.BackViews = {
                     });
                 }
 
-                const autoSave = () => {
+                const autoSave = (immediate = false) => {
                     let val = urlInput.value.trim();
                     const saveBtn = document.getElementById('edit-save-btn');
 
@@ -2357,7 +2233,11 @@ EditManager.BackViews = {
                     if (anchorEl && val) anchorEl.href = RenderEngine.safeUrl(val);
                     const nameDisplay = row.querySelector('.nook-link-name');
                     if (nameDisplay) nameDisplay.textContent = nameInput.value.trim() || 'Yeni bağlantı';
-                    EditManager.Global.degisiklikYapildi();
+                    if (immediate) {
+                        EditManager.Global.degisiklikYapildi();
+                    } else {
+                        EditManager.Global.degisiklikYapildiDebounced();
+                    }
                 };
 
                 let iconDebounceTimer = null;
@@ -2394,9 +2274,9 @@ EditManager.BackViews = {
                     }
                 };
 
-                nameInput.addEventListener('input', autoSave);
+                nameInput.addEventListener('input', () => autoSave(false));
                 urlInput.addEventListener('input', () => {
-                    autoSave();
+                    autoSave(false);
                     updateLinkIconAndDomain(false);
                 });
                 urlInput.addEventListener('blur', () => {
@@ -2407,7 +2287,7 @@ EditManager.BackViews = {
                 const handleEnter = (e) => {
                     if (e.key === 'Enter') {
                         e.preventDefault();
-                        autoSave();
+                        autoSave(true);
                         closeAccordion(row, collapseEl, urlInput);
                     }
                 };
@@ -2525,300 +2405,6 @@ EditManager.BackViews = {
                 }
             }
         });
-    },
-
-    // --- Working On ---
-    acWorkingFormu() {
-        const panel = document.getElementById('view-working-on');
-        if (!panel) return;
-        const scrollWrap = panel.querySelector('.scrollable-fade');
-        if (!scrollWrap) return;
-
-        let form = scrollWrap.querySelector('.working-edit-form');
-        if (form) {
-            form.querySelector('.working-text-input')?.focus();
-            return;
-        }
-
-        const statusCard = scrollWrap.querySelector('.status-card');
-        if (statusCard) statusCard.style.display = 'none';
-
-        const placeholder = scrollWrap.querySelector('.placeholder-text');
-        if (placeholder) placeholder.style.display = 'none';
-
-        const addBtn = scrollWrap.querySelector('.working-add-btn');
-        if (addBtn) addBtn.style.display = 'none';
-
-        const mevcutMetin = kartVerisi.working_on?.metin || '';
-
-        form = document.createElement('div');
-        form.className = 'inline-form-card working-edit-form';
-        form.innerHTML = `
-            <h4 class="inline-form-title">Şu Anda Ne Yapıyorum?</h4>
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 8px 0;">
-                Üzerinde çalıştığın proje veya anlık durumunu güncelle.
-            </p>
-            <textarea class="inline-form-input working-text-input" rows="3" maxlength="160" placeholder="Örn: Building next-gen UI components on Nook...">${EditManager.escapeHtml(mevcutMetin)}</textarea>
-            <div class="inline-form-actions">
-                <button type="button" class="form-btn-sm form-btn-cancel working-cancel-btn">İptal</button>
-                <button type="button" class="form-btn-sm form-btn-submit working-save-btn">Kaydet</button>
-            </div>
-        `;
-
-        if (addBtn) {
-            scrollWrap.insertBefore(form, addBtn);
-        } else {
-            scrollWrap.appendChild(form);
-        }
-
-        const textarea = form.querySelector('.working-text-input');
-        if (textarea) {
-            setTimeout(() => {
-                textarea.focus();
-                textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-            }, 50);
-        }
-
-        form.querySelector('.working-cancel-btn').onclick = () => {
-            form.remove();
-            if (!kartVerisi.working_on || !kartVerisi.working_on.metin || kartVerisi.working_on.metin.trim() === '') {
-                if (typeof Router !== 'undefined') Router.resetToMainMenu();
-            } else {
-                if (statusCard) statusCard.style.display = '';
-                if (placeholder) placeholder.style.display = '';
-                if (addBtn) addBtn.style.display = '';
-            }
-        };
-
-        form.querySelector('.working-save-btn').onclick = () => {
-            const metin = form.querySelector('.working-text-input').value.trim().slice(0, 160);
-            if (!metin) {
-                EditManager.Global.toastGoster("Lütfen durum metni girin!", 'warning');
-                return;
-            }
-
-            if (!kartVerisi.working_on) kartVerisi.working_on = {};
-            kartVerisi.working_on.metin = metin;
-
-            RenderEngine.menuCiz(kartVerisi);
-            RenderEngine.altEkranlariCiz(kartVerisi);
-            EditManager.BackViews.init();
-            EditManager.Global.degisiklikYapildi();
-        };
-    },
-
-    workingOnDuzenlemeKur() {
-        const panel = document.getElementById('view-working-on');
-        if (!panel) return;
-        const scrollWrap = panel.querySelector('.scrollable-fade');
-        if (!scrollWrap) return;
-
-        const card = scrollWrap.querySelector('.status-card');
-        if (card && !card.querySelector('.working-owner-actions')) {
-            card.classList.add('editable-hover');
-            card.title = "Durumunuzu güncellemek için tıklayın";
-            card.onclick = (e) => {
-                if (e.target.closest('button')) return;
-                this.acWorkingFormu();
-            };
-
-            const actionsWrap = document.createElement('div');
-            actionsWrap.className = 'working-owner-actions';
-            actionsWrap.style.display = 'flex';
-            actionsWrap.style.justifyContent = 'flex-end';
-            actionsWrap.style.gap = '8px';
-            actionsWrap.style.marginTop = '8px';
-
-            actionsWrap.innerHTML = `
-                <button type="button" class="form-btn-sm form-btn-cancel working-edit-btn" style="font-size: 0.75rem;">Düzenle</button>
-                <button type="button" class="form-btn-sm form-btn-cancel working-remove-btn" style="color: #ef4444; font-size: 0.75rem;">Kaldır</button>
-            `;
-
-            actionsWrap.querySelector('.working-edit-btn').onclick = (e) => {
-                e.stopPropagation();
-                this.acWorkingFormu();
-            };
-
-            actionsWrap.querySelector('.working-remove-btn').onclick = (e) => {
-                e.stopPropagation();
-                kartVerisi.working_on = {};
-                RenderEngine.menuCiz(kartVerisi);
-                RenderEngine.altEkranlariCiz(kartVerisi);
-                EditManager.BackViews.init();
-                EditManager.Global.degisiklikYapildi();
-                if (typeof Router !== 'undefined') Router.resetToMainMenu();
-            };
-
-            card.appendChild(actionsWrap);
-        } else if (!card && !panel.querySelector('.working-add-btn') && !scrollWrap.querySelector('.working-edit-form')) {
-            const placeholder = scrollWrap.querySelector('.placeholder-text');
-            if (placeholder) placeholder.remove();
-
-            const addBtn = document.createElement('button');
-            addBtn.className = 'view-add-btn working-add-btn';
-            addBtn.innerHTML = `
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                <span>Durum Bildirimi Ekle</span>
-            `;
-            addBtn.onclick = () => {
-                if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
-                this.acWorkingFormu();
-            };
-            scrollWrap.appendChild(addBtn);
-        }
-    },
-
-    // --- Widgets ---
-    acWidgetFormu(mevcutUser = '') {
-        const panel = document.getElementById('view-widgets');
-        if (!panel) return;
-        const scrollWrap = panel.querySelector('.scrollable-fade');
-        if (!scrollWrap) return;
-
-        let form = scrollWrap.querySelector('.widget-add-form');
-        if (form) {
-            form.querySelector('.widget-user-input')?.focus();
-            return;
-        }
-
-        form = document.createElement('div');
-        form.className = 'inline-form-card widget-add-form';
-        form.innerHTML = `
-            <h4 class="inline-form-title">${mevcutUser ? 'Monkeytype Kullanıcısını Değiştir' : 'Monkeytype Widget\'ı Ekle'}</h4>
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 8px 0;">
-                ${mevcutUser ? 'Yeni Monkeytype kullanıcı adını gir:' : 'Monkeytype kullanıcı adını girerek canlı klavye yazma skorlarını kartına ekle:'}
-            </p>
-            <input type="text" class="inline-form-input widget-user-input" maxlength="30" placeholder="Kullanıcı Adı (Örn: miodec)" value="${EditManager.escapeHtml(mevcutUser)}">
-            <div class="inline-form-actions">
-                <button type="button" class="form-btn-sm form-btn-cancel widget-cancel-btn">İptal</button>
-                <button type="button" class="form-btn-sm form-btn-submit widget-save-btn">${mevcutUser ? 'Güncelle' : 'Ekle'}</button>
-            </div>
-        `;
-
-        const addBtn = scrollWrap.querySelector('.widget-add-btn');
-        if (addBtn) {
-            scrollWrap.insertBefore(form, addBtn);
-        } else {
-            scrollWrap.appendChild(form);
-        }
-
-        const userInput = form.querySelector('.widget-user-input');
-        if (userInput) setTimeout(() => userInput.focus(), 50);
-
-        form.querySelector('.widget-cancel-btn').onclick = () => {
-            form.remove();
-            if (!kartVerisi.widgets || kartVerisi.widgets.length === 0) {
-                if (typeof Router !== 'undefined') Router.resetToMainMenu();
-            }
-        };
-
-        form.querySelector('.widget-save-btn').onclick = () => {
-            const yeniUser = form.querySelector('.widget-user-input').value.trim();
-            if (!yeniUser) {
-                EditManager.Global.toastGoster("Lütfen Monkeytype kullanıcı adınızı girin!", 'warning');
-                return;
-            }
-            if (!/^[a-zA-Z0-9_]{1,30}$/.test(yeniUser)) {
-                EditManager.Global.toastGoster("Monkeytype kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir (en fazla 30 karakter).", 'warning');
-                return;
-            }
-
-            if (!Array.isArray(kartVerisi.widgets)) kartVerisi.widgets = [];
-            let w = kartVerisi.widgets.find(item => item.tur === 'monkeytype');
-            if (w) {
-                if (!w.ayarlar) w.ayarlar = {};
-                w.ayarlar.kullanici = yeniUser;
-            } else {
-                kartVerisi.widgets.push({
-                    tur: 'monkeytype',
-                    ayarlar: { kullanici: yeniUser }
-                });
-            }
-
-            RenderEngine.menuCiz(kartVerisi);
-            RenderEngine.altEkranlariCiz(kartVerisi);
-            EditManager.BackViews.init();
-
-            if (typeof canliMonkeytypeVerisiCek === 'function') {
-                canliMonkeytypeVerisiCek(yeniUser).then(skorlar => {
-                    if (skorlar) {
-                        kartVerisi.canli_monkeytype = skorlar;
-                        RenderEngine.monkeytypeGuncelle(skorlar);
-                    }
-                });
-            }
-            EditManager.Global.degisiklikYapildi();
-        };
-    },
-
-    widgetsDuzenlemeKur() {
-        const panel = document.getElementById('view-widgets');
-        if (!panel) return;
-        const scrollWrap = panel.querySelector('.scrollable-fade');
-        if (!scrollWrap) return;
-
-        // Sahip modunda boş bildirim metnini kaldır
-        const placeholder = scrollWrap.querySelector('.placeholder-text');
-        if (placeholder) placeholder.remove();
-
-        // Monkeytype kartı varsa kullanıcı adını güncelleme ve widget'ı kaldırma butonu koy
-        const mtCard = panel.querySelector('.monkeytype-card');
-        if (mtCard && !mtCard.querySelector('.mt-owner-actions')) {
-            const actionsWrap = document.createElement('div');
-            actionsWrap.className = 'mt-owner-actions';
-            actionsWrap.style.display = 'flex';
-            actionsWrap.style.justifyContent = 'flex-end';
-            actionsWrap.style.gap = '8px';
-            actionsWrap.style.marginTop = '8px';
-
-            actionsWrap.innerHTML = `
-                <button type="button" class="form-btn-sm form-btn-cancel mt-edit-user-btn" style="font-size: 0.75rem;">Kullanıcıyı Değiştir</button>
-                <button type="button" class="form-btn-sm form-btn-cancel mt-remove-btn" style="color: #ef4444; font-size: 0.75rem;">Widget'ı Kaldır</button>
-            `;
-
-            actionsWrap.querySelector('.mt-edit-user-btn').onclick = () => {
-                const mevcutUser = mtCard.dataset.username || '';
-                this.acWidgetFormu(mevcutUser);
-            };
-
-            actionsWrap.querySelector('.mt-remove-btn').onclick = () => {
-                kartVerisi.widgets = (kartVerisi.widgets || []).filter(item => item.tur !== 'monkeytype');
-                if (kartVerisi.widgets.length === 0) {
-                    delete kartVerisi.widgets;
-                    RenderEngine.menuCiz(kartVerisi);
-                    RenderEngine.altEkranlariCiz(kartVerisi);
-                    EditManager.BackViews.init();
-                    EditManager.Global.degisiklikYapildi();
-                    if (typeof Router !== 'undefined') Router.resetToMainMenu();
-                } else {
-                    RenderEngine.menuCiz(kartVerisi);
-                    RenderEngine.altEkranlariCiz(kartVerisi);
-                    EditManager.BackViews.init();
-                    EditManager.Global.degisiklikYapildi();
-                }
-            };
-
-            mtCard.appendChild(actionsWrap);
-        } else if (!mtCard && !panel.querySelector('.widget-add-btn') && !scrollWrap.querySelector('.widget-add-form')) {
-            // Widget yoksa "+ Monkeytype Widget'ı Ekle" butonu koy
-            const addBtn = document.createElement('button');
-            addBtn.className = 'view-add-btn widget-add-btn';
-            addBtn.innerHTML = `
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                <span>Monkeytype Widget'ı Ekle</span>
-            `;
-            addBtn.onclick = () => {
-                if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
-                this.acWidgetFormu();
-            };
-            scrollWrap.appendChild(addBtn);
-        }
     }
 };
 
@@ -3083,152 +2669,6 @@ EditManager.TrophyPicker = {
     kapat() {
         const modal = document.getElementById('trophy-picker-modal');
         if (modal) modal.classList.remove('is-open');
-    }
-};
-// #endregion
-
-// #region 6: BÖLÜM SEÇİCİ VE YENİ KATEGORİ OLUŞTURMA (SECTION PICKER)
-EditManager.SectionPicker = {
-    init() {
-        const closeBtn = document.getElementById('add-section-close');
-        const backdrop = document.getElementById('add-section-backdrop');
-        if (closeBtn) closeBtn.onclick = () => this.kapat();
-        if (backdrop) backdrop.onclick = () => this.kapat();
-
-        this.bagla();
-    },
-
-    bagla() {
-        document.querySelectorAll('#open-add-section-modal').forEach(btn => {
-            btn.onclick = (e) => {
-                if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
-                e.stopPropagation();
-                this.ac();
-            };
-        });
-    },
-
-    ac() {
-        const modal = document.getElementById('add-section-modal');
-        const list = document.getElementById('sectionPickerList');
-        if (!modal || !list) return;
-
-        const hasLinks = Array.isArray(kartVerisi.links) && kartVerisi.links.length > 0;
-        const hasWidgets = Array.isArray(kartVerisi.widgets) && kartVerisi.widgets.length > 0;
-        const hasWorking = !!(kartVerisi.working_on && (kartVerisi.working_on.metin || kartVerisi.working_on.status));
-
-        const kategoriler = [
-            {
-                id: 'links',
-                baslik: 'Bağlantılar (Links)',
-                alt: 'Sosyal medya, GitHub ve web bağlantılarını listele',
-                ikon: RenderEngine.getCategoryIcon('links', 20),
-                varMi: hasLinks,
-                comingSoon: false
-            },
-            {
-                id: 'widgets',
-                baslik: 'Monkeytype Skoru (Widgets)',
-                alt: 'Canlı klavye yazma hızı ve doğruluk widgetı',
-                ikon: RenderEngine.getCategoryIcon('widgets', 20),
-                varMi: hasWidgets,
-                comingSoon: false
-            },
-            {
-                id: 'working-on',
-                baslik: 'Şu Anda Ne Yapıyorum (Working on)',
-                alt: 'Üzerinde çalıştığın proje veya anlık durum bildirimi',
-                ikon: RenderEngine.getCategoryIcon('working-on', 20),
-                varMi: hasWorking,
-                comingSoon: false
-            },
-            {
-                id: 'trophies',
-                baslik: 'Trophies (Kupalar & Koleksiyon)',
-                alt: 'Karakterler, kitaplar ve dijital başarımlar',
-                ikon: RenderEngine.getCategoryIcon('trophies', 20),
-                varMi: false,
-                comingSoon: true
-            }
-        ];
-
-        list.innerHTML = kategoriler.map(k => {
-            const itemClasses = ['section-picker-item'];
-            if (k.varMi) itemClasses.push('is-already-added');
-            if (k.comingSoon) itemClasses.push('is-coming-soon');
-
-            let badgeHtml = '';
-            if (k.varMi) {
-                badgeHtml = '<span class="picker-added-badge">Mevcut</span>';
-            } else if (k.comingSoon) {
-                badgeHtml = '<span class="picker-soon-badge">Yakında</span>';
-            }
-
-            return `
-                <div class="${itemClasses.join(' ')}" data-cat="${k.id}" ${k.comingSoon ? 'data-coming-soon="true"' : ''}>
-                    <div class="picker-item-icon">${k.ikon}</div>
-                    <div class="picker-item-info">
-                        <div class="picker-item-title-row">
-                            <span class="picker-item-title">${k.baslik}</span>
-                            ${badgeHtml}
-                        </div>
-                        <span class="picker-item-desc">${k.alt}</span>
-                    </div>
-                    <div class="picker-item-action">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        list.querySelectorAll('.section-picker-item').forEach(item => {
-            item.onclick = () => {
-                const isSoon = item.dataset.comingSoon === 'true';
-                if (isSoon) {
-                    if (typeof toastBildirimiGoster === 'function') {
-                        toastBildirimiGoster("Trophies & Koleksiyon bölümü çok yakında geliyor!", 3000, 'warning');
-                    } else if (typeof EditManager.Global?.toastGoster === 'function') {
-                        EditManager.Global.toastGoster("Trophies bölümü yakında kullanıma açılacak!");
-                    }
-                    this.kapat();
-                    return;
-                }
-                const catId = item.dataset.cat;
-                this.kategoriSecildi(catId);
-            };
-        });
-
-        modal.classList.add('is-open');
-    },
-
-    kapat() {
-        const modal = document.getElementById('add-section-modal');
-        if (modal) modal.classList.remove('is-open');
-    },
-
-    kategoriSecildi(catId) {
-        this.kapat();
-
-        if (catId === 'links') {
-            if (!Array.isArray(kartVerisi.links)) kartVerisi.links = [];
-        } else if (catId === 'widgets') {
-            if (!Array.isArray(kartVerisi.widgets)) kartVerisi.widgets = [];
-        } else if (catId === 'working-on') {
-            if (!kartVerisi.working_on) kartVerisi.working_on = { metin: '' };
-        }
-
-        // Arayüzü yeniden çiz
-        RenderEngine.menuCiz(kartVerisi);
-        RenderEngine.altEkranlariCiz(kartVerisi);
-        EditManager.BackViews.init();
-        this.bagla();
-
-        // Doğrudan oluşturulan kategorinin detay ekranına git
-        if (typeof Router !== 'undefined') {
-            Router.openDetailView(catId);
-        }
     }
 };
 // #endregion
@@ -4127,6 +3567,9 @@ EditManager.CompanionViews = {
 
         // 9. Kullanıcı Yorumu (Textarea) Dinleyicilerini Bağla (Revizyon Madde 1)
         container.querySelectorAll('.user-review-textarea').forEach(textarea => {
+            if (textarea._reviewBound) return;
+            textarea._reviewBound = true;
+
             const itemId = textarea.dataset.itemId;
             const unitEl = textarea.closest('.top-item-unit');
             const cardEl = unitEl ? unitEl.querySelector('.top-item-card') : null;
@@ -4165,7 +3608,7 @@ EditManager.CompanionViews = {
                     badge.remove();
                 }
 
-                EditManager.Global.degisiklikYapildi();
+                EditManager.Global.degisiklikYapildiDebounced();
             });
 
             textarea.addEventListener('pointerdown', (e) => e.stopPropagation());
@@ -4296,6 +3739,18 @@ EditManager.CompanionViews = {
                 canDrag: () => typeof isOwner !== 'undefined' && isOwner,
                 excludedDragSelectors: '.companion-row-del-btn, button, input, a',
                 onDrop: () => {
+                    if (Array.isArray(kartVerisi.trophies)) {
+                        const rows = Array.from(trophiesMasterList.querySelectorAll('.companion-row-item'));
+                        const newTrophies = [];
+                        rows.forEach(r => {
+                            const tId = r.dataset.trophyId;
+                            const found = kartVerisi.trophies.find(t => t && (t.id === tId || t.tur === tId));
+                            if (found) newTrophies.push(found);
+                        });
+                        if (newTrophies.length === kartVerisi.trophies.length) {
+                            kartVerisi.trophies = newTrophies;
+                        }
+                    }
                     EditManager.Global.degisiklikYapildi();
                 }
             });

@@ -19,8 +19,14 @@ function turnstileTokenAlindi(token, widgetEl) {
 }
 
 function turnstileHata(widgetEl) {
-    turnstileToken = null;
-    if (widgetEl && widgetEl.id) delete turnstileTokens[widgetEl.id];
+    if (widgetEl && widgetEl.id) {
+        if (turnstileToken && turnstileTokens[widgetEl.id] === turnstileToken) {
+            turnstileToken = null;
+        }
+        delete turnstileTokens[widgetEl.id];
+    } else {
+        turnstileToken = null;
+    }
     if (widgetEl) {
         widgetEl.classList.remove('is-active');
     } else {
@@ -29,8 +35,14 @@ function turnstileHata(widgetEl) {
 }
 
 function turnstileSuresiDoldu(widgetEl) {
-    turnstileToken = null;
-    if (widgetEl && widgetEl.id) delete turnstileTokens[widgetEl.id];
+    if (widgetEl && widgetEl.id) {
+        if (turnstileToken && turnstileTokens[widgetEl.id] === turnstileToken) {
+            turnstileToken = null;
+        }
+        delete turnstileTokens[widgetEl.id];
+    } else {
+        turnstileToken = null;
+    }
     if (widgetEl) {
         widgetEl.classList.remove('is-active');
     } else {
@@ -38,10 +50,18 @@ function turnstileSuresiDoldu(widgetEl) {
     }
 }
 
+function turnstileTokenAl(hedefId) {
+    if (hedefId && turnstileTokens[hedefId]) return turnstileTokens[hedefId];
+    return turnstileToken;
+}
+
 const turnstileWidgetIds = {};
 
 function turnstileSifirla(hedefId = null) {
     if (hedefId) {
+        if (turnstileToken && turnstileTokens[hedefId] === turnstileToken) {
+            turnstileToken = null;
+        }
         delete turnstileTokens[hedefId];
         const el = document.getElementById(hedefId);
         if (el) el.classList.remove('is-active');
@@ -397,7 +417,7 @@ function authButonMetniniGuncelle() {
 // #endregion
 
 // #region 3: GİRİŞ VE KAYIT İŞLEMLERİ (SUPABASE AUTH)
-async function sistemeGirisYap(email, password) {
+async function sistemeGirisYap(email, password, turnstileId = 'auth-turnstile') {
     authHataTemizle();
     if (girisKilitliMi) {
         authHataGoster("Çok fazla hatalı deneme yaptın. Lütfen daha sonra tekrar dene.");
@@ -411,7 +431,8 @@ async function sistemeGirisYap(email, password) {
         authHataGoster("Şifre en az 8 karakter olmalıdır.");
         return false;
     }
-    if (!turnstileToken) {
+    const aktifToken = turnstileTokenAl(turnstileId);
+    if (!aktifToken) {
         authHataGoster("Lütfen doğrulamayı tamamlayın.");
         return false;
     }
@@ -419,9 +440,9 @@ async function sistemeGirisYap(email, password) {
     const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
         password,
-        options: { captchaToken: turnstileToken }
+        options: { captchaToken: aktifToken }
     });
-    turnstileSifirla();
+    turnstileSifirla(turnstileId);
     if (error) {
         hataliGirisDenemesi++;
         if (hataliGirisDenemesi >= 5) {
@@ -452,7 +473,7 @@ async function sistemeGirisYap(email, password) {
     return true;
 }
 
-async function sistemeKayitOl(email, password, username) {
+async function sistemeKayitOl(email, password, username, turnstileId = 'auth-turnstile') {
     authHataTemizle();
     const temizKullaniciAdi = (username || '').trim();
 
@@ -468,7 +489,8 @@ async function sistemeKayitOl(email, password, username) {
         authHataGoster("Şifreniz en az 8 karakter olmalıdır.");
         return false;
     }
-    if (!turnstileToken) {
+    const aktifToken = turnstileTokenAl(turnstileId);
+    if (!aktifToken) {
         authHataGoster("Lütfen doğrulamayı tamamlayın.");
         return false;
     }
@@ -496,10 +518,10 @@ async function sistemeKayitOl(email, password, username) {
         options: {
             data: { kullanici_adi: temizKullaniciAdi },
             emailRedirectTo: `${window.location.origin}${window.location.pathname}?user=${encodeURIComponent(temizKullaniciAdi)}`,
-            captchaToken: turnstileToken
+            captchaToken: aktifToken
         }
     });
-    turnstileSifirla();
+    turnstileSifirla(turnstileId);
 
     if (error) {
         let hataMesaji = "Kayıt Hatası: " + error.message;
@@ -535,7 +557,7 @@ async function sistemeKayitOl(email, password, username) {
 }
 
 
-async function sistemeSifreSifirlamaGonder(email, hedefBox = null) {
+async function sistemeSifreSifirlamaGonder(email, hedefBox = null, turnstileId = 'auth-forgot-turnstile') {
     authHataTemizle(hedefBox);
     const temizEmail = (email || '').trim();
     if (!temizEmail) {
@@ -548,12 +570,13 @@ async function sistemeSifreSifirlamaGonder(email, hedefBox = null) {
         return false;
     }
 
+    const aktifToken = turnstileTokenAl(turnstileId);
     const redirectTo = `${window.location.origin}${window.location.pathname}?recovery=true`;
     const { data, error } = await supabaseClient.auth.resetPasswordForEmail(temizEmail, {
         redirectTo: redirectTo,
-        captchaToken: turnstileToken || undefined
+        captchaToken: aktifToken || undefined
     });
-    turnstileSifirla();
+    turnstileSifirla(turnstileId);
 
     if (error) {
         let msg = "Şifre sıfırlama hatası: " + error.message;
@@ -741,7 +764,7 @@ function authModaliniBaslat() {
                 setTimeout(() => forgotEmail.focus(), 50);
             }
             requestAnimationFrame(() => {
-                if (window.turnstile) turnstileWidgetiHazirla('auth-forgot-turnstile');
+                turnstileWidgetiHazirla('auth-forgot-turnstile');
             });
         } else {
             // 'login' veya 'register'
@@ -767,15 +790,7 @@ function authModaliniBaslat() {
             if (emailInput) setTimeout(() => emailInput.focus(), 50);
 
             requestAnimationFrame(() => {
-                if (!window.turnstile) return;
-                const widget = document.getElementById('auth-turnstile');
-                if (!widget) return;
-
-                if (widget.dataset.turnstileRendered !== 'true') {
-                    turnstileWidgetiHazirla('auth-turnstile');
-                } else {
-                    turnstileSifirla('auth-turnstile');
-                }
+                turnstileWidgetiHazirla('auth-turnstile');
             });
         }
     };

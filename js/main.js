@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 3. Veri Çekimi ve Akıcı Bekleme Süresi (FOUC Önleyici)
     const onbellekVar = typeof yerelOnbellekVarMi === 'function' && yerelOnbellekVarMi();
-    const MIN_BEKLEME_MS = onbellekVar ? 120 : 600;
+    const MIN_BEKLEME_MS = onbellekVar ? 0 : 150;
     const baslangic = Date.now();
 
     const basarili = await tumVerileriCek();
@@ -76,7 +76,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userThemeId = themeConfig.theme_id || themeConfig.theme || null;
         if (userThemeId && userThemeId !== 'default') {
             await ThemeManager.applyTheme(userThemeId, {
-                ...themeConfig,
                 primaryColor: themeConfig.primary_color
             });
         } else {

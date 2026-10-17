@@ -127,16 +127,6 @@ async function tumVerileriCek() {
             document.body.classList.remove('is-owner');
         }
 
-        // Tema ve rengini veritabanı verisiyle kesinleştir
-        if (typeof ThemeManager !== 'undefined') {
-            const userThemeId = kartVerisi.theme_config?.theme_id || 'default';
-            ThemeManager.applyTheme(userThemeId, {
-                primaryColor: kartVerisi.theme_config?.primary_color
-            });
-        } else if (kartVerisi.theme_config?.primary_color) {
-            document.documentElement.style.setProperty('--accent-color', kartVerisi.theme_config.primary_color);
-        }
-
         const loadingUserEl = document.getElementById('app-loading-user');
         if (loadingUserEl) {
             loadingUserEl.classList.add('is-loaded');
@@ -149,8 +139,10 @@ async function tumVerileriCek() {
         // Arayüzü yeni verilerle çiz
         if (typeof RenderEngine !== 'undefined') {
             RenderEngine.vitrinCiz(kartVerisi);
-            RenderEngine.menuCiz(kartVerisi);
-            RenderEngine.altEkranlariCiz(kartVerisi);
+            RenderEngine.linklerCiz(kartVerisi);
+            if (kartVerisi.tops) {
+                RenderEngine.companionCiz(kartVerisi.tops);
+            }
             if (typeof RenderEngine.trophiesCiz === 'function') {
                 RenderEngine.trophiesCiz(kartVerisi);
             }
@@ -300,10 +292,23 @@ async function icerikAra(aramaMetni, aramaTuru) {
 // #region 5: YEREL ÖNBELLEK VE GÖRSEL PRELOAD MOTORU (LOCALSTORAGE & PRELOAD ENGINE)
 window._nookImagePreloadCache = window._nookImagePreloadCache || new Map();
 
+// Eski Base64 görsel önbellek kayıtlarını (nook_img_*) tek seferlik temizle
+(function temizleEskiGorselOnbellek() {
+    try {
+        const silinecekler = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('nook_img_')) silinecekler.push(k);
+        }
+        silinecekler.forEach(k => localStorage.removeItem(k));
+    } catch {}
+})();
+
 function yerelOnbellekVarMi() {
     if (!KULLANICI_ADI) return false;
     try {
-        const raw = localStorage.getItem('nook_profile_' + KULLANICI_ADI);
+        const lowerKey = 'nook_profile_' + KULLANICI_ADI.toLowerCase();
+        const raw = localStorage.getItem(lowerKey) || localStorage.getItem('nook_profile_' + KULLANICI_ADI);
         return !!raw;
     } catch {
         return false;
@@ -313,7 +318,8 @@ function yerelOnbellekVarMi() {
 function yerelOnbellekYukle() {
     if (!KULLANICI_ADI) return false;
     try {
-        const raw = localStorage.getItem('nook_profile_' + KULLANICI_ADI);
+        const lowerKey = 'nook_profile_' + KULLANICI_ADI.toLowerCase();
+        const raw = localStorage.getItem(lowerKey) || localStorage.getItem('nook_profile_' + KULLANICI_ADI);
         if (!raw) return false;
         const profil = JSON.parse(raw);
         if (!profil || typeof profil !== 'object') return false;
@@ -348,10 +354,12 @@ function yerelOnbellekYukle() {
         // Arayüzü önbellekten hemen çiz
         if (typeof RenderEngine !== 'undefined') {
             RenderEngine.vitrinCiz(kartVerisi);
-            RenderEngine.menuCiz(kartVerisi);
-            RenderEngine.altEkranlariCiz(kartVerisi);
+            RenderEngine.linklerCiz(kartVerisi);
             if (kartVerisi.tops) {
                 RenderEngine.companionCiz(kartVerisi.tops);
+            }
+            if (typeof RenderEngine.trophiesCiz === 'function') {
+                RenderEngine.trophiesCiz(kartVerisi);
             }
         }
 
@@ -368,30 +376,13 @@ function yerelOnbellekYukle() {
 function yerelOnbellekKaydet(veri) {
     if (!KULLANICI_ADI || !veri) return;
     try {
-        localStorage.setItem('nook_profile_' + KULLANICI_ADI, JSON.stringify(veri));
+        const lowerKey = 'nook_profile_' + KULLANICI_ADI.toLowerCase();
+        localStorage.setItem(lowerKey, JSON.stringify(veri));
+        if (KULLANICI_ADI !== KULLANICI_ADI.toLowerCase()) {
+            localStorage.removeItem('nook_profile_' + KULLANICI_ADI);
+        }
     } catch (err) {
         console.warn("Yerel önbelleğe kaydedilemedi:", err);
-    }
-}
-
-function guvenliGorselOnbellegeKaydet(key, value) {
-    try {
-        localStorage.setItem(key, value);
-    } catch {
-        // LocalStorage kota aşımı durumunda eski görsel kayıtlarını temizle ve tekrar dene
-        try {
-            const keysToRemove = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const k = localStorage.key(i);
-                if (k && k.startsWith('nook_img_')) {
-                    keysToRemove.push(k);
-                }
-            }
-            keysToRemove.slice(0, Math.ceil(keysToRemove.length / 2)).forEach(k => localStorage.removeItem(k));
-            localStorage.setItem(key, value);
-        } catch {
-            // Depolama tamamen doluysa sessizce devam et
-        }
     }
 }
 
@@ -400,7 +391,7 @@ function gorseliOnbellegeAl(url) {
     const temizUrl = url.trim();
     if (!temizUrl.startsWith('http://') && !temizUrl.startsWith('https://')) return;
 
-    // 1. Tarayıcı Bellek Ön Yüklemesi (RAM Texture Cache)
+    // Tarayıcı Bellek ve HTTP Ön Yüklemesi (RAM Texture Cache)
     if (!window._nookImagePreloadCache.has(temizUrl)) {
         const img = new Image();
         img.referrerPolicy = 'no-referrer';
@@ -408,32 +399,6 @@ function gorseliOnbellegeAl(url) {
         img.src = temizUrl;
         window._nookImagePreloadCache.set(temizUrl, img);
     }
-
-    // 2. LocalStorage Base64 Kalıcı Önbellek (Non-blocking arka plan)
-    const storageKey = 'nook_img_' + temizUrl;
-    try {
-        if (localStorage.getItem(storageKey)) return;
-    } catch {}
-
-    fetch(temizUrl, { mode: 'cors' })
-        .then(res => {
-            if (!res.ok) throw new Error('Ağ yanıtı başarısız');
-            return res.blob();
-        })
-        .then(blob => {
-            // 1.5MB'den büyük görselleri localStorage kotasını korumak için atla
-            if (blob.size > 1500000) return;
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                if (reader.result && typeof reader.result === 'string') {
-                    guvenliGorselOnbellegeKaydet(storageKey, reader.result);
-                }
-            };
-            reader.readAsDataURL(blob);
-        })
-        .catch(() => {
-            // CORS kısıtı olan görseller Image() nesnesiyle tarayıcı HTTP önbelleğinde zaten tutulur
-        });
 }
 
 function tumGorselleriPreloadEt(veri) {

@@ -235,6 +235,9 @@ function landingEkraniniBaslat() {
                 switchBtn.textContent = 'Giriş Yap';
                 if (auxLinks) auxLinks.style.display = 'none';
             }
+            if (typeof turnstileWidgetiHazirla === 'function') {
+                requestAnimationFrame(() => turnstileWidgetiHazirla('landing-turnstile'));
+            }
         });
     }
 
@@ -258,6 +261,9 @@ function landingEkraniniBaslat() {
             forgotForm.style.display = 'none';
             mainForm.style.display = 'flex';
             if (mainTitle) mainTitle.textContent = rastgeleBaslikSec(loginBasliklari);
+            if (typeof turnstileWidgetiHazirla === 'function') {
+                requestAnimationFrame(() => turnstileWidgetiHazirla('landing-turnstile'));
+            }
         });
     }
 
@@ -267,7 +273,7 @@ function landingEkraniniBaslat() {
             forgotSubmitBtn.disabled = true;
             forgotSubmitBtn.textContent = 'Gönderiliyor...';
             if (typeof sistemeSifreSifirlamaGonder === 'function') {
-                await sistemeSifreSifirlamaGonder(email, '#landing-forgot-error-box');
+                await sistemeSifreSifirlamaGonder(email, '#landing-forgot-error-box', 'landing-forgot-turnstile');
             }
             forgotSubmitBtn.disabled = false;
             forgotSubmitBtn.textContent = 'Sıfırlama Bağlantısı Gönder';
@@ -289,7 +295,7 @@ function landingEkraniniBaslat() {
 
             if (isLandingLoginMode) {
                 if (typeof sistemeGirisYap === 'function') {
-                    await sistemeGirisYap(email, password);
+                    await sistemeGirisYap(email, password, 'landing-turnstile');
                 }
             } else {
                 const username = usernameInput?.value.trim();
@@ -300,7 +306,7 @@ function landingEkraniniBaslat() {
                     return;
                 }
                 if (typeof sistemeKayitOl === 'function') {
-                    await sistemeKayitOl(email, password, username);
+                    await sistemeKayitOl(email, password, username, 'landing-turnstile');
                 }
             }
 

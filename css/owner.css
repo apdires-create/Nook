@@ -281,9 +281,7 @@ body.is-owner .tag-pill:hover .tag-remove-btn {
 }
 /* #endregion */
 
-/* #region 4: ARKA YÜZ (DRILL-DOWN) DÜZENLEME KONTROLLERİ */
-body.is-owner .nav-item-btn,
-body.is-owner .link-item-row,
+/* #region 4: ARKA YÜZ VE KANAT DÜZENLEME KONTROLLERİ */
 body.is-owner .top-item-card,
 body.is-owner .companion-row-item,
 body.is-owner .companion-tab-btn {
@@ -293,8 +291,6 @@ body.is-owner .companion-tab-btn {
     transition: transform 0.15s ease, opacity 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-body.is-owner .nav-item-btn:active,
-body.is-owner .link-item-row:active,
 body.is-owner .top-item-card:active,
 body.is-owner .companion-row-item:active,
 body.is-owner .companion-tab-btn:active {
@@ -314,8 +310,6 @@ body.is-owner .companion-tab-btn:active {
     pointer-events: none;
 }
 
-.nav-item-btn.is-dragging,
-.link-item-row.is-dragging,
 .top-item-card.is-dragging,
 .companion-row-item.is-dragging {
     opacity: var(--companion-row-drag-opacity, 0.45);
@@ -326,8 +320,6 @@ body.is-owner .companion-tab-btn:active {
     z-index: 10;
 }
 
-.nav-item-btn.is-dragging *,
-.link-item-row.is-dragging *,
 .top-item-card.is-dragging *,
 .companion-row-item.is-dragging * {
     pointer-events: none;
@@ -375,28 +367,7 @@ body.is-owner .companion-tab-btn:active {
 }
 /* #endregion */
 
-/* #region BLOK SİLME BUTONU VE MODALI */
-.delete-section-btn {
-    display: none !important;
-}
-
-body.is-owner .delete-section-btn {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    margin-left: auto;
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
-}
-
-body.is-owner .delete-section-btn:hover {
-    background: rgba(239, 68, 68, 0.15) !important;
-    border-color: rgba(239, 68, 68, 0.45) !important;
-    color: #ef4444 !important;
-    transform: scale(1.08);
-}
-
-/* Blok Silme Modalı */
+/* #region SİLME ONAY MODALI (CONFIRM MODAL) */
 .block-delete-panel {
     padding: 24px;
     text-align: center;
@@ -469,33 +440,6 @@ body.is-owner .delete-section-btn:hover {
 }
 /* #endregion */
 
-.nav-item-btn.is-empty-module {
-    border-style: dashed;
-    opacity: 0.75;
-}
-
-.nav-item-btn.is-empty-module:hover {
-    opacity: 1;
-    border-color: var(--accent-color);
-}
-
-.empty-module-pill {
-    font-size: 0.65rem;
-    padding: 2px 7px;
-    border-radius: var(--radius-pill);
-    background: rgba(59, 91, 219, 0.2);
-    color: var(--accent-light);
-    border: 1px solid var(--accent-glow);
-    margin-left: 6px;
-    font-weight: 600;
-}
-
-.view-owner-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 2cqw;
-}
-
 .view-add-btn {
     display: inline-flex;
     align-items: center;
@@ -520,10 +464,6 @@ body.is-owner .delete-section-btn:hover {
     color: var(--text-primary);
 }
 
-.link-item-row {
-    position: relative;
-}
-
 .item-delete-btn {
     background: transparent;
     border: none;
@@ -536,10 +476,6 @@ body.is-owner .delete-section-btn:hover {
     justify-content: center;
     margin-left: auto;
     transition: color 0.2s ease, background-color 0.2s ease;
-}
-
-body.is-owner .link-item-row:hover .item-delete-btn {
-    display: flex;
 }
 
 .top-item-card .item-delete-btn {
@@ -1757,10 +1693,6 @@ body:not(.is-owner) .top-add-form {
 
 /* #region 17: DOKUNMATİK CİHAZ KONTROLLERİ (@media hover: none) */
 @media (hover: none) {
-    body.is-owner .link-item-row .item-delete-btn {
-        display: flex !important;
-        opacity: 0.9;
-    }
     body.is-owner .top-item-card .item-delete-btn {
         display: none !important;
     }
