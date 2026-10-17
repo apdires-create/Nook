@@ -1,15 +1,11 @@
-ROADMAP.md
+# İşletim sistemi ve log kalıntıları
 .DS_Store
 Thumbs.db
 *.log
-ornek-kart-tasarımı.html
-landing-ornek.html
-AI_INSTRUCTIONS.md
-bright-task.txt
-COMPLETED.md
-css-divider*
-archive-v1/
-archive-*/
-supabase
+
+# Veritabanı ve sunucusuz fonksiyon mimarisi (Özel)
+supabase/
+
+# Yerel geliştirici notları
 tema düzenleme.txt
 notlar.txt
