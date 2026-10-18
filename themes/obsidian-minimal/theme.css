@@ -152,10 +152,9 @@
 }
 
 /* ----------------------------------------------------
-   3.2. KARTIN ÜST KISMINDAN AŞAĞIYA DOĞRU SÜZÜLEN IŞIK GRADYANI
+   3.2. KARTIN ÜST VE ARKA ALT KISMINDAN SÜZÜLEN IŞIK GRADYANI
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] .card-front::before,
-[data-theme="obsidian-minimal"] .card-back::before,
 [data-theme="obsidian-minimal"] .companion-card::before {
     content: '';
     position: absolute;
@@ -167,6 +166,25 @@
         to bottom,
         color-mix(in oklch, var(--accent-color) 25%, transparent) 0%,
         color-mix(in oklch, var(--accent-color) 10%, transparent) 35%,
+        transparent 100%
+    );
+    pointer-events: none;
+    z-index: 2;
+    animation: cardTopGlowBreathing 5s ease-in-out infinite;
+}
+
+/* Arka Yüz: Işık alttan yukarıya süzülür (Link okunabilirliği ve alt boşluk estetiği) */
+[data-theme="obsidian-minimal"] .card-back::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 55cqh;
+    background: linear-gradient(
+        to top,
+        color-mix(in oklch, var(--accent-color) 26%, transparent) 0%,
+        color-mix(in oklch, var(--accent-color) 9%, transparent) 38%,
         transparent 100%
     );
     pointer-events: none;
