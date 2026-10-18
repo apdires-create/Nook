@@ -22,23 +22,37 @@ const TiltEngine = {
             this.wake();
         }, { passive: true });
 
-        // Kart üzerinde fare koordinatlarını CSS değişkeni olarak takip et (Spotlight border)
-        const stage = document.getElementById('profileStage');
-        if (stage) {
-            stage.addEventListener('mousemove', (e) => {
-                if (window.innerWidth < 900) return;
-                const targetCard = e.target.closest('#cardContainer, .companion-card');
-                if (targetCard) {
-                    const rect = targetCard.getBoundingClientRect();
-                    targetCard.style.setProperty('--card-mouse-x', `${(e.clientX - rect.left).toFixed(1)}px`);
-                    targetCard.style.setProperty('--card-mouse-y', `${(e.clientY - rect.top).toFixed(1)}px`);
+        // Kart yakınlık ve fare koordinatlarını takip et (Proximity Spotlight Border)
+        window.addEventListener('mousemove', (e) => {
+            if (window.innerWidth < 900) return;
+
+            const cards = document.querySelectorAll('#cardContainer, .companion-card');
+            const PROXIMITY_PX = 180; // Kartın 180px yakınına kadar ışık yumuşakça parlar
+
+            cards.forEach(card => {
+                if (card.offsetParent === null) return;
+                const rect = card.getBoundingClientRect();
+                const dx = Math.max(rect.left - e.clientX, 0, e.clientX - rect.right);
+                const dy = Math.max(rect.top - e.clientY, 0, e.clientY - rect.bottom);
+                const dist = Math.hypot(dx, dy);
+
+                if (dist < PROXIMITY_PX) {
+                    const proximity = Math.pow(1 - (dist / PROXIMITY_PX), 1.2);
+                    card.style.setProperty('--card-border-proximity', proximity.toFixed(3));
+                    card.style.setProperty('--card-mouse-x', `${(e.clientX - rect.left).toFixed(1)}px`);
+                    card.style.setProperty('--card-mouse-y', `${(e.clientY - rect.top).toFixed(1)}px`);
+                } else if (card.style.getPropertyValue('--card-border-proximity') !== '0') {
+                    card.style.setProperty('--card-border-proximity', '0');
                 }
-            }, { passive: true });
-        }
+            });
+        }, { passive: true });
 
         window.addEventListener('mouseleave', () => {
             this.mouseX = 0;
             this.mouseY = 0;
+            document.querySelectorAll('#cardContainer, .companion-card').forEach(card => {
+                card.style.setProperty('--card-border-proximity', '0');
+            });
             this.wake();
         });
 

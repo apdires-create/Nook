@@ -17,9 +17,9 @@
     /* ----------------------------------------------------
        2. RENK, IŞIK VE MAT OBSİDİYEN PALETİ
        ---------------------------------------------------- */
-    --bg-stage: #04010a;
-    --bg-card: color-mix(in oklch, var(--accent-color) 7%, #090a0f);
-    --bg-card-subtle: color-mix(in oklch, var(--accent-color) 11%, #101118);
+    --bg-stage: color-mix(in oklch, var(--accent-color) 4%, #000000);
+    --bg-card: color-mix(in oklch, var(--accent-color) 9%, #000000);
+    --bg-card-subtle: color-mix(in oklch, var(--accent-color) 13%, #000000);
     --bg-pill: rgba(255, 255, 255, 0.04);
     --bg-pill-hover: rgba(255, 255, 255, 0.1);
 
@@ -43,8 +43,8 @@
     --stage-pattern-size: 44px 44px;
     --stage-pattern-opacity: 1;
 
-    /* Karoların zemin rengi: Aşırı parlamayan, oturaklı ve derin kadife mor */
-    --stage-pattern-bg: color-mix(in oklch, var(--accent-color) 22%, #04010a);
+    /* Karoların zemin rengi: Tamamen accent color'ın düşük parlaklıklı tonu */
+    --stage-pattern-bg: color-mix(in oklch, var(--accent-color) 18%, #000000);
 
     /* Yumuşatılmış Bevel & Emboss (Daha az kontrast, yumuşak geçişli dikişler) */
     --stage-pattern:
@@ -59,12 +59,12 @@
         /* Yüzey faset eğimi */
         linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, transparent 45%, rgba(0, 0, 0, 0.25) 100%);
     
-    /* Kart odaklı spot ışığı */
+    /* Kart odaklı spot ışığı: Sabit renksiz, tamamen bg-stage ile kenarlara akar */
     --stage-gradient: radial-gradient(
         ellipse clamp(320px, 85vw, 560px) clamp(550px, 75vh, 850px) at 50% 46%,
-        rgba(4, 1, 10, 0.04) 0%,
-        rgba(4, 1, 10, 0.45) 45%,
-        rgba(4, 1, 10, 0.88) 75%,
+        color-mix(in oklch, var(--bg-stage) 5%, transparent) 0%,
+        color-mix(in oklch, var(--bg-stage) 55%, transparent) 45%,
+        color-mix(in oklch, var(--bg-stage) 92%, transparent) 75%,
         var(--bg-stage) 100%
     );
 
@@ -120,7 +120,7 @@
 }
 
 /* ----------------------------------------------------
-   3.1. FAREYİ TAKİP EDEN SPOTLIGHT BORDER (SEÇENEK B)
+   3.1. FAREYİ VE YAKINLIĞI (PROXIMITY) TAKİP EDEN SPOTLIGHT BORDER
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] .card-face::after,
 [data-theme="obsidian-minimal"] .companion-card::after {
@@ -130,7 +130,7 @@
     border-radius: inherit;
     padding: 1.5px;
     background: radial-gradient(
-        220px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, -100px),
+        260px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, -100px),
         var(--accent-color) 0%,
         color-mix(in oklch, var(--accent-color) 50%, transparent) 35%,
         color-mix(in oklch, var(--accent-color) 15%, transparent) 60%,
@@ -141,60 +141,57 @@
     mask-composite: exclude;
     pointer-events: none;
     z-index: 25;
-    opacity: 0;
-    transition: opacity 0.28s ease;
+    /* Kartın yakınına gelindiğinde ve üzerinde iken yumuşakça parlar */
+    opacity: var(--card-border-proximity, 0);
+    transition: opacity 0.18s ease-out;
 }
 
-/* Fare kartın üzerine geldiğinde spotlight border yanar */
 [data-theme="obsidian-minimal"] .card-container:hover .card-face::after,
 [data-theme="obsidian-minimal"] .companion-card:hover::after {
-    opacity: 1;
+    opacity: max(var(--card-border-proximity, 0), 0.95);
 }
 
 /* ----------------------------------------------------
-   3.2. PFP (AVATAR) ALTI NEFES ALAN IŞIK HALOSU (BREATHING GLOW)
+   3.2. KARTIN ÜST KISMINDAN AŞAĞIYA DOĞRU SÜZÜLEN IŞIK GRADYANI
    ---------------------------------------------------- */
-[data-theme="obsidian-minimal"] .identity-zone {
-    position: relative;
-}
-
-[data-theme="obsidian-minimal"] .identity-zone::before {
+[data-theme="obsidian-minimal"] .card-front::before,
+[data-theme="obsidian-minimal"] .card-back::before,
+[data-theme="obsidian-minimal"] .companion-card::before {
     content: '';
     position: absolute;
-    top: 28cqh;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 42cqw;
-    height: 42cqw;
-    border-radius: 50%;
-    background: radial-gradient(
-        circle,
-        color-mix(in oklch, var(--accent-color) 38%, transparent) 0%,
-        color-mix(in oklch, var(--accent-color) 14%, transparent) 45%,
-        transparent 72%
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60cqh;
+    background: linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--accent-color) 25%, transparent) 0%,
+        color-mix(in oklch, var(--accent-color) 10%, transparent) 35%,
+        transparent 100%
     );
-    filter: blur(14px);
     pointer-events: none;
     z-index: 2;
-    animation: pfpBreathingHalo 4.8s ease-in-out infinite;
+    animation: cardTopGlowBreathing 5s ease-in-out infinite;
 }
 
-@keyframes pfpBreathingHalo {
+@keyframes cardTopGlowBreathing {
     0%, 100% {
-        transform: translate(-50%, -50%) scale(0.92);
-        opacity: 0.60;
+        opacity: 0.70;
     }
     50% {
-        transform: translate(-50%, -50%) scale(1.18);
-        opacity: 0.95;
+        opacity: 1;
     }
 }
 
-/* İsim, unvan ve içeriğin daima halonun üzerinde kalmasını garanti et */
+/* İsim, unvan ve içeriğin daima ışık gradyanının üzerinde kalmasını garanti et */
+[data-theme="obsidian-minimal"] .identity-zone,
 [data-theme="obsidian-minimal"] .profile-name,
 [data-theme="obsidian-minimal"] .profile-title,
 [data-theme="obsidian-minimal"] .bio-zone,
-[data-theme="obsidian-minimal"] .tags-zone {
+[data-theme="obsidian-minimal"] .tags-zone,
+[data-theme="obsidian-minimal"] .avatar-box,
+[data-theme="obsidian-minimal"] .companion-header,
+[data-theme="obsidian-minimal"] .companion-body {
     position: relative;
     z-index: 5;
 }
