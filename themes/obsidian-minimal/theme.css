@@ -43,27 +43,28 @@
     --stage-pattern-size: 44px 44px;
     --stage-pattern-opacity: 1;
 
-    /* Karoların derin mor zemin rengi (accent-color ile dinamik harmanlanır) */
-    --stage-pattern-bg: color-mix(in oklch, var(--accent-color) 28%, #04010a);
+    /* Karoların zemin rengi: Aşırı parlamayan, oturaklı ve derin kadife mor */
+    --stage-pattern-bg: color-mix(in oklch, var(--accent-color) 22%, #04010a);
 
-    /* 4 Kenar Bevel & Emboss (Işık + Gölge + Yüzey Faset Eğimi) */
+    /* Yumuşatılmış Bevel & Emboss (Daha az kontrast, yumuşak geçişli dikişler) */
     --stage-pattern:
-        /* Üst kenar ışık çizgisi (Bevel Top Highlight) */
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.20) 0 2px, transparent 2px),
-        /* Sol kenar ışık çizgisi (Bevel Left Highlight) */
-        linear-gradient(to right, rgba(255, 255, 255, 0.12) 0 2px, transparent 2px),
-        /* Alt kenar derin gölge oluğu (Emboss Bottom Groove) */
-        linear-gradient(to top, rgba(0, 0, 0, 0.85) 0 3px, transparent 3px),
-        /* Sağ kenar derin gölge oluğu (Emboss Right Groove) */
-        linear-gradient(to left, rgba(0, 0, 0, 0.85) 0 3px, transparent 3px),
-        /* Yüzey eğimi / Faset geçişi */
-        linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.40) 100%);
+        /* Üst kenar ışık çizgisi (Yumuşak Highlight) */
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.14) 0, rgba(255, 255, 255, 0.05) 1.5px, transparent 3px),
+        /* Sol kenar ışık çizgisi */
+        linear-gradient(to right, rgba(255, 255, 255, 0.10) 0, rgba(255, 255, 255, 0.03) 1.5px, transparent 3px),
+        /* Alt kenar gölge oluğu (Yumuşatılmış Emboss Groove) */
+        linear-gradient(to top, rgba(0, 0, 0, 0.65) 0, rgba(0, 0, 0, 0.25) 2px, transparent 3.5px),
+        /* Sağ kenar gölge oluğu */
+        linear-gradient(to left, rgba(0, 0, 0, 0.65) 0, rgba(0, 0, 0, 0.25) 2px, transparent 3.5px),
+        /* Yüzey faset eğimi */
+        linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, transparent 45%, rgba(0, 0, 0, 0.25) 100%);
     
-    /* Sahne Vinyeti: Ortada parlayan elmaslar, kenarlarda derin gece siyahı */
-    --stage-gradient: radial-gradient(ellipse at 50% 45%,
-        rgba(4, 1, 10, 0.05) 0%,
-        rgba(4, 1, 10, 0.50) 35%,
-        rgba(4, 1, 10, 0.92) 70%,
+    /* Kart Odaklı Spot Işığı: Genişliği kartı sarar (min(45vw, 440px)), yüksekliği sayfaya yayılır (68vh) */
+    --stage-gradient: radial-gradient(
+        ellipse min(45vw, 440px) 68vh at 50% 46%,
+        rgba(4, 1, 10, 0.04) 0%,
+        rgba(4, 1, 10, 0.45) 45%,
+        rgba(4, 1, 10, 0.88) 75%,
         var(--bg-stage) 100%
     );
 
