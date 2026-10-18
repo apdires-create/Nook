@@ -17,7 +17,7 @@
     /* ----------------------------------------------------
        2. RENK, IŞIK VE MAT OBSİDİYEN PALETİ
        ---------------------------------------------------- */
-    --bg-stage: #050507;
+    --bg-stage: #050408;
     --bg-card: #0b0c10;
     --bg-card-subtle: #12131a;
     --bg-pill: rgba(255, 255, 255, 0.04);
@@ -27,11 +27,20 @@
     --text-secondary: rgba(255, 255, 255, 0.62);
     --text-tertiary: rgba(255, 255, 255, 0.38);
 
-    /* Vurgu: Platin & Titanyum Işıltısı */
-    --accent-color: #f4f4f5;
-    --accent-glow: rgba(255, 255, 255, 0.12);
+    /* Vurgu: Void Violet (Görseldeki Derin Gece Moru) */
+    --accent-color: #a855f7;
+    --accent-glow: color-mix(in oklch, var(--accent-color) 35%, transparent);
+    --accent-stage-glow: color-mix(in oklch, var(--accent-color) 24%, transparent);
     --border-soft: rgba(255, 255, 255, 0.09);
     --border-highlight: rgba(255, 255, 255, 0.2);
+
+    /* ----------------------------------------------------
+       2.1. SAHNE DESENİ: BEVEL & EMBOSS KAPİTONE (SVG PATTERN)
+       ---------------------------------------------------- */
+    --stage-pattern-size: 40px 40px;
+    --stage-pattern-opacity: 0.28; /* Bu değeri el ile dilediğin gibi ayarlayabilirsin */
+    --stage-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3C!-- Derin Gölge Oluğu (Alt-Sağ Kenar) --%3E%3Cline x1='0' y1='1' x2='40' y2='41' stroke='%23000000' stroke-width='1.5' stroke-opacity='0.9'/%3E%3Cline x1='0' y1='39' x2='40' y2='-1' stroke='%23000000' stroke-width='1.5' stroke-opacity='0.9'/%3E%3C!-- Vuran Işık Çizgisi (Üst-Sol Kenar - Bevel Highlight) --%3E%3Cline x1='0' y1='0' x2='40' y2='40' stroke='%23ffffff' stroke-width='1' stroke-opacity='0.22'/%3E%3Cline x1='0' y1='40' x2='40' y2='0' stroke='%23ffffff' stroke-width='1' stroke-opacity='0.22'/%3E%3C/svg%3E");
+    --stage-gradient: radial-gradient(circle at 50% 45%, var(--accent-stage-glow) 0%, rgba(18, 10, 30, 0.45) 45%, rgba(5, 4, 8, 0.98) 78%);
 
     /* ----------------------------------------------------
        3. GEOMETRİ VE KENAR DİLİ (JAPON MİNİMALİZMİ)
@@ -71,11 +80,6 @@
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] body {
     background-color: var(--bg-stage);
-}
-
-[data-theme="obsidian-minimal"] .ambient-background {
-    background: radial-gradient(circle at 50% 38%, #14151b 0%, #08080b 60%, #030305 100%) !important;
-    opacity: 0.95;
 }
 
 /* ----------------------------------------------------

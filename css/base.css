@@ -53,9 +53,22 @@ html, body {
 .ambient-background {
     position: fixed;
     inset: 0;
-    background: radial-gradient(circle at 50% 30%, rgba(35, 45, 75, 0.4) 0%, rgba(12, 14, 20, 1) 75%);
+    background-color: var(--bg-stage);
+    background-image: var(--stage-gradient);
     pointer-events: none;
     z-index: 0;
+    overflow: hidden;
+}
+
+.ambient-background::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--stage-pattern);
+    background-size: var(--stage-pattern-size, auto);
+    background-repeat: repeat;
+    opacity: var(--stage-pattern-opacity, 0.15);
+    pointer-events: none;
 }
 
 .stage {

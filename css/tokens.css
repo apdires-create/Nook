@@ -33,6 +33,12 @@
     --toast-error-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
     --toast-warning-bg: #f59e0b;
     --toast-warning-shadow: 0 8px 24px rgba(245, 158, 11, 0.45);
+
+    /* Sahne Deseni ve Atmosfer Tokenları */
+    --stage-pattern: none;
+    --stage-pattern-size: auto;
+    --stage-pattern-opacity: 0.15;
+    --stage-gradient: radial-gradient(circle at 50% 30%, rgba(35, 45, 75, 0.4) 0%, rgba(12, 14, 20, 1) 75%);
 }
 /* #endregion */
 
