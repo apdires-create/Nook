@@ -36,8 +36,12 @@
 
     /* Sahne Deseni ve Atmosfer Tokenları */
     --stage-pattern: none;
+    --stage-pattern-bg: transparent;
     --stage-pattern-size: auto;
-    --stage-pattern-opacity: 0.15;
+    --stage-pattern-width: 100%;
+    --stage-pattern-height: 100%;
+    --stage-pattern-transform: translate(-50%, -50%);
+    --stage-pattern-opacity: 1;
     --stage-gradient: radial-gradient(circle at 50% 30%, rgba(35, 45, 75, 0.4) 0%, rgba(12, 14, 20, 1) 75%);
 }
 /* #endregion */

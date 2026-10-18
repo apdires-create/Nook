@@ -17,7 +17,7 @@
     /* ----------------------------------------------------
        2. RENK, IŞIK VE MAT OBSİDİYEN PALETİ
        ---------------------------------------------------- */
-    --bg-stage: #050408;
+    --bg-stage: #04010a;
     --bg-card: #0b0c10;
     --bg-card-subtle: #12131a;
     --bg-pill: rgba(255, 255, 255, 0.04);
@@ -35,12 +35,37 @@
     --border-highlight: rgba(255, 255, 255, 0.2);
 
     /* ----------------------------------------------------
-       2.1. SAHNE DESENİ: BEVEL & EMBOSS KAPİTONE (SVG PATTERN)
+       2.1. SAHNE DESENİ: BEVEL & EMBOSS 45° DÖNDÜRÜLMÜŞ ELMAS KAROLAR
        ---------------------------------------------------- */
-    --stage-pattern-size: 40px 40px;
-    --stage-pattern-opacity: 0.28; /* Bu değeri el ile dilediğin gibi ayarlayabilirsin */
-    --stage-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3C!-- Derin Gölge Oluğu (Alt-Sağ Kenar) --%3E%3Cline x1='0' y1='1' x2='40' y2='41' stroke='%23000000' stroke-width='1.5' stroke-opacity='0.9'/%3E%3Cline x1='0' y1='39' x2='40' y2='-1' stroke='%23000000' stroke-width='1.5' stroke-opacity='0.9'/%3E%3C!-- Vuran Işık Çizgisi (Üst-Sol Kenar - Bevel Highlight) --%3E%3Cline x1='0' y1='0' x2='40' y2='40' stroke='%23ffffff' stroke-width='1' stroke-opacity='0.22'/%3E%3Cline x1='0' y1='40' x2='40' y2='0' stroke='%23ffffff' stroke-width='1' stroke-opacity='0.22'/%3E%3C/svg%3E");
-    --stage-gradient: radial-gradient(circle at 50% 45%, var(--accent-stage-glow) 0%, rgba(18, 10, 30, 0.45) 45%, rgba(5, 4, 8, 0.98) 78%);
+    --stage-pattern-width: 220vmax;
+    --stage-pattern-height: 220vmax;
+    --stage-pattern-transform: translate(-50%, -50%) rotate(45deg);
+    --stage-pattern-size: 44px 44px;
+    --stage-pattern-opacity: 1;
+
+    /* Karoların derin mor zemin rengi (accent-color ile dinamik harmanlanır) */
+    --stage-pattern-bg: color-mix(in oklch, var(--accent-color) 28%, #04010a);
+
+    /* 4 Kenar Bevel & Emboss (Işık + Gölge + Yüzey Faset Eğimi) */
+    --stage-pattern:
+        /* Üst kenar ışık çizgisi (Bevel Top Highlight) */
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.20) 0 2px, transparent 2px),
+        /* Sol kenar ışık çizgisi (Bevel Left Highlight) */
+        linear-gradient(to right, rgba(255, 255, 255, 0.12) 0 2px, transparent 2px),
+        /* Alt kenar derin gölge oluğu (Emboss Bottom Groove) */
+        linear-gradient(to top, rgba(0, 0, 0, 0.85) 0 3px, transparent 3px),
+        /* Sağ kenar derin gölge oluğu (Emboss Right Groove) */
+        linear-gradient(to left, rgba(0, 0, 0, 0.85) 0 3px, transparent 3px),
+        /* Yüzey eğimi / Faset geçişi */
+        linear-gradient(135deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.40) 100%);
+    
+    /* Sahne Vinyeti: Ortada parlayan elmaslar, kenarlarda derin gece siyahı */
+    --stage-gradient: radial-gradient(ellipse at 50% 45%,
+        rgba(4, 1, 10, 0.05) 0%,
+        rgba(4, 1, 10, 0.50) 35%,
+        rgba(4, 1, 10, 0.92) 70%,
+        var(--bg-stage) 100%
+    );
 
     /* ----------------------------------------------------
        3. GEOMETRİ VE KENAR DİLİ (JAPON MİNİMALİZMİ)

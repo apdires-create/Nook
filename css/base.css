@@ -54,7 +54,6 @@ html, body {
     position: fixed;
     inset: 0;
     background-color: var(--bg-stage);
-    background-image: var(--stage-gradient);
     pointer-events: none;
     z-index: 0;
     overflow: hidden;
@@ -63,11 +62,24 @@ html, body {
 .ambient-background::before {
     content: '';
     position: absolute;
-    inset: 0;
+    left: 50%;
+    top: 50%;
+    width: var(--stage-pattern-width, 100%);
+    height: var(--stage-pattern-height, 100%);
+    transform: var(--stage-pattern-transform, translate(-50%, -50%));
+    background-color: var(--stage-pattern-bg, transparent);
     background-image: var(--stage-pattern);
     background-size: var(--stage-pattern-size, auto);
     background-repeat: repeat;
-    opacity: var(--stage-pattern-opacity, 0.15);
+    opacity: var(--stage-pattern-opacity, 1);
+    pointer-events: none;
+}
+
+.ambient-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--stage-gradient);
     pointer-events: none;
 }
 
