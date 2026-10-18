@@ -18,8 +18,8 @@
        2. RENK, IŞIK VE MAT OBSİDİYEN PALETİ
        ---------------------------------------------------- */
     --bg-stage: #04010a;
-    --bg-card: #0b0c10;
-    --bg-card-subtle: #12131a;
+    --bg-card: color-mix(in oklch, var(--accent-color) 7%, #090a0f);
+    --bg-card-subtle: color-mix(in oklch, var(--accent-color) 11%, #101118);
     --bg-pill: rgba(255, 255, 255, 0.04);
     --bg-pill-hover: rgba(255, 255, 255, 0.1);
 
@@ -71,8 +71,8 @@
     /* ----------------------------------------------------
        3. GEOMETRİ VE KENAR DİLİ (JAPON MİNİMALİZMİ)
        ---------------------------------------------------- */
-    --card-radius: 18px;
-    --nook-card-radius: 18px;
+    --card-radius: 20px;
+    --nook-card-radius: 20px;
     --radius-btn: 6px;
     --radius-item: 8px;
     --radius-pill: 6px;
@@ -80,19 +80,19 @@
 
     /* Lüks Derinlik ve İnce Gölgeler */
     --shadow-card: 
-        0 12px 40px -10px rgba(0, 0, 0, 0.85),
-        0 30px 70px -20px rgba(0, 0, 0, 0.95),
-        inset 0 1px 0 rgba(255, 255, 255, 0.14),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+        0 14px 44px -10px rgba(0, 0, 0, 0.88),
+        0 30px 75px -20px rgba(0, 0, 0, 0.95),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 
     --card-shadow: var(--shadow-card);
-    --card-border: 1px solid rgba(255, 255, 255, 0.1);
+    --card-border: 1px solid color-mix(in oklch, var(--accent-color) 22%, rgba(255, 255, 255, 0.08));
 
     /* ----------------------------------------------------
-       4. DOKU VE KAPLAMA (MICRO GRAIN OVERLAY)
+       4. DOKU VE KAPLAMA (GERÇEK FRAKTAL NOISE OVERLAY)
        ---------------------------------------------------- */
-    --theme-overlay-opacity: 0.045;
-    --theme-overlay-blend: soft-light;
+    --theme-overlay-opacity: 0.55;
+    --theme-overlay-blend: overlay;
 
     /* ----------------------------------------------------
        6. HAREKET VE FİZİK KİMLİĞİ (DELIBERATE EDITORIAL EASE)
@@ -109,17 +109,94 @@
 }
 
 /* ----------------------------------------------------
-   3. DOKU OVERLAY (INLINE MICRO NOISE GRAIN)
+   3. DOKU OVERLAY (GERÇEK KUM MAT FRAKTAL NOISE)
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] .theme-overlay {
-    background-image: 
-        radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px),
-        radial-gradient(rgba(0, 0, 0, 0.3) 1px, transparent 1px);
-    background-size: 8px 8px, 12px 12px;
-    background-position: 0 0, 4px 4px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.09'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
     opacity: var(--theme-overlay-opacity);
     mix-blend-mode: var(--theme-overlay-blend);
     pointer-events: none;
+}
+
+/* ----------------------------------------------------
+   3.1. FAREYİ TAKİP EDEN SPOTLIGHT BORDER (SEÇENEK B)
+   ---------------------------------------------------- */
+[data-theme="obsidian-minimal"] .card-face::after,
+[data-theme="obsidian-minimal"] .companion-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: radial-gradient(
+        220px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, -100px),
+        var(--accent-color) 0%,
+        color-mix(in oklch, var(--accent-color) 50%, transparent) 35%,
+        color-mix(in oklch, var(--accent-color) 15%, transparent) 60%,
+        transparent 80%
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 25;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+}
+
+/* Fare kartın üzerine geldiğinde spotlight border yanar */
+[data-theme="obsidian-minimal"] .card-container:hover .card-face::after,
+[data-theme="obsidian-minimal"] .companion-card:hover::after {
+    opacity: 1;
+}
+
+/* ----------------------------------------------------
+   3.2. PFP (AVATAR) ALTI NEFES ALAN IŞIK HALOSU (BREATHING GLOW)
+   ---------------------------------------------------- */
+[data-theme="obsidian-minimal"] .identity-zone {
+    position: relative;
+}
+
+[data-theme="obsidian-minimal"] .identity-zone::before {
+    content: '';
+    position: absolute;
+    top: 28cqh;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 42cqw;
+    height: 42cqw;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        color-mix(in oklch, var(--accent-color) 38%, transparent) 0%,
+        color-mix(in oklch, var(--accent-color) 14%, transparent) 45%,
+        transparent 72%
+    );
+    filter: blur(14px);
+    pointer-events: none;
+    z-index: 2;
+    animation: pfpBreathingHalo 4.8s ease-in-out infinite;
+}
+
+@keyframes pfpBreathingHalo {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(0.92);
+        opacity: 0.60;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.18);
+        opacity: 0.95;
+    }
+}
+
+/* İsim, unvan ve içeriğin daima halonun üzerinde kalmasını garanti et */
+[data-theme="obsidian-minimal"] .profile-name,
+[data-theme="obsidian-minimal"] .profile-title,
+[data-theme="obsidian-minimal"] .bio-zone,
+[data-theme="obsidian-minimal"] .tags-zone {
+    position: relative;
+    z-index: 5;
 }
 
 /* ----------------------------------------------------
@@ -237,8 +314,10 @@
    7. COMPANION KARTLAR (TROPHIES & SHOWCASE)
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] .companion-card {
-    background: #0b0c10 !important;
-    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    background: var(--bg-card) !important;
+    border: var(--card-border) !important;
+    border-radius: var(--card-radius) !important;
+    box-shadow: var(--card-shadow) !important;
 }
 
 [data-theme="obsidian-minimal"] .companion-header {

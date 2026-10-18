@@ -22,6 +22,20 @@ const TiltEngine = {
             this.wake();
         }, { passive: true });
 
+        // Kart üzerinde fare koordinatlarını CSS değişkeni olarak takip et (Spotlight border)
+        const stage = document.getElementById('profileStage');
+        if (stage) {
+            stage.addEventListener('mousemove', (e) => {
+                if (window.innerWidth < 900) return;
+                const targetCard = e.target.closest('#cardContainer, .companion-card');
+                if (targetCard) {
+                    const rect = targetCard.getBoundingClientRect();
+                    targetCard.style.setProperty('--card-mouse-x', `${(e.clientX - rect.left).toFixed(1)}px`);
+                    targetCard.style.setProperty('--card-mouse-y', `${(e.clientY - rect.top).toFixed(1)}px`);
+                }
+            }, { passive: true });
+        }
+
         window.addEventListener('mouseleave', () => {
             this.mouseX = 0;
             this.mouseY = 0;
