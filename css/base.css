@@ -670,7 +670,7 @@ html.is-profile-loading #landing-screen {
     flex-direction: column;
     overflow: hidden;
     container-type: size;
-    animation: companionCard3DEnter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: companionCard3DEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
     transform-origin: left center;
     z-index: 4;
     will-change: transform, opacity;
@@ -678,23 +678,20 @@ html.is-profile-loading #landing-screen {
 
 /* Kapanırken ana kartın arkasına yumuşakça saklanma */
 .companion-card.is-closing {
-    animation: companionCard3DExit 0.50s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    animation: companionCard3DExit 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
     pointer-events: none;
 }
 
-/* Masaüstü: Profil kartının TAM ARKASINDAN (-Z ekseni ve hafif 3D açıyla) süzülerek çıkış */
+/* Masaüstü: Profil kartının arkasından katı ve tok bir şekilde süzülerek çıkış (Opaklık yırtılması önlendi) */
 @keyframes companionCard3DEnter {
     0% {
-        opacity: 0;
-        transform: translate3d(-60px, 0, -60px) rotateY(-8deg) scale(0.93);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
-    }
-    40% {
-        opacity: 0.7;
+        opacity: 0.95;
+        transform: translate3d(-40px, 0, -20px) scale(0.97);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
     }
     100% {
         opacity: 1;
-        transform: translate3d(0, 0, 0) rotateY(0deg) scale(1);
+        transform: translate3d(0, 0, 0) scale(1);
         box-shadow: var(--card-shadow);
     }
 }
@@ -703,13 +700,13 @@ html.is-profile-loading #landing-screen {
 @keyframes companionCard3DExit {
     0% {
         opacity: 1;
-        transform: translate3d(0, 0, 0) rotateY(0deg) scale(1);
+        transform: translate3d(0, 0, 0) scale(1);
         box-shadow: var(--card-shadow);
     }
     100% {
         opacity: 0;
-        transform: translate3d(-50px, 0, -60px) rotateY(-8deg) scale(0.93);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+        transform: translate3d(-35px, 0, -20px) scale(0.97);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
     }
 }
 
