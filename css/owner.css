@@ -66,27 +66,19 @@ body.is-owner .avatar-box:hover .image-edit-overlay {
 /* #endregion */
 
 /* #region 2: INLINE METİN DÜZENLEME VE HOVER EFEKTLERİ */
-body.is-owner .profile-name:not(.is-input-active),
-body.is-owner .profile-title:not(.is-input-active) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: auto;
-    max-width: 90%;
+body.is-owner .profile-name,
+body.is-owner .profile-title {
     box-sizing: border-box;
 }
 
-body.is-owner .profile-bio:not(.is-input-active) {
-    display: block;
-    width: 100%;
-    max-width: 96%;
+body.is-owner .profile-bio {
     box-sizing: border-box;
 }
 
-body.is-owner .editable-hover:not(.is-input-active) {
+body.is-owner .editable-hover {
     position: relative;
     cursor: text;
-    border-radius: 6px;
+    border-radius: var(--radius-btn, 6px);
     padding: 2px 8px;
     border: 1px solid transparent;
     transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
@@ -100,31 +92,29 @@ body.is-owner .editable-hover:not(.is-input-active):hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* 🎯 YENİ CONTENTEDITABLE ODAK ÇERÇEVESİ (Metin ve font asla değişmez, sadece etrafında zarif bir alan oluşur) */
+body.is-owner .editable-hover.is-input-active {
+    outline: none !important;
+    background-color: rgba(0, 0, 0, 0.55) !important;
+    border: 1px solid var(--accent-color) !important;
+    box-shadow: 0 0 0 2px var(--accent-glow), 0 0 16px var(--accent-glow) !important;
+    cursor: text !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    caret-color: var(--accent-color, #ffffff) !important;
+}
+
 .profile-name.is-input-active,
 .profile-title.is-input-active {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
+    white-space: normal !important;
     overflow: visible !important;
-    padding: 0 !important;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    width: auto !important;
-    max-width: 90% !important;
+    text-overflow: clip !important;
 }
 
 .profile-bio.is-input-active {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    overflow: visible !important;
-    width: auto !important;
-    max-width: 96% !important;
-    padding: 0 !important;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
+    white-space: pre-wrap !important;
+    overflow-y: auto !important;
+    display: block !important;
 }
 
 .edit-name-input {

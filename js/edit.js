@@ -1708,7 +1708,7 @@ EditManager.Vitrin = {
 
         el.addEventListener('click', (e) => {
             if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
-            if (el.querySelector('input, textarea') || e.target.closest('a') || e.target.closest('button')) return;
+            if (el.isContentEditable || e.target.closest('a') || e.target.closest('button')) return;
             e.stopPropagation();
 
             const front = kartVerisi.front_data || {};
@@ -1716,92 +1716,112 @@ EditManager.Vitrin = {
                 ? (front.gorunen_isim || kartVerisi.kullanici_adi || '')
                 : (front[fieldName] || '');
 
-            const mevcutYukseklik = el.offsetHeight;
+            // Düzenleme bayraklarını ve görsel sınıfları aktif et
             el.classList.add('is-input-active');
             window._frontEditingActive = true;
 
-            let inputHtml = '';
-            if (isTextarea) {
-                inputHtml = `<textarea class="edit-input-rect edit-bio-textarea" maxlength="${maxLen}" placeholder="Kendinden bahset...">${EditManager.escapeHtml(guncelDeger)}</textarea>`;
-            } else {
-                const placeholder = (fieldName === 'gorunen_isim') ? 'İsim gir...' : 'Ünvan ekle...';
-                const charWidth = guncelDeger.length === 0 
-                    ? Math.max(placeholder.length, 4) 
-                    : Math.max(guncelDeger.length + 1, 2);
-                inputHtml = `<input type="text" class="edit-input-rect edit-name-input" maxlength="${maxLen}" value="${EditManager.escapeHtml(guncelDeger)}" placeholder="${placeholder}" style="width: ${charWidth}ch;">`;
+            // Elementin orijinal metnini temiz şekilde yükle ve düzenlenebilir yap
+            el.contentEditable = "plaintext-only";
+            // Bazı tarayıcılarda plaintext-only desteklenmezse fallback
+            if (el.contentEditable !== "plaintext-only") {
+                el.contentEditable = "true";
             }
+            el.setAttribute('spellcheck', 'false');
+            el.textContent = guncelDeger;
 
-            el.innerHTML = inputHtml;
-            const inputEl = el.querySelector('input, textarea');
-            if (!inputEl) return;
+            // Odağı ver ve imleci metnin sonuna taşı
+            el.focus();
+            try {
+                const range = document.createRange();
+                const sel = window.getSelection();
+                range.selectNodeContents(el);
+                range.collapse(false);
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } catch (err) {}
 
-            if (isTextarea) {
-                const autoResize = () => {
-                    inputEl.style.height = 'auto';
-                    inputEl.style.height = `${inputEl.scrollHeight}px`;
-                    inputEl.scrollTop = 0;
-                };
+            let kapandi = false;
+            const kaydetVeKapat = (kaydet = true) => {
+                if (kapandi) return;
+                kapandi = true;
 
-                // İlk açılışta içeriğe göre yüksekliği ayarla
-                autoResize();
+                // Event listener'ları temizle
+                el.removeEventListener('blur', onBlur);
+                el.removeEventListener('keydown', onKeydown);
+                el.removeEventListener('input', onInput);
 
-                inputEl.addEventListener('input', function() {
-                    const lines = this.value.split('\n');
-                    if (lines.length > 5) {
-                        this.value = lines.slice(0, 5).join('\n');
-                    }
-                    autoResize();
-                });
-            } else {
-                const placeholder = (fieldName === 'gorunen_isim') ? 'İsim gir...' : 'Ünvan ekle...';
-                inputEl.addEventListener('input', function() {
-                    const len = this.value.length;
-                    const w = len === 0 ? Math.max(placeholder.length, 4) : Math.max(len + 1, 2);
-                    this.style.width = `${w}ch`;
-                });
-            }
-
-            inputEl.focus();
-            if (inputEl.setSelectionRange) {
-                inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
-            }
-
-            const kaydetVeKapat = () => {
-                const yeniDeger = inputEl.value.trim();
-                const eskiDeger = guncelDeger.trim();
+                el.contentEditable = "false";
+                el.removeAttribute('contenteditable');
+                el.classList.remove('is-input-active');
 
                 window._frontEditingActive = false;
                 window._frontEditJustClosed = Date.now();
 
                 if (!kartVerisi.front_data) kartVerisi.front_data = {};
 
-                if (fieldName === 'gorunen_isim') {
-                    kartVerisi.front_data.gorunen_isim = yeniDeger;
-                } else {
-                    kartVerisi.front_data[fieldName] = yeniDeger;
+                let yeniDeger = el.textContent ? el.textContent.trim() : '';
+                // Max length denetimi
+                if (yeniDeger.length > maxLen) {
+                    yeniDeger = yeniDeger.substring(0, maxLen);
                 }
 
-                el.classList.remove('is-input-active');
+                const eskiDeger = (fieldName === 'gorunen_isim')
+                    ? (front.gorunen_isim || kartVerisi.kullanici_adi || '').trim()
+                    : (front[fieldName] || '').trim();
 
+                if (kaydet) {
+                    if (fieldName === 'gorunen_isim') {
+                        kartVerisi.front_data.gorunen_isim = yeniDeger;
+                    } else {
+                        kartVerisi.front_data[fieldName] = yeniDeger;
+                    }
+                }
+
+                // Arayüzü yeniden tazeleyip düzenleme dinleyicilerini yenile
                 if (typeof RenderEngine !== 'undefined') {
                     RenderEngine.vitrinCiz(kartVerisi);
                 }
                 EditManager.Vitrin.init();
 
-                if (yeniDeger !== eskiDeger) {
+                if (kaydet && yeniDeger !== eskiDeger) {
                     EditManager.Global.degisiklikYapildi();
                 }
             };
 
-            inputEl.addEventListener('blur', kaydetVeKapat);
-            inputEl.addEventListener('keydown', (evt) => {
+            const onBlur = () => {
+                kaydetVeKapat(true);
+            };
+
+            const onInput = () => {
+                // Karakter limiti kontrolü
+                if (el.textContent && el.textContent.length > maxLen) {
+                    el.textContent = el.textContent.substring(0, maxLen);
+                    // İmleci sona al
+                    const range = document.createRange();
+                    const sel = window.getSelection();
+                    range.selectNodeContents(el);
+                    range.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+
+                // Çok satırlı bio için max 5 satır kontrolü
+                if (isTextarea) {
+                    const lines = (el.innerText || el.textContent).split('\n');
+                    if (lines.length > 5) {
+                        el.innerText = lines.slice(0, 5).join('\n');
+                    }
+                }
+            };
+
+            const onKeydown = (evt) => {
                 if (evt.key === 'Enter') {
                     if (!isTextarea) {
                         evt.preventDefault();
-                        kaydetVeKapat();
+                        el.blur(); // blur tetiklenerek kaydeder
                     } else {
-                        const satirlar = (inputEl.value.match(/\n/g) || []).length + 1;
-                        if (satirlar >= 5) {
+                        const lines = (el.innerText || el.textContent).split('\n');
+                        if (lines.length >= 5) {
                             evt.preventDefault();
                             return;
                         }
@@ -1809,15 +1829,13 @@ EditManager.Vitrin = {
                     }
                 } else if (evt.key === 'Escape') {
                     evt.preventDefault();
-                    window._frontEditingActive = false;
-                    window._frontEditJustClosed = Date.now();
-                    el.classList.remove('is-input-active');
-                    if (typeof RenderEngine !== 'undefined') {
-                        RenderEngine.vitrinCiz(kartVerisi);
-                    }
-                    EditManager.Vitrin.init();
+                    kaydetVeKapat(false); // Kaydetmeden kapat
                 }
-            });
+            };
+
+            el.addEventListener('blur', onBlur);
+            el.addEventListener('keydown', onKeydown);
+            el.addEventListener('input', onInput);
         });
     },
 

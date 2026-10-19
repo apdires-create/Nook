@@ -259,32 +259,6 @@
     font-weight: 600 !important;
 }
 
-/* Düzenleme Modu (Edit Mode) Tipografi Eşitlemeleri: Zıplamaları ve sapmaları önler */
-[data-theme="obsidian-minimal"] .profile-name .edit-name-input {
-    font-family: var(--font-display) !important;
-    font-size: var(--cq-fs-name) !important;
-    font-weight: 600 !important;
-    letter-spacing: -0.015em !important;
-    line-height: 1.15 !important;
-}
-
-[data-theme="obsidian-minimal"] .profile-title .edit-name-input {
-    font-family: var(--font-body) !important;
-    font-size: var(--cq-fs-subtitle) !important;
-    letter-spacing: 0.18em !important;
-    text-transform: uppercase !important;
-    font-style: italic !important;
-    font-weight: 500 !important;
-    line-height: inherit !important;
-}
-
-[data-theme="obsidian-minimal"] .edit-bio-textarea {
-    font-family: var(--font-body) !important;
-    font-size: var(--cq-fs-body) !important;
-    line-height: 1.6 !important;
-    letter-spacing: 0.01em !important;
-}
-
 /* ----------------------------------------------------
    5. BİLEŞENLER, TAG'LER & BUTONLAR
    ---------------------------------------------------- */
