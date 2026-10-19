@@ -183,7 +183,7 @@
     margin-top: 2cqh;
     width: 90%;
     font-family: var(--font-display, var(--font-sans));
-    font-size: 6.8cqw;
+    font-size: var(--cq-fs-name);
     font-weight: 750;
     color: var(--text-primary);
     white-space: nowrap;
@@ -195,7 +195,7 @@
 .profile-title {
     margin-top: 0.6cqh;
     width: 85%;
-    font-size: 3.9cqw;
+    font-size: var(--cq-fs-subtitle);
     font-weight: 500;
     color: var(--text-tertiary);
     font-style: italic;
@@ -218,7 +218,7 @@
 }
 
 .profile-bio {
-    font-size: 4.1cqw;
+    font-size: var(--cq-fs-body);
     line-height: 1.6;
     color: var(--text-secondary);
     font-weight: 450;

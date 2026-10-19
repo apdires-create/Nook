@@ -218,23 +218,33 @@
 /* ----------------------------------------------------
    4. TİPOGRAFİ VE EDİTORYAL KART BAŞLIKLARI
    ---------------------------------------------------- */
+[data-theme="obsidian-minimal"] {
+   /* Cormorant Garamond'un optik inceliğini dengelemek için isme özel daha tok akış */
+   --cq-fs-name: clamp(24px, 7.2cqw, 36px);
+}
+
 [data-theme="obsidian-minimal"] .profile-name {
     font-family: var(--font-display) !important;
+    font-size: var(--cq-fs-name) !important;
     font-weight: 600 !important;
     letter-spacing: -0.015em !important;
+    line-height: 1.15 !important;
     color: #ffffff !important;
 }
 
 [data-theme="obsidian-minimal"] .profile-title {
     font-family: var(--font-body) !important;
-    letter-spacing: 0.12em !important;
+    font-size: var(--cq-fs-subtitle) !important;
+    letter-spacing: 0.18em !important;
     text-transform: uppercase !important;
+    font-style: italic !important;
     font-weight: 500 !important;
     color: var(--text-secondary) !important;
 }
 
 [data-theme="obsidian-minimal"] .profile-bio {
     font-family: var(--font-body) !important;
+    font-size: var(--cq-fs-body) !important;
     font-weight: 400 !important;
     line-height: 1.6 !important;
     color: rgba(255, 255, 255, 0.72) !important;
@@ -244,8 +254,25 @@
 [data-theme="obsidian-minimal"] .back-links-title,
 [data-theme="obsidian-minimal"] .companion-title {
     font-family: var(--font-display) !important;
+    font-size: var(--cq-fs-title) !important;
     letter-spacing: 0.04em !important;
     font-weight: 600 !important;
+}
+
+/* Düzenleme Modu (Edit Mode) Tipografi Eşitlemeleri: Zıplamaları ve sapmaları önler */
+[data-theme="obsidian-minimal"] .edit-name-input {
+    font-family: var(--font-display) !important;
+    font-size: var(--cq-fs-name) !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.015em !important;
+    line-height: 1.15 !important;
+}
+
+[data-theme="obsidian-minimal"] .edit-bio-textarea {
+    font-family: var(--font-body) !important;
+    font-size: var(--cq-fs-body) !important;
+    line-height: 1.6 !important;
+    letter-spacing: 0.01em !important;
 }
 
 /* ----------------------------------------------------

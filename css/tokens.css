@@ -48,15 +48,15 @@
 
 /* #region 2: CONTAINER QUERY TİPOGRAFİ SKALASI */
 :root {
-    --cq-fs-name: 6.6cqw;
-    --cq-fs-title: 5cqw;
-    --cq-fs-subtitle: 3.8cqw;
-    --cq-fs-btn: 3.6cqw;
-    --cq-fs-item-title: 3.4cqw;
-    --cq-fs-body: 3.6cqw;
-    --cq-fs-pill: 3.2cqw;
-    --cq-fs-desc: 2.7cqw;
-    --cq-fs-mono: 2.5cqw;
+    --cq-fs-name: clamp(22px, 6.6cqw, 34px);
+    --cq-fs-title: clamp(18px, 5cqw, 26px);
+    --cq-fs-subtitle: clamp(12px, 3.8cqw, 18px);
+    --cq-fs-btn: clamp(12px, 3.6cqw, 16px);
+    --cq-fs-item-title: clamp(12px, 3.4cqw, 17px);
+    --cq-fs-body: clamp(13px, 3.6cqw, 17px);
+    --cq-fs-pill: clamp(11px, 3.2cqw, 15px);
+    --cq-fs-desc: clamp(10px, 2.7cqw, 14px);
+    --cq-fs-mono: clamp(10px, 2.5cqw, 13px);
 }
 /* #endregion */
 

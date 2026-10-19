@@ -172,7 +172,7 @@ body.is-owner .editable-hover:not(.is-input-active):hover {
 }
 
 .edit-bio-textarea {
-    font-size: 4.1cqw;
+    font-size: var(--cq-fs-body);
     line-height: 1.6;
     font-weight: 450;
     text-align: center;
