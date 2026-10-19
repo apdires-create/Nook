@@ -68,10 +68,18 @@ body.is-owner .avatar-box:hover .image-edit-overlay {
 /* #region 2: INLINE METİN DÜZENLEME VE HOVER EFEKTLERİ */
 body.is-owner .profile-name,
 body.is-owner .profile-title {
+    width: fit-content !important;
+    max-width: 90% !important;
+    margin-left: auto;
+    margin-right: auto;
     box-sizing: border-box;
 }
 
 body.is-owner .profile-bio {
+    width: fit-content !important;
+    max-width: 96% !important;
+    margin-left: auto;
+    margin-right: auto;
     box-sizing: border-box;
 }
 
@@ -92,10 +100,10 @@ body.is-owner .editable-hover:not(.is-input-active):hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* 🎯 YENİ CONTENTEDITABLE ODAK ÇERÇEVESİ (Metin ve font asla değişmez, sadece etrafında zarif bir alan oluşur) */
+/* 🎯 YENİ CONTENTEDITABLE ODAK ÇERÇEVESİ (Metnin etrafını saran akıllı odak kapsülü) */
 body.is-owner .editable-hover.is-input-active {
     outline: none !important;
-    background-color: rgba(0, 0, 0, 0.55) !important;
+    background-color: rgba(0, 0, 0, 0.65) !important;
     border: 1px solid var(--accent-color) !important;
     box-shadow: 0 0 0 2px var(--accent-glow), 0 0 16px var(--accent-glow) !important;
     cursor: text !important;
@@ -115,6 +123,9 @@ body.is-owner .editable-hover.is-input-active {
     white-space: pre-wrap !important;
     overflow-y: auto !important;
     display: block !important;
+    -webkit-line-clamp: unset !important;
+    line-clamp: unset !important;
+    max-height: calc(1.6em * 5 + 16px) !important;
 }
 
 .edit-name-input {
@@ -150,16 +161,6 @@ body.is-owner .editable-hover.is-input-active {
     box-shadow: 0 0 12px var(--accent-glow);
 }
 
-#profileBio.is-input-active {
-    display: block !important;
-    width: 100% !important;
-    max-width: 96% !important;
-    padding: 0 !important;
-    border: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    overflow: visible !important;
-}
 
 .edit-bio-textarea {
     font-size: var(--cq-fs-body);
