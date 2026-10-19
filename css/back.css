@@ -694,15 +694,17 @@ body.is-owner .top-item-unit:active {
     display: none;
     width: 100%;
     box-sizing: border-box;
-    margin-top: 8px;
+    margin-top: 10px;
     padding: 12px 14px;
-    background: rgba(12, 14, 20, 0.82);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-soft);
+    border-left: 2.5px solid var(--accent-color);
+    border-radius: var(--radius-item, 8px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 16px rgba(0, 0, 0, 0.3);
     cursor: default;
+    position: relative;
 }
 
 .top-item-unit.is-expanded .top-item-review-drawer {
@@ -728,18 +730,19 @@ body.is-owner .top-item-unit:active {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: calc(var(--cq-fs-desc) * 0.92);
-    color: var(--accent-light, #748ffc);
+    font-size: calc(var(--cq-fs-desc) * 0.95);
+    color: var(--accent-color);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.08em;
 }
 
 .user-review-text {
     font-size: var(--cq-fs-desc);
-    color: var(--text-primary);
-    line-height: 1.5;
+    color: var(--text-secondary);
+    line-height: 1.55;
     margin: 0;
+    font-style: italic;
 }
 
 /* Yorum Rozeti (Başlık satırında minik emoji/ikon) */

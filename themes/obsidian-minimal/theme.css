@@ -88,6 +88,17 @@
     --card-shadow: var(--shadow-card);
     --card-border: 1px solid color-mix(in oklch, var(--accent-color) 22%, rgba(255, 255, 255, 0.08));
 
+    /* Modal & Pop-up Senkronizasyonu (Olgun, tok mat zemin ve 16px radius) */
+    --radius-modal: 16px;
+    --modal-bg: color-mix(in oklch, var(--accent-color) 8%, #000000);
+    --modal-border: 1px solid color-mix(in oklch, var(--accent-color) 20%, rgba(255, 255, 255, 0.09));
+    --modal-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.9), 0 0 20px color-mix(in oklch, var(--accent-color) 12%, transparent);
+    --modal-item-bg: rgba(255, 255, 255, 0.03);
+    --modal-item-border: 1px solid rgba(255, 255, 255, 0.07);
+    --modal-item-radius: 8px;
+    --modal-item-hover-bg: color-mix(in oklch, var(--accent-color) 12%, rgba(255, 255, 255, 0.05));
+    --modal-item-hover-border: color-mix(in oklch, var(--accent-color) 45%, rgba(255, 255, 255, 0.2));
+
     /* ----------------------------------------------------
        4. DOKU VE KAPLAMA (GERÇEK FRAKTAL NOISE OVERLAY)
        ---------------------------------------------------- */
@@ -430,7 +441,107 @@
 }
 
 /* ----------------------------------------------------
-   8. AVATAR & BANNER DOKUNUŞLARI
+   8. SHOWCASE KARTLARI, BÜYÜK AFİŞLER VE YORUM ALANI
+   ---------------------------------------------------- */
+/* 8.1. Liste İçerik Kartı (Normal ve Büyük Genişlemiş Durum) */
+[data-theme="obsidian-minimal"] .top-item-card {
+    background: rgba(255, 255, 255, 0.025) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    border-radius: var(--radius-item) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 3px 10px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="obsidian-minimal"] .top-item-thumb {
+    border-radius: 6px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Büyük Genişlemiş Kart Durumu */
+[data-theme="obsidian-minimal"] .top-item-card.is-expanded {
+    background: color-mix(in oklch, var(--accent-color) 6%, rgba(255, 255, 255, 0.03)) !important;
+    border-color: color-mix(in oklch, var(--accent-color) 45%, rgba(255, 255, 255, 0.15)) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12),
+                0 12px 32px rgba(0, 0, 0, 0.75),
+                0 0 20px color-mix(in oklch, var(--accent-color) 25%, transparent) !important;
+}
+
+/* 8.2. Kullanıcı Yorumu Çekmecesi (Editoryal Alıntı Bloğu) */
+[data-theme="obsidian-minimal"] .top-item-review-drawer {
+    background: color-mix(in oklch, var(--accent-color) 4%, #06070a) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-left: 2.5px solid var(--accent-color) !important;
+    border-radius: var(--radius-item) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="obsidian-minimal"] .user-review-header {
+    color: var(--accent-color) !important;
+    font-family: var(--font-body) !important;
+    letter-spacing: 0.12em !important;
+}
+
+[data-theme="obsidian-minimal"] .user-review-text {
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-family: var(--font-body) !important;
+}
+
+[data-theme="obsidian-minimal"] .user-review-textarea {
+    background: rgba(0, 0, 0, 0.55) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+    font-family: var(--font-body) !important;
+}
+
+[data-theme="obsidian-minimal"] .user-review-textarea:focus {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 12px var(--accent-glow) !important;
+}
+
+/* 8.3. Düzenleme ve Kategori Ayar Formları (.tops-modal-panel) */
+[data-theme="obsidian-minimal"] .tops-modal-panel {
+    background: var(--modal-bg) !important;
+    border: var(--modal-border) !important;
+    border-radius: var(--radius-modal) !important;
+}
+
+[data-theme="obsidian-minimal"] .tops-modal-title {
+    font-family: var(--font-display) !important;
+    letter-spacing: 0.02em !important;
+}
+
+[data-theme="obsidian-minimal"] .tops-type-btn {
+    border-radius: 6px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="obsidian-minimal"] .tops-type-btn:hover {
+    background: color-mix(in oklch, var(--accent-color) 12%, rgba(255, 255, 255, 0.05)) !important;
+    border-color: color-mix(in oklch, var(--accent-color) 45%, rgba(255, 255, 255, 0.2)) !important;
+}
+
+[data-theme="obsidian-minimal"] .tops-type-btn.is-active {
+    background: color-mix(in oklch, var(--accent-color) 20%, rgba(255, 255, 255, 0.08)) !important;
+    border-color: var(--accent-color) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 14px var(--accent-glow) !important;
+}
+
+[data-theme="obsidian-minimal"] .tops-search-item {
+    border-radius: 6px !important;
+    background: rgba(255, 255, 255, 0.025) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+[data-theme="obsidian-minimal"] .tops-search-item:hover {
+    background: color-mix(in oklch, var(--accent-color) 12%, rgba(255, 255, 255, 0.05)) !important;
+    border-color: color-mix(in oklch, var(--accent-color) 45%, rgba(255, 255, 255, 0.2)) !important;
+}
+
+/* ----------------------------------------------------
+   9. AVATAR & BANNER DOKUNUŞLARI
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] .avatar-box {
     border: 2px solid rgba(255, 255, 255, 0.15) !important;
@@ -442,7 +553,7 @@
 }
 
 /* ----------------------------------------------------
-   9. SÜRÜKLE-BIRAK (POINTER DRAG) GEÇİŞ SABİTLEME
+   10. SÜRÜKLE-BIRAK (POINTER DRAG) GEÇİŞ SABİTLEME
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] body.is-pointer-dragging .tag-pill,
 [data-theme="obsidian-minimal"] body.is-pointer-dragging .tag-pill:hover,
