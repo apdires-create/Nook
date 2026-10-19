@@ -152,10 +152,10 @@
 }
 
 /* ----------------------------------------------------
-   3.2. KARTIN ÜST VE ARKA ALT KISMINDAN SÜZÜLEN IŞIK GRADYANI
+   3.2. KARTIN ÜST VE ARKA/COMPANION ALT KISMINDAN SÜZÜLEN IŞIK GRADYANI
    ---------------------------------------------------- */
-[data-theme="obsidian-minimal"] .card-front::before,
-[data-theme="obsidian-minimal"] .companion-card::before {
+/* Ön Yüz: Işık üstten aşağıya süzülür (Banner ve Kimlik Alanı) */
+[data-theme="obsidian-minimal"] .card-front::before {
     content: '';
     position: absolute;
     top: 0;
@@ -173,18 +173,19 @@
     animation: cardTopGlowBreathing 5s ease-in-out infinite;
 }
 
-/* Arka Yüz: Işık alttan yukarıya süzülür (Link okunabilirliği ve alt boşluk estetiği) */
-[data-theme="obsidian-minimal"] .card-back::before {
+/* Arka Yüz ve Companion (Showcase / Trophies): Işık alttan yukarıya süzülür */
+[data-theme="obsidian-minimal"] .card-back::before,
+[data-theme="obsidian-minimal"] .companion-card::before {
     content: '';
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 55cqh;
+    height: 52cqh;
     background: linear-gradient(
         to top,
-        color-mix(in oklch, var(--accent-color) 26%, transparent) 0%,
-        color-mix(in oklch, var(--accent-color) 9%, transparent) 38%,
+        color-mix(in oklch, var(--accent-color) 24%, transparent) 0%,
+        color-mix(in oklch, var(--accent-color) 8%, transparent) 38%,
         transparent 100%
     );
     pointer-events: none;
