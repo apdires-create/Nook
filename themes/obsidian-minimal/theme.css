@@ -446,9 +446,51 @@
 /* 8.1. Liste İçerik Kartı (Normal ve Büyük Genişlemiş Durum) */
 [data-theme="obsidian-minimal"] .top-item-card {
     background: rgba(255, 255, 255, 0.025) !important;
-    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-color: rgba(255, 255, 255, 0.07);
     border-radius: var(--radius-item) !important;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 3px 10px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 💎 Obsidian Hiyerarşi & Madalya Kenarlıkları (Cevher / Mineral Işıltısı) */
+/* 🥇 Altın (Gold Obsidian): Sıcak şampanya altın cevheri ve ışıltısı */
+[data-theme="obsidian-minimal"] .top-item-card.tier-gold {
+    border-color: rgba(245, 158, 11, 0.55) !important;
+    box-shadow: inset 0 1px 0 rgba(245, 158, 11, 0.25),
+                0 4px 16px rgba(0, 0, 0, 0.5),
+                0 0 14px rgba(245, 158, 11, 0.18) !important;
+}
+[data-theme="obsidian-minimal"] .top-item-rank.tier-gold {
+    color: #fbbf24 !important;
+    background: rgba(245, 158, 11, 0.12) !important;
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+/* 🥈 Gümüş (Silver / Platin): Buzul platin parlaklığı, soğuk titanyum aurası */
+[data-theme="obsidian-minimal"] .top-item-card.tier-silver {
+    border-color: rgba(203, 213, 225, 0.45) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                0 4px 16px rgba(0, 0, 0, 0.5),
+                0 0 14px rgba(148, 163, 184, 0.16) !important;
+}
+[data-theme="obsidian-minimal"] .top-item-rank.tier-silver {
+    color: #f1f5f9 !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+/* 🥉 Bronz (Deep Copper / Amber): Derin kehribar bakır ışıltısı */
+[data-theme="obsidian-minimal"] .top-item-card.tier-bronze {
+    border-color: rgba(249, 115, 22, 0.45) !important;
+    box-shadow: inset 0 1px 0 rgba(249, 115, 22, 0.2),
+                0 4px 16px rgba(0, 0, 0, 0.5),
+                0 0 14px rgba(234, 88, 12, 0.15) !important;
+}
+[data-theme="obsidian-minimal"] .top-item-rank.tier-bronze {
+    color: #fb923c !important;
+    background: rgba(234, 88, 12, 0.12) !important;
+    border: 1px solid rgba(249, 115, 22, 0.28) !important;
 }
 
 [data-theme="obsidian-minimal"] .top-item-thumb {
