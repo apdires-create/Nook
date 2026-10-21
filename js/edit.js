@@ -656,15 +656,14 @@ EditManager.Appearance = {
             this.colorPaletteEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
                 btn.onclick = (e) => {
                     e.stopPropagation();
-                    const presetId = btn.dataset.preset || btn.dataset.paletteId;
-                    this.renkSec(btn.dataset.color, presetId, btn.dataset.name, true);
+                    this.renkSec(btn.dataset.color, btn.dataset.name, true);
                 };
             });
         }
 
         if (this.colorInputEl) {
             this.colorInputEl.oninput = (e) => {
-                this.renkSec(e.target.value, 'custom', null, true);
+                this.renkSec(e.target.value, null, true);
             };
         }
 
@@ -686,21 +685,18 @@ EditManager.Appearance = {
         // Orijinal ve Geçici Durumları Başlat
         const currentThemeId = kartVerisi?.theme_config?.theme_id || 'default';
         const currentPrimaryColor = kartVerisi?.theme_config?.primary_color || '#a855f7';
-        const currentPreset = kartVerisi?.theme_config?.preset || null;
 
         this.originalState = {
             themeId: currentThemeId,
-            primaryColor: currentPrimaryColor,
-            preset: currentPreset
+            primaryColor: currentPrimaryColor
         };
         this.tempState = {
             themeId: currentThemeId,
-            primaryColor: currentPrimaryColor,
-            preset: currentPreset
+            primaryColor: currentPrimaryColor
         };
 
         this.temalariCiz();
-        this.renkSec(this.tempState.primaryColor, this.tempState.preset, null, false);
+        this.renkSec(this.tempState.primaryColor, null, false);
 
         // Arka planda veritabanı envanterini de tazele ve kartları yeniden çiz
         if (typeof ThemeMarket !== 'undefined' && typeof ThemeMarket.kullaniciEnvanteriniYukle === 'function') {
@@ -726,7 +722,7 @@ EditManager.Appearance = {
 
         // Eğer geçici değişiklikler yapılmışsa ve kaydedilmemişse orijinal temaya/renge geri dön
         if (this.originalState) {
-            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor, this.originalState.preset);
+            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor);
         }
 
         const userDropdown = document.getElementById('profile-user-dropdown');
@@ -781,35 +777,35 @@ EditManager.Appearance = {
         });
     },
 
+    // 7 İmza Renk ve Küratör İsim Lookup Haritası
+    CURATED_COLORS: {
+        '#a855f7': 'Void Violet',
+        '#e03131': 'Blood Obsidian',
+        '#2f9e44': 'Cyber Emerald',
+        '#f59f00': 'Amber Gold',
+        '#3b5bdb': 'Sapphire Abyss',
+        '#1098ad': 'Electric Cyan',
+        '#f4f4f5': 'Titanium Monocle'
+    },
+
     temaSec(themeId) {
         this.tempState.themeId = themeId;
         this.temalariCiz();
-        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.preset);
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
     },
 
-    renkSec(color, preset = null, presetName = null, apply = true) {
+    renkSec(color, presetName = null, apply = true) {
         if (!color) return;
+        const normalizedHex = color.trim().toLowerCase();
         this.tempState.primaryColor = color;
 
-        // Eğer preset belirtilmemişse veya 'default' ise mevcut butonlardan renkle eşleşeni bul
-        let matchedBtn = null;
-        if (this.colorPaletteEl) {
-            matchedBtn = Array.from(this.colorPaletteEl.querySelectorAll('.color-swatch-btn')).find(btn => 
-                (preset && preset !== 'custom' && (btn.dataset.preset === preset || btn.dataset.paletteId === preset)) ||
-                (!preset && btn.dataset.color?.toLowerCase() === color.toLowerCase())
-            );
-        }
-
-        const effectivePreset = (preset && preset !== 'custom') 
-            ? preset 
-            : (matchedBtn ? (matchedBtn.dataset.preset || matchedBtn.dataset.paletteId) : 'custom');
-        const effectiveName = presetName || (matchedBtn ? matchedBtn.dataset.name : null);
-        this.tempState.preset = effectivePreset;
+        // Küratör isim kontrolü (Haritadan veya swatch butonundan)
+        const curatedName = presetName || this.CURATED_COLORS[normalizedHex] || null;
 
         // appearance-color-hex başlığını ve ışıma efektini güncelle
         if (this.colorHexEl) {
-            if (effectivePreset !== 'custom' && effectiveName) {
-                this.colorHexEl.textContent = effectiveName;
+            if (curatedName) {
+                this.colorHexEl.textContent = curatedName;
                 this.colorHexEl.classList.remove('is-custom');
                 this.colorHexEl.style.color = color;
                 this.colorHexEl.style.textShadow = `0 0 10px ${color}88, 0 0 20px ${color}55`;
@@ -825,11 +821,8 @@ EditManager.Appearance = {
 
         if (this.colorPaletteEl) {
             this.colorPaletteEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
-                const btnPreset = btn.dataset.preset || btn.dataset.paletteId;
-                const isActive = (effectivePreset !== 'custom')
-                    ? btnPreset === effectivePreset
-                    : btn.dataset.color.toLowerCase() === color.toLowerCase();
-                btn.classList.toggle('is-active', isActive);
+                const isMatch = btn.dataset.color.toLowerCase() === normalizedHex;
+                btn.classList.toggle('is-active', isMatch);
             });
         }
 
@@ -837,17 +830,16 @@ EditManager.Appearance = {
         if (themeDot) themeDot.style.background = color;
 
         if (apply) {
-            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.preset);
+            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
         }
     },
 
-    geciciUygula(themeId, color, preset = null) {
+    geciciUygula(themeId, color) {
         if (typeof ThemeManager !== 'undefined') {
             const themeObj = this.availableThemes.find(t => t.id === themeId);
             ThemeManager.applyTheme(themeId, {
                 fontUrl: themeObj?.font_url,
-                primaryColor: color,
-                preset: preset || this.tempState.preset
+                primaryColor: color
             });
         }
     },
@@ -864,7 +856,7 @@ EditManager.Appearance = {
         this.freezeEditMode();
 
         // Temayı ve rengi geçici uygula
-        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.preset);
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
 
         // Önizleme barını göster ve yapılandır
         if (this.previewBarEl) {
@@ -1023,16 +1015,13 @@ EditManager.Appearance = {
         if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
         kartVerisi.theme_config.theme_id = this.tempState.themeId;
         kartVerisi.theme_config.primary_color = this.tempState.primaryColor;
-        kartVerisi.theme_config.preset = this.tempState.preset || 'default';
-        if ('palette_id' in kartVerisi.theme_config) {
-            delete kartVerisi.theme_config.palette_id;
-        }
+        // Eski veya geçersiz anahtarları temizle
+        if ('palette_id' in kartVerisi.theme_config) delete kartVerisi.theme_config.palette_id;
 
         // Orijinal state'i güncelle
         this.originalState = {
             themeId: this.tempState.themeId,
-            primaryColor: this.tempState.primaryColor,
-            preset: this.tempState.preset
+            primaryColor: this.tempState.primaryColor
         };
 
         const client = (typeof supabaseClient !== 'undefined' && supabaseClient) || null;
@@ -1051,7 +1040,6 @@ EditManager.Appearance = {
                     if (!EditManager.state.orijinalVeri.theme_config) EditManager.state.orijinalVeri.theme_config = {};
                     EditManager.state.orijinalVeri.theme_config.theme_id = this.tempState.themeId;
                     EditManager.state.orijinalVeri.theme_config.primary_color = this.tempState.primaryColor;
-                    EditManager.state.orijinalVeri.theme_config.preset = this.tempState.preset;
                     if ('palette_id' in EditManager.state.orijinalVeri.theme_config) {
                         delete EditManager.state.orijinalVeri.theme_config.palette_id;
                     }

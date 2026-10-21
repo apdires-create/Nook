@@ -62,14 +62,7 @@ const ThemeManager = {
             document.documentElement.setAttribute('data-theme', safeThemeId);
             this.currentThemeId = safeThemeId;
 
-            // 5. Palet / Preset ve Vurgu Rengini uygula
-            const preset = options.preset || options.paletteId || (typeof kartVerisi !== 'undefined' && (kartVerisi?.theme_config?.preset || kartVerisi?.theme_config?.palette_id));
-            if (preset && preset !== 'default') {
-                document.documentElement.setAttribute('data-palette', preset);
-            } else {
-                document.documentElement.removeAttribute('data-palette');
-            }
-
+            // 5. Vurgu rengini uygula (OKLCH formülü kök rengi otomatik türetir)
             const primaryColor = options.primaryColor || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.primary_color);
             if (this.isValidHexColor(primaryColor)) {
                 document.documentElement.style.setProperty('--accent-color', primaryColor.trim());
