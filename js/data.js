@@ -339,14 +339,16 @@ function yerelOnbellekYukle() {
         // Tema ve rengini önbellekten hemen uygula (FOUC önleyici 0ms)
         if (typeof ThemeManager !== 'undefined') {
             const userThemeId = kartVerisi.theme_config?.theme_id || 'default';
+            const userPreset = kartVerisi.theme_config?.preset || kartVerisi.theme_config?.palette_id;
             ThemeManager.applyTheme(userThemeId, {
                 primaryColor: kartVerisi.theme_config?.primary_color,
-                paletteId: kartVerisi.theme_config?.palette_id
+                preset: userPreset
             });
         } else if (kartVerisi.theme_config?.primary_color) {
             document.documentElement.style.setProperty('--accent-color', kartVerisi.theme_config.primary_color);
-            if (kartVerisi.theme_config?.palette_id) {
-                document.documentElement.setAttribute('data-palette', kartVerisi.theme_config.palette_id);
+            const userPreset = kartVerisi.theme_config?.preset || kartVerisi.theme_config?.palette_id;
+            if (userPreset && userPreset !== 'default') {
+                document.documentElement.setAttribute('data-palette', userPreset);
             }
         }
 

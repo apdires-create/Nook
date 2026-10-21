@@ -656,7 +656,8 @@ EditManager.Appearance = {
             this.colorPaletteEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
                 btn.onclick = (e) => {
                     e.stopPropagation();
-                    this.renkSec(btn.dataset.color, btn.dataset.paletteId, btn.dataset.name, true);
+                    const presetId = btn.dataset.preset || btn.dataset.paletteId;
+                    this.renkSec(btn.dataset.color, presetId, btn.dataset.name, true);
                 };
             });
         }
@@ -685,21 +686,21 @@ EditManager.Appearance = {
         // Orijinal ve Geçici Durumları Başlat
         const currentThemeId = kartVerisi?.theme_config?.theme_id || 'default';
         const currentPrimaryColor = kartVerisi?.theme_config?.primary_color || '#a855f7';
-        const currentPaletteId = kartVerisi?.theme_config?.palette_id || null;
+        const currentPreset = kartVerisi?.theme_config?.preset || null;
 
         this.originalState = {
             themeId: currentThemeId,
             primaryColor: currentPrimaryColor,
-            paletteId: currentPaletteId
+            preset: currentPreset
         };
         this.tempState = {
             themeId: currentThemeId,
             primaryColor: currentPrimaryColor,
-            paletteId: currentPaletteId
+            preset: currentPreset
         };
 
         this.temalariCiz();
-        this.renkSec(this.tempState.primaryColor, this.tempState.paletteId, null, false);
+        this.renkSec(this.tempState.primaryColor, this.tempState.preset, null, false);
 
         // Arka planda veritabanı envanterini de tazele ve kartları yeniden çiz
         if (typeof ThemeMarket !== 'undefined' && typeof ThemeMarket.kullaniciEnvanteriniYukle === 'function') {
@@ -725,7 +726,7 @@ EditManager.Appearance = {
 
         // Eğer geçici değişiklikler yapılmışsa ve kaydedilmemişse orijinal temaya/renge geri dön
         if (this.originalState) {
-            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor, this.originalState.paletteId);
+            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor, this.originalState.preset);
         }
 
         const userDropdown = document.getElementById('profile-user-dropdown');
@@ -783,29 +784,31 @@ EditManager.Appearance = {
     temaSec(themeId) {
         this.tempState.themeId = themeId;
         this.temalariCiz();
-        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.paletteId);
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.preset);
     },
 
-    renkSec(color, paletteId = null, paletteName = null, apply = true) {
+    renkSec(color, preset = null, presetName = null, apply = true) {
         if (!color) return;
         this.tempState.primaryColor = color;
 
-        // Eğer paletteId belirtilmemişse mevcut butonlardan renkle eşleşeni bul
+        // Eğer preset belirtilmemişse veya 'default' ise mevcut butonlardan renkle eşleşeni bul
         let matchedBtn = null;
         if (this.colorPaletteEl) {
             matchedBtn = Array.from(this.colorPaletteEl.querySelectorAll('.color-swatch-btn')).find(btn => 
-                (paletteId && btn.dataset.paletteId === paletteId) ||
-                (!paletteId && btn.dataset.color?.toLowerCase() === color.toLowerCase())
+                (preset && preset !== 'custom' && (btn.dataset.preset === preset || btn.dataset.paletteId === preset)) ||
+                (!preset && btn.dataset.color?.toLowerCase() === color.toLowerCase())
             );
         }
 
-        const effectivePaletteId = paletteId || (matchedBtn ? matchedBtn.dataset.paletteId : 'custom');
-        const effectiveName = paletteName || (matchedBtn ? matchedBtn.dataset.name : null);
-        this.tempState.paletteId = effectivePaletteId;
+        const effectivePreset = (preset && preset !== 'custom') 
+            ? preset 
+            : (matchedBtn ? (matchedBtn.dataset.preset || matchedBtn.dataset.paletteId) : 'custom');
+        const effectiveName = presetName || (matchedBtn ? matchedBtn.dataset.name : null);
+        this.tempState.preset = effectivePreset;
 
         // appearance-color-hex başlığını ve ışıma efektini güncelle
         if (this.colorHexEl) {
-            if (effectivePaletteId !== 'custom' && effectiveName) {
+            if (effectivePreset !== 'custom' && effectiveName) {
                 this.colorHexEl.textContent = effectiveName;
                 this.colorHexEl.classList.remove('is-custom');
                 this.colorHexEl.style.color = color;
@@ -822,8 +825,9 @@ EditManager.Appearance = {
 
         if (this.colorPaletteEl) {
             this.colorPaletteEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
-                const isActive = (effectivePaletteId !== 'custom')
-                    ? btn.dataset.paletteId === effectivePaletteId
+                const btnPreset = btn.dataset.preset || btn.dataset.paletteId;
+                const isActive = (effectivePreset !== 'custom')
+                    ? btnPreset === effectivePreset
                     : btn.dataset.color.toLowerCase() === color.toLowerCase();
                 btn.classList.toggle('is-active', isActive);
             });
@@ -833,17 +837,17 @@ EditManager.Appearance = {
         if (themeDot) themeDot.style.background = color;
 
         if (apply) {
-            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.paletteId);
+            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.preset);
         }
     },
 
-    geciciUygula(themeId, color, paletteId = null) {
+    geciciUygula(themeId, color, preset = null) {
         if (typeof ThemeManager !== 'undefined') {
             const themeObj = this.availableThemes.find(t => t.id === themeId);
             ThemeManager.applyTheme(themeId, {
                 fontUrl: themeObj?.font_url,
                 primaryColor: color,
-                paletteId: paletteId || this.tempState.paletteId
+                preset: preset || this.tempState.preset
             });
         }
     },
@@ -860,7 +864,7 @@ EditManager.Appearance = {
         this.freezeEditMode();
 
         // Temayı ve rengi geçici uygula
-        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.paletteId);
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.preset);
 
         // Önizleme barını göster ve yapılandır
         if (this.previewBarEl) {
@@ -1019,13 +1023,16 @@ EditManager.Appearance = {
         if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
         kartVerisi.theme_config.theme_id = this.tempState.themeId;
         kartVerisi.theme_config.primary_color = this.tempState.primaryColor;
-        kartVerisi.theme_config.palette_id = this.tempState.paletteId;
+        kartVerisi.theme_config.preset = this.tempState.preset || 'default';
+        if ('palette_id' in kartVerisi.theme_config) {
+            delete kartVerisi.theme_config.palette_id;
+        }
 
         // Orijinal state'i güncelle
         this.originalState = {
             themeId: this.tempState.themeId,
             primaryColor: this.tempState.primaryColor,
-            paletteId: this.tempState.paletteId
+            preset: this.tempState.preset
         };
 
         const client = (typeof supabaseClient !== 'undefined' && supabaseClient) || null;
@@ -1044,7 +1051,10 @@ EditManager.Appearance = {
                     if (!EditManager.state.orijinalVeri.theme_config) EditManager.state.orijinalVeri.theme_config = {};
                     EditManager.state.orijinalVeri.theme_config.theme_id = this.tempState.themeId;
                     EditManager.state.orijinalVeri.theme_config.primary_color = this.tempState.primaryColor;
-                    EditManager.state.orijinalVeri.theme_config.palette_id = this.tempState.paletteId;
+                    EditManager.state.orijinalVeri.theme_config.preset = this.tempState.preset;
+                    if ('palette_id' in EditManager.state.orijinalVeri.theme_config) {
+                        delete EditManager.state.orijinalVeri.theme_config.palette_id;
+                    }
                 }
 
                 // Yerel önbelleği güncelle

@@ -62,12 +62,11 @@ const ThemeManager = {
             document.documentElement.setAttribute('data-theme', safeThemeId);
             this.currentThemeId = safeThemeId;
 
-            // 5. Palet ve Vurgu Rengini uygula
-            const paletteId = options.paletteId || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.palette_id);
-            if (paletteId) {
-                document.documentElement.setAttribute('data-palette', paletteId);
+            // 5. Palet / Preset ve Vurgu Rengini uygula
+            const preset = options.preset || options.paletteId || (typeof kartVerisi !== 'undefined' && (kartVerisi?.theme_config?.preset || kartVerisi?.theme_config?.palette_id));
+            if (preset && preset !== 'default') {
+                document.documentElement.setAttribute('data-palette', preset);
             } else {
-                // Eğer kayıtlı bir palet id yoksa ama renk varsa
                 document.documentElement.removeAttribute('data-palette');
             }
 
