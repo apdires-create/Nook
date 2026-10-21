@@ -340,10 +340,14 @@ function yerelOnbellekYukle() {
         if (typeof ThemeManager !== 'undefined') {
             const userThemeId = kartVerisi.theme_config?.theme_id || 'default';
             ThemeManager.applyTheme(userThemeId, {
-                primaryColor: kartVerisi.theme_config?.primary_color
+                primaryColor: kartVerisi.theme_config?.primary_color,
+                paletteId: kartVerisi.theme_config?.palette_id
             });
         } else if (kartVerisi.theme_config?.primary_color) {
             document.documentElement.style.setProperty('--accent-color', kartVerisi.theme_config.primary_color);
+            if (kartVerisi.theme_config?.palette_id) {
+                document.documentElement.setAttribute('data-palette', kartVerisi.theme_config.palette_id);
+            }
         }
 
         const loadingUserEl = document.getElementById('app-loading-user');

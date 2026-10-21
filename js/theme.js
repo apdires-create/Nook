@@ -62,7 +62,15 @@ const ThemeManager = {
             document.documentElement.setAttribute('data-theme', safeThemeId);
             this.currentThemeId = safeThemeId;
 
-            // 5. Vurgu rengini koru / uygula (Kullanıcının tercihi temaya hükmeder)
+            // 5. Palet ve Vurgu Rengini uygula
+            const paletteId = options.paletteId || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.palette_id);
+            if (paletteId) {
+                document.documentElement.setAttribute('data-palette', paletteId);
+            } else {
+                // Eğer kayıtlı bir palet id yoksa ama renk varsa
+                document.documentElement.removeAttribute('data-palette');
+            }
+
             const primaryColor = options.primaryColor || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.primary_color);
             if (this.isValidHexColor(primaryColor)) {
                 document.documentElement.style.setProperty('--accent-color', primaryColor.trim());
@@ -97,6 +105,7 @@ const ThemeManager = {
         }
 
         document.documentElement.removeAttribute('data-theme');
+        document.documentElement.removeAttribute('data-palette');
         this.currentThemeId = null;
 
         // Vurgu rengini koru / sıfırla

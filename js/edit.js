@@ -656,14 +656,14 @@ EditManager.Appearance = {
             this.colorPaletteEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
                 btn.onclick = (e) => {
                     e.stopPropagation();
-                    this.renkSec(btn.dataset.color);
+                    this.renkSec(btn.dataset.color, btn.dataset.paletteId, btn.dataset.name, true);
                 };
             });
         }
 
         if (this.colorInputEl) {
             this.colorInputEl.oninput = (e) => {
-                this.renkSec(e.target.value);
+                this.renkSec(e.target.value, 'custom', null, true);
             };
         }
 
@@ -684,19 +684,22 @@ EditManager.Appearance = {
 
         // Orijinal ve Geçici Durumları Başlat
         const currentThemeId = kartVerisi?.theme_config?.theme_id || 'default';
-        const currentPrimaryColor = kartVerisi?.theme_config?.primary_color || '#3b5bdb';
+        const currentPrimaryColor = kartVerisi?.theme_config?.primary_color || '#a855f7';
+        const currentPaletteId = kartVerisi?.theme_config?.palette_id || null;
 
         this.originalState = {
             themeId: currentThemeId,
-            primaryColor: currentPrimaryColor
+            primaryColor: currentPrimaryColor,
+            paletteId: currentPaletteId
         };
         this.tempState = {
             themeId: currentThemeId,
-            primaryColor: currentPrimaryColor
+            primaryColor: currentPrimaryColor,
+            paletteId: currentPaletteId
         };
 
         this.temalariCiz();
-        this.renkSec(this.tempState.primaryColor, false);
+        this.renkSec(this.tempState.primaryColor, this.tempState.paletteId, null, false);
 
         // Arka planda veritabanı envanterini de tazele ve kartları yeniden çiz
         if (typeof ThemeMarket !== 'undefined' && typeof ThemeMarket.kullaniciEnvanteriniYukle === 'function') {
@@ -722,7 +725,7 @@ EditManager.Appearance = {
 
         // Eğer geçici değişiklikler yapılmışsa ve kaydedilmemişse orijinal temaya/renge geri dön
         if (this.originalState) {
-            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor);
+            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor, this.originalState.paletteId);
         }
 
         const userDropdown = document.getElementById('profile-user-dropdown');
@@ -780,18 +783,49 @@ EditManager.Appearance = {
     temaSec(themeId) {
         this.tempState.themeId = themeId;
         this.temalariCiz();
-        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.paletteId);
     },
 
-    renkSec(color, apply = true) {
+    renkSec(color, paletteId = null, paletteName = null, apply = true) {
         if (!color) return;
         this.tempState.primaryColor = color;
-        if (this.colorHexEl) this.colorHexEl.textContent = color.toUpperCase();
+
+        // Eğer paletteId belirtilmemişse mevcut butonlardan renkle eşleşeni bul
+        let matchedBtn = null;
+        if (this.colorPaletteEl) {
+            matchedBtn = Array.from(this.colorPaletteEl.querySelectorAll('.color-swatch-btn')).find(btn => 
+                (paletteId && btn.dataset.paletteId === paletteId) ||
+                (!paletteId && btn.dataset.color?.toLowerCase() === color.toLowerCase())
+            );
+        }
+
+        const effectivePaletteId = paletteId || (matchedBtn ? matchedBtn.dataset.paletteId : 'custom');
+        const effectiveName = paletteName || (matchedBtn ? matchedBtn.dataset.name : null);
+        this.tempState.paletteId = effectivePaletteId;
+
+        // appearance-color-hex başlığını ve ışıma efektini güncelle
+        if (this.colorHexEl) {
+            if (effectivePaletteId !== 'custom' && effectiveName) {
+                this.colorHexEl.textContent = effectiveName;
+                this.colorHexEl.classList.remove('is-custom');
+                this.colorHexEl.style.color = color;
+                this.colorHexEl.style.textShadow = `0 0 10px ${color}88, 0 0 20px ${color}55`;
+            } else {
+                this.colorHexEl.textContent = color.toUpperCase();
+                this.colorHexEl.classList.add('is-custom');
+                this.colorHexEl.style.color = '';
+                this.colorHexEl.style.textShadow = '';
+            }
+        }
+
         if (this.colorInputEl) this.colorInputEl.value = color;
 
         if (this.colorPaletteEl) {
             this.colorPaletteEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
-                btn.classList.toggle('is-active', btn.dataset.color.toLowerCase() === color.toLowerCase());
+                const isActive = (effectivePaletteId !== 'custom')
+                    ? btn.dataset.paletteId === effectivePaletteId
+                    : btn.dataset.color.toLowerCase() === color.toLowerCase();
+                btn.classList.toggle('is-active', isActive);
             });
         }
 
@@ -799,16 +833,17 @@ EditManager.Appearance = {
         if (themeDot) themeDot.style.background = color;
 
         if (apply) {
-            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
+            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.paletteId);
         }
     },
 
-    geciciUygula(themeId, color) {
+    geciciUygula(themeId, color, paletteId = null) {
         if (typeof ThemeManager !== 'undefined') {
             const themeObj = this.availableThemes.find(t => t.id === themeId);
             ThemeManager.applyTheme(themeId, {
                 fontUrl: themeObj?.font_url,
-                primaryColor: color
+                primaryColor: color,
+                paletteId: paletteId || this.tempState.paletteId
             });
         }
     },
@@ -825,7 +860,7 @@ EditManager.Appearance = {
         this.freezeEditMode();
 
         // Temayı ve rengi geçici uygula
-        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.paletteId);
 
         // Önizleme barını göster ve yapılandır
         if (this.previewBarEl) {
@@ -984,11 +1019,13 @@ EditManager.Appearance = {
         if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
         kartVerisi.theme_config.theme_id = this.tempState.themeId;
         kartVerisi.theme_config.primary_color = this.tempState.primaryColor;
+        kartVerisi.theme_config.palette_id = this.tempState.paletteId;
 
         // Orijinal state'i güncelle
         this.originalState = {
             themeId: this.tempState.themeId,
-            primaryColor: this.tempState.primaryColor
+            primaryColor: this.tempState.primaryColor,
+            paletteId: this.tempState.paletteId
         };
 
         const client = (typeof supabaseClient !== 'undefined' && supabaseClient) || null;
@@ -1007,6 +1044,7 @@ EditManager.Appearance = {
                     if (!EditManager.state.orijinalVeri.theme_config) EditManager.state.orijinalVeri.theme_config = {};
                     EditManager.state.orijinalVeri.theme_config.theme_id = this.tempState.themeId;
                     EditManager.state.orijinalVeri.theme_config.primary_color = this.tempState.primaryColor;
+                    EditManager.state.orijinalVeri.theme_config.palette_id = this.tempState.paletteId;
                 }
 
                 // Yerel önbelleği güncelle
