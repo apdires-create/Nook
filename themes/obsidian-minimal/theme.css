@@ -144,11 +144,12 @@
     border-radius: inherit;
     padding: 1.5px;
     background: radial-gradient(
-        260px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, -100px),
-        var(--accent-color) 0%,
-        color-mix(in oklch, var(--accent-color) 50%, transparent) 35%,
-        color-mix(in oklch, var(--accent-color) 15%, transparent) 60%,
-        transparent 80%
+        220px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, -100px),
+        color-mix(in oklch, #ffffff 65%, var(--accent-color)) 0%,
+        var(--accent-color) 16%,
+        color-mix(in oklch, var(--accent-color) 65%, transparent) 38%,
+        color-mix(in oklch, var(--accent-color) 25%, transparent) 62%,
+        transparent 85%
     );
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;

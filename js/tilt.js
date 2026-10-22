@@ -8,17 +8,21 @@ const TiltEngine = {
     mouseInWindow: false,
     currentTiltX: 0,
     currentTiltY: 0,
-    maxTilt: 2.2,
-    lerpSpeed: 0.08,
+    
+    // Tilt Konfigürasyonu (Dinamik Mesafe Duyarlı)
+    minTilt: 3.2,           // Kartın üzerindeyken veya tıklama alanındayken stabil tilt (derece)
+    maxTilt: 8.5,           // Karttan uzaklaşıldığında sahne derinliğini hissettiren belirgin tilt (derece)
+    lerpSpeed: 0.09,        // Yaylanma hızı
+
     isRunning: false,
     rafId: null,
     lastFrameTime: 0,
 
     // Orbit & Aydınlatma Konfigürasyonu
-    ORBIT_SPEED: 320,       // px / saniye (yaklaşık 5.5 - 6 saniyede tam tur)
-    PROXIMITY_PX: 180,      // Fare takip ve yakınlık menzili
-    AMBIENT_OPACITY: 0.50,  // Fare uzaktayken / otonom orbit esnasındaki canlı ortam ışıltısı
-    ACTIVE_OPACITY: 0.95,   // Kartın üzerinde veya odaklıyken tepe ışıma opasitesi
+    ORBIT_SPEED: 380,       // px / saniye (yaklaşık 4.7 saniyede tam tur; net ve akıcı hareket)
+    PROXIMITY_PX: 200,      // Fare takip ve yakınlık menzili
+    AMBIENT_OPACITY: 0.82,  // Pasif orbit esnasında canlı, net ve fark edilir ışıltı opasitesi
+    ACTIVE_OPACITY: 0.98,   // Kartın üzerinde veya odaklıyken tepe ışıma opasitesi
 
     // Her kart için bağımsız orbit, pozisyon ve lerp durumu
     cardStates: new WeakMap(),
@@ -273,16 +277,26 @@ const TiltEngine = {
         const isFlipped = (typeof Router !== 'undefined' && Router.isFlipped);
 
         // ========================================================
-        // 1. 3D TILT MOTORU GÜNCELLEMESİ
-        // Mouse takibi ve tilt SADECE kart ön yüzdeyken ve eşlikçi kart kapalıyken çalışır
+        // 1. 3D TILT MOTORU GÜNCELLEMESİ (DİNAMİK MESAFE DUYARLI)
+        // Kart üzerindeyken tıklama stabilitesi (minTilt: 3.2°),
+        // karttan uzaklaştıkça artan derinlikli sahne perspektifi (maxTilt: 8.5°)
         // ========================================================
         const canTilt = !isCompanionOpen && !isTransitioning && !isFlipped;
         let targetTiltX = 0;
         let targetTiltY = 0;
 
         if (canTilt) {
-            targetTiltX = -this.mouseY * this.maxTilt;
-            targetTiltY = this.mouseX * this.maxTilt;
+            const mainRect = this.cardContainer.getBoundingClientRect();
+            const mainDx = Math.max(mainRect.left - this.clientMouseX, 0, this.clientMouseX - mainRect.right);
+            const mainDy = Math.max(mainRect.top - this.clientMouseY, 0, this.clientMouseY - mainRect.bottom);
+            const mainDist = this.mouseInWindow ? Math.hypot(mainDx, mainDy) : Infinity;
+
+            // Mesafe eğrisi: 0px (kart üstünde) -> 350px (uzakta)
+            const distFactor = Math.min(mainDist / 350, 1);
+            const effectiveMaxTilt = this.minTilt + distFactor * (this.maxTilt - this.minTilt);
+
+            targetTiltX = -this.mouseY * effectiveMaxTilt;
+            targetTiltY = this.mouseX * effectiveMaxTilt;
         }
 
         this.currentTiltX += (targetTiltX - this.currentTiltX) * this.lerpSpeed;
@@ -366,7 +380,7 @@ const TiltEngine = {
                 state.currentY += (orbitPt.y - state.currentY) * 0.18;
 
                 // Opasite kuralı:
-                // Kart üzerindeyken (hover) tepe parlaklık (0.95), uzaktayken yaşayan ambient parlaklık (0.50)
+                // Kart üzerindeyken (hover) tepe parlaklık (0.98), uzaktayken canlı ambient parlaklık (0.82)
                 if (dist === 0) {
                     state.targetOpacity = this.ACTIVE_OPACITY;
                 } else if (dist < this.PROXIMITY_PX) {
