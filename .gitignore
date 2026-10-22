@@ -6,7 +6,8 @@ Thumbs.db
 # Veritabanı ve sunucusuz fonksiyon mimarisi (Özel)
 supabase/
 
-# Yerel geliştirici notları ve Proje Şartname Belgeleri
+# Yerel geliştirici notları ve Proje Rehberi
 tema düzenleme.txt
 notlar.txt
-project_*.md
+nook_guide.md
+
