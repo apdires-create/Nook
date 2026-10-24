@@ -4,7 +4,14 @@ const SUPABASE_ANON_KEY = 'sb_publishable_t5LYrH03nWrL1-tzhhXV4g_UF77mEAy';
 const supabaseClient = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 const urlParams = new URLSearchParams(window.location.search);
-const KULLANICI_ADI = urlParams.get('user')?.trim() || null;
+const KULLANICI_ADI = (typeof getBootstrapUser === 'function') ? getBootstrapUser() : null;
+
+function buildProfileUrl(username) {
+    if (!username) return window.location.origin;
+    const isSubfolder = window.location.pathname.startsWith('/Nook');
+    const basePath = isSubfolder ? '/Nook/' : '/';
+    return `${window.location.origin}${basePath}@${encodeURIComponent(username)}`;
+}
 
 let aktifKullaniciOturumu = null;
 let aktifKullaniciAdi = null;

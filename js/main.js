@@ -44,6 +44,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     // SENARYO B: URL PARAMETRESİ VARSA -> 5:7 PROFİL KARTI
     // ========================================================
     document.title = `Nook - @${KULLANICI_ADI}`;
+
+    // Adres çubuğunu /@kullanici formatına normalize et
+    try {
+        const isSubfolder = window.location.pathname.startsWith('/Nook');
+        const basePath = isSubfolder ? '/Nook/' : '/';
+        const targetPath = `${basePath}@${KULLANICI_ADI}`;
+        if (window.location.pathname !== targetPath) {
+            window.history.replaceState(null, document.title, targetPath + window.location.search + window.location.hash);
+        }
+    } catch (e) {
+        console.warn('URL normalization failed:', e);
+    }
     if (landingScreen) landingScreen.style.display = 'none';
     if (profileStage) profileStage.style.display = 'none';
     if (profileTopNav) profileTopNav.style.display = 'none';

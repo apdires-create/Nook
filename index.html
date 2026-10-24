@@ -8,10 +8,33 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Erken Tema & Font Bootstrap (Zero Waste Critical Asset Loading) -->
     <script>
+        // 1. GitHub Pages SPA Yönlendirmesini Yakala (sessionStorage)
         (function() {
             try {
-                var params = new URLSearchParams(window.location.search);
-                var user = params.get('user');
+                var redirect = sessionStorage.getItem('nook_spa_redirect');
+                if (redirect) {
+                    sessionStorage.removeItem('nook_spa_redirect');
+                    window.history.replaceState(null, document.title, redirect);
+                }
+            } catch(e) {}
+        })();
+
+        // 2. Kullanıcı Adını SADECE /@kullanici Formatından Al
+        function getBootstrapUser() {
+            try {
+                var path = window.location.pathname;
+                var cleanPath = path.replace(/^\/Nook\/?/i, '/');
+                var match = cleanPath.match(/^\/@([a-zA-Z0-9_]{3,20})(?:\/.*)?$/);
+                if (match) {
+                    return match[1];
+                }
+            } catch(e) {}
+            return null;
+        }
+
+        (function() {
+            try {
+                var user = getBootstrapUser();
                 var themeId = 'default';
                 var fontUrl = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap';
                 var primaryColor = null;
@@ -99,7 +122,7 @@
 
     <script>
         // Profil açılıyorsa ilk frame'den itibaren siyah yükleme ekranını hazırla
-        const initialUserParam = new URLSearchParams(window.location.search).get('user')?.trim();
+        const initialUserParam = (typeof getBootstrapUser === 'function') ? getBootstrapUser() : new URLSearchParams(window.location.search).get('user')?.trim();
         if (initialUserParam) {
             document.documentElement.classList.add('is-profile-loading');
         }
@@ -422,6 +445,7 @@
 
         <!-- SOL SAHNE: TROPHIES EŞLİKÇİ KART (TROPHIES WING) -->
         <div class="companion-card trophies-companion-card" id="trophiesCompanionCard" style="display: none;">
+            <div class="theme-overlay" aria-hidden="true"></div>
             <!-- Trophies Kök İçerik Alanı (Master & Detail) -->
             <div class="companion-view-master" id="trophiesMasterView">
                 <div class="companion-header">
@@ -484,6 +508,7 @@
 
         <!-- SAĞ SAHNE: TOPS EŞLİKÇİ KART (SHOWCASE WING) -->
         <div class="companion-card tops-companion-card" id="topsCompanionCard" style="display: none;">
+            <div class="theme-overlay" aria-hidden="true"></div>
             <!-- Showcase Kök Liste Ekranı (Master View) -->
             <div class="companion-view-master" id="showcaseMasterView">
                 <div class="companion-header">

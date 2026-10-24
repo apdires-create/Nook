@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <title>Nook</title>
+    <script>
+        // GitHub Pages SPA Yönlendirici: Sadece /@kullanici rotalarını ana sayfaya taşır
+        (function() {
+            var path = window.location.pathname;
+            var isSubfolder = path.indexOf('/Nook') === 0;
+            var cleanPath = path.replace(/^\/Nook\/?/i, '/');
+            if (/^\/@([a-zA-Z0-9_]{3,20})(?:\/.*)?$/.test(cleanPath)) {
+                sessionStorage.setItem('nook_spa_redirect', path + window.location.search + window.location.hash);
+            }
+            window.location.replace(isSubfolder ? '/Nook/' : '/');
+        })();
+    </script>
+</head>
+<body>
+</body>
+</html>
