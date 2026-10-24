@@ -9,10 +9,11 @@ const TiltEngine = {
     currentTiltX: 0,
     currentTiltY: 0,
     
-    // Tilt Konfigürasyonu (Dinamik Mesafe Duyarlı)
+    // Tilt & Takip Konfigürasyonu (Dinamik Mesafe Duyarlı)
     minTilt: 3.2,           // Kartın üzerindeyken veya tıklama alanındayken stabil tilt (derece)
-    maxTilt: 8.5,           // Karttan uzaklaşıldığında sahne derinliğini hissettiren belirgin tilt (derece)
-    lerpSpeed: 0.09,        // Yaylanma hızı
+    maxTilt: 8.5,           // Kart kenarındayken hissedilen zirve 3D derinlik (derece)
+    lerpSpeed: 0.09,        // Yaylanma ve düzleşme hızı
+    TRACK_RANGE_PX: 260,    // Kartın etrafındaki aktif 3D takip alanı / menzili (px)
 
     isRunning: false,
     rafId: null,
@@ -20,7 +21,6 @@ const TiltEngine = {
 
     // Orbit & Aydınlatma Konfigürasyonu
     ORBIT_SPEED: 380,       // px / saniye (yaklaşık 4.7 saniyede tam tur; net ve akıcı hareket)
-    PROXIMITY_PX: 200,      // Fare takip ve yakınlık menzili
     AMBIENT_OPACITY: 0.82,  // Pasif orbit esnasında canlı, net ve fark edilir ışıltı opasitesi
     ACTIVE_OPACITY: 0.98,   // Kartın üzerinde veya odaklıyken tepe ışıma opasitesi
 
@@ -43,24 +43,24 @@ const TiltEngine = {
             this.wake();
         }, { passive: true });
 
-        // 2. Fare pencereden ayrıldığında veya sekme odağını kaybettiğinde
-        window.addEventListener('mouseleave', () => {
+        // 2. Fare pencereden / sayfadan ayrıldığında (sayfa dışı)
+        const handleMouseLeave = () => {
             this.mouseInWindow = false;
             this.clientMouseX = -9999;
             this.clientMouseY = -9999;
             this.mouseX = 0;
             this.mouseY = 0;
             this.wake();
-        });
+        };
 
-        window.addEventListener('blur', () => {
-            this.mouseInWindow = false;
-            this.clientMouseX = -9999;
-            this.clientMouseY = -9999;
-            this.mouseX = 0;
-            this.mouseY = 0;
-            this.wake();
+        window.addEventListener('mouseleave', handleMouseLeave);
+        document.documentElement.addEventListener('mouseleave', handleMouseLeave);
+        document.addEventListener('mouseout', (e) => {
+            if (!e.relatedTarget && !e.toElement) {
+                handleMouseLeave();
+            }
         });
+        window.addEventListener('blur', handleMouseLeave);
 
         // 3. Sekme gizlendiğinde CPU/Pil tasarrufu için döngüyü uyut
         document.addEventListener('visibilitychange', () => {
@@ -277,26 +277,41 @@ const TiltEngine = {
         const isFlipped = (typeof Router !== 'undefined' && Router.isFlipped);
 
         // ========================================================
-        // 1. 3D TILT MOTORU GÜNCELLEMESİ (DİNAMİK MESAFE DUYARLI)
-        // Kart üzerindeyken tıklama stabilitesi (minTilt: 3.2°),
-        // karttan uzaklaştıkça artan derinlikli sahne perspektifi (maxTilt: 8.5°)
+        // 1. 3D TILT MOTORU GÜNCELLEMESİ (TAKİP ALANI VE SAYFA DIŞI DUYARLI)
+        // İmleç sayfa dışındayken veya takip alanının (TRACK_RANGE_PX) dışına çıktığında
+        // kart pürüzsüzce tamamen düz (0deg, 0deg) hale gelir.
         // ========================================================
         const canTilt = !isCompanionOpen && !isTransitioning && !isFlipped;
         let targetTiltX = 0;
         let targetTiltY = 0;
 
-        if (canTilt) {
-            const mainRect = this.cardContainer.getBoundingClientRect();
-            const mainDx = Math.max(mainRect.left - this.clientMouseX, 0, this.clientMouseX - mainRect.right);
-            const mainDy = Math.max(mainRect.top - this.clientMouseY, 0, this.clientMouseY - mainRect.bottom);
-            const mainDist = this.mouseInWindow ? Math.hypot(mainDx, mainDy) : Infinity;
+        const mainRect = this.cardContainer.getBoundingClientRect();
+        const mainDx = Math.max(mainRect.left - this.clientMouseX, 0, this.clientMouseX - mainRect.right);
+        const mainDy = Math.max(mainRect.top - this.clientMouseY, 0, this.clientMouseY - mainRect.bottom);
+        const mainDist = this.mouseInWindow ? Math.hypot(mainDx, mainDy) : Infinity;
+        const isInsideTrackingArea = this.mouseInWindow && (mainDist < this.TRACK_RANGE_PX);
 
-            // Mesafe eğrisi: 0px (kart üstünde) -> 350px (uzakta)
-            const distFactor = Math.min(mainDist / 350, 1);
-            const effectiveMaxTilt = this.minTilt + distFactor * (this.maxTilt - this.minTilt);
+        if (canTilt && isInsideTrackingArea) {
+            const p = mainDist / this.TRACK_RANGE_PX; // 0 (kart üstü) -> 1 (takip alanı sınırı)
+            
+            // Kart üstünde stabil (minTilt: 3.2°), kart kenarında zirve (maxTilt: 8.5°),
+            // takip alanı sınırına yaklaşırken pürüzsüzce 0°'ye yatışan akıllı eğri
+            let effTilt = 0;
+            if (p <= 0.45) {
+                effTilt = this.minTilt + (p / 0.45) * (this.maxTilt - this.minTilt);
+            } else {
+                effTilt = this.maxTilt * (1.0 - (p - 0.45) / 0.55);
+            }
 
-            targetTiltX = -this.mouseY * effectiveMaxTilt;
-            targetTiltY = this.mouseX * effectiveMaxTilt;
+            const cardCenterX = mainRect.left + mainRect.width * 0.5;
+            const cardCenterY = mainRect.top + mainRect.height * 0.5;
+            const maxSpanX = mainRect.width * 0.5 + this.TRACK_RANGE_PX;
+            const maxSpanY = mainRect.height * 0.5 + this.TRACK_RANGE_PX;
+            const dirX = Math.max(-1.0, Math.min(1.0, (this.clientMouseX - cardCenterX) / maxSpanX));
+            const dirY = Math.max(-1.0, Math.min(1.0, (this.clientMouseY - cardCenterY) / maxSpanY));
+
+            targetTiltX = -dirY * effTilt;
+            targetTiltY = dirX * effTilt;
         }
 
         this.currentTiltX += (targetTiltX - this.currentTiltX) * this.lerpSpeed;
@@ -311,7 +326,7 @@ const TiltEngine = {
             this.currentTiltY = targetTiltY;
         }
 
-        if (isCompanionOpen && !isTransitioning && isTiltConverged) {
+        if ((isCompanionOpen && !isTransitioning) || (isTiltConverged && targetTiltX === 0 && targetTiltY === 0)) {
             this.cardContainer.style.transform = 'translateZ(0px) rotateX(0deg) rotateY(0deg)';
         } else {
             this.cardContainer.style.transform = `rotateX(${this.currentTiltX.toFixed(2)}deg) rotateY(${this.currentTiltY.toFixed(2)}deg)`;
@@ -344,8 +359,8 @@ const TiltEngine = {
             const dist = this.mouseInWindow ? Math.hypot(dx, dy) : Infinity;
 
             // Kural: Mouse takibi SADECE kartın tilt mekanizmasının çalıştığı ortamda (ön yüz, eşlikçi yok)
-            // ve fare kartın menzilindeyken geçerlidir
-            const shouldTrackMouse = canTilt && isMainCard && (dist < this.PROXIMITY_PX);
+            // ve fare kartın aktif takip alanı menzilindeyken geçerlidir
+            const shouldTrackMouse = canTilt && isMainCard && isInsideTrackingArea;
 
             if (shouldTrackMouse) {
                 // ----------------------------------------------------
@@ -361,13 +376,13 @@ const TiltEngine = {
                 // Işığın kart çevresindeki en yakın s konumunu an be an güncelle (ayrılma durumunda kesintisiz devam için)
                 state.s = this.getClosestPerimeterDistance(state.currentX, state.currentY, W, H, radius);
 
-                const proximity = Math.pow(1 - (dist / this.PROXIMITY_PX), 1.2);
+                const proximity = Math.pow(1 - (dist / this.TRACK_RANGE_PX), 1.2);
                 state.targetOpacity = Math.max(proximity, 0.0);
                 state.isTracking = true;
             } else {
                 // ----------------------------------------------------
                 // MOD B: OTONOM ÇEVRE DÖNÜŞÜ (BORDER ORBITING)
-                // (Kart arkası çevrildiğinde, eşlikçi kart açıldığında veya fare uzaklaştığında)
+                // (Kart arkası çevrildiğinde, eşlikçi kart açıldığında, takip alanından çıkıldığında veya fare sayfa dışındayken)
                 // ----------------------------------------------------
                 state.isTracking = false;
 
@@ -383,8 +398,8 @@ const TiltEngine = {
                 // Kart üzerindeyken (hover) tepe parlaklık (0.98), uzaktayken canlı ambient parlaklık (0.82)
                 if (dist === 0) {
                     state.targetOpacity = this.ACTIVE_OPACITY;
-                } else if (dist < this.PROXIMITY_PX) {
-                    const proxFactor = 1 - (dist / this.PROXIMITY_PX);
+                } else if (dist < this.TRACK_RANGE_PX) {
+                    const proxFactor = 1 - (dist / this.TRACK_RANGE_PX);
                     state.targetOpacity = this.AMBIENT_OPACITY + proxFactor * (this.ACTIVE_OPACITY - this.AMBIENT_OPACITY);
                 } else {
                     state.targetOpacity = this.AMBIENT_OPACITY;
