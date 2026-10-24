@@ -596,8 +596,6 @@ body.is-owner .top-item-unit:active {
     display: flex;
     align-items: center;
     gap: 1.5cqw;
-    min-width: 0;
-    width: 100%;
 }
 
 /* 👑 HERO KART & ALTIN-GÜMÜŞ-BRONZ HİYERARŞİSİ (PLAN.md Madde 6) */
@@ -804,8 +802,6 @@ body.is-owner .top-item-unit:active {
 }
 
 .top-item-title {
-    flex: 1;
-    min-width: 0;
     font-size: var(--cq-fs-item-title);
     font-weight: 600;
     color: var(--text-primary);

@@ -135,9 +135,6 @@ html, body {
 .trophies-companion-card,
 .companion-card {
     border-radius: var(--card-radius);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
 }
 
 .nook-card,
@@ -239,21 +236,6 @@ body.is-pointer-dragging * {
 .nook-icon-btn:hover {
     background: var(--bg-pill-hover);
     transform: translateX(-2px);
-}
-
-/* Dokunsal Basılma & Gecikme Efekti (Tactile Feedback) */
-.is-touch-pressed,
-.nook-link-row:active,
-.top-item-card:active,
-.trophy-card-unit:active,
-.card-flag-btn:active,
-.flip-trigger-btn:active,
-.nook-icon-btn:active,
-.companion-back-btn:active,
-.companion-close-btn:active {
-    transform: scale(0.97) !important;
-    box-shadow: 0 0 14px var(--accent-glow, rgba(99, 102, 241, 0.45)) !important;
-    transition: transform 0.08s ease, box-shadow 0.08s ease !important;
 }
 /* #endregion */
 
@@ -583,10 +565,7 @@ html.is-profile-loading #landing-screen {
         justify-content: center;
         perspective: 1200px;
         overflow: hidden !important;
-        padding-top: calc(54px + env(safe-area-inset-top, 0px));
-        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-        padding-left: 0;
-        padding-right: 0;
+        padding: 0;
         box-sizing: border-box;
         touch-action: pan-y;
     }
@@ -594,8 +573,7 @@ html.is-profile-loading #landing-screen {
     /* Sabit 5:7 Geometrisi */
     .stage .card-container,
     .stage .companion-card {
-        --mobile-available-h: calc(100dvh - 54px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px);
-        --mobile-card-max-h: min(var(--card-height), var(--mobile-available-h));
+        --mobile-card-max-h: min(var(--card-height), calc(100dvh - 84px));
         --mobile-card-w: min(
             var(--card-narrow-width),
             calc(100vw - 32px),
@@ -610,6 +588,7 @@ html.is-profile-loading #landing-screen {
         flex-shrink: 0;
         box-sizing: border-box;
         transition: transform 0.40s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease !important;
+        will-change: transform, opacity;
     }
 
     /* Profil Kartı: Normalde merkezde */
@@ -1519,10 +1498,12 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
 
 .lazy-img {
     opacity: 0;
-    transition: opacity 0.35s ease;
+    transition: opacity 0.35s ease, filter 0.35s ease;
+    filter: blur(6px);
 }
 
 .lazy-img.is-loaded {
     opacity: 1;
+    filter: blur(0);
 }
 /* #endregion */

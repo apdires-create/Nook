@@ -175,7 +175,7 @@ function landingEkraniniBaslat() {
         if (heroLoginBtn) heroLoginBtn.style.display = 'none';
         if (navUserMenu) navUserMenu.style.display = 'block';
         if (navUserName) navUserName.textContent = `@${aktifKullaniciAdi}`;
-        if (navGoProfile) navGoProfile.href = (typeof buildProfileUrl === 'function') ? buildProfileUrl(aktifKullaniciAdi) : `?user=${encodeURIComponent(aktifKullaniciAdi)}`;
+        if (navGoProfile) navGoProfile.href = `?user=${encodeURIComponent(aktifKullaniciAdi)}`;
         
         if (navUserTrigger && navDropdown) {
             navUserTrigger.addEventListener('click', (e) => {

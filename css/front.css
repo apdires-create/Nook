@@ -219,7 +219,7 @@
 
 .profile-bio {
     font-size: var(--cq-fs-body);
-    line-height: 1.5;
+    line-height: 1.6;
     color: var(--text-secondary);
     font-weight: 450;
     text-align: center;
@@ -228,9 +228,9 @@
     white-space: pre-wrap;
     display: -webkit-box;
     -webkit-box-orient: vertical;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
-    max-height: calc(1.5em * 4 + 4px);
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+    max-height: calc(1.6em * 5 + 4px);
     padding: 2px 8px;
     box-sizing: border-box;
     overflow: hidden;
@@ -243,8 +243,6 @@
     flex-shrink: 0;
     width: 100%;
     position: relative;
-    max-height: 18cqh;
-    overflow: hidden;
 }
 
 .tags-grid {
@@ -253,8 +251,6 @@
     align-items: center;
     justify-content: center;
     gap: 1.8cqw;
-    max-height: 18cqh;
-    overflow: hidden;
 }
 
 @media (max-width: 899px) {

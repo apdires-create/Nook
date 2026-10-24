@@ -4,53 +4,45 @@ let hataliGirisDenemesi = 0;
 let girisKilitliMi = false;
 let turnstileToken = null;
 const turnstileTokens = {};
-const turnstileBekleyenler = {};
 
 function turnstileTokenAlindi(token, widgetEl) {
     turnstileToken = token;
-    const widgetId = (widgetEl && widgetEl.id) ? widgetEl.id : 'auth-turnstile';
-    turnstileTokens[widgetId] = token;
-
+    if (widgetEl && widgetEl.id) {
+        turnstileTokens[widgetEl.id] = token;
+    }
     // Onay alındığında ilgili kutuyu gizle
     if (widgetEl) {
         widgetEl.classList.remove('is-active');
     } else {
         document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
     }
-
-    // Bekleyen Promise'leri çöz ve devam ettir
-    if (turnstileBekleyenler[widgetId] && turnstileBekleyenler[widgetId].length > 0) {
-        const bekleyenler = turnstileBekleyenler[widgetId].splice(0);
-        bekleyenler.forEach(item => item.resolve(token));
-    }
 }
 
 function turnstileHata(widgetEl) {
-    const widgetId = (widgetEl && widgetEl.id) ? widgetEl.id : 'auth-turnstile';
-    if (turnstileToken && turnstileTokens[widgetId] === turnstileToken) {
+    if (widgetEl && widgetEl.id) {
+        if (turnstileToken && turnstileTokens[widgetEl.id] === turnstileToken) {
+            turnstileToken = null;
+        }
+        delete turnstileTokens[widgetEl.id];
+    } else {
         turnstileToken = null;
     }
-    delete turnstileTokens[widgetId];
-
     if (widgetEl) {
         widgetEl.classList.remove('is-active');
     } else {
         document.querySelectorAll('.cf-turnstile').forEach(el => el.classList.remove('is-active'));
     }
-
-    if (turnstileBekleyenler[widgetId] && turnstileBekleyenler[widgetId].length > 0) {
-        const bekleyenler = turnstileBekleyenler[widgetId].splice(0);
-        bekleyenler.forEach(item => item.reject(new Error("TURNSTILE_ERROR")));
-    }
 }
 
 function turnstileSuresiDoldu(widgetEl) {
-    const widgetId = (widgetEl && widgetEl.id) ? widgetEl.id : 'auth-turnstile';
-    if (turnstileToken && turnstileTokens[widgetId] === turnstileToken) {
+    if (widgetEl && widgetEl.id) {
+        if (turnstileToken && turnstileTokens[widgetEl.id] === turnstileToken) {
+            turnstileToken = null;
+        }
+        delete turnstileTokens[widgetEl.id];
+    } else {
         turnstileToken = null;
     }
-    delete turnstileTokens[widgetId];
-
     if (widgetEl) {
         widgetEl.classList.remove('is-active');
     } else {
@@ -61,37 +53,6 @@ function turnstileSuresiDoldu(widgetEl) {
 function turnstileTokenAl(hedefId) {
     if (hedefId && turnstileTokens[hedefId]) return turnstileTokens[hedefId];
     return turnstileToken;
-}
-
-function turnstileTokenBekle(hedefId = 'auth-turnstile', timeoutMs = 8000) {
-    const mevcutToken = turnstileTokenAl(hedefId);
-    if (mevcutToken) {
-        return Promise.resolve(mevcutToken);
-    }
-
-    return new Promise((resolve, reject) => {
-        if (!turnstileBekleyenler[hedefId]) {
-            turnstileBekleyenler[hedefId] = [];
-        }
-
-        const timer = setTimeout(() => {
-            if (turnstileBekleyenler[hedefId]) {
-                turnstileBekleyenler[hedefId] = turnstileBekleyenler[hedefId].filter(item => item.resolve !== resolve);
-            }
-            reject(new Error("TURNSTILE_TIMEOUT"));
-        }, timeoutMs);
-
-        turnstileBekleyenler[hedefId].push({
-            resolve: (token) => {
-                clearTimeout(timer);
-                resolve(token);
-            },
-            reject: (err) => {
-                clearTimeout(timer);
-                reject(err);
-            }
-        });
-    });
 }
 
 const turnstileWidgetIds = {};
@@ -470,29 +431,10 @@ async function sistemeGirisYap(email, password, turnstileId = 'auth-turnstile') 
         authHataGoster("Şifre en az 8 karakter olmalıdır.");
         return false;
     }
-    let aktifToken = turnstileTokenAl(turnstileId);
+    const aktifToken = turnstileTokenAl(turnstileId);
     if (!aktifToken) {
-        const submitBtn = document.getElementById('auth-submit-btn');
-        const eskiText = submitBtn ? submitBtn.textContent : '';
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Doğrulanıyor...';
-        }
-        try {
-            aktifToken = await turnstileTokenBekle(turnstileId, 8000);
-        } catch (e) {
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = eskiText;
-            }
-            authHataGoster("Güvenlik doğrulaması tamamlanamadı. Lütfen tekrar deneyin.");
-            return false;
-        } finally {
-            if (submitBtn && submitBtn.textContent === 'Doğrulanıyor...') {
-                submitBtn.disabled = false;
-                submitBtn.textContent = eskiText;
-            }
-        }
+        authHataGoster("Lütfen doğrulamayı tamamlayın.");
+        return false;
     }
 
     const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -522,7 +464,7 @@ async function sistemeGirisYap(email, password, turnstileId = 'auth-turnstile') 
         .single();
 
     if (profileData && profileData.kullanici_adi) {
-        window.location.href = (typeof buildProfileUrl === 'function') ? buildProfileUrl(profileData.kullanici_adi) : `?user=${encodeURIComponent(profileData.kullanici_adi)}`;
+        window.location.href = `?user=${encodeURIComponent(profileData.kullanici_adi)}`;
     } else {
         await supabaseClient.auth.signOut();
         authHataGoster("Bu hesaba ait bir arşiv bulunamadı veya silinmiş. Lütfen yeniden kayıt olun.");
@@ -547,29 +489,10 @@ async function sistemeKayitOl(email, password, username, turnstileId = 'auth-tur
         authHataGoster("Şifreniz en az 8 karakter olmalıdır.");
         return false;
     }
-    let aktifToken = turnstileTokenAl(turnstileId);
+    const aktifToken = turnstileTokenAl(turnstileId);
     if (!aktifToken) {
-        const submitBtn = document.getElementById('auth-submit-btn');
-        const eskiText = submitBtn ? submitBtn.textContent : '';
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Doğrulanıyor...';
-        }
-        try {
-            aktifToken = await turnstileTokenBekle(turnstileId, 8000);
-        } catch (e) {
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = eskiText;
-            }
-            authHataGoster("Güvenlik doğrulaması tamamlanamadı. Lütfen tekrar deneyin.");
-            return false;
-        } finally {
-            if (submitBtn && submitBtn.textContent === 'Doğrulanıyor...') {
-                submitBtn.disabled = false;
-                submitBtn.textContent = eskiText;
-            }
-        }
+        authHataGoster("Lütfen doğrulamayı tamamlayın.");
+        return false;
     }
 
     const REZERVE_ISIMLER = ['admin', 'api', 'login', 'register', 'nook', 'www', 'support', 'help', 'settings', 'about', 'terms', 'privacy'];
@@ -647,30 +570,7 @@ async function sistemeSifreSifirlamaGonder(email, hedefBox = null, turnstileId =
         return false;
     }
 
-    let aktifToken = turnstileTokenAl(turnstileId);
-    if (!aktifToken) {
-        const submitBtn = document.getElementById('auth-forgot-submit-btn');
-        const eskiText = submitBtn ? submitBtn.textContent : '';
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Doğrulanıyor...';
-        }
-        try {
-            aktifToken = await turnstileTokenBekle(turnstileId, 8000);
-        } catch (e) {
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = eskiText;
-            }
-            authHataGoster("Güvenlik doğrulaması tamamlanamadı. Lütfen tekrar deneyin.", hedefBox);
-            return false;
-        } finally {
-            if (submitBtn && submitBtn.textContent === 'Doğrulanıyor...') {
-                submitBtn.disabled = false;
-                submitBtn.textContent = eskiText;
-            }
-        }
-    }
+    const aktifToken = turnstileTokenAl(turnstileId);
     const redirectTo = `${window.location.origin}${window.location.pathname}?recovery=true`;
     const { data, error } = await supabaseClient.auth.resetPasswordForEmail(temizEmail, {
         redirectTo: redirectTo,
@@ -730,7 +630,7 @@ async function sistemeYeniSifreKaydet(yeniSifre, tekrarSifre, hedefBox = '#auth-
                 .eq('auth_id', userData.user.id)
                 .single();
             if (profile?.kullanici_adi) {
-                hedefSayfa = (typeof buildProfileUrl === 'function') ? buildProfileUrl(profile.kullanici_adi) : `?user=${encodeURIComponent(profile.kullanici_adi)}`;
+                hedefSayfa = `?user=${encodeURIComponent(profile.kullanici_adi)}`;
             }
         }
     } catch (e) {
@@ -835,7 +735,7 @@ function authModaliniBaslat() {
             if (accountDisplayEmail) accountDisplayEmail.textContent = uEmail;
             if (accountAvatarInitial) accountAvatarInitial.textContent = uName.charAt(0).toUpperCase();
             if (accountPageLink) {
-                accountPageLink.href = (typeof buildProfileUrl === 'function') ? buildProfileUrl(uName) : `?user=${encodeURIComponent(uName)}`;
+                accountPageLink.href = `?user=${encodeURIComponent(uName)}`;
                 accountPageLink.style.display = (KULLANICI_ADI && KULLANICI_ADI.toLowerCase() === uName.toLowerCase()) ? 'none' : 'inline-flex';
             }
             if (accountPassSection) accountPassSection.style.display = 'none';
@@ -928,7 +828,7 @@ function authModaliniBaslat() {
             toastBildirimiGoster("Kopyalanacak profil bulunamadı.", 3000, 'warning');
             return;
         }
-        const url = (typeof buildProfileUrl === 'function') ? buildProfileUrl(hedefUser) : `${window.location.origin}${window.location.pathname}?user=${encodeURIComponent(hedefUser)}`;
+        const url = `${window.location.origin}${window.location.pathname}?user=${encodeURIComponent(hedefUser)}`;
         try {
             await navigator.clipboard.writeText(url);
             toastBildirimiGoster("Profil bağlantısı panoya kopyalandı!", 3000, 'success');
@@ -1076,18 +976,10 @@ function authModaliniBaslat() {
                 return;
             }
 
-            let token = turnstileTokens['account-pass-turnstile'] || turnstileToken;
+            const token = turnstileTokens['account-pass-turnstile'] || turnstileToken;
             if (!token) {
-                accountChangePassBtn.disabled = true;
-                accountChangePassBtn.textContent = 'Doğrulanıyor...';
-                try {
-                    token = await turnstileTokenBekle('account-pass-turnstile', 8000);
-                } catch (e) {
-                    accountChangePassBtn.disabled = false;
-                    accountChangePassBtn.textContent = 'Şifreyi Güncelle';
-                    authHataGoster("Güvenlik doğrulaması tamamlanamadı. Lütfen tekrar deneyin.", msgBox);
-                    return;
-                }
+                authHataGoster("Lütfen güvenlik doğrulamasını tamamlayın.", msgBox);
+                return;
             }
 
             const currentUserEmail = aktifKullaniciOturumu?.user?.email;
@@ -1207,21 +1099,11 @@ function authModaliniBaslat() {
                 return;
             }
 
-            let token = turnstileTokens['account-delete-turnstile'] || turnstileToken;
+            const token = turnstileTokens['account-delete-turnstile'] || turnstileToken;
             if (!token) {
-                deleteConfirmBtn.disabled = true;
-                if (deleteCancelBtn) deleteCancelBtn.disabled = true;
-                deleteConfirmBtn.textContent = 'Doğrulanıyor...';
-                try {
-                    token = await turnstileTokenBekle('account-delete-turnstile', 8000);
-                } catch (e) {
-                    deleteConfirmBtn.disabled = false;
-                    if (deleteCancelBtn) deleteCancelBtn.disabled = false;
-                    deleteConfirmBtn.textContent = 'Evet, Hesabımı Sil';
-                    if (deleteMsgBox) authHataGoster("Güvenlik doğrulaması tamamlanamadı. Lütfen tekrar deneyin.", deleteMsgBox);
-                    else toastBildirimiGoster("Güvenlik doğrulaması tamamlanamadı. Lütfen tekrar deneyin.", 3500, 'warning');
-                    return;
-                }
+                if (deleteMsgBox) authHataGoster("Lütfen güvenlik doğrulamasını tamamlayın.", deleteMsgBox);
+                else toastBildirimiGoster("Lütfen güvenlik doğrulamasını tamamlayın.", 3500, 'warning');
+                return;
             }
 
             const currentUserEmail = aktifKullaniciOturumu?.user?.email;
