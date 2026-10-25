@@ -2,6 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <base href="/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nook</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -106,6 +107,7 @@
             var cleanPath = path.replace(/^\/Nook\/?/i, '/');
             var match = cleanPath.match(/^\/@([a-zA-Z0-9_]{3,20})(?:\/.*)?$/);
             var initialUser = match ? match[1] : new URLSearchParams(window.location.search).get('user')?.trim();
+            window.initialUserParam = initialUser;
             if (initialUser) {
                 document.documentElement.classList.add('is-profile-loading');
             }
