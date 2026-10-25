@@ -78,6 +78,59 @@ const Router = {
             TouchGestureManager.init();
         }
 
+        // 140ms Dokunsal Dokunma Geri Bildirimi (Tactile Tap Delay)
+        if ('ontouchstart' in window) {
+            let touchTarget = null;
+            let touchStartTime = 0;
+
+            document.addEventListener('touchstart', (e) => {
+                const interactive = e.target.closest('.nook-link-row, .top-item-card, .trophy-card-unit, .flip-trigger-btn, .companion-back-btn, .companion-close-btn, .nook-icon-btn');
+                if (interactive) {
+                    touchTarget = interactive;
+                    touchStartTime = Date.now();
+                    interactive.classList.add('is-touch-pressed');
+                }
+            }, { passive: true });
+
+            const clearPressed = () => {
+                if (touchTarget) {
+                    touchTarget.classList.remove('is-touch-pressed');
+                    touchTarget = null;
+                }
+            };
+
+            document.addEventListener('touchmove', clearPressed, { passive: true });
+            document.addEventListener('touchcancel', clearPressed, { passive: true });
+            document.addEventListener('touchend', () => {
+                if (!touchTarget) return;
+                const target = touchTarget;
+                const elapsed = Date.now() - touchStartTime;
+                const remaining = Math.max(0, 140 - elapsed);
+                if (remaining > 0) {
+                    setTimeout(() => target.classList.remove('is-touch-pressed'), remaining);
+                } else {
+                    target.classList.remove('is-touch-pressed');
+                }
+                touchTarget = null;
+            }, { passive: true });
+
+            // Link tıklamalarında 140ms basılma hissi sonrasında sayfayı/sekmeyi aç
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('a.nook-link-row');
+                if (link && !link.dataset.navigating) {
+                    e.preventDefault();
+                    link.classList.add('is-touch-pressed');
+                    setTimeout(() => {
+                        link.classList.remove('is-touch-pressed');
+                        link.dataset.navigating = 'true';
+                        link.click();
+                    }, 140);
+                } else if (link && link.dataset.navigating) {
+                    delete link.dataset.navigating;
+                }
+            }, false);
+        }
+
         // Ön yüzde aktif düzenleme açıkken dışarıya tıklandığını en erken fazda (capture) yakala
         document.addEventListener('pointerdown', (e) => {
             const activeEdit = document.querySelector('.editable-hover.is-input-active');

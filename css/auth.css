@@ -698,18 +698,20 @@
 .cf-turnstile {
     display: flex;
     justify-content: center;
+    align-items: center;
     margin: 0;
     max-height: 0;
     opacity: 0;
     overflow: hidden;
     pointer-events: none;
-    transition: max-height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease, margin 0.3s ease;
+    transition: max-height 0.35s ease, opacity 0.3s ease, margin 0.3s ease;
 }
 
 .cf-turnstile.is-active {
-    max-height: 100px;
+    max-height: 140px;
     opacity: 1;
-    margin: 8px 0;
+    margin: 10px 0;
+    overflow: visible;
     pointer-events: auto;
 }
 /* #endregion */

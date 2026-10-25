@@ -327,7 +327,7 @@ const TiltEngine = {
         }
 
         if ((isCompanionOpen && !isTransitioning) || (isTiltConverged && targetTiltX === 0 && targetTiltY === 0)) {
-            this.cardContainer.style.transform = 'translateZ(0px) rotateX(0deg) rotateY(0deg)';
+            this.cardContainer.style.transform = '';
         } else {
             this.cardContainer.style.transform = `rotateX(${this.currentTiltX.toFixed(2)}deg) rotateY(${this.currentTiltY.toFixed(2)}deg)`;
         }
@@ -415,7 +415,17 @@ const TiltEngine = {
             card.style.setProperty('--card-border-proximity', state.currentOpacity.toFixed(3));
         });
 
-        // Yaşayan animasyon döngüsü kesintisiz devam eder
+        // 3. Performans ve Uyku Optimizasyonu (Varsayılan Tema)
+        // Varsayılan temada spotlight kenarlığı kullanılmadığından, tilt durduğunda döngüyü uyut
+        const activeTheme = document.documentElement.getAttribute('data-theme') || 'default';
+        const usesBorderOrbit = (activeTheme !== 'default');
+
+        if (!usesBorderOrbit && isTiltConverged && (!canTilt || !isInsideTrackingArea)) {
+            this.isRunning = false;
+            return;
+        }
+
+        // Yaşayan animasyon döngüsü devam eder
         this.rafId = requestAnimationFrame((ts) => this.loop(ts));
     }
 };
