@@ -319,9 +319,11 @@ async function oturumuKontrolEt() {
             // Şifre kurtarma (recovery) ile gelindiyse ve henüz kullanıcının profil sayfasında değilsek,
             // kullanıcıyı doğrudan kendi profil sayfasına yönlendir.
             if (isPasswordRecovery && aktifKullaniciAdi) {
-                const currentParam = new URLSearchParams(window.location.search).get('user');
-                if (!currentParam || currentParam.toLowerCase() !== aktifKullaniciAdi.toLowerCase()) {
-                    window.location.replace(`?user=${encodeURIComponent(aktifKullaniciAdi)}&recovery=true`);
+                const currentU = (typeof KULLANICI_ADI !== 'undefined' && KULLANICI_ADI) ? KULLANICI_ADI : new URLSearchParams(window.location.search).get('user');
+                if (!currentU || currentU.toLowerCase() !== aktifKullaniciAdi.toLowerCase()) {
+                    const targetBase = (typeof buildProfileUrl === 'function') ? buildProfileUrl(aktifKullaniciAdi) : `?user=${encodeURIComponent(aktifKullaniciAdi)}`;
+                    const sep = targetBase.includes('?') ? '&' : '?';
+                    window.location.replace(`${targetBase}${sep}recovery=true`);
                     return;
                 }
             }
@@ -374,9 +376,11 @@ async function oturumuKontrolEt() {
                 } else if (event === 'PASSWORD_RECOVERY') {
                     window.isPasswordRecoveryMode = true;
                     if (aktifKullaniciAdi) {
-                        const curParam = new URLSearchParams(window.location.search).get('user');
-                        if (!curParam || curParam.toLowerCase() !== aktifKullaniciAdi.toLowerCase()) {
-                            window.location.replace(`?user=${encodeURIComponent(aktifKullaniciAdi)}&recovery=true`);
+                        const curU = (typeof KULLANICI_ADI !== 'undefined' && KULLANICI_ADI) ? KULLANICI_ADI : new URLSearchParams(window.location.search).get('user');
+                        if (!curU || curU.toLowerCase() !== aktifKullaniciAdi.toLowerCase()) {
+                            const targetBase = (typeof buildProfileUrl === 'function') ? buildProfileUrl(aktifKullaniciAdi) : `?user=${encodeURIComponent(aktifKullaniciAdi)}`;
+                            const sep = targetBase.includes('?') ? '&' : '?';
+                            window.location.replace(`${targetBase}${sep}recovery=true`);
                             return;
                         }
                     }
