@@ -22,6 +22,10 @@ const KULLANICI_ADI = getKullaniciAdiFromUrl();
 
 function buildProfileUrl(username) {
     if (!username) return window.location.origin;
+    const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    if (isLocal) {
+        return `${window.location.origin}${window.location.pathname}?user=${encodeURIComponent(username)}`;
+    }
     const isSubfolder = window.location.pathname.startsWith('/Nook');
     const basePath = isSubfolder ? '/Nook/' : '/';
     return `${window.location.origin}${basePath}@${encodeURIComponent(username)}`;
