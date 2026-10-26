@@ -42,7 +42,7 @@ const RenderEngine = {
             const tags = Array.isArray(front.tags) ? front.tags.filter(t => t && String(t).trim() !== '') : [];
             tagsGrid.innerHTML = tags
                 .slice(0, 6)
-                .map(tag => `<span class="tag-pill">${this.escapeHtml(tag)}</span>`)
+                .map(tag => `<span class="tag-pill" title="${this.escapeHtml(tag)}"><span class="tag-text">${this.escapeHtml(tag)}</span></span>`)
                 .join('');
         }
 
