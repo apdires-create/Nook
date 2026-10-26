@@ -972,6 +972,8 @@ html.is-profile-loading #landing-screen {
     border: var(--companion-row-border, 1px solid rgba(255, 255, 255, 0.07));
     border-radius: var(--companion-row-radius, var(--radius-btn, 10px));
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
     user-select: none;
     box-sizing: border-box;
@@ -979,13 +981,16 @@ html.is-profile-loading #landing-screen {
     width: 100%;
 }
 
-body:not(.is-pointer-dragging) .companion-row-item:hover {
-    background: var(--companion-row-hover-bg, rgba(255, 255, 255, 0.07));
-    border-color: var(--companion-row-hover-border-color, rgba(255, 255, 255, 0.16));
-    transform: var(--companion-row-hover-transform, translateY(-1px));
+@media (hover: hover) and (pointer: fine) {
+    body:not(.is-pointer-dragging) .companion-row-item:hover {
+        background: var(--companion-row-hover-bg, rgba(255, 255, 255, 0.07));
+        border-color: var(--companion-row-hover-border-color, rgba(255, 255, 255, 0.16));
+        transform: var(--companion-row-hover-transform, translateY(-1px));
+    }
 }
 
-body:not(.is-pointer-dragging) .companion-row-item:active {
+body:not(.is-pointer-dragging) .companion-row-item:active,
+body:not(.is-pointer-dragging) .companion-row-item.is-touch-pressed {
     transform: var(--companion-row-active-transform, scale(0.99));
 }
 
@@ -1058,9 +1063,11 @@ body:not(.is-pointer-dragging) .companion-row-item:active {
     transition: transform 0.2s ease;
 }
 
-.companion-row-item:hover .companion-row-arrow {
-    transform: translateX(3px);
-    color: var(--text-primary);
+@media (hover: hover) and (pointer: fine) {
+    .companion-row-item:hover .companion-row-arrow {
+        transform: translateX(3px);
+        color: var(--text-primary);
+    }
 }
 
 /* Master Satırı Silme Butonu (Sahip için) */

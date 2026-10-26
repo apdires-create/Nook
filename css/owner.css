@@ -282,8 +282,14 @@ body.is-owner .companion-row-item,
 body.is-owner .companion-tab-btn {
     cursor: pointer;
     user-select: none;
-    touch-action: none !important;
+    touch-action: pan-y !important;
     transition: transform 0.15s ease, opacity 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.is-owner .top-item-card.is-dragging,
+body.is-owner .companion-row-item.is-dragging,
+body.is-owner .companion-tab-btn.is-dragging {
+    touch-action: none !important;
 }
 
 body.is-owner .top-item-card:active,

@@ -84,7 +84,7 @@ const Router = {
             let touchStartTime = 0;
 
             document.addEventListener('touchstart', (e) => {
-                const interactive = e.target.closest('.nook-link-row, .top-item-card, .trophy-card-unit, .flip-trigger-btn, .companion-back-btn, .companion-close-btn, .nook-icon-btn');
+                const interactive = e.target.closest('.nook-link-row, .top-item-card, .trophy-card-unit, .flip-trigger-btn, .companion-back-btn, .companion-close-btn, .nook-icon-btn, .companion-row-item');
                 if (interactive) {
                     touchTarget = interactive;
                     touchStartTime = Date.now();

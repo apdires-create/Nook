@@ -92,9 +92,15 @@ const EditManager = {
         let longPressTimer = null;
         let pointerType = 'mouse';
 
+        let activePointerId = null;
+
         const startDraggingEngine = (clientX, clientY) => {
             if (!draggedItem || isDragging) return;
             isDragging = true;
+
+            if (pointerType === 'touch' && activePointerId && draggedItem.setPointerCapture) {
+                try { draggedItem.setPointerCapture(activePointerId); } catch(err) {}
+            }
 
             // Container Query uyumluluğu için kart veya eşlikçi kart konteynerini baz alan portal oluştur
             const scopeContainer = draggedItem.closest('.companion-card') || draggedItem.closest('.tops-companion-card') || draggedItem.closest('.trophies-companion-card') || draggedItem.closest('.card-container');
@@ -160,11 +166,10 @@ const EditManager = {
             draggedItem = item;
             pointerType = e.pointerType || 'mouse';
 
+            activePointerId = e.pointerId;
+
             if (pointerType === 'touch') {
-                if (e.pointerId && item.setPointerCapture) {
-                    try { item.setPointerCapture(e.pointerId); } catch(err) {}
-                }
-                // Mobilde basılı tutma (320ms long-press) ile başlat
+                // Mobilde basılı tutma (320ms long-press) ile başlat (erken pointer capture yapma, tıklamayı kesmesin)
                 longPressTimer = setTimeout(() => {
                     longPressTimer = null;
                     if (!draggedItem) return;
@@ -267,9 +272,13 @@ const EditManager = {
             }
 
             if (draggedItem) {
+                if (activePointerId && draggedItem.releasePointerCapture) {
+                    try { draggedItem.releasePointerCapture(activePointerId); } catch(err) {}
+                }
                 draggedItem.style.pointerEvents = '';
                 draggedItem.classList.remove('is-dragging', 'is-drag-placeholder', 'is-longpressed');
             }
+            activePointerId = null;
             document.body.classList.remove('is-pointer-dragging');
 
             if (isDragging) {
