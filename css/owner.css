@@ -89,6 +89,10 @@ body.is-owner .editable-hover {
     border-radius: var(--radius-btn, 6px);
     padding: 2px 8px;
     border: 1px solid transparent;
+}
+
+/* FOUC Flash Onleyici: Transition yalnizca yukleme perdesi kalktiktan sonra aktif */
+html:not(.is-profile-loading) body.is-owner .editable-hover {
     transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
                 box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);

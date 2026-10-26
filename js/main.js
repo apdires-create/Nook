@@ -83,6 +83,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // 3.2: Sayfa Sahibi İse Düzenleme Modunu Perde Arkasındayken Yükle (Flash / FOUC Önleyici)
+    if (basarili && typeof isOwner !== 'undefined' && isOwner) {
+        if (typeof ThemeMarket !== 'undefined' && typeof ThemeMarket.kullaniciEnvanteriniYukle === 'function') {
+            ThemeMarket.kullaniciEnvanteriniYukle().catch(() => {});
+        }
+        await editModunuYukle();
+        if (typeof EditManager !== 'undefined') {
+            EditManager.init();
+        }
+    }
+
     // Bekleme süresini tamamla
     const gecen = Date.now() - baslangic;
     const kalan = Math.max(0, MIN_BEKLEME_MS - gecen);
@@ -111,19 +122,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 4. Ribbon Taşma İzleyicisi (Madde 1)
         checkRibbonOverflow();
         window.addEventListener('resize', checkRibbonOverflow, { passive: true });
-
-        // 5. Sayfa Sahibi İse Düzenleme Modunu Lazy-Load Et
-        if (typeof isOwner !== 'undefined' && isOwner) {
-            // Kullanıcı tema envanterini peşinen yükle
-            if (typeof ThemeMarket !== 'undefined' && typeof ThemeMarket.kullaniciEnvanteriniYukle === 'function') {
-                ThemeMarket.kullaniciEnvanteriniYukle().catch(() => {});
-            }
-
-            await editModunuYukle();
-            if (typeof EditManager !== 'undefined') {
-                EditManager.init();
-            }
-        }
     }
 });
 
