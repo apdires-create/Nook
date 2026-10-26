@@ -609,6 +609,22 @@ const TouchGestureManager = {
                 e.preventDefault();
             }
         }
+
+        // Dikey eksen kilitlendiyse ve liste detayı içinden yukarı kaydırma (geri dönüş) jesti yapılıyorsa
+        // yerel kaydırma momentumunu engelle (böylece liste döndüğünde tarayıcı ilk dokunuşu momentum durdurma sanıp yutmaz)
+        const stage = document.getElementById('profileStage');
+        const isShowcaseOpen = stage && stage.classList.contains('is-showcase-active');
+        const isTrophiesOpen = stage && stage.classList.contains('is-trophies-active');
+        const isDetailActive = (isShowcaseOpen && typeof kartVerisi !== 'undefined' && kartVerisi?.tops?.aktifListeId) ||
+                               (isTrophiesOpen && typeof window !== 'undefined' && window._activeTrophyDetail);
+
+        if (this.lockedAxis === 'y' && !this.startedInScroller && deltaY < -10 && absY > absX * 1.2) {
+            if (isDetailActive || (!stage?.classList.contains('has-companion-open') && !Router.isFlipped)) {
+                if (e.cancelable) {
+                    e.preventDefault();
+                }
+            }
+        }
     },
 
     handleTouchCancel(e) {
