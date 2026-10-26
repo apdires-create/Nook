@@ -49,7 +49,7 @@ const ThemeManager = {
                 ? candidateFontUrl
                 : (this.knownThemeFonts[safeThemeId] || null);
             if (fontUrl) {
-                this._injectFont(fontUrl);
+                await this._injectFont(fontUrl);
             }
 
             // 2. Tema CSS URL'ini her zaman yerel güvenli dizinden oluştur (Harici cssUrl enjeksiyonuna kapalı)
@@ -154,18 +154,43 @@ const ThemeManager = {
      * Google Fonts preconnect ve font stylesheet etiketlerini optimize şekilde ekler
      * @private
      */
-    _injectFont(fontUrl) {
+    async _injectFont(fontUrl) {
         this._ensurePreconnect();
 
         let fontLink = document.getElementById(this.fontLinkElementId);
+        const urlDegisti = !fontLink || fontLink.href !== fontUrl;
+
         if (!fontLink) {
             fontLink = document.createElement('link');
             fontLink.id = this.fontLinkElementId;
             fontLink.rel = 'stylesheet';
             document.head.appendChild(fontLink);
         }
-        if (fontLink.href !== fontUrl) {
+
+        if (urlDegisti) {
             fontLink.href = fontUrl;
+        }
+
+        // Font dosyasının inmesini ve render motoruna hazır hale gelmesini bekle (Maksimum 600ms timeout güvencesi)
+        try {
+            await Promise.race([
+                Promise.all([
+                    new Promise((resolve) => {
+                        if (fontLink.sheet) {
+                            resolve();
+                        } else {
+                            fontLink.onload = () => resolve();
+                            fontLink.onerror = () => resolve();
+                        }
+                    }),
+                    (document.fonts && typeof document.fonts.ready !== 'undefined')
+                        ? document.fonts.ready
+                        : Promise.resolve()
+                ]),
+                new Promise((resolve) => setTimeout(resolve, 600))
+            ]);
+        } catch (err) {
+            // Font bekleme hatası akışı kilitlemesin
         }
     },
 
