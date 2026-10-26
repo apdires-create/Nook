@@ -1776,15 +1776,37 @@ EditManager.Vitrin = {
                 sel.addRange(range);
             } catch (err) {}
 
+            // Mobilde telefonun geri tuşuna basıldığında düzenlemeyi kapatmak için mikro state
+            let historyPushed = false;
+            try {
+                history.pushState({ nookEditing: true }, '');
+                historyPushed = true;
+            } catch (err) {}
+
             let kapandi = false;
+            const onPopState = () => {
+                historyPushed = false; // Geri tuşuyla state zaten tüketildi
+                kaydetVeKapat(true);
+            };
+            window.addEventListener('popstate', onPopState, { once: true });
+
             const kaydetVeKapat = (kaydet = true) => {
                 if (kapandi) return;
                 kapandi = true;
 
                 // Event listener'ları temizle
+                window.removeEventListener('popstate', onPopState);
                 el.removeEventListener('blur', onBlur);
                 el.removeEventListener('keydown', onKeydown);
                 el.removeEventListener('input', onInput);
+
+                // Eğer geri tuşuna basılmadan (örneğin ekrana tıklanarak) kapandıysa pushState'i temizle
+                if (historyPushed) {
+                    historyPushed = false;
+                    try {
+                        history.back();
+                    } catch (err) {}
+                }
 
                 el.contentEditable = "false";
                 el.removeAttribute('contenteditable');
