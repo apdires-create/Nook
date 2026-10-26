@@ -4,12 +4,14 @@
     transform: translateZ(2px);
 }
 
-/* Sağ Kenar: Ribbon / Flag Butonları */
+/* Sol Kenar: Ribbon / Flag Butonları */
 .card-flags-wrapper {
     position: absolute;
     top: 36px;
-    left: 100%;
-    margin-left: -2px;
+    right: 100%;
+    left: auto;
+    margin-right: -2px;
+    margin-left: 0;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -29,7 +31,7 @@
     width: 38px;
     height: 42px;
     padding: 0;
-    border-radius: 0 12px 12px 0;
+    border-radius: 12px 0 0 12px;
     border: none;
     cursor: pointer;
     backdrop-filter: blur(8px);
@@ -56,17 +58,17 @@
 /* 🟥 Trophies Canlı Kırmızı/Yakut Ribbon */
 .card-flag-btn.flag-trophies {
     background: linear-gradient(135deg, #ff3b56 0%, #e03131 65%, #c92a2a 100%);
-    box-shadow: 4px 4px 14px rgba(224, 49, 49, 0.45), 2px 2px 6px rgba(0, 0, 0, 0.4);
+    box-shadow: -4px 4px 14px rgba(224, 49, 49, 0.45), -2px 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .card-flag-btn.flag-trophies:hover {
-    transform: translateX(4px) scale(1.04);
-    box-shadow: 6px 4px 20px rgba(255, 59, 86, 0.65), 2px 2px 8px rgba(0, 0, 0, 0.4);
+    transform: translateX(-4px) scale(1.04);
+    box-shadow: -6px 4px 20px rgba(255, 59, 86, 0.65), -2px 2px 8px rgba(0, 0, 0, 0.4);
     filter: brightness(1.1);
 }
 
 .stage.has-companion-open.is-trophies-active .card-flag-btn.flag-trophies {
-    transform: translateX(3px);
+    transform: translateX(-3px);
     box-shadow: 0 0 24px rgba(255, 59, 86, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
     filter: brightness(1.15);
 }
@@ -74,24 +76,24 @@
 /* 🟦 Showcase Canlı Mavi/Safir Ribbon */
 .card-flag-btn.flag-showcase {
     background: linear-gradient(135deg, #228be6 0%, #1c7ed6 60%, #1864ab 100%);
-    box-shadow: 4px 4px 14px rgba(34, 139, 230, 0.45), 2px 2px 6px rgba(0, 0, 0, 0.4);
+    box-shadow: -4px 4px 14px rgba(34, 139, 230, 0.45), -2px 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .card-flag-btn.flag-showcase:hover {
-    transform: translateX(4px) scale(1.04);
-    box-shadow: 6px 4px 20px rgba(34, 139, 230, 0.65), 2px 2px 8px rgba(0, 0, 0, 0.4);
+    transform: translateX(-4px) scale(1.04);
+    box-shadow: -6px 4px 20px rgba(34, 139, 230, 0.65), -2px 2px 8px rgba(0, 0, 0, 0.4);
     filter: brightness(1.1);
 }
 
 .stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase {
-    transform: translateX(3px);
+    transform: translateX(-3px);
     box-shadow: 0 0 24px rgba(34, 139, 230, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
     filter: brightness(1.15);
 }
 
 /* 🔄 FLIP DURUMU 1: Masaüstü (Taşma Yokken) -> Havada Asılı Dairesel Forma Dönüşüm */
 .card-container.is-flipped:not(.flags-inward) .card-flags-wrapper {
-    transform: translateX(12px) translateZ(40px);
+    transform: translateX(-12px) translateZ(40px);
 }
 
 .card-container.is-flipped:not(.flags-inward) .card-flag-btn {
@@ -107,10 +109,10 @@
 
 /* 📐 TAŞMA DURUMU (Masaüstünde Pencere Daraldığında KART İÇİNE DOĞRU DÖNÜŞ) */
 .card-container.flags-inward .card-flags-wrapper {
-    left: auto;
-    right: 12px;
+    left: 12px;
+    right: auto;
     top: 24px;
-    margin-left: 0;
+    margin-right: 0;
     gap: 8px;
 }
 .card-container.flags-inward .card-flag-btn {

@@ -135,7 +135,7 @@ function checkRibbonOverflow() {
     const cardContainer = document.getElementById('cardContainer');
     if (!cardContainer) return;
     const rect = cardContainer.getBoundingClientRect();
-    const needsInward = (rect.right + 46 > window.innerWidth) || (window.innerWidth <= 899);
+    const needsInward = (rect.left - 46 < 0) || (window.innerWidth <= 899);
     cardContainer.classList.toggle('flags-inward', needsInward);
 }
 // #endregion
