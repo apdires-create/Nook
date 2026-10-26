@@ -723,8 +723,8 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 54px !important;
-        padding: 0 clamp(12px, 4vw, 24px);
+        height: 52px !important;
+        padding: 0 clamp(10px, 3.5vw, 20px);
         z-index: var(--z-nav);
         pointer-events: none;
     }
@@ -734,20 +734,32 @@
         pointer-events: auto;
     }
 
+    .top-nav-actions {
+        gap: clamp(6px, 1.8vw, 10px);
+    }
+
     .top-nav-btn {
-        height: 36px;
-        padding: 0 14px;
-        font-size: 12px;
+        height: clamp(30px, 7.5vw, 34px);
+        padding: 0 clamp(8px, 2.4vw, 12px);
+        font-size: clamp(11px, 2.8vw, 12.5px);
+        gap: clamp(4px, 1.2vw, 6px);
+        border-radius: var(--radius-pill);
+    }
+
+    .top-nav-btn svg {
+        width: clamp(13px, 3.2vw, 15px);
+        height: clamp(13px, 3.2vw, 15px);
+        flex-shrink: 0;
     }
 
     .nav-logo {
-        width: 30px;
-        height: 30px;
-        font-size: 14px;
+        width: clamp(26px, 6.5vw, 30px);
+        height: clamp(26px, 6.5vw, 30px);
+        font-size: clamp(12px, 3vw, 14px);
     }
 
     .nav-brand-text {
-        font-size: 15px;
+        font-size: clamp(13px, 3.2vw, 15px);
     }
 
     .user-dropdown-panel {
