@@ -392,14 +392,19 @@
 }
 
 /* ----------------------------------------------------
-   6. SAĞ KENAR KULAKÇIKLARI (RIBBON FLAGS)
+   6. SOL KENAR KULAKÇIKLARI (RIBBON FLAGS)
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] .card-flag-btn {
-    border-radius: 0 8px 8px 0 !important;
+    border-radius: 8px 0 0 8px !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-left: none !important;
+    border-right: none !important;
     background: #111218 !important;
-    box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: -3px 3px 12px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="obsidian-minimal"] .card-container.is-flipped:not(.flags-inward) .card-flag-btn {
+    border-radius: 50% !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 [data-theme="obsidian-minimal"] .card-flag-btn.flag-trophies {
