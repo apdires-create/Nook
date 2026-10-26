@@ -382,7 +382,7 @@
 /* #region 6: CANLI ÖNİZLEME YÜZEN BARI (LIVE PREVIEW BAR) */
 .theme-preview-bar {
     position: fixed;
-    bottom: 24px;
+    bottom: max(20px, env(safe-area-inset-bottom, 20px));
     left: 50%;
     transform: translateX(-50%) translateY(0);
     z-index: var(--z-modal, 10000);
@@ -396,6 +396,7 @@
     box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 20px var(--accent-glow);
     padding: 8px 14px 8px 18px;
     animation: previewBarSlideUp 0.3s var(--ease-spring);
+    transition: transform 0.3s var(--ease-spring), opacity 0.25s ease;
 }
 
 @keyframes previewBarSlideUp {
@@ -477,6 +478,67 @@
     background: var(--accent-color);
     color: #ffffff;
     box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.theme-preview-btn.is-action:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.theme-preview-btn.is-apply-action {
+    background: #10b981;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.theme-preview-btn.is-apply-action:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* 📱 Mobil Boyutlandırma: Tema Önizleme Barı */
+@media (max-width: 640px) {
+    .theme-preview-bar {
+        width: calc(100% - 24px);
+        max-width: 420px;
+        padding: 10px 14px;
+        border-radius: 18px;
+        bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    }
+
+    .theme-preview-bar-inner {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .theme-preview-bar-info {
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .theme-preview-bar-title {
+        font-size: 0.84rem;
+        text-align: center;
+    }
+
+    .theme-preview-bar-hint {
+        display: none !important;
+    }
+
+    .theme-preview-bar-actions {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+    }
+
+    .theme-preview-btn {
+        flex: 1;
+        justify-content: center;
+        height: 38px;
+        padding: 0 12px;
+        font-size: 0.8rem;
+    }
 }
 
 .theme-preview-btn.is-action:hover {

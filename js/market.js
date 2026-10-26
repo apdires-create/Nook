@@ -382,6 +382,7 @@ const ThemeMarket = {
         this.kapat();
 
         // Kart düzenleme araçlarını dondur (inceleme modu)
+        document.body.classList.add('is-theme-previewing');
         if (typeof EditManager !== 'undefined' && EditManager.Appearance) {
             EditManager.Appearance.freezeEditMode();
         }
@@ -436,6 +437,7 @@ const ThemeMarket = {
      * Önizleme Modundan Çıkış ve Eski Temaya Geri Dönüş
      */
     async onizlemeyiBitir(revertToOriginal = true) {
+        document.body.classList.remove('is-theme-previewing');
         if (this.previewBarEl) {
             this.previewBarEl.style.display = 'none';
         }
