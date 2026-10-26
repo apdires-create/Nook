@@ -285,18 +285,8 @@ const RenderEngine = {
 
             // Geri butonu
             if (backBtn) {
-                if (!isUserOwner && trophyCount === 1) {
-                    backBtn.title = "Profile Dön";
-                } else {
-                    backBtn.title = "Geri";
-                }
+                backBtn.title = "Başarılara Geri Dön";
                 backBtn.onclick = () => {
-                    if (!isUserOwner && trophyCount === 1) {
-                        if (typeof Router !== 'undefined' && typeof Router.toggleCompanion === 'function') {
-                            Router.toggleCompanion(false);
-                            return;
-                        }
-                    }
                     window._activeTrophyDetail = null;
                     window._manualTrophyMaster = true;
                     this.trophiesCiz(kart);
@@ -608,18 +598,8 @@ const RenderEngine = {
             }
 
             if (backBtn) {
-                if (!isUserOwner && listeler.length === 1) {
-                    backBtn.title = "Profile Dön";
-                } else {
-                    backBtn.title = "Listelere Geri Dön";
-                }
+                backBtn.title = "Listelere Geri Dön";
                 backBtn.onclick = () => {
-                    if (!isUserOwner && listeler.length === 1) {
-                        if (typeof Router !== 'undefined' && typeof Router.toggleCompanion === 'function') {
-                            Router.toggleCompanion(false);
-                            return;
-                        }
-                    }
                     tops.aktifListeId = null;
                     tops._manualMaster = true;
                     const compCard = document.getElementById('topsCompanionCard');

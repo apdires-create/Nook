@@ -675,27 +675,14 @@ const TouchGestureManager = {
 
         // [0. Liste İçeriğinin / Detayın İçindeyken Yukarı Kaydırma -> Master Listeye Geri Dön]
         if (isAnyOpen && !this.startedInScroller && absY >= 50 && absY > absX * 1.3 && deltaY < 0) {
-            const isOwnerUser = typeof isOwner !== 'undefined' && isOwner;
             if (isShowcaseOpen && typeof kartVerisi !== 'undefined' && kartVerisi.tops && kartVerisi.tops.aktifListeId) {
-                const listeler = Array.isArray(kartVerisi.tops.listeler) ? kartVerisi.tops.listeler : [];
                 this.hasSwiped = true;
-                if (!isOwnerUser && listeler.length === 1) {
-                    Router.toggleCompanion(false);
-                    return;
-                }
                 kartVerisi.tops.aktifListeId = null;
                 kartVerisi.tops._manualMaster = true;
                 if (typeof RenderEngine !== 'undefined') RenderEngine.companionCiz(kartVerisi.tops);
                 return;
             } else if (isTrophiesOpen && window._activeTrophyDetail) {
                 this.hasSwiped = true;
-                const mt = (kartVerisi?.trophies && (kartVerisi.trophies.monkeytype || (Array.isArray(kartVerisi.trophies) && kartVerisi.trophies.find(x => x && x.tur === 'monkeytype')))) || (Array.isArray(kartVerisi?.widgets) && kartVerisi.widgets.find(x => x && x.tur === 'monkeytype'));
-                const mtUsername = mt ? (mt.kullanici || mt.username || mt.ayarlar?.kullanici || '') : '';
-                const trophyCount = mtUsername ? 1 : 0;
-                if (!isOwnerUser && trophyCount === 1) {
-                    Router.toggleCompanion(false);
-                    return;
-                }
                 window._activeTrophyDetail = null;
                 window._manualTrophyMaster = true;
                 if (typeof RenderEngine !== 'undefined') RenderEngine.trophiesCiz(kartVerisi);

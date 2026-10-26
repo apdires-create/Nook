@@ -681,6 +681,7 @@ html.is-profile-loading #landing-screen {
 
     /* Mobilde Kapatma & Geri Butonlarını Gizle (Jest Odaklı Temiz Arayüz) */
     .companion-close-btn,
+    .companion-back-btn,
     #flipToFrontBtn {
         display: none !important;
     }
