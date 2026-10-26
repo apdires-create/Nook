@@ -678,6 +678,17 @@ html.is-profile-loading #landing-screen {
         opacity: 1 !important;
         pointer-events: auto !important;
     }
+
+    /* Mobilde Kapatma & Geri Butonlarını Gizle (Jest Odaklı Temiz Arayüz) */
+    .companion-close-btn,
+    #flipToFrontBtn {
+        display: none !important;
+    }
+
+    .back-links-header {
+        justify-content: center !important;
+        text-align: center !important;
+    }
 }
 
 /* 3. COMPANION CARD GÖVDESİ */

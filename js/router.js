@@ -649,39 +649,37 @@ const TouchGestureManager = {
         const isTrophiesOpen = stage && stage.classList.contains('is-trophies-active');
         const isAnyOpen = stage && stage.classList.contains('has-companion-open');
 
-        // [PLAN.md Madde 5: Showcase ve Trophies'te Yukarı Kaydırma (Swipe-Up) ile Geri Dönüş]
-        if (isAnyOpen && !this.startedInScroller && absY >= 60 && absY > absX * 1.3 && deltaY < 0) {
-            this.hasSwiped = true;
-            if (isShowcaseOpen) {
-                // Eğer Showcase detayındaysa (aktif liste varsa) önce master listeye dön
-                if (typeof kartVerisi !== 'undefined' && kartVerisi.tops && kartVerisi.tops.aktifListeId) {
-                    kartVerisi.tops.aktifListeId = null;
-                    if (typeof RenderEngine !== 'undefined') RenderEngine.companionCiz(kartVerisi.tops);
-                    return;
-                }
-                // Master'daysa eşlikçi kartı kapatıp profil kartına dön
-                Router.toggleCompanion(false);
+        // [0. Liste İçeriğinin / Detayın İçindeyken Yukarı Kaydırma -> Master Listeye Geri Dön]
+        if (isAnyOpen && !this.startedInScroller && absY >= 50 && absY > absX * 1.3 && deltaY < 0) {
+            if (isShowcaseOpen && typeof kartVerisi !== 'undefined' && kartVerisi.tops && kartVerisi.tops.aktifListeId) {
+                this.hasSwiped = true;
+                kartVerisi.tops.aktifListeId = null;
+                if (typeof RenderEngine !== 'undefined') RenderEngine.companionCiz(kartVerisi.tops);
                 return;
-            } else if (isTrophiesOpen) {
-                // Eğer Trophies detayındaysa önce master listeye dön
-                if (window._activeTrophyDetail) {
-                    window._activeTrophyDetail = null;
-                    if (typeof RenderEngine !== 'undefined') RenderEngine.trophiesCiz(kartVerisi);
-                    return;
-                }
-                // Master'daysa eşlikçi kartı kapatıp profil kartına dön
-                Router.toggleCompanion(false);
+            } else if (isTrophiesOpen && window._activeTrophyDetail) {
+                this.hasSwiped = true;
+                window._activeTrophyDetail = null;
+                if (typeof RenderEngine !== 'undefined') RenderEngine.trophiesCiz(kartVerisi);
                 return;
             }
         }
 
-        // [0. Mobilde Linkler Açıkken Dikey Kaydırma -> Ön Yüze Dönüş]
-        // EĞER dokunuş linkler gibi aktif bir scroller içinde başladıysa kartı ASLA ön yüze çevirme!
-        if (Router.isFlipped && !isAnyOpen) {
-            if (!this.startedInScroller && absY > 50 && absY > absX * 1.5) {
-                this.hasSwiped = true;
-                Router.setFlipped(false);
-                return;
+        // [1. Profil Bloğunun Üstündeyken Dikey Kaydırma (Yukarı -> Arkaya / Aşağı -> Ön Yüze)]
+        if (!isAnyOpen) {
+            if (!Router.isFlipped) {
+                // Ön yüzdeyken Yukarı Kaydırma (Swipe-Up, deltaY < -50) -> Kartı arkaya çevir
+                if (!this.startedInScroller && absY > 50 && absY > absX * 1.5 && deltaY < 0) {
+                    this.hasSwiped = true;
+                    Router.setFlipped(true);
+                    return;
+                }
+            } else {
+                // Arka yüzdeyken Dikey Kaydırma -> Ön yüze dön
+                if (!this.startedInScroller && absY > 50 && absY > absX * 1.5) {
+                    this.hasSwiped = true;
+                    Router.setFlipped(false);
+                    return;
+                }
             }
         }
 
