@@ -383,7 +383,9 @@ const Router = {
                 stage.classList.remove('is-trophies-active');
                 stage.classList.add('is-showcase-active');
                 if (kartVerisi?.tops) {
-                    kartVerisi.tops.aktifListeId = null;
+                    delete kartVerisi.tops._manualMaster;
+                    const listeler = Array.isArray(kartVerisi.tops.listeler) ? kartVerisi.tops.listeler : [];
+                    kartVerisi.tops.aktifListeId = (listeler.length === 1) ? listeler[0].id : null;
                 }
                 const topsCompanion = document.getElementById('topsCompanionCard');
                 if (topsCompanion) topsCompanion.classList.remove('is-detail-editing');
@@ -396,7 +398,11 @@ const Router = {
             } else {
                 stage.classList.remove('is-showcase-active');
                 stage.classList.add('is-trophies-active');
-                window._activeTrophyDetail = null;
+                delete window._manualTrophyMaster;
+                const mt = (kartVerisi?.trophies && (kartVerisi.trophies.monkeytype || (Array.isArray(kartVerisi.trophies) && kartVerisi.trophies.find(x => x && x.tur === 'monkeytype')))) || (Array.isArray(kartVerisi?.widgets) && kartVerisi.widgets.find(x => x && x.tur === 'monkeytype'));
+                const mtUsername = mt ? (mt.kullanici || mt.username || mt.ayarlar?.kullanici || '') : '';
+                const trophyCount = mtUsername ? 1 : 0;
+                window._activeTrophyDetail = (trophyCount === 1) ? 'monkeytype' : null;
                 if (typeof RenderEngine !== 'undefined') {
                     RenderEngine.trophiesCiz(kartVerisi);
                 }
@@ -483,10 +489,12 @@ const Router = {
                     trophiesCard.classList.remove('is-closing');
                     if (isDesktop) trophiesCard.style.display = 'none';
                 }
-                // Bir sonraki açılış için her iki kartın da durumunu master listeye sıfırla
+                // Bir sonraki açılış için her iki kartın da durumunu sıfırla
                 if (kartVerisi?.tops) {
+                    delete kartVerisi.tops._manualMaster;
                     kartVerisi.tops.aktifListeId = null;
                 }
+                delete window._manualTrophyMaster;
                 window._activeTrophyDetail = null;
                 const topsComp = document.getElementById('topsCompanionCard');
                 if (topsComp) topsComp.classList.remove('is-detail-editing');
@@ -667,14 +675,29 @@ const TouchGestureManager = {
 
         // [0. Liste İçeriğinin / Detayın İçindeyken Yukarı Kaydırma -> Master Listeye Geri Dön]
         if (isAnyOpen && !this.startedInScroller && absY >= 50 && absY > absX * 1.3 && deltaY < 0) {
+            const isOwnerUser = typeof isOwner !== 'undefined' && isOwner;
             if (isShowcaseOpen && typeof kartVerisi !== 'undefined' && kartVerisi.tops && kartVerisi.tops.aktifListeId) {
+                const listeler = Array.isArray(kartVerisi.tops.listeler) ? kartVerisi.tops.listeler : [];
                 this.hasSwiped = true;
+                if (!isOwnerUser && listeler.length === 1) {
+                    Router.toggleCompanion(false);
+                    return;
+                }
                 kartVerisi.tops.aktifListeId = null;
+                kartVerisi.tops._manualMaster = true;
                 if (typeof RenderEngine !== 'undefined') RenderEngine.companionCiz(kartVerisi.tops);
                 return;
             } else if (isTrophiesOpen && window._activeTrophyDetail) {
                 this.hasSwiped = true;
+                const mt = (kartVerisi?.trophies && (kartVerisi.trophies.monkeytype || (Array.isArray(kartVerisi.trophies) && kartVerisi.trophies.find(x => x && x.tur === 'monkeytype')))) || (Array.isArray(kartVerisi?.widgets) && kartVerisi.widgets.find(x => x && x.tur === 'monkeytype'));
+                const mtUsername = mt ? (mt.kullanici || mt.username || mt.ayarlar?.kullanici || '') : '';
+                const trophyCount = mtUsername ? 1 : 0;
+                if (!isOwnerUser && trophyCount === 1) {
+                    Router.toggleCompanion(false);
+                    return;
+                }
                 window._activeTrophyDetail = null;
+                window._manualTrophyMaster = true;
                 if (typeof RenderEngine !== 'undefined') RenderEngine.trophiesCiz(kartVerisi);
                 return;
             }

@@ -130,6 +130,12 @@ const RenderEngine = {
         const username = mtData ? (mtData.kullanici || mtData.username || mtData.ayarlar?.kullanici || '') : '';
         const live = (typeof kartVerisi !== 'undefined' && kartVerisi.canli_monkeytype) ? kartVerisi.canli_monkeytype : null;
 
+        // Eğer sadece tek bir başarı varsa ve manuel olarak ana listeye çıkılmadıysa doğrudan o başarıyı göster
+        const trophyCount = username ? 1 : 0;
+        if (trophyCount === 1 && !window._manualTrophyMaster) {
+            window._activeTrophyDetail = 'monkeytype';
+        }
+
         // Aktif detay görünümü durumu: window._activeTrophyDetail ('monkeytype' vs null)
         const activeTrophy = window._activeTrophyDetail || null;
 
@@ -279,8 +285,20 @@ const RenderEngine = {
 
             // Geri butonu
             if (backBtn) {
+                if (!isUserOwner && trophyCount === 1) {
+                    backBtn.title = "Profile Dön";
+                } else {
+                    backBtn.title = "Geri";
+                }
                 backBtn.onclick = () => {
+                    if (!isUserOwner && trophyCount === 1) {
+                        if (typeof Router !== 'undefined' && typeof Router.toggleCompanion === 'function') {
+                            Router.toggleCompanion(false);
+                            return;
+                        }
+                    }
                     window._activeTrophyDetail = null;
+                    window._manualTrophyMaster = true;
                     this.trophiesCiz(kart);
                 };
             }
@@ -424,6 +442,11 @@ const RenderEngine = {
         const tops = topsData || kartVerisi.tops || { listeler: [] };
         const listeler = Array.isArray(tops.listeler) ? tops.listeler : [];
         const isUserOwner = (typeof isOwner !== 'undefined' && isOwner);
+
+        // Eğer sadece tek bir kürasyon listesi varsa ve manuel olarak ana listeye çıkılmadıysa doğrudan o listeyi aç
+        if (listeler.length === 1 && !tops._manualMaster) {
+            tops.aktifListeId = listeler[0].id;
+        }
 
         const aktifListeId = tops.aktifListeId;
         const aktifListe = listeler.find(l => l.id === aktifListeId);
@@ -585,8 +608,20 @@ const RenderEngine = {
             }
 
             if (backBtn) {
+                if (!isUserOwner && listeler.length === 1) {
+                    backBtn.title = "Profile Dön";
+                } else {
+                    backBtn.title = "Listelere Geri Dön";
+                }
                 backBtn.onclick = () => {
+                    if (!isUserOwner && listeler.length === 1) {
+                        if (typeof Router !== 'undefined' && typeof Router.toggleCompanion === 'function') {
+                            Router.toggleCompanion(false);
+                            return;
+                        }
+                    }
                     tops.aktifListeId = null;
+                    tops._manualMaster = true;
                     const compCard = document.getElementById('topsCompanionCard');
                     if (compCard) compCard.classList.remove('is-detail-editing');
                     this.companionCiz(tops);
