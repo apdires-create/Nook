@@ -476,7 +476,10 @@ async function sistemeGirisYap(email, password, turnstileId = 'auth-turnstile') 
     }
     let aktifToken = turnstileTokenAl(turnstileId);
     if (!aktifToken) {
-        const submitBtn = document.getElementById('auth-submit-btn');
+        const widgetEl = document.getElementById(turnstileId);
+        if (widgetEl) widgetEl.classList.add('is-active');
+
+        const submitBtn = document.getElementById('auth-submit-btn') || document.getElementById('landing-submit-btn');
         const eskiText = submitBtn ? submitBtn.textContent : '';
         if (submitBtn) {
             submitBtn.disabled = true;
@@ -553,7 +556,10 @@ async function sistemeKayitOl(email, password, username, turnstileId = 'auth-tur
     }
     let aktifToken = turnstileTokenAl(turnstileId);
     if (!aktifToken) {
-        const submitBtn = document.getElementById('auth-submit-btn');
+        const widgetEl = document.getElementById(turnstileId);
+        if (widgetEl) widgetEl.classList.add('is-active');
+
+        const submitBtn = document.getElementById('auth-submit-btn') || document.getElementById('landing-submit-btn');
         const eskiText = submitBtn ? submitBtn.textContent : '';
         if (submitBtn) {
             submitBtn.disabled = true;
@@ -653,7 +659,10 @@ async function sistemeSifreSifirlamaGonder(email, hedefBox = null, turnstileId =
 
     let aktifToken = turnstileTokenAl(turnstileId);
     if (!aktifToken) {
-        const submitBtn = document.getElementById('auth-forgot-submit-btn');
+        const widgetEl = document.getElementById(turnstileId);
+        if (widgetEl) widgetEl.classList.add('is-active');
+
+        const submitBtn = document.getElementById('auth-forgot-submit-btn') || document.getElementById('landing-forgot-submit-btn');
         const eskiText = submitBtn ? submitBtn.textContent : '';
         if (submitBtn) {
             submitBtn.disabled = true;
