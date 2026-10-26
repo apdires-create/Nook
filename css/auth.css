@@ -744,6 +744,27 @@
         font-size: clamp(11px, 2.8vw, 12.5px);
         gap: clamp(4px, 1.2vw, 6px);
         border-radius: var(--radius-pill);
+        max-width: 160px;
+    }
+
+    #profile-user-name {
+        max-width: clamp(65px, 18vw, 110px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    @media (max-width: 380px) {
+        .nav-market-trigger-btn .login-text {
+            display: none;
+        }
+        .nav-market-trigger-btn {
+            padding: 0 10px;
+        }
+        #profile-user-name {
+            max-width: 75px;
+        }
     }
 
     .top-nav-btn svg {
