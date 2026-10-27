@@ -1089,7 +1089,8 @@ body.is-owner .top-item-unit:active {
     opacity: 1;
 }
 
-.mt-profile-link.is-editing .mt-link-icon {
+.mt-profile-link.is-editing .mt-link-icon,
+body.is-owner .mt-link-icon {
     display: none;
 }
 
