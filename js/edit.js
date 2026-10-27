@@ -2517,10 +2517,14 @@ EditManager.TrophiesView = {
 
     inlineKullaniciDuzenle(mtCard, linkEl, editBtn) {
         const currentUser = mtCard.dataset.username || '';
-        if (mtCard.querySelector('.mt-inline-input')) return;
+        if (linkEl.classList.contains('is-editing')) return;
 
-        linkEl.style.display = 'none';
+        const usernameSpan = linkEl.querySelector('.mt-username-text');
+        if (!usernameSpan) return;
+
+        linkEl.classList.add('is-editing');
         editBtn.style.display = 'none';
+        usernameSpan.style.display = 'none';
 
         const input = document.createElement('input');
         input.type = 'text';
@@ -2530,23 +2534,36 @@ EditManager.TrophiesView = {
         input.spellcheck = false;
         input.autocomplete = 'off';
         input.placeholder = 'kullanıcı_adı';
+        input.style.width = Math.max(currentUser.length + 1, 6) + 'ch';
 
-        linkEl.parentNode.insertBefore(input, linkEl);
+        usernameSpan.parentNode.insertBefore(input, usernameSpan.nextSibling);
         input.focus();
         input.select();
+
+        input.oninput = () => {
+            input.style.width = Math.max(input.value.length + 1, 6) + 'ch';
+        };
+
+        const onLinkClick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+        linkEl.addEventListener('click', onLinkClick);
 
         let isSaving = false;
 
         const iptalEt = () => {
             if (isSaving) return;
+            linkEl.removeEventListener('click', onLinkClick);
             input.remove();
-            linkEl.style.display = 'inline-flex';
+            usernameSpan.style.display = '';
+            linkEl.classList.remove('is-editing');
             editBtn.style.display = 'inline-flex';
         };
 
         const kaydet = async () => {
             if (isSaving) return;
-            const yeniUser = input.value.trim();
+            const yeniUser = input.value.trim().replace(/^@/, '');
 
             if (!yeniUser || yeniUser === currentUser) {
                 iptalEt();
@@ -2602,7 +2619,7 @@ EditManager.TrophiesView = {
         input.onblur = () => {
             setTimeout(() => {
                 if (!isSaving) {
-                    const val = input.value.trim();
+                    const val = input.value.trim().replace(/^@/, '');
                     if (val && val !== currentUser && /^[a-zA-Z0-9_]{1,30}$/.test(val)) {
                         kaydet();
                     } else {

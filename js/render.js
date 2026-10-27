@@ -353,8 +353,9 @@ const RenderEngine = {
                             <div class="mt-user-badge-wrap">
                                 <a href="https://monkeytype.com/profile/${encodeURIComponent(username)}" target="_blank" rel="noopener noreferrer" class="mt-profile-link" title="Monkeytype Profilini Gör">
                                     <span class="mt-brand-icon">mt</span>
-                                    <span class="mt-username-text">@${this.escapeHtml(username)}</span>
-                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                                    <span class="mt-at-sign">@</span>
+                                    <span class="mt-username-text">${this.escapeHtml(username)}</span>
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" class="mt-link-icon">
                                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                         <polyline points="15 3 21 3 21 9"></polyline>
                                         <line x1="10" y1="14" x2="21" y2="3"></line>
