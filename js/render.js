@@ -351,10 +351,10 @@ const RenderEngine = {
                     <div class="monkeytype-card" data-username="${this.escapeHtml(username)}">
                         <div class="mt-identity-bar">
                             <div class="mt-user-badge-wrap">
-                                <span class="mt-brand-icon">mt</span>
                                 <a href="https://monkeytype.com/profile/${encodeURIComponent(username)}" target="_blank" rel="noopener noreferrer" class="mt-profile-link" title="Monkeytype Profilini Gör">
+                                    <span class="mt-brand-icon">mt</span>
                                     <span class="mt-username-text">@${this.escapeHtml(username)}</span>
-                                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2">
+                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                         <polyline points="15 3 21 3 21 9"></polyline>
                                         <line x1="10" y1="14" x2="21" y2="3"></line>
@@ -371,57 +371,41 @@ const RenderEngine = {
                             </div>
                         </div>
 
-                        <div class="mt-capsules-list">
-                            <div class="mt-capsule-item" data-mode="time" data-amount="15">
-                                <div class="mt-capsule-left">
-                                    <span class="mt-capsule-mode">15s Time</span>
+                        <div class="mt-scores-grid">
+                            <div class="mt-score-box" data-mode="time" data-amount="15">
+                                <span class="mt-score-title">15S TIME</span>
+                                <div class="mt-score-main">
+                                    <span class="mt-score-wpm">${t15.wpm}</span>
+                                    <span class="mt-score-unit">wpm</span>
                                 </div>
-                                <div class="mt-capsule-right">
-                                    <div class="mt-score-main">
-                                        <span class="mt-score-wpm">${t15.wpm}</span>
-                                        <span class="mt-score-unit">wpm</span>
-                                    </div>
-                                    <span class="mt-score-acc">${t15.acc !== '-' ? `${t15.acc}% acc` : '-% acc'}</span>
-                                </div>
+                                <span class="mt-score-acc">${t15.acc !== '-' ? `${t15.acc}% acc` : '-% acc'}</span>
                             </div>
 
-                            <div class="mt-capsule-item" data-mode="time" data-amount="60">
-                                <div class="mt-capsule-left">
-                                    <span class="mt-capsule-mode">60s Time</span>
+                            <div class="mt-score-box" data-mode="time" data-amount="60">
+                                <span class="mt-score-title">60S TIME</span>
+                                <div class="mt-score-main">
+                                    <span class="mt-score-wpm">${t60.wpm}</span>
+                                    <span class="mt-score-unit">wpm</span>
                                 </div>
-                                <div class="mt-capsule-right">
-                                    <div class="mt-score-main">
-                                        <span class="mt-score-wpm">${t60.wpm}</span>
-                                        <span class="mt-score-unit">wpm</span>
-                                    </div>
-                                    <span class="mt-score-acc">${t60.acc !== '-' ? `${t60.acc}% acc` : '-% acc'}</span>
-                                </div>
+                                <span class="mt-score-acc">${t60.acc !== '-' ? `${t60.acc}% acc` : '-% acc'}</span>
                             </div>
 
-                            <div class="mt-capsule-item" data-mode="words" data-amount="10">
-                                <div class="mt-capsule-left">
-                                    <span class="mt-capsule-mode">10 Words</span>
+                            <div class="mt-score-box" data-mode="words" data-amount="10">
+                                <span class="mt-score-title">10 WORDS</span>
+                                <div class="mt-score-main">
+                                    <span class="mt-score-wpm">${w10.wpm}</span>
+                                    <span class="mt-score-unit">wpm</span>
                                 </div>
-                                <div class="mt-capsule-right">
-                                    <div class="mt-score-main">
-                                        <span class="mt-score-wpm">${w10.wpm}</span>
-                                        <span class="mt-score-unit">wpm</span>
-                                    </div>
-                                    <span class="mt-score-acc">${w10.acc !== '-' ? `${w10.acc}% acc` : '-% acc'}</span>
-                                </div>
+                                <span class="mt-score-acc">${w10.acc !== '-' ? `${w10.acc}% acc` : '-% acc'}</span>
                             </div>
 
-                            <div class="mt-capsule-item" data-mode="words" data-amount="25">
-                                <div class="mt-capsule-left">
-                                    <span class="mt-capsule-mode">25 Words</span>
+                            <div class="mt-score-box" data-mode="words" data-amount="25">
+                                <span class="mt-score-title">25 WORDS</span>
+                                <div class="mt-score-main">
+                                    <span class="mt-score-wpm">${w25.wpm}</span>
+                                    <span class="mt-score-unit">wpm</span>
                                 </div>
-                                <div class="mt-capsule-right">
-                                    <div class="mt-score-main">
-                                        <span class="mt-score-wpm">${w25.wpm}</span>
-                                        <span class="mt-score-unit">wpm</span>
-                                    </div>
-                                    <span class="mt-score-acc">${w25.acc !== '-' ? `${w25.acc}% acc` : '-% acc'}</span>
-                                </div>
+                                <span class="mt-score-acc">${w25.acc !== '-' ? `${w25.acc}% acc` : '-% acc'}</span>
                             </div>
                         </div>
                     </div>

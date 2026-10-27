@@ -982,8 +982,9 @@ body.is-owner .top-item-unit:active {
 .mt-identity-bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: clamp(12px, 2.5cqh, 20px);
+    justify-content: flex-start;
+    gap: 8px;
+    margin-bottom: clamp(14px, 2.8cqh, 22px);
     padding: 0 2px;
 }
 
@@ -993,15 +994,45 @@ body.is-owner .top-item-unit:active {
     gap: 8px;
 }
 
+.mt-profile-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0.8cqh 3cqw;
+    width: fit-content;
+    max-width: 85%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-pill, 9999px);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: var(--cq-fs-desc, 13px);
+    font-weight: 600;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .mt-profile-link:hover {
+        background: rgba(59, 91, 219, 0.16);
+        border-color: var(--accent-color);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(59, 91, 219, 0.25);
+        transform: translateY(-1px);
+    }
+}
+
 .mt-brand-icon {
-    width: 22px;
-    height: 22px;
+    width: 17px;
+    height: 17px;
     background: var(--mt-color, #e2b714);
     color: #111111;
     font-family: var(--font-mono);
     font-weight: 800;
-    font-size: 11px;
-    border-radius: 4px;
+    font-size: 10px;
+    border-radius: 3px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1009,103 +1040,88 @@ body.is-owner .top-item-unit:active {
     flex-shrink: 0;
 }
 
-.mt-profile-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--text-secondary);
-    font-size: var(--cq-fs-desc, 13px);
+.mt-username-text {
     font-family: var(--font-mono);
-    text-decoration: none;
-    padding: 4px 10px;
-    border-radius: var(--radius-pill);
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border-soft);
-    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-}
-
-.mt-profile-link:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.08);
-    border-color: var(--border-highlight);
+    font-size: var(--cq-fs-desc, 13px);
+    letter-spacing: -0.01em;
 }
 
 .mt-edit-trigger {
-    background: transparent;
-    border: none;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     color: var(--text-tertiary);
     cursor: pointer;
-    padding: 4px 6px;
-    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
-    transition: color 0.2s ease, background 0.2s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.mt-edit-trigger:hover {
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.08);
+@media (hover: hover) and (pointer: fine) {
+    .mt-edit-trigger:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--border-highlight);
+        color: var(--text-primary);
+        transform: translateY(-1px);
+    }
 }
 
 .mt-inline-input {
     font-family: var(--font-mono);
     font-size: var(--cq-fs-desc, 13px);
+    font-weight: 600;
     color: var(--text-primary);
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.55);
     border: 1px solid var(--accent-color, #3b5bdb);
-    border-radius: var(--radius-pill);
-    padding: 3px 10px;
+    border-radius: var(--radius-pill, 9999px);
+    padding: 0.8cqh 3cqw;
     outline: none;
-    width: 140px;
+    width: 150px;
     box-shadow: 0 0 0 2px var(--accent-glow, rgba(59, 91, 219, 0.25));
 }
 
-.mt-capsules-list {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(10px, 2cqh, 16px);
+.mt-scores-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(10px, 2.8cqw, 16px);
     width: 100%;
 }
 
-.mt-capsule-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: clamp(12px, 2.4cqh, 18px) clamp(14px, 3.5cqw, 20px);
-    background: rgba(255, 255, 255, 0.03);
+.mt-score-box {
+    background: var(--bg-card-subtle);
     border: 1px solid var(--border-soft);
-    border-radius: var(--radius-card, 12px);
-    transition: background 0.2s ease, border-color 0.2s ease;
+    border-radius: var(--radius-card, 14px);
+    padding: clamp(14px, 3.2cqh, 22px) clamp(10px, 2.5cqw, 16px);
+    min-height: clamp(95px, 16cqh, 125px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: clamp(6px, 1.4cqh, 10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .mt-capsule-item:hover {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.14);
+    .mt-score-box:hover {
+        border-color: var(--border-highlight);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        transform: translateY(-2px);
     }
 }
 
-.mt-capsule-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.mt-capsule-mode {
-    font-size: var(--cq-fs-mono, 12px);
-    font-family: var(--font-mono);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+.mt-score-title {
+    font-size: clamp(11px, 2.8cqw, 13px);
     color: var(--text-secondary);
-}
-
-.mt-capsule-right {
-    display: flex;
-    align-items: baseline;
-    gap: clamp(10px, 2.5cqw, 16px);
+    font-weight: 700;
+    font-family: var(--font-sans);
+    letter-spacing: 0.05em;
+    line-height: 1.2;
 }
 
 .mt-score-main {
@@ -1116,14 +1132,14 @@ body.is-owner .top-item-unit:active {
 
 .mt-score-wpm {
     font-family: var(--font-mono);
-    font-size: clamp(1.3rem, 5.5cqw, 1.75rem);
+    font-size: clamp(1.8rem, 7.5cqw, 2.4rem);
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1;
 }
 
 .mt-score-unit {
-    font-size: var(--cq-fs-mono, 11px);
+    font-size: clamp(12px, 3cqw, 14px);
     color: var(--mt-color, #e2b714);
     font-weight: 700;
     font-family: var(--font-mono);
@@ -1132,10 +1148,8 @@ body.is-owner .top-item-unit:active {
 
 .mt-score-acc {
     font-family: var(--font-mono);
-    font-size: var(--cq-fs-desc, 12px);
+    font-size: clamp(12px, 2.8cqw, 13.5px);
     color: var(--text-tertiary);
     font-weight: 500;
-    min-width: 60px;
-    text-align: right;
 }
 /* #endregion */
