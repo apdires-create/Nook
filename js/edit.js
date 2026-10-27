@@ -2497,52 +2497,123 @@ EditManager.TrophiesView = {
     init() {
         if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
         const detailBody = document.getElementById('trophiesDetailBody');
-        const masterList = document.getElementById('trophiesMasterList');
-        if (!detailBody && !masterList) return;
+        if (!detailBody) return;
 
-        const mtCard = detailBody?.querySelector('.monkeytype-card');
-        if (mtCard && !mtCard.querySelector('.mt-owner-actions')) {
-            const actionsWrap = document.createElement('div');
-            actionsWrap.className = 'mt-owner-actions';
-            actionsWrap.style.display = 'flex';
-            actionsWrap.style.justifyContent = 'flex-end';
-            actionsWrap.style.gap = '8px';
-            actionsWrap.style.marginTop = '10px';
+        const mtCard = detailBody.querySelector('.monkeytype-card');
+        if (!mtCard) return;
 
-            actionsWrap.innerHTML = `
-                <button type="button" class="form-btn-sm form-btn-cancel mt-edit-user-btn" style="font-size: 0.75rem;">Kullanıcıyı Değiştir</button>
-                <button type="button" class="form-btn-sm form-btn-cancel mt-remove-btn" style="color: #ef4444; font-size: 0.75rem;">Rekoru Kaldır</button>
-            `;
+        const editBtn = mtCard.querySelector('#mtEditTriggerBtn');
+        const linkEl = mtCard.querySelector('.mt-profile-link');
+        if (!editBtn || !linkEl) return;
 
-            actionsWrap.querySelector('.mt-edit-user-btn').onclick = (e) => {
-                e.stopPropagation();
-                const mevcutUser = mtCard.dataset.username || '';
-                this.acMonkeytypeFormu(mevcutUser);
-            };
+        if (editBtn.dataset.bound === 'true') return;
+        editBtn.dataset.bound = 'true';
 
-            actionsWrap.querySelector('.mt-remove-btn').onclick = (e) => {
-                e.stopPropagation();
-                if (Array.isArray(kartVerisi.trophies)) {
-                    kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== 'monkeytype');
-                } else if (kartVerisi.trophies && typeof kartVerisi.trophies === 'object') {
-                    delete kartVerisi.trophies.monkeytype;
+        editBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.inlineKullaniciDuzenle(mtCard, linkEl, editBtn);
+        };
+    },
+
+    inlineKullaniciDuzenle(mtCard, linkEl, editBtn) {
+        const currentUser = mtCard.dataset.username || '';
+        if (mtCard.querySelector('.mt-inline-input')) return;
+
+        linkEl.style.display = 'none';
+        editBtn.style.display = 'none';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'mt-inline-input';
+        input.value = currentUser;
+        input.maxLength = 30;
+        input.spellcheck = false;
+        input.autocomplete = 'off';
+        input.placeholder = 'kullanıcı_adı';
+
+        linkEl.parentNode.insertBefore(input, linkEl);
+        input.focus();
+        input.select();
+
+        let isSaving = false;
+
+        const iptalEt = () => {
+            if (isSaving) return;
+            input.remove();
+            linkEl.style.display = 'inline-flex';
+            editBtn.style.display = 'inline-flex';
+        };
+
+        const kaydet = async () => {
+            if (isSaving) return;
+            const yeniUser = input.value.trim();
+
+            if (!yeniUser || yeniUser === currentUser) {
+                iptalEt();
+                return;
+            }
+
+            if (!/^[a-zA-Z0-9_]{1,30}$/.test(yeniUser)) {
+                EditManager.Global.toastGoster("Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir.", 'warning');
+                input.focus();
+                return;
+            }
+
+            isSaving = true;
+            input.disabled = true;
+            input.style.opacity = '0.6';
+
+            if (!Array.isArray(kartVerisi.trophies)) kartVerisi.trophies = [];
+            kartVerisi.trophies = kartVerisi.trophies.filter(x => x && typeof x === 'object' && x.tur !== 'monkeytype');
+            kartVerisi.trophies.push({ tur: 'monkeytype', kullanici: yeniUser });
+
+            if (!Array.isArray(kartVerisi.widgets)) kartVerisi.widgets = [];
+            kartVerisi.widgets = kartVerisi.widgets.filter(x => x && x.tur !== 'monkeytype');
+            kartVerisi.widgets.push({ tur: 'monkeytype', kullanici: yeniUser });
+
+            window._activeTrophyDetail = 'monkeytype';
+            RenderEngine.trophiesCiz(kartVerisi);
+            EditManager.Global.degisiklikYapildi();
+            EditManager.Global.toastGoster("Monkeytype kullanıcısı güncellendi.", 'success');
+
+            if (typeof canliMonkeytypeVerisiCek === 'function') {
+                try {
+                    const skorlar = await canliMonkeytypeVerisiCek(yeniUser);
+                    if (skorlar) {
+                        kartVerisi.canli_monkeytype = skorlar;
+                        RenderEngine.monkeytypeGuncelle(skorlar);
+                    }
+                } catch (err) {
+                    console.warn("MT skor çekme hatası:", err);
                 }
-                if (Array.isArray(kartVerisi.widgets)) {
-                    kartVerisi.widgets = kartVerisi.widgets.filter(x => x && x.tur !== 'monkeytype');
-                }
-                delete kartVerisi.canli_monkeytype;
-                window._activeTrophyDetail = null;
-                RenderEngine.trophiesCiz(kartVerisi);
-                EditManager.Global.degisiklikYapildi();
-                EditManager.Global.toastGoster("Monkeytype rekoru kaldırıldı.", 'success');
-            };
+            }
+        };
 
-            mtCard.appendChild(actionsWrap);
-        }
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                kaydet();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                iptalEt();
+            }
+        };
+
+        input.onblur = () => {
+            setTimeout(() => {
+                if (!isSaving) {
+                    const val = input.value.trim();
+                    if (val && val !== currentUser && /^[a-zA-Z0-9_]{1,30}$/.test(val)) {
+                        kaydet();
+                    } else {
+                        iptalEt();
+                    }
+                }
+            }, 120);
+        };
     },
 
     acMonkeytypeFormu(mevcutKullanici = '') {
-        // Formu açmadan önce detay görünümüne geç
         window._activeTrophyDetail = 'monkeytype';
         RenderEngine.trophiesCiz(kartVerisi);
 
@@ -2558,7 +2629,7 @@ EditManager.TrophiesView = {
         formWrap.style.marginBottom = '12px';
         formWrap.innerHTML = `
             <div style="font-size: var(--cq-fs-desc); font-weight: 600; margin-bottom: 8px;">Monkeytype Kullanıcı Adı:</div>
-            <input type="text" class="inline-form-input mt-user-input" placeholder="apdi" value="${RenderEngine.escapeHtml(mevcutKullanici)}" maxlength="30" autocomplete="off" spellcheck="false">
+            <input type="text" class="inline-form-input mt-user-input" placeholder="kullanıcı_adı" value="${RenderEngine.escapeHtml(mevcutKullanici)}" maxlength="30" autocomplete="off" spellcheck="false">
             <div class="inline-form-actions" style="margin-top: 8px; display: flex; justify-content: flex-end; gap: 8px;">
                 <button type="button" class="form-btn-sm form-btn-cancel mt-form-cancel">İptal</button>
                 <button type="button" class="form-btn-sm form-btn-save mt-form-save">Kaydet</button>
@@ -2588,14 +2659,10 @@ EditManager.TrophiesView = {
                 return;
             }
 
-            if (!Array.isArray(kartVerisi.trophies)) {
-                kartVerisi.trophies = [];
-            }
+            if (!Array.isArray(kartVerisi.trophies)) kartVerisi.trophies = [];
             kartVerisi.trophies = kartVerisi.trophies.filter(x => x && typeof x === 'object' && x.tur !== 'monkeytype');
-            kartVerisi.trophies.push({
-                tur: 'monkeytype',
-                kullanici: yeniUser
-            });
+            kartVerisi.trophies.push({ tur: 'monkeytype', kullanici: yeniUser });
+
             if (!Array.isArray(kartVerisi.widgets)) kartVerisi.widgets = [];
             kartVerisi.widgets = kartVerisi.widgets.filter(x => x.tur !== 'monkeytype');
             kartVerisi.widgets.push({ tur: 'monkeytype', kullanici: yeniUser });
@@ -2609,7 +2676,7 @@ EditManager.TrophiesView = {
                 canliMonkeytypeVerisiCek(yeniUser).then(skorlar => {
                     if (skorlar) {
                         kartVerisi.canli_monkeytype = skorlar;
-                        RenderEngine.trophiesCiz(kartVerisi);
+                        RenderEngine.monkeytypeGuncelle(skorlar);
                     }
                 });
             }

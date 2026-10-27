@@ -34,6 +34,9 @@
     --toast-warning-bg: #f59e0b;
     --toast-warning-shadow: 0 8px 24px rgba(245, 158, 11, 0.45);
 
+    /* Entegrasyon & Kupa Marka Renkleri */
+    --mt-color: #e2b714;
+
     /* Sahne Deseni ve Atmosfer Tokenları */
     --stage-pattern: none;
     --stage-pattern-bg: transparent;
