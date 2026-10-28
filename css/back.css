@@ -975,23 +975,18 @@ body.is-owner .top-item-unit:active {
     padding: 0;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     width: 100%;
+    flex: 1;
     box-shadow: none;
-}
-
-.mt-identity-bar {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    margin-bottom: clamp(14px, 2.8cqh, 22px);
-    padding: 0 2px;
 }
 
 .mt-user-badge-wrap {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
+    max-width: 92%;
 }
 
 .mt-profile-link {

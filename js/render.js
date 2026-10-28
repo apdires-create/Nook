@@ -106,6 +106,7 @@ const RenderEngine = {
         const masterList = document.getElementById('trophiesMasterList');
         const detailTitle = document.getElementById('trophiesDetailTitle');
         const detailBody = document.getElementById('trophiesDetailBody');
+        const detailFooter = document.getElementById('trophiesDetailFooter');
         const deleteActiveBtn = document.getElementById('trophiesDeleteActiveBtn');
         const backBtn = document.getElementById('trophiesBackBtn');
 
@@ -145,6 +146,7 @@ const RenderEngine = {
             // ==========================================
             masterView.style.display = 'flex';
             if (detailView) detailView.style.display = 'none';
+            if (detailFooter) { detailFooter.innerHTML = ''; detailFooter.style.display = 'none'; }
 
             let itemsHtml = '';
 
@@ -349,29 +351,6 @@ const RenderEngine = {
 
                 mtHtml = `
                     <div class="monkeytype-card" data-username="${this.escapeHtml(username)}">
-                        <div class="mt-identity-bar">
-                            <div class="mt-user-badge-wrap">
-                                <a href="https://monkeytype.com/profile/${encodeURIComponent(username)}" target="_blank" rel="noopener noreferrer" class="mt-profile-link" title="Monkeytype Profilini Gör">
-                                    <span class="mt-brand-icon">mt</span>
-                                    <span class="mt-at-sign">@</span>
-                                    <span class="mt-username-text">${this.escapeHtml(username)}</span>
-                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" class="mt-link-icon">
-                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                        <polyline points="15 3 21 3 21 9"></polyline>
-                                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                                    </svg>
-                                </a>
-                                ${isUserOwner ? `
-                                <button type="button" class="mt-edit-trigger" id="mtEditTriggerBtn" title="Kullanıcı Adını Değiştir" aria-label="Kullanıcı Adını Değiştir">
-                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                    </svg>
-                                </button>
-                                ` : ''}
-                            </div>
-                        </div>
-
                         <div class="mt-scores-grid">
                             <div class="mt-score-box" data-mode="time" data-amount="15">
                                 <span class="mt-score-title">15S TIME</span>
@@ -411,8 +390,38 @@ const RenderEngine = {
                         </div>
                     </div>
                 `;
+
+                if (detailFooter) {
+                    detailFooter.innerHTML = `
+                        <div class="mt-user-badge-wrap">
+                            <a href="https://monkeytype.com/profile/${encodeURIComponent(username)}" target="_blank" rel="noopener noreferrer" class="mt-profile-link" title="Monkeytype Profilini Gör">
+                                <span class="mt-brand-icon">mt</span>
+                                <span class="mt-at-sign">@</span>
+                                <span class="mt-username-text">${this.escapeHtml(username)}</span>
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" class="mt-link-icon">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                            </a>
+                            ${isUserOwner ? `
+                            <button type="button" class="mt-edit-trigger" id="mtEditTriggerBtn" title="Kullanıcı Adını Değiştir" aria-label="Kullanıcı Adını Değiştir">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            ` : ''}
+                        </div>
+                    `;
+                    detailFooter.style.display = 'flex';
+                }
             } else {
                 mtHtml = `<p class="placeholder-text" style="text-align: center; color: var(--text-tertiary); padding: 3cqh 0;">Henüz Monkeytype hesabı eklenmemiş.</p>`;
+                if (detailFooter) {
+                    detailFooter.innerHTML = '';
+                    detailFooter.style.display = 'none';
+                }
             }
 
             if (detailBody) detailBody.innerHTML = mtHtml;

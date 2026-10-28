@@ -2496,14 +2496,12 @@ EditManager.BackViews = {
 EditManager.TrophiesView = {
     init() {
         if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
-        const detailBody = document.getElementById('trophiesDetailBody');
-        if (!detailBody) return;
+        const detailView = document.getElementById('trophiesDetailView');
+        if (!detailView) return;
 
-        const mtCard = detailBody.querySelector('.monkeytype-card');
-        if (!mtCard) return;
-
-        const editBtn = mtCard.querySelector('#mtEditTriggerBtn');
-        const linkEl = mtCard.querySelector('.mt-profile-link');
+        const mtCard = detailView.querySelector('.monkeytype-card');
+        const editBtn = detailView.querySelector('#mtEditTriggerBtn');
+        const linkEl = detailView.querySelector('.mt-profile-link');
         if (!editBtn || !linkEl) return;
 
         if (editBtn.dataset.bound === 'true') return;
