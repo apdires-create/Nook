@@ -326,9 +326,80 @@ const RenderEngine = {
                 const t15 = getStat('time', '15');
                 const w10 = getStat('words', '10');
 
+                // Avatar & Kimlik Verileri
+                const front = kart?.front || {};
+                const safeAvatar = this.getGorselUrl(front?.pfp_url || front?.avatar_url || kart?.profil_resmi);
+                const defaultAvatar = "https://i.ibb.co/8gvf4SNF/pfp-placeholder.png";
+                const avatarSrc = (safeAvatar && safeAvatar !== '#') ? safeAvatar : defaultAvatar;
+
+                // Monkeytype İstatistikleri (Toplam Süre, Biten Test, Gün Serisi)
+                const stats = live?.typingStats || null;
+                const timeSec = stats?.timeTyping || 0;
+                let timeStr = '-';
+                if (timeSec > 0) {
+                    const hours = Math.floor(timeSec / 3600);
+                    const mins = Math.floor((timeSec % 3600) / 60);
+                    timeStr = hours > 0 ? `${hours} sa ${mins} dk` : `${mins} dk`;
+                }
+
+                const completedCount = (stats && stats.completedTests !== undefined) ? stats.completedTests.toLocaleString('tr-TR') : '-';
+                const streakVal = (live && live.streak !== undefined) ? live.streak : '-';
+                const maxStreakVal = (live && live.maxStreak !== undefined) ? `${live.maxStreak} gün` : '-';
+
+                let joinedStr = 'Monkeytype Typist';
+                if (live?.addedAt) {
+                    try {
+                        const d = new Date(live.addedAt);
+                        const ayYil = d.toLocaleDateString('tr-TR', { month: 'short', year: 'numeric' });
+                        joinedStr = `${ayYil}'te katıldı`;
+                    } catch {
+                        joinedStr = 'Monkeytype Typist';
+                    }
+                }
+
                 mtHtml = `
                     <div class="monkeytype-card" data-username="${this.escapeHtml(username)}">
-                        <div class="mt-header-box" id="mtHeaderBox"></div>
+                        <div class="mt-header-box" id="mtHeaderBox">
+                            <div class="mt-header-top-row">
+                                <div class="mt-header-user-wrap">
+                                    <div class="mt-avatar-wrap">
+                                        <img src="${avatarSrc}" alt="${this.escapeHtml(username)}" class="mt-avatar-img" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+                                        <div class="mt-avatar-fallback" style="display: none;">
+                                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                        </div>
+                                        <span class="mt-avatar-badge" title="Monkeytype">mt</span>
+                                    </div>
+                                    <div class="mt-header-user-info">
+                                        <div class="mt-header-username" title="${this.escapeHtml(username)}">${this.escapeHtml(username)}</div>
+                                        <div class="mt-header-meta">${this.escapeHtml(joinedStr)}</div>
+                                    </div>
+                                </div>
+                                <div class="mt-streak-pill" title="Mevcut Gün Serisi">
+                                    <span class="mt-streak-fire">🔥</span>
+                                    <span class="mt-streak-val">${streakVal !== '-' ? `${streakVal} Gün` : '-'}</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-header-divider"></div>
+
+                            <div class="mt-stats-strip">
+                                <div class="mt-stat-col">
+                                    <span class="mt-stat-label">YAZMA SÜRESİ</span>
+                                    <span class="mt-stat-value">${timeStr}</span>
+                                </div>
+                                <div class="mt-stat-divider"></div>
+                                <div class="mt-stat-col">
+                                    <span class="mt-stat-label">BİTEN TEST</span>
+                                    <span class="mt-stat-value">${completedCount}</span>
+                                </div>
+                                <div class="mt-stat-divider"></div>
+                                <div class="mt-stat-col">
+                                    <span class="mt-stat-label">REKOR SERİ</span>
+                                    <span class="mt-stat-value">${maxStreakVal}</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mt-scores-grid">
                             <div class="mt-score-box" data-mode="time" data-amount="15">
                                 <span class="mt-score-title">15S TIME</span>
