@@ -324,7 +324,12 @@ const RenderEngine = {
                 };
 
                 const t15 = getStat('time', '15');
+                const t30 = getStat('time', '30');
+                const t60 = getStat('time', '60');
+
                 const w10 = getStat('words', '10');
+                const w25 = getStat('words', '25');
+                const w50 = getStat('words', '50');
 
                 // Avatar & Kimlik Verileri
                 const front = kart?.front || {};
@@ -359,13 +364,14 @@ const RenderEngine = {
 
                 mtHtml = `
                     <div class="monkeytype-card" data-username="${this.escapeHtml(username)}">
+                        <!-- 1. Genişletilmiş & Ferah Kimlik Kartı -->
                         <div class="mt-header-box" id="mtHeaderBox">
                             <div class="mt-header-top-row">
                                 <div class="mt-header-user-wrap">
                                     <div class="mt-avatar-wrap">
                                         <img src="${avatarSrc}" alt="${this.escapeHtml(username)}" class="mt-avatar-img" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
                                         <div class="mt-avatar-fallback" style="display: none;">
-                                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                                         </div>
                                         <span class="mt-avatar-badge" title="Monkeytype">mt</span>
                                     </div>
@@ -400,23 +406,69 @@ const RenderEngine = {
                             </div>
                         </div>
 
-                        <div class="mt-scores-grid">
-                            <div class="mt-score-box" data-mode="time" data-amount="15">
-                                <span class="mt-score-title">15S TIME</span>
-                                <div class="mt-score-main">
-                                    <span class="mt-score-wpm">${t15.wpm}</span>
-                                    <span class="mt-score-unit">wpm</span>
+                        <!-- 2. Saniye (Time) Satırı -->
+                        <div class="mt-section-group">
+                            <div class="mt-section-label">Zaman (Time)</div>
+                            <div class="mt-row-grid">
+                                <div class="mt-score-box" data-mode="time" data-amount="15">
+                                    <span class="mt-score-title">15s</span>
+                                    <div class="mt-score-main">
+                                        <span class="mt-score-wpm">${t15.wpm}</span>
+                                        <span class="mt-score-unit">wpm</span>
+                                    </div>
+                                    <span class="mt-score-acc">${t15.acc !== '-' ? `${t15.acc}% acc` : '-% acc'}</span>
                                 </div>
-                                <span class="mt-score-acc">${t15.acc !== '-' ? `${t15.acc}% acc` : '-% acc'}</span>
-                            </div>
 
-                            <div class="mt-score-box" data-mode="words" data-amount="10">
-                                <span class="mt-score-title">10 WORDS</span>
-                                <div class="mt-score-main">
-                                    <span class="mt-score-wpm">${w10.wpm}</span>
-                                    <span class="mt-score-unit">wpm</span>
+                                <div class="mt-score-box" data-mode="time" data-amount="30">
+                                    <span class="mt-score-title">30s</span>
+                                    <div class="mt-score-main">
+                                        <span class="mt-score-wpm">${t30.wpm}</span>
+                                        <span class="mt-score-unit">wpm</span>
+                                    </div>
+                                    <span class="mt-score-acc">${t30.acc !== '-' ? `${t30.acc}% acc` : '-% acc'}</span>
                                 </div>
-                                <span class="mt-score-acc">${w10.acc !== '-' ? `${w10.acc}% acc` : '-% acc'}</span>
+
+                                <div class="mt-score-box" data-mode="time" data-amount="60">
+                                    <span class="mt-score-title">60s</span>
+                                    <div class="mt-score-main">
+                                        <span class="mt-score-wpm">${t60.wpm}</span>
+                                        <span class="mt-score-unit">wpm</span>
+                                    </div>
+                                    <span class="mt-score-acc">${t60.acc !== '-' ? `${t60.acc}% acc` : '-% acc'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Kelime (Words) Satırı -->
+                        <div class="mt-section-group">
+                            <div class="mt-section-label">Kelime (Words)</div>
+                            <div class="mt-row-grid">
+                                <div class="mt-score-box" data-mode="words" data-amount="10">
+                                    <span class="mt-score-title">10w</span>
+                                    <div class="mt-score-main">
+                                        <span class="mt-score-wpm">${w10.wpm}</span>
+                                        <span class="mt-score-unit">wpm</span>
+                                    </div>
+                                    <span class="mt-score-acc">${w10.acc !== '-' ? `${w10.acc}% acc` : '-% acc'}</span>
+                                </div>
+
+                                <div class="mt-score-box" data-mode="words" data-amount="25">
+                                    <span class="mt-score-title">25w</span>
+                                    <div class="mt-score-main">
+                                        <span class="mt-score-wpm">${w25.wpm}</span>
+                                        <span class="mt-score-unit">wpm</span>
+                                    </div>
+                                    <span class="mt-score-acc">${w25.acc !== '-' ? `${w25.acc}% acc` : '-% acc'}</span>
+                                </div>
+
+                                <div class="mt-score-box" data-mode="words" data-amount="50">
+                                    <span class="mt-score-title">50w</span>
+                                    <div class="mt-score-main">
+                                        <span class="mt-score-wpm">${w50.wpm}</span>
+                                        <span class="mt-score-unit">wpm</span>
+                                    </div>
+                                    <span class="mt-score-acc">${w50.acc !== '-' ? `${w50.acc}% acc` : '-% acc'}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -872,8 +924,8 @@ const RenderEngine = {
             }
         };
 
-        ['15', '60'].forEach(a => veriyiYaz('time', a));
-        ['10', '25'].forEach(a => veriyiYaz('words', a));
+        ['15', '30', '60'].forEach(a => veriyiYaz('time', a));
+        ['10', '25', '50'].forEach(a => veriyiYaz('words', a));
     },
 
     safeUrl(url) {

@@ -975,8 +975,8 @@ body.is-owner .top-item-unit:active {
     padding: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: clamp(12px, 2cqh, 18px);
+    justify-content: flex-start;
+    gap: clamp(14px, 2.2cqh, 20px);
     width: 100%;
     flex: 1;
     box-shadow: none;
@@ -984,16 +984,16 @@ body.is-owner .top-item-unit:active {
 
 /* Monkeytype Üst Başlık / Profil Kartı */
 .mt-header-box {
-    background: linear-gradient(180deg, rgba(226, 183, 20, 0.05) 0%, rgba(255, 255, 255, 0.015) 100%), var(--bg-card-subtle);
+    background: linear-gradient(180deg, rgba(226, 183, 20, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%), var(--bg-card-subtle);
     border: 1px solid var(--border-soft);
-    border-radius: var(--radius-card, 14px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
-    padding: clamp(14px, 2.6cqh, 18px) clamp(14px, 3.5cqw, 20px);
+    border-radius: var(--radius-card, 16px);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+    padding: clamp(15px, 2.6cqh, 20px) clamp(14px, 3.8cqw, 20px);
     width: 100%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: clamp(10px, 1.8cqh, 14px);
+    gap: clamp(12px, 1.8cqh, 15px);
     position: relative;
     overflow: hidden;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
@@ -1017,26 +1017,26 @@ body.is-owner .top-item-unit:active {
 .mt-header-user-wrap {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     min-width: 0;
     flex: 1;
 }
 
 .mt-avatar-wrap {
     position: relative;
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
 }
 
 .mt-avatar-img,
 .mt-avatar-fallback {
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     object-fit: cover;
     background: rgba(255, 255, 255, 0.06);
-    border: 1.5px solid rgba(226, 183, 20, 0.45);
+    border: 2px solid rgba(226, 183, 20, 0.45);
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -1048,20 +1048,20 @@ body.is-owner .top-item-unit:active {
     position: absolute;
     bottom: -2px;
     right: -3px;
-    width: 15px;
-    height: 15px;
+    width: 17px;
+    height: 17px;
     background: var(--mt-color, #e2b714);
     color: #111111;
     font-family: var(--font-mono);
-    font-size: 8.5px;
+    font-size: 9px;
     font-weight: 800;
     line-height: 1;
-    border-radius: 4px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-    border: 1px solid var(--bg-card-subtle);
+    border: 1.5px solid var(--bg-card-subtle);
 }
 
 .mt-header-user-info {
@@ -1073,8 +1073,8 @@ body.is-owner .top-item-unit:active {
 
 .mt-header-username {
     font-family: var(--font-sans);
-    font-size: clamp(14px, 3.5cqw, 16px);
-    font-weight: 700;
+    font-size: clamp(15px, 4cqw, 18px);
+    font-weight: 750;
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -1084,7 +1084,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .mt-header-meta {
-    font-size: clamp(10px, 2.4cqw, 11.5px);
+    font-size: clamp(11px, 2.6cqw, 12.5px);
     color: var(--text-tertiary);
     font-family: var(--font-sans);
     white-space: nowrap;
@@ -1095,13 +1095,13 @@ body.is-owner .top-item-unit:active {
 .mt-streak-pill {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 9px;
+    gap: 5px;
+    padding: 5px 11px;
     border-radius: var(--radius-pill, 999px);
     background: rgba(226, 183, 20, 0.1);
     border: 1px solid rgba(226, 183, 20, 0.28);
     color: #fcc419;
-    font-size: clamp(11px, 2.6cqw, 12px);
+    font-size: clamp(11.5px, 2.7cqw, 13px);
     font-weight: 700;
     font-family: var(--font-mono);
     flex-shrink: 0;
@@ -1109,7 +1109,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .mt-streak-fire {
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1;
 }
 
@@ -1139,16 +1139,16 @@ body.is-owner .top-item-unit:active {
 
 .mt-stat-divider {
     width: 1px;
-    height: 22px;
+    height: 26px;
     background: var(--border-soft);
     opacity: 0.6;
 }
 
 .mt-stat-label {
-    font-size: clamp(9px, 2.2cqw, 10.5px);
+    font-size: clamp(9.5px, 2.3cqw, 11px);
     font-weight: 600;
     color: var(--text-tertiary);
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     font-family: var(--font-sans);
     white-space: nowrap;
@@ -1156,8 +1156,8 @@ body.is-owner .top-item-unit:active {
 
 .mt-stat-value {
     font-family: var(--font-mono);
-    font-size: clamp(12.5px, 3.2cqw, 14.5px);
-    font-weight: 700;
+    font-size: clamp(13px, 3.4cqw, 15.5px);
+    font-weight: 750;
     color: var(--text-primary);
     white-space: nowrap;
     line-height: 1.1;
@@ -1179,25 +1179,59 @@ body.is-owner .top-item-unit:active {
     flex-shrink: 0;
 }
 
-.mt-scores-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: clamp(10px, 2.8cqw, 16px);
+/* Mod Satır Grupları (Time & Words) */
+.mt-section-group {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(6px, 1cqh, 9px);
     width: 100%;
+}
+
+.mt-section-label {
+    font-size: clamp(10px, 2.4cqw, 11.5px);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 2px;
+}
+
+.mt-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-soft);
+    opacity: 0.6;
+}
+
+.mt-row-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(8px, 2cqw, 12px);
+    width: 100%;
+}
+
+@container (max-width: 320px) {
+    .mt-row-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .mt-score-box {
     background: var(--bg-card-subtle);
     border: 1px solid var(--border-soft);
-    border-radius: var(--radius-card, 14px);
-    padding: clamp(14px, 3.2cqh, 22px) clamp(10px, 2.5cqw, 16px);
-    min-height: clamp(95px, 16cqh, 125px);
+    border-radius: var(--radius-card, 12px);
+    padding: clamp(10px, 1.8cqh, 14px) clamp(6px, 1.5cqw, 10px);
+    min-height: clamp(80px, 12cqh, 96px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: clamp(6px, 1.4cqh, 10px);
+    gap: clamp(4px, 0.8cqh, 6px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1211,30 +1245,31 @@ body.is-owner .top-item-unit:active {
 }
 
 .mt-score-title {
-    font-size: clamp(11px, 2.8cqw, 13px);
+    font-size: clamp(10px, 2.3cqw, 11.5px);
     color: var(--text-secondary);
     font-weight: 700;
     font-family: var(--font-sans);
     letter-spacing: 0.05em;
     line-height: 1.2;
+    text-transform: uppercase;
 }
 
 .mt-score-main {
     display: flex;
     align-items: baseline;
-    gap: 4px;
+    gap: 3px;
 }
 
 .mt-score-wpm {
     font-family: var(--font-mono);
-    font-size: clamp(1.8rem, 7.5cqw, 2.4rem);
+    font-size: clamp(1.4rem, 4.8cqw, 1.85rem);
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1;
 }
 
 .mt-score-unit {
-    font-size: clamp(12px, 3cqw, 14px);
+    font-size: clamp(10.5px, 2.2cqw, 12px);
     color: var(--mt-color, #e2b714);
     font-weight: 700;
     font-family: var(--font-mono);
@@ -1243,7 +1278,7 @@ body.is-owner .top-item-unit:active {
 
 .mt-score-acc {
     font-family: var(--font-mono);
-    font-size: clamp(12px, 2.8cqw, 13.5px);
+    font-size: clamp(10.5px, 2.2cqw, 12px);
     color: var(--text-tertiary);
     font-weight: 500;
 }
