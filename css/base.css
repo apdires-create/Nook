@@ -1139,7 +1139,8 @@ body.is-owner .companion-row-del-btn {
     display: flex !important;
 }
 
-.companion-card.is-detail-editing #showcaseDeleteListBtn {
+.companion-card.is-detail-editing #showcaseDeleteListBtn,
+.companion-card.is-detail-editing #trophiesDeleteActiveBtn {
     display: inline-flex !important;
 }
 

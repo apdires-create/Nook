@@ -976,59 +976,39 @@ body.is-owner .top-item-unit:active {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    gap: clamp(12px, 2cqh, 18px);
     width: 100%;
     flex: 1;
     box-shadow: none;
 }
 
-.mt-user-badge-wrap {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    max-width: 92%;
-}
-
-.mt-profile-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: clamp(6px, 1.2cqh, 8px) clamp(10px, 2.5cqw, 14px);
-    width: fit-content;
-    max-width: 88%;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-pill, 9999px);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: clamp(14px, 3.5cqw, 16px);
-    font-weight: 600;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+/* Monkeytype Üst Başlık / Profil Placeholder Kutusu */
+.mt-header-box {
+    background: var(--bg-card-subtle);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-card, 14px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+    min-height: clamp(85px, 15cqh, 120px);
+    width: 100%;
     box-sizing: border-box;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-
-.mt-profile-link.is-editing {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: var(--accent-color, #3b5bdb);
-    box-shadow: 0 0 0 2px var(--accent-glow, rgba(59, 91, 219, 0.28)), 0 4px 14px rgba(0, 0, 0, 0.3);
-    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .mt-profile-link:not(.is-editing):hover {
-        background: rgba(59, 91, 219, 0.16);
-        border-color: var(--accent-color);
-        color: #ffffff;
-        box-shadow: 0 4px 14px rgba(59, 91, 219, 0.25);
-        transform: translateY(-1px);
+    .mt-header-box:hover {
+        border-color: var(--border-highlight);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
     }
 }
 
 .mt-brand-icon {
-    width: 19px;
-    height: 19px;
+    width: 18px;
+    height: 18px;
     background: var(--mt-color, #e2b714);
     color: #111111;
     font-family: var(--font-mono);
@@ -1040,77 +1020,6 @@ body.is-owner .top-item-unit:active {
     justify-content: center;
     line-height: 1;
     flex-shrink: 0;
-}
-
-.mt-at-sign {
-    font-family: var(--font-mono);
-    font-size: clamp(14px, 3.5cqw, 16px);
-    font-weight: 600;
-    color: var(--text-tertiary);
-    user-select: none;
-    margin-right: -1px;
-}
-
-.mt-username-text {
-    font-family: var(--font-mono);
-    font-size: clamp(14px, 3.5cqw, 16px);
-    font-weight: 600;
-    color: var(--text-primary);
-    letter-spacing: -0.01em;
-}
-
-.mt-inline-input {
-    font-family: var(--font-mono);
-    font-size: clamp(14px, 3.5cqw, 16px);
-    font-weight: 600;
-    color: var(--text-primary);
-    background: transparent;
-    border: none;
-    outline: none;
-    padding: 0;
-    margin: 0;
-    min-width: 60px;
-    max-width: 160px;
-    line-height: 1.2;
-}
-
-.mt-link-icon {
-    flex-shrink: 0;
-    opacity: 0.65;
-    transition: opacity 0.2s ease;
-}
-
-.mt-profile-link:hover .mt-link-icon {
-    opacity: 1;
-}
-
-.mt-profile-link.is-editing .mt-link-icon,
-body.is-owner .mt-link-icon {
-    display: none;
-}
-
-.mt-edit-trigger {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--text-tertiary);
-    cursor: pointer;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-@media (hover: hover) and (pointer: fine) {
-    .mt-edit-trigger:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: var(--border-highlight);
-        color: var(--text-primary);
-        transform: translateY(-1px);
-    }
 }
 
 .mt-scores-grid {

@@ -186,8 +186,17 @@ async function canliMonkeytypeVerisiCek(kullanici) {
         const res = await fetch(`https://api.monkeytype.com/users/${encodeURIComponent(kullanici)}/profile`);
         if (res.ok) {
             const json = await res.json();
-            if (json.data && json.data.personalBests) {
-                return json.data.personalBests;
+            if (json.data) {
+                return {
+                    personalBests: json.data.personalBests || {},
+                    typingStats: json.data.typingStats || null,
+                    streak: json.data.streak || 0,
+                    maxStreak: json.data.maxStreak || 0,
+                    xp: json.data.xp || 0,
+                    name: json.data.name || kullanici,
+                    addedAt: json.data.addedAt || null,
+                    ...(json.data.personalBests || {})
+                };
             }
         }
     } catch (err) {

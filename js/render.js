@@ -283,7 +283,20 @@ const RenderEngine = {
             if (detailView) detailView.style.display = 'flex';
 
             if (detailTitle) detailTitle.textContent = 'Monkeytype';
-            if (deleteActiveBtn) deleteActiveBtn.style.display = isUserOwner ? 'inline-flex' : 'none';
+
+            const trophiesCompanion = document.getElementById('trophiesCompanionCard');
+            const isDetailEditing = trophiesCompanion && trophiesCompanion.classList.contains('is-detail-editing');
+
+            const editToggleBtn = document.getElementById('trophiesEditToggleBtn');
+            if (editToggleBtn) {
+                editToggleBtn.style.display = isUserOwner ? 'inline-flex' : 'none';
+                editToggleBtn.classList.toggle('is-active', isDetailEditing);
+                editToggleBtn.title = isDetailEditing ? "Düzenlemeyi Bitir" : "Başarıyı Düzenle";
+            }
+
+            if (deleteActiveBtn) {
+                deleteActiveBtn.style.display = (isUserOwner && isDetailEditing) ? 'inline-flex' : 'none';
+            }
 
             // Geri butonu
             if (backBtn) {
@@ -291,43 +304,8 @@ const RenderEngine = {
                 backBtn.onclick = () => {
                     window._activeTrophyDetail = null;
                     window._manualTrophyMaster = true;
+                    if (trophiesCompanion) trophiesCompanion.classList.remove('is-detail-editing');
                     this.trophiesCiz(kart);
-                };
-            }
-
-            if (deleteActiveBtn) {
-                deleteActiveBtn.onclick = async () => {
-                    let onay = false;
-                    if (typeof window.onayPopupiGoster === 'function') {
-                        onay = await window.onayPopupiGoster({
-                            baslik: "Monkeytype Rekorunu Kaldır",
-                            aciklama: "Monkeytype rekorunu vitrinden kaldırmak istediğinize emin misiniz?",
-                            onayMetni: "Rekoru Kaldır",
-                            tehlikeliMi: true
-                        });
-                    } else {
-                        onay = confirm("Monkeytype rekorunu kaldırmak istediğinize emin misiniz?");
-                    }
-
-                    if (onay) {
-                        if (Array.isArray(kartVerisi.trophies)) {
-                            kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== 'monkeytype');
-                        } else if (kartVerisi.trophies) {
-                            delete kartVerisi.trophies.monkeytype;
-                        }
-                        if (Array.isArray(kartVerisi.widgets)) {
-                            kartVerisi.widgets = kartVerisi.widgets.filter(x => x && x.tur !== 'monkeytype');
-                        }
-                        delete kartVerisi.canli_monkeytype;
-                        window._activeTrophyDetail = null;
-                        this.trophiesCiz(kartVerisi);
-                        if (typeof EditManager !== 'undefined') {
-                            EditManager.Global.degisiklikYapildi();
-                        }
-                        if (typeof window.toastBildirimiGoster === 'function') {
-                            window.toastBildirimiGoster("Monkeytype rekoru kaldırıldı.", 3000, 'success');
-                        }
-                    }
                 };
             }
 
@@ -335,7 +313,8 @@ const RenderEngine = {
             if (username) {
                 const getStat = (mode, amount) => {
                     if (!live) return { wpm: '-', acc: '-' };
-                    const modeData = live[mode];
+                    const pBests = live.personalBests || live;
+                    const modeData = pBests[mode];
                     const stat = (modeData && modeData[amount]) ? modeData[amount][0] : null;
                     if (!stat) return { wpm: '-', acc: '-' };
                     return {
@@ -345,12 +324,11 @@ const RenderEngine = {
                 };
 
                 const t15 = getStat('time', '15');
-                const t60 = getStat('time', '60');
                 const w10 = getStat('words', '10');
-                const w25 = getStat('words', '25');
 
                 mtHtml = `
                     <div class="monkeytype-card" data-username="${this.escapeHtml(username)}">
+                        <div class="mt-header-box" id="mtHeaderBox"></div>
                         <div class="mt-scores-grid">
                             <div class="mt-score-box" data-mode="time" data-amount="15">
                                 <span class="mt-score-title">15S TIME</span>
@@ -361,15 +339,6 @@ const RenderEngine = {
                                 <span class="mt-score-acc">${t15.acc !== '-' ? `${t15.acc}% acc` : '-% acc'}</span>
                             </div>
 
-                            <div class="mt-score-box" data-mode="time" data-amount="60">
-                                <span class="mt-score-title">60S TIME</span>
-                                <div class="mt-score-main">
-                                    <span class="mt-score-wpm">${t60.wpm}</span>
-                                    <span class="mt-score-unit">wpm</span>
-                                </div>
-                                <span class="mt-score-acc">${t60.acc !== '-' ? `${t60.acc}% acc` : '-% acc'}</span>
-                            </div>
-
                             <div class="mt-score-box" data-mode="words" data-amount="10">
                                 <span class="mt-score-title">10 WORDS</span>
                                 <div class="mt-score-main">
@@ -378,43 +347,34 @@ const RenderEngine = {
                                 </div>
                                 <span class="mt-score-acc">${w10.acc !== '-' ? `${w10.acc}% acc` : '-% acc'}</span>
                             </div>
-
-                            <div class="mt-score-box" data-mode="words" data-amount="25">
-                                <span class="mt-score-title">25 WORDS</span>
-                                <div class="mt-score-main">
-                                    <span class="mt-score-wpm">${w25.wpm}</span>
-                                    <span class="mt-score-unit">wpm</span>
-                                </div>
-                                <span class="mt-score-acc">${w25.acc !== '-' ? `${w25.acc}% acc` : '-% acc'}</span>
-                            </div>
                         </div>
                     </div>
                 `;
 
                 if (detailFooter) {
-                    detailFooter.innerHTML = `
-                        <div class="mt-user-badge-wrap">
-                            <a href="https://monkeytype.com/profile/${encodeURIComponent(username)}" target="_blank" rel="noopener noreferrer" class="mt-profile-link" title="Monkeytype Profilini Gör">
-                                <span class="mt-brand-icon">mt</span>
-                                <span class="mt-at-sign">@</span>
-                                <span class="mt-username-text">${this.escapeHtml(username)}</span>
+                    if (isDetailEditing) {
+                        detailFooter.innerHTML = `
+                            <div class="companion-footer-edit-wrap">
+                                <input type="text" class="companion-footer-link-input" id="trophiesFooterLinkInput" placeholder="Monkeytype kullanıcı adı (@...)" value="${this.escapeHtml(username)}">
+                            </div>
+                        `;
+                        detailFooter.style.display = 'flex';
+                    } else {
+                        detailFooter.innerHTML = `
+                            <a href="https://monkeytype.com/profile/${encodeURIComponent(username)}" target="_blank" rel="noopener noreferrer" class="companion-footer-link" title="Monkeytype Profilini Gör">
+                                <span class="companion-link-favicon-wrap">
+                                    <span class="mt-brand-icon">mt</span>
+                                </span>
+                                <span class="companion-link-domain">@${this.escapeHtml(username)}</span>
                                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" class="mt-link-icon">
                                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                     <polyline points="15 3 21 3 21 9"></polyline>
                                     <line x1="10" y1="14" x2="21" y2="3"></line>
                                 </svg>
                             </a>
-                            ${isUserOwner ? `
-                            <button type="button" class="mt-edit-trigger" id="mtEditTriggerBtn" title="Kullanıcı Adını Değiştir" aria-label="Kullanıcı Adını Değiştir">
-                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                </svg>
-                            </button>
-                            ` : ''}
-                        </div>
-                    `;
-                    detailFooter.style.display = 'flex';
+                        `;
+                        detailFooter.style.display = 'flex';
+                    }
                 }
             } else {
                 mtHtml = `<p class="placeholder-text" style="text-align: center; color: var(--text-tertiary); padding: 3cqh 0;">Henüz Monkeytype hesabı eklenmemiş.</p>`;
