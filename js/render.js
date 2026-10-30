@@ -428,7 +428,7 @@ const RenderEngine = {
                                     <span class="mt-score-acc">${t30.acc !== '-' ? `${t30.acc}% acc` : '-% acc'}</span>
                                 </div>
 
-                                <div class="mt-score-box" data-mode="time" data-amount="60">
+                                <div class="mt-score-box is-tertiary-mode" data-mode="time" data-amount="60">
                                     <span class="mt-score-title">60s</span>
                                     <div class="mt-score-main">
                                         <span class="mt-score-wpm">${t60.wpm}</span>
@@ -461,7 +461,7 @@ const RenderEngine = {
                                     <span class="mt-score-acc">${w25.acc !== '-' ? `${w25.acc}% acc` : '-% acc'}</span>
                                 </div>
 
-                                <div class="mt-score-box" data-mode="words" data-amount="50">
+                                <div class="mt-score-box is-tertiary-mode" data-mode="words" data-amount="50">
                                     <span class="mt-score-title">50w</span>
                                     <div class="mt-score-main">
                                         <span class="mt-score-wpm">${w50.wpm}</span>
