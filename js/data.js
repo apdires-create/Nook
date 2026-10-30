@@ -149,24 +149,28 @@ async function tumVerileriCek() {
         }
 
         // Canlı Widget / Trophies Skorlarını Asenkron Sorgula (Non-blocking)
-        const mtWidget = (Array.isArray(kartVerisi.trophies) ? kartVerisi.trophies.find(t => t && t.tur === 'monkeytype') : null)
-            || (kartVerisi.trophies?.monkeytype ? kartVerisi.trophies.monkeytype : null)
-            || (Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets.find(w => w && w.tur === 'monkeytype') : null);
+        if (typeof TrophiesManager !== 'undefined' && typeof TrophiesManager.tumCanliVerileriYukle === 'function') {
+            TrophiesManager.tumCanliVerileriYukle(kartVerisi);
+        } else {
+            const mtWidget = (Array.isArray(kartVerisi.trophies) ? kartVerisi.trophies.find(t => t && t.tur === 'monkeytype') : null)
+                || (kartVerisi.trophies?.monkeytype ? kartVerisi.trophies.monkeytype : null)
+                || (Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets.find(w => w && w.tur === 'monkeytype') : null);
 
-        if (mtWidget) {
-            const mtUser = mtWidget.ayarlar?.kullanici || mtWidget.kullanici || mtWidget.username;
-            if (mtUser) {
-                canliMonkeytypeVerisiCek(mtUser).then(skorlar => {
-                    if (skorlar) {
-                        kartVerisi.canli_monkeytype = skorlar;
-                        if (typeof RenderEngine !== 'undefined') {
-                            if (typeof RenderEngine.trophiesCiz === 'function') {
-                                RenderEngine.trophiesCiz(kartVerisi);
+            if (mtWidget) {
+                const mtUser = mtWidget.ayarlar?.kullanici || mtWidget.kullanici || mtWidget.username;
+                if (mtUser && typeof canliMonkeytypeVerisiCek === 'function') {
+                    canliMonkeytypeVerisiCek(mtUser).then(skorlar => {
+                        if (skorlar) {
+                            kartVerisi.canli_monkeytype = skorlar;
+                            if (typeof RenderEngine !== 'undefined') {
+                                if (typeof RenderEngine.trophiesCiz === 'function') {
+                                    RenderEngine.trophiesCiz(kartVerisi);
+                                }
+                                RenderEngine.monkeytypeGuncelle(skorlar);
                             }
-                            RenderEngine.monkeytypeGuncelle(skorlar);
                         }
-                    }
-                });
+                    });
+                }
             }
         }
 

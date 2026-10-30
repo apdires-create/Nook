@@ -581,6 +581,24 @@ const EditManager = {
                         </div>
                         <button type="button" class="section-picker-close" id="trophy-picker-close">&times;</button>
                     </div>
+                    <div class="trophy-picker-search-bar">
+                        <div class="trophy-search-input-wrap">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="trophyPickerSearchInput" class="trophy-search-input" placeholder="Oyun veya başarım ara (LoL, Valorant, Chess, CS2, vb.)..." autocomplete="off" spellcheck="false">
+                            <button type="button" id="trophyPickerSearchClear" class="trophy-search-clear-btn" title="Aramayı Temizle">&times;</button>
+                        </div>
+                        <div class="trophy-picker-categories" id="trophyPickerCategories">
+                            <button type="button" class="trophy-cat-pill is-active" data-cat="all">Tümü</button>
+                            <button type="button" class="trophy-cat-pill" data-cat="fps">FPS & Taktik</button>
+                            <button type="button" class="trophy-cat-pill" data-cat="moba">MOBA</button>
+                            <button type="button" class="trophy-cat-pill" data-cat="strateji">Strateji</button>
+                            <button type="button" class="trophy-cat-pill" data-cat="yazma">Hız & Klavye</button>
+                            <button type="button" class="trophy-cat-pill" data-cat="diger">Diğer</button>
+                        </div>
+                    </div>
                     <div class="section-picker-list" id="trophyPickerList"></div>
                 </div>
             `;
@@ -2686,79 +2704,150 @@ EditManager.TrophiesView = {
 
 // #region 5.5: BAŞARIM VE KUPA SEÇİCİ (TROPHY PICKER)
 EditManager.TrophyPicker = {
+    _aramaMetni: '',
+    _aktifKategori: 'all',
+    _inited: false,
+
     init() {
         const modal = document.getElementById('trophy-picker-modal');
         const closeBtn = document.getElementById('trophy-picker-close');
         const backdrop = document.getElementById('trophy-picker-backdrop');
+        const searchInput = document.getElementById('trophyPickerSearchInput');
+        const searchClear = document.getElementById('trophyPickerSearchClear');
+        const catButtons = document.querySelectorAll('#trophyPickerCategories .trophy-cat-pill');
+
         if (closeBtn) closeBtn.onclick = () => this.kapat();
         if (backdrop) backdrop.onclick = () => this.kapat();
+
+        if (searchInput && !this._inited) {
+            searchInput.oninput = (e) => {
+                this._aramaMetni = e.target.value || '';
+                if (searchClear) {
+                    searchClear.classList.toggle('is-visible', !!this._aramaMetni.trim());
+                }
+                this.renderListe();
+            };
+
+            searchInput.onkeydown = (e) => {
+                if (e.key === 'Escape') {
+                    if (this._aramaMetni) {
+                        e.stopPropagation();
+                        searchInput.value = '';
+                        this._aramaMetni = '';
+                        if (searchClear) searchClear.classList.remove('is-visible');
+                        this.renderListe();
+                    } else {
+                        this.kapat();
+                    }
+                }
+            };
+        }
+
+        if (searchClear && !this._inited) {
+            searchClear.onclick = () => {
+                if (searchInput) searchInput.value = '';
+                this._aramaMetni = '';
+                searchClear.classList.remove('is-visible');
+                this.renderListe();
+                if (searchInput) searchInput.focus();
+            };
+        }
+
+        if (catButtons && !this._inited) {
+            catButtons.forEach(btn => {
+                btn.onclick = () => {
+                    catButtons.forEach(b => b.classList.remove('is-active'));
+                    btn.classList.add('is-active');
+                    this._aktifKategori = btn.dataset.cat || 'all';
+                    this.renderListe();
+                };
+            });
+        }
+
+        this._inited = true;
     },
 
     ac() {
         const modal = document.getElementById('trophy-picker-modal');
+        const searchInput = document.getElementById('trophyPickerSearchInput');
+        const searchClear = document.getElementById('trophyPickerSearchClear');
+        const catButtons = document.querySelectorAll('#trophyPickerCategories .trophy-cat-pill');
+
+        if (!modal) return;
+        this.init();
+
+        this._aramaMetni = '';
+        this._aktifKategori = 'all';
+
+        if (searchInput) searchInput.value = '';
+        if (searchClear) searchClear.classList.remove('is-visible');
+        if (catButtons) {
+            catButtons.forEach(b => b.classList.toggle('is-active', b.dataset.cat === 'all'));
+        }
+
+        this.renderListe();
+        modal.classList.add('is-open');
+
+        setTimeout(() => {
+            if (searchInput) searchInput.focus();
+        }, 100);
+    },
+
+    kapat() {
+        const modal = document.getElementById('trophy-picker-modal');
+        if (modal) modal.classList.remove('is-open');
+    },
+
+    renderListe() {
         const list = document.getElementById('trophyPickerList');
-        if (!modal || !list) return;
+        if (!list) return;
 
-        const hasMt = !!(
-            (Array.isArray(kartVerisi.trophies) && kartVerisi.trophies.some(t => t && t.tur === 'monkeytype')) ||
-            kartVerisi.trophies?.monkeytype ||
-            (Array.isArray(kartVerisi.widgets) && kartVerisi.widgets.some(w => w && w.tur === 'monkeytype'))
-        );
+        if (typeof TrophiesManager === 'undefined' || !Array.isArray(TrophiesManager.catalog)) {
+            list.innerHTML = `<div class="trophy-picker-empty">Katalog yüklenemedi.</div>`;
+            return;
+        }
 
-        const items = [
-            {
-                id: 'monkeytype',
-                tur: 'monkeytype',
-                baslik: 'Monkeytype Rekoru',
-                alt: 'Canlı klavye yazma hızı (WPM) ve doğruluk skorunu bağla',
-                ikon: '<span style="font-weight: 800; font-size: 1.1rem; color: #eab308; letter-spacing: -0.5px;">mt</span>',
-                varMi: hasMt,
-                comingSoon: false
-            },
-            {
-                id: 'lol',
-                tur: 'lol',
-                baslik: 'League of Legends Rank',
-                alt: 'Dereceli lig, LP ve en çok oynanan şampiyon verileri',
-                ikon: '<span style="font-size: 1.25rem;">⚔️</span>',
-                varMi: false,
-                comingSoon: true
-            },
-            {
-                id: 'valorant',
-                tur: 'valorant',
-                baslik: 'Valorant Rank & Peak',
-                alt: 'Mevcut rekabetçi kademe, RR ve kariyer zirvesi',
-                ikon: '<span style="font-size: 1.25rem;">🎯</span>',
-                varMi: false,
-                comingSoon: true
-            },
-            {
-                id: 'brawlhalla',
-                tur: 'brawlhalla',
-                baslik: 'Brawlhalla Elo',
-                alt: 'Kişisel 1v1 elo puanı ve sezon zirvesi',
-                ikon: '<span style="font-size: 1.25rem;">🥊</span>',
-                varMi: false,
-                comingSoon: true
-            }
-        ];
+        const items = TrophiesManager.katalogFiltrele(this._aramaMetni, this._aktifKategori);
+
+        if (items.length === 0) {
+            const aramaGoster = this._aramaMetni ? `"${RenderEngine.escapeHtml(this._aramaMetni)}"` : 'Seçilen kategoride';
+            list.innerHTML = `
+                <div class="trophy-picker-empty">
+                    <span style="font-size: 1.6rem; opacity: 0.6; margin-bottom: 4px;">🔍</span>
+                    <span>${aramaGoster} eşleşen başarım veya oyun bulunamadı.</span>
+                </div>
+            `;
+            return;
+        }
 
         list.innerHTML = items.map(item => {
+            const varMi = !!(
+                (Array.isArray(kartVerisi?.trophies) && kartVerisi.trophies.some(t => t && t.tur === item.id)) ||
+                (kartVerisi?.trophies && kartVerisi.trophies[item.id]) ||
+                (Array.isArray(kartVerisi?.widgets) && kartVerisi.widgets.some(w => w && w.tur === item.id))
+            );
+
             const itemClasses = ['section-picker-item'];
-            if (item.varMi) itemClasses.push('is-already-added');
+            if (varMi) itemClasses.push('is-already-added');
             if (item.comingSoon) itemClasses.push('is-coming-soon');
 
             let badgeHtml = '';
-            if (item.varMi) {
-                badgeHtml = '<span class="picker-added-badge">Mevcut</span>';
+            if (varMi) {
+                badgeHtml = '<span class="picker-added-badge">Vitrinde</span>';
             } else if (item.comingSoon) {
                 badgeHtml = '<span class="picker-soon-badge">Beta Sürecinde</span>';
             }
 
+            const faviconUrl = TrophiesManager.getFaviconUrl(item.domain, 128);
+            const fallbackHarfler = (item.baslik || 'NK').substring(0, 2).toUpperCase();
+
             return `
                 <div class="${itemClasses.join(' ')}" data-trophy-type="${item.id}" ${item.comingSoon ? 'data-coming-soon="true"' : ''}>
-                    <div class="picker-item-icon" style="background: rgba(255, 255, 255, 0.05);">${item.ikon}</div>
+                    <div class="picker-item-icon" style="background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: center;">
+                        <img src="${faviconUrl}" class="picker-item-favicon" loading="lazy" alt="${item.baslik}"
+                             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                        <span class="picker-item-fallback-icon" style="display:none;">${fallbackHarfler}</span>
+                    </div>
                     <div class="picker-item-info">
                         <div class="picker-item-title-row">
                             <span class="picker-item-title">${item.baslik}</span>
@@ -2780,9 +2869,9 @@ EditManager.TrophyPicker = {
                 const isSoon = el.dataset.comingSoon === 'true';
                 if (isSoon) {
                     if (typeof window.toastBildirimiGoster === 'function') {
-                        window.toastBildirimiGoster("Bu oyun desteği beta sürecinde eklenecektir!", 3000, 'warning');
+                        window.toastBildirimiGoster("Bu oyun desteği beta sürecinde çok yakında eklenecektir!", 3000, 'warning');
                     } else if (typeof EditManager.Global?.toastGoster === 'function') {
-                        EditManager.Global.toastGoster("Bu oyun desteği beta sürecinde eklenecektir!", 'warning');
+                        EditManager.Global.toastGoster("Bu oyun desteği beta sürecinde çok yakında eklenecektir!", 'warning');
                     }
                     this.kapat();
                     return;
@@ -2806,16 +2895,22 @@ EditManager.TrophyPicker = {
                         }
                         EditManager.TrophiesView.acMonkeytypeFormu(existingUser);
                     }
+                } else if (trophyType === 'chess') {
+                    if (EditManager.TrophiesView) {
+                        let existingUser = '';
+                        if (Array.isArray(kartVerisi.trophies)) {
+                            const ch = kartVerisi.trophies.find(t => t && t.tur === 'chess');
+                            if (ch) existingUser = ch.kullanici || ch.username || '';
+                        }
+                        if (typeof EditManager.TrophiesView.acChessFormu === 'function') {
+                            EditManager.TrophiesView.acChessFormu(existingUser);
+                        } else if (typeof window.toastBildirimiGoster === 'function') {
+                            window.toastBildirimiGoster("Chess.com formu hazırlanıyor...", 2000, 'info');
+                        }
+                    }
                 }
             };
         });
-
-        modal.classList.add('is-open');
-    },
-
-    kapat() {
-        const modal = document.getElementById('trophy-picker-modal');
-        if (modal) modal.classList.remove('is-open');
     }
 };
 // #endregion
