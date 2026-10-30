@@ -590,14 +590,6 @@ const EditManager = {
                             <input type="text" id="trophyPickerSearchInput" class="trophy-search-input" placeholder="Oyun veya başarım ara (LoL, Valorant, Chess, CS2, vb.)..." autocomplete="off" spellcheck="false">
                             <button type="button" id="trophyPickerSearchClear" class="trophy-search-clear-btn" title="Aramayı Temizle">&times;</button>
                         </div>
-                        <div class="trophy-picker-categories" id="trophyPickerCategories">
-                            <button type="button" class="trophy-cat-pill is-active" data-cat="all">Tümü</button>
-                            <button type="button" class="trophy-cat-pill" data-cat="fps">FPS & Taktik</button>
-                            <button type="button" class="trophy-cat-pill" data-cat="moba">MOBA</button>
-                            <button type="button" class="trophy-cat-pill" data-cat="strateji">Strateji</button>
-                            <button type="button" class="trophy-cat-pill" data-cat="yazma">Hız & Klavye</button>
-                            <button type="button" class="trophy-cat-pill" data-cat="diger">Diğer</button>
-                        </div>
                     </div>
                     <div class="section-picker-list" id="trophyPickerList"></div>
                 </div>
@@ -2705,7 +2697,6 @@ EditManager.TrophiesView = {
 // #region 5.5: BAŞARIM VE KUPA SEÇİCİ (TROPHY PICKER)
 EditManager.TrophyPicker = {
     _aramaMetni: '',
-    _aktifKategori: 'all',
     _inited: false,
 
     init() {
@@ -2714,7 +2705,6 @@ EditManager.TrophyPicker = {
         const backdrop = document.getElementById('trophy-picker-backdrop');
         const searchInput = document.getElementById('trophyPickerSearchInput');
         const searchClear = document.getElementById('trophyPickerSearchClear');
-        const catButtons = document.querySelectorAll('#trophyPickerCategories .trophy-cat-pill');
 
         if (closeBtn) closeBtn.onclick = () => this.kapat();
         if (backdrop) backdrop.onclick = () => this.kapat();
@@ -2753,17 +2743,6 @@ EditManager.TrophyPicker = {
             };
         }
 
-        if (catButtons && !this._inited) {
-            catButtons.forEach(btn => {
-                btn.onclick = () => {
-                    catButtons.forEach(b => b.classList.remove('is-active'));
-                    btn.classList.add('is-active');
-                    this._aktifKategori = btn.dataset.cat || 'all';
-                    this.renderListe();
-                };
-            });
-        }
-
         this._inited = true;
     },
 
@@ -2771,19 +2750,14 @@ EditManager.TrophyPicker = {
         const modal = document.getElementById('trophy-picker-modal');
         const searchInput = document.getElementById('trophyPickerSearchInput');
         const searchClear = document.getElementById('trophyPickerSearchClear');
-        const catButtons = document.querySelectorAll('#trophyPickerCategories .trophy-cat-pill');
 
         if (!modal) return;
         this.init();
 
         this._aramaMetni = '';
-        this._aktifKategori = 'all';
 
         if (searchInput) searchInput.value = '';
         if (searchClear) searchClear.classList.remove('is-visible');
-        if (catButtons) {
-            catButtons.forEach(b => b.classList.toggle('is-active', b.dataset.cat === 'all'));
-        }
 
         this.renderListe();
         modal.classList.add('is-open');
@@ -2807,14 +2781,14 @@ EditManager.TrophyPicker = {
             return;
         }
 
-        const items = TrophiesManager.katalogFiltrele(this._aramaMetni, this._aktifKategori);
+        const items = TrophiesManager.katalogFiltrele(this._aramaMetni);
 
         if (items.length === 0) {
-            const aramaGoster = this._aramaMetni ? `"${RenderEngine.escapeHtml(this._aramaMetni)}"` : 'Seçilen kategoride';
+            const aramaGoster = this._aramaMetni ? `"${RenderEngine.escapeHtml(this._aramaMetni)}"` : '';
             list.innerHTML = `
                 <div class="trophy-picker-empty">
                     <span style="font-size: 1.6rem; opacity: 0.6; margin-bottom: 4px;">🔍</span>
-                    <span>${aramaGoster} eşleşen başarım veya oyun bulunamadı.</span>
+                    <span>${aramaGoster ? aramaGoster + ' ile eşleşen' : 'Eşleşen'} başarım veya oyun bulunamadı.</span>
                 </div>
             `;
             return;

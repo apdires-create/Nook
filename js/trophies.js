@@ -194,20 +194,18 @@ const TrophiesManager = {
     ],
 
     /**
-     * Kataloğu kategori ve arama metnine göre filtreler.
+     * Kataloğu arama metnine göre anlık olarak filtreler.
      * @param {string} arama Arama metni
-     * @param {string} kategori Kategori filtresi ('all' veya 'fps', 'moba', 'strateji', 'yazma', 'diger')
      */
-    katalogFiltrele(arama = '', kategori = 'all') {
+    katalogFiltrele(arama = '') {
         const q = (arama || '').toLowerCase().trim();
+        if (!q) return this.catalog;
         return this.catalog.filter(item => {
-            const kategoriUygun = (kategori === 'all' || item.kategori === kategori);
-            if (!kategoriUygun) return false;
-            if (!q) return true;
             return item.baslik.toLowerCase().includes(q)
                 || item.alt.toLowerCase().includes(q)
                 || item.id.toLowerCase().includes(q)
-                || item.domain.toLowerCase().includes(q);
+                || item.domain.toLowerCase().includes(q)
+                || (item.kategoriBaslik && item.kategoriBaslik.toLowerCase().includes(q));
         });
     },
 

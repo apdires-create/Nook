@@ -1003,12 +1003,9 @@ body:has(:is(.auth-modal, .image-cropper-modal, .tag-picker-modal,
     overflow: hidden;
 }
 
-/* #region 6: TROPHY PICKER ARAMA & KATEGORİ STİLLERİ */
+/* #region 6: TROPHY PICKER ARAMA STİLLERİ */
 .trophy-picker-search-bar {
-    margin-bottom: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    margin-bottom: 12px;
 }
 
 .trophy-search-input-wrap {
@@ -1067,43 +1064,6 @@ body:has(:is(.auth-modal, .image-cropper-modal, .tag-picker-modal,
 
 .trophy-search-clear-btn.is-visible {
     display: block;
-}
-
-.trophy-picker-categories {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-width: none;
-}
-
-.trophy-picker-categories::-webkit-scrollbar {
-    display: none;
-}
-
-.trophy-cat-pill {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.65);
-    border-radius: 999px;
-    padding: 4px 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.15s ease;
-}
-
-.trophy-cat-pill:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-}
-
-.trophy-cat-pill.is-active {
-    background: #fff;
-    color: #000;
-    border-color: #fff;
-    font-weight: 600;
 }
 
 .picker-item-favicon {
