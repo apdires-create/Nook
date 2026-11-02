@@ -399,10 +399,10 @@ const Router = {
                 stage.classList.remove('is-showcase-active');
                 stage.classList.add('is-trophies-active');
                 delete window._manualTrophyMaster;
-                const mt = (kartVerisi?.trophies && (kartVerisi.trophies.monkeytype || (Array.isArray(kartVerisi.trophies) && kartVerisi.trophies.find(x => x && x.tur === 'monkeytype')))) || (Array.isArray(kartVerisi?.widgets) && kartVerisi.widgets.find(x => x && x.tur === 'monkeytype'));
-                const mtUsername = mt ? (mt.kullanici || mt.username || mt.ayarlar?.kullanici || '') : '';
-                const trophyCount = mtUsername ? 1 : 0;
-                window._activeTrophyDetail = (trophyCount === 1) ? 'monkeytype' : null;
+                const aktifTrophyler = (typeof TrophiesManager !== 'undefined' && typeof TrophiesManager.aktifTrophyleriAl === 'function')
+                    ? TrophiesManager.aktifTrophyleriAl(kartVerisi)
+                    : [];
+                window._activeTrophyDetail = (aktifTrophyler.length === 1) ? aktifTrophyler[0].tur : null;
                 if (typeof RenderEngine !== 'undefined') {
                     RenderEngine.trophiesCiz(kartVerisi);
                 }

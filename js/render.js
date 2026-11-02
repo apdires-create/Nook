@@ -99,7 +99,7 @@ const RenderEngine = {
         }
     },
 
-    // 1.3: Trophies Eşlikçi Kart Render Motoru (Master & Detail)
+    // 1.3: Trophies Eşlikçi Kart Render Motoru (Master & Universal Root Layout Detail)
     trophiesCiz(data) {
         const masterView = document.getElementById('trophiesMasterView');
         const detailView = document.getElementById('trophiesDetailView');
@@ -114,72 +114,85 @@ const RenderEngine = {
 
         const kart = (data && data.kullanici_adi) ? data : (typeof kartVerisi !== 'undefined' ? kartVerisi : {});
         const isUserOwner = (typeof isOwner !== 'undefined' && isOwner);
-
-        // Monkeytype verisini bul (trophies veya geriye dönük widgets fallback)
-        let mtData = null;
-        if (kart.trophies) {
-            if (kart.trophies.monkeytype) {
-                mtData = kart.trophies.monkeytype;
-            } else if (Array.isArray(kart.trophies)) {
-                mtData = kart.trophies.find(x => x.tur === 'monkeytype');
-            }
-        }
-        if (!mtData && Array.isArray(kart.widgets)) {
-            mtData = kart.widgets.find(x => x.tur === 'monkeytype');
+        if (!kart._canli_trophies) kart._canli_trophies = {};
+        if (kart.canli_monkeytype && !kart._canli_trophies.monkeytype) {
+            kart._canli_trophies.monkeytype = kart.canli_monkeytype;
         }
 
-        const username = mtData ? (mtData.kullanici || mtData.username || mtData.ayarlar?.kullanici || '') : '';
-        const live = (typeof kartVerisi !== 'undefined' && kartVerisi.canli_monkeytype) ? kartVerisi.canli_monkeytype : null;
+        const aktifTrophyler = (typeof TrophiesManager !== 'undefined')
+            ? TrophiesManager.aktifTrophyleriAl(kart)
+            : [];
 
-        // Eğer sadece tek bir başarı varsa ve manuel olarak ana listeye çıkılmadıysa doğrudan o başarıyı göster
-        const trophyCount = username ? 1 : 0;
-        if (trophyCount === 1 && !window._manualTrophyMaster) {
-            window._activeTrophyDetail = 'monkeytype';
+        // Sadece 1 başarım varsa ve kullanıcı manuel olarak ana listeye dönmediyse doğrudan detayı aç
+        if (aktifTrophyler.length === 1 && !window._manualTrophyMaster && !window._activeTrophyDetail) {
+            window._activeTrophyDetail = aktifTrophyler[0].tur;
         }
 
-        // Aktif detay görünümü durumu: window._activeTrophyDetail ('monkeytype' vs null)
-        const activeTrophy = window._activeTrophyDetail || null;
+        const activeTur = window._activeTrophyDetail || null;
 
-        if (!activeTrophy) {
+        if (!activeTur) {
             // ==========================================
-            // MASTER GÖRÜNÜMÜ: Başarılar Listesi
+            // MASTER GÖRÜNÜMÜ: Kompakt Başarımlar Listesi (Lazy Detail)
             // ==========================================
             masterView.style.display = 'flex';
             if (detailView) detailView.style.display = 'none';
             if (detailFooter) { detailFooter.innerHTML = ''; detailFooter.style.display = 'none'; }
 
+            const trophiesCompanion = document.getElementById('trophiesCompanionCard');
+            if (trophiesCompanion) trophiesCompanion.classList.remove('is-detail-editing');
+
             let itemsHtml = '';
 
-            // Monkeytype Öğesi
-            if (username) {
-                itemsHtml += `
-                    <div class="companion-row-item" data-trophy-id="monkeytype" role="button" tabindex="0">
-                        <div class="companion-row-icon-wrap" style="background: rgba(234, 179, 8, 0.12); color: #eab308;">
-                            <span style="font-weight: 800; font-size: 0.85rem; letter-spacing: -0.5px;">mt</span>
-                        </div>
-                        <div class="companion-row-info">
-                            <span class="companion-row-title">Monkeytype</span>
-                            <span class="companion-row-meta">@${this.escapeHtml(username)}</span>
-                        </div>
-                        ${isUserOwner ? `
-                            <button type="button" class="companion-row-del-btn" data-del-trophy="monkeytype" title="Monkeytype'ı Kaldır">
-                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                </svg>
-                            </button>
-                        ` : ''}
-                    </div>
-                `;
-            }
+            if (aktifTrophyler.length > 0) {
+                itemsHtml += aktifTrophyler.map(item => {
+                    const rawLive = kart._canli_trophies?.[item.tur] || TrophiesManager._getCache(item.tur, item.kullanici) || null;
+                    const norm = TrophiesManager.getNormalizedTrophyData(item.tur, item.kullanici, rawLive);
+                    const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
+                    const summaryPill = (rawLive && norm.heroValue && norm.heroValue !== '—')
+                        ? `<span class="companion-row-live-pill">${this.escapeHtml(norm.heroValue)}</span>`
+                        : '';
 
-            // Eğer hiç başarı yoksa ve sahipse yönlendirme
-            if (!username) {
+                    return `
+                        <div class="companion-row-item" data-trophy-id="${this.escapeHtml(item.tur)}" role="button" tabindex="0">
+                            <div class="companion-row-icon-wrap" style="background: rgba(255, 255, 255, 0.06); border: 1px solid ${this.escapeHtml(norm.accent)}44;">
+                                <img src="${this.escapeHtml(norm.faviconUrl)}" class="companion-row-favicon" loading="lazy" alt="${this.escapeHtml(norm.baslik)}"
+                                     onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                                <span style="display:none; font-weight: 800; font-size: 0.75rem; color: var(--text-primary);">${this.escapeHtml(fallbackHarf)}</span>
+                            </div>
+                            <div class="companion-row-info">
+                                <span class="companion-row-title">${this.escapeHtml(norm.baslik)}</span>
+                                <span class="companion-row-meta">${this.escapeHtml(norm.handle)}</span>
+                            </div>
+                            ${summaryPill}
+                            ${isUserOwner ? `
+                                <button type="button" class="companion-row-del-btn" data-del-trophy="${this.escapeHtml(item.tur)}" data-trophy-title="${this.escapeHtml(norm.baslik)}" title="${this.escapeHtml(norm.baslik)} Başarımını Kaldır">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+
                 if (isUserOwner) {
                     itemsHtml += `
+                        <button type="button" class="companion-add-row-btn" id="trophiesMasterAddBtn" style="margin-top: 4px;">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>Başarını Sergile</span>
+                        </button>
+                    `;
+                }
+            } else {
+                if (isUserOwner) {
+                    itemsHtml = `
                         <div class="companion-empty-state" style="padding: 4cqh 2cqw; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                             <div class="companion-empty-title" style="margin-bottom: 0.8cqh;">Başarı Ekle</div>
-                            <p class="companion-empty-desc" style="margin-bottom: 2.2cqh; color: var(--text-tertiary);">Klavye hız rekorlarını veya dijital başarımlarını profilinde sergile.</p>
+                            <p class="companion-empty-desc" style="margin-bottom: 2.2cqh; color: var(--text-tertiary);">Oyun derecelerini, elo puanlarını veya klavye hız rekorlarını profilinde sergile.</p>
                             <button type="button" class="companion-add-row-btn" id="trophiesMasterAddBtn" style="width: auto; padding: 1.2cqh 5cqw;">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
                                     <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -190,28 +203,18 @@ const RenderEngine = {
                         </div>
                     `;
                 } else {
-                    itemsHtml += `
+                    itemsHtml = `
                         <div class="companion-empty-state" style="padding: 4cqh 2cqw; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                             <div class="companion-empty-title">Henüz Bir Başarı Yok</div>
                             <p class="companion-empty-desc" style="color: var(--text-tertiary);">Kullanıcı bu vitrinde henüz bir başarım paylaşmamış.</p>
                         </div>
                     `;
                 }
-            } else if (isUserOwner) {
-                itemsHtml += `
-                    <button type="button" class="companion-add-row-btn" id="trophiesMasterAddBtn" style="margin-top: 4px;">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                        </svg>
-                        <span>Başarını Sergile</span>
-                    </button>
-                `;
             }
 
             masterList.innerHTML = itemsHtml;
 
-            // Master satır tıklamaları (Detaya git)
+            // Master satır tıklamaları (Lazy Detail Render)
             masterList.querySelectorAll('.companion-row-item').forEach(item => {
                 item.onclick = (e) => {
                     if (e.target.closest('.companion-row-del-btn')) return;
@@ -228,37 +231,9 @@ const RenderEngine = {
                 delBtn.onclick = async (e) => {
                     e.stopPropagation();
                     const trophyId = delBtn.dataset.delTrophy;
-                    if (trophyId === 'monkeytype') {
-                        let onay = false;
-                        if (typeof window.onayPopupiGoster === 'function') {
-                            onay = await window.onayPopupiGoster({
-                                baslik: "Monkeytype Rekorunu Kaldır",
-                                aciklama: "Monkeytype rekorunu vitrinden kaldırmak istediğinize emin misiniz?",
-                                onayMetni: "Rekoru Kaldır",
-                                tehlikeliMi: true
-                            });
-                        } else {
-                            onay = confirm("Monkeytype rekorunu kaldırmak istediğinize emin misiniz?");
-                        }
-
-                        if (onay) {
-                            if (Array.isArray(kartVerisi.trophies)) {
-                                kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== 'monkeytype');
-                            } else if (kartVerisi.trophies) {
-                                delete kartVerisi.trophies.monkeytype;
-                            }
-                            if (Array.isArray(kartVerisi.widgets)) {
-                                kartVerisi.widgets = kartVerisi.widgets.filter(x => x && x.tur !== 'monkeytype');
-                            }
-                            delete kartVerisi.canli_monkeytype;
-                            this.trophiesCiz(kartVerisi);
-                            if (typeof EditManager !== 'undefined') {
-                                EditManager.Global.degisiklikYapildi();
-                            }
-                            if (typeof window.toastBildirimiGoster === 'function') {
-                                window.toastBildirimiGoster("Monkeytype rekoru kaldırıldı.", 3000, 'success');
-                            }
-                        }
+                    const trophyTitle = delBtn.dataset.trophyTitle || 'Başarım';
+                    if (trophyId && typeof EditManager !== 'undefined' && EditManager.TrophiesView) {
+                        await EditManager.TrophiesView.trophySil(trophyId, trophyTitle);
                     }
                 };
             });
@@ -269,33 +244,43 @@ const RenderEngine = {
                 masterAddBtn.onclick = () => {
                     if (typeof EditManager !== 'undefined' && EditManager.TrophyPicker) {
                         EditManager.TrophyPicker.ac();
-                    } else if (typeof toastBildirimiGoster === 'function') {
-                        toastBildirimiGoster("Başarım seçici yükleniyor...", 2000);
                     }
                 };
             }
 
-        } else if (activeTrophy === 'monkeytype') {
+        } else {
             // ==========================================
-            // DETAY GÖRÜNÜMÜ: Monkeytype Detay Ekranı
+            // DETAY GÖRÜNÜMÜ: Evrensel 4 Katmanlı Root Layout
             // ==========================================
             masterView.style.display = 'none';
             if (detailView) detailView.style.display = 'flex';
 
-            if (detailTitle) detailTitle.textContent = 'Monkeytype';
+            const meta = (typeof TrophiesManager !== 'undefined' && TrophiesManager.katalogOgesiBul(activeTur)) || {
+                id: activeTur,
+                tur: activeTur,
+                baslik: activeTur.toUpperCase(),
+                domain: `${activeTur}.com`,
+                accent: '#3b5bdb',
+                girdiEtiket: 'Kullanıcı Adı'
+            };
+
+            if (detailTitle) detailTitle.textContent = meta.baslik;
 
             const trophiesCompanion = document.getElementById('trophiesCompanionCard');
             const isDetailEditing = trophiesCompanion && trophiesCompanion.classList.contains('is-detail-editing');
 
+            const seciliOge = aktifTrophyler.find(t => t.tur === activeTur) || null;
+            const kullanici = seciliOge ? seciliOge.kullanici : '';
+
             const editToggleBtn = document.getElementById('trophiesEditToggleBtn');
             if (editToggleBtn) {
-                editToggleBtn.style.display = isUserOwner ? 'inline-flex' : 'none';
+                editToggleBtn.style.display = (isUserOwner && kullanici) ? 'inline-flex' : 'none';
                 editToggleBtn.classList.toggle('is-active', isDetailEditing);
                 editToggleBtn.title = isDetailEditing ? "Düzenlemeyi Bitir" : "Başarıyı Düzenle";
             }
 
             if (deleteActiveBtn) {
-                deleteActiveBtn.style.display = (isUserOwner && isDetailEditing) ? 'inline-flex' : 'none';
+                deleteActiveBtn.style.display = (isUserOwner && isDetailEditing && kullanici) ? 'inline-flex' : 'none';
             }
 
             // Geri butonu
@@ -309,186 +294,49 @@ const RenderEngine = {
                 };
             }
 
-            let mtHtml = '';
-            if (username) {
-                const getStat = (mode, amount) => {
-                    if (!live) return { wpm: '-', acc: '-' };
-                    const pBests = live.personalBests || live;
-                    const modeData = pBests[mode];
-                    const stat = (modeData && modeData[amount]) ? modeData[amount][0] : null;
-                    if (!stat) return { wpm: '-', acc: '-' };
-                    return {
-                        wpm: Math.round(stat.wpm || 0),
-                        acc: Math.round(stat.acc || 0)
-                    };
-                };
+            if (kullanici && typeof TrophiesManager !== 'undefined') {
+                let rawLive = kart._canli_trophies?.[activeTur] || TrophiesManager._getCache(activeTur, kullanici) || null;
+                const norm = TrophiesManager.getNormalizedTrophyData(activeTur, kullanici, rawLive);
 
-                const t15 = getStat('time', '15');
-                const t30 = getStat('time', '30');
-                const t60 = getStat('time', '60');
-
-                const w10 = getStat('words', '10');
-                const w25 = getStat('words', '25');
-                const w50 = getStat('words', '50');
-
-                // Avatar & Kimlik Verileri
-                const front = kart?.front || {};
-                const safeAvatar = this.getGorselUrl(front?.pfp_url || front?.avatar_url || kart?.profil_resmi);
-                const defaultAvatar = "https://i.ibb.co/8gvf4SNF/pfp-placeholder.png";
-                const avatarSrc = (safeAvatar && safeAvatar !== '#') ? safeAvatar : defaultAvatar;
-
-                // Monkeytype İstatistikleri (Toplam Süre, Biten Test, Gün Serisi)
-                const stats = live?.typingStats || null;
-                const timeSec = stats?.timeTyping || 0;
-                let timeStr = '-';
-                if (timeSec > 0) {
-                    const hours = Math.floor(timeSec / 3600);
-                    const mins = Math.floor((timeSec % 3600) / 60);
-                    timeStr = hours > 0 ? `${hours} sa ${mins} dk` : `${mins} dk`;
+                if (detailBody) {
+                    detailBody.innerHTML = this.renderTrophyRootLayout(norm);
                 }
 
-                const completedCount = (stats && stats.completedTests !== undefined) ? stats.completedTests.toLocaleString('tr-TR') : '-';
-                const streakVal = (live && live.streak !== undefined) ? live.streak : '-';
-                const maxStreakVal = (live && live.maxStreak !== undefined) ? `${live.maxStreak} gün` : '-';
-
-                let joinedStr = 'Monkeytype Typist';
-                if (live?.addedAt) {
-                    try {
-                        const d = new Date(live.addedAt);
-                        const ayYil = d.toLocaleDateString('tr-TR', { month: 'short', year: 'numeric' });
-                        joinedStr = `${ayYil}'te katıldı`;
-                    } catch {
-                        joinedStr = 'Monkeytype Typist';
-                    }
+                // Eğer canlı veri henüz bellekte yoksa arka planda lazy olarak çek ve görünümü tazele
+                if (!rawLive && !window[`_fetchingTrophy_${activeTur}_${kullanici}`]) {
+                    window[`_fetchingTrophy_${activeTur}_${kullanici}`] = true;
+                    TrophiesManager.canliVeriCek(activeTur, kullanici).then(fetched => {
+                        delete window[`_fetchingTrophy_${activeTur}_${kullanici}`];
+                        if (fetched) {
+                            kart._canli_trophies[activeTur] = fetched;
+                            if (activeTur === 'monkeytype') kart.canli_monkeytype = fetched;
+                            if (window._activeTrophyDetail === activeTur) {
+                                this.trophiesCiz(kart);
+                            }
+                        }
+                    }).catch(() => {
+                        delete window[`_fetchingTrophy_${activeTur}_${kullanici}`];
+                    });
                 }
-
-                mtHtml = `
-                    <div class="monkeytype-card" data-username="${this.escapeHtml(username)}">
-                        <!-- 1. Genişletilmiş & Ferah Kimlik Kartı -->
-                        <div class="mt-header-box" id="mtHeaderBox">
-                            <div class="mt-header-top-row">
-                                <div class="mt-header-user-wrap">
-                                    <div class="mt-avatar-wrap">
-                                        <img src="${avatarSrc}" alt="${this.escapeHtml(username)}" class="mt-avatar-img" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
-                                        <div class="mt-avatar-fallback" style="display: none;">
-                                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                                        </div>
-                                        <span class="mt-avatar-badge" title="Monkeytype">mt</span>
-                                    </div>
-                                    <div class="mt-header-user-info">
-                                        <div class="mt-header-username" title="${this.escapeHtml(username)}">${this.escapeHtml(username)}</div>
-                                        <div class="mt-header-meta">${this.escapeHtml(joinedStr)}</div>
-                                    </div>
-                                </div>
-                                <div class="mt-streak-pill" title="Mevcut Gün Serisi">
-                                    <span class="mt-streak-fire">🔥</span>
-                                    <span class="mt-streak-val">${streakVal !== '-' ? `${streakVal} Gün` : '-'}</span>
-                                </div>
-                            </div>
-
-                            <div class="mt-header-divider"></div>
-
-                            <div class="mt-stats-strip">
-                                <div class="mt-stat-col">
-                                    <span class="mt-stat-label">YAZMA SÜRESİ</span>
-                                    <span class="mt-stat-value">${timeStr}</span>
-                                </div>
-                                <div class="mt-stat-divider"></div>
-                                <div class="mt-stat-col">
-                                    <span class="mt-stat-label">BİTEN TEST</span>
-                                    <span class="mt-stat-value">${completedCount}</span>
-                                </div>
-                                <div class="mt-stat-divider"></div>
-                                <div class="mt-stat-col">
-                                    <span class="mt-stat-label">REKOR SERİ</span>
-                                    <span class="mt-stat-value">${maxStreakVal}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 2. Saniye (Time) Satırı -->
-                        <div class="mt-section-group">
-                            <div class="mt-section-label">Zaman (Time)</div>
-                            <div class="mt-row-grid">
-                                <div class="mt-score-box" data-mode="time" data-amount="15">
-                                    <span class="mt-score-title">15s</span>
-                                    <div class="mt-score-main">
-                                        <span class="mt-score-wpm">${t15.wpm}</span>
-                                        <span class="mt-score-unit">wpm</span>
-                                    </div>
-                                    <span class="mt-score-acc">${t15.acc !== '-' ? `${t15.acc}% acc` : '-% acc'}</span>
-                                </div>
-
-                                <div class="mt-score-box" data-mode="time" data-amount="30">
-                                    <span class="mt-score-title">30s</span>
-                                    <div class="mt-score-main">
-                                        <span class="mt-score-wpm">${t30.wpm}</span>
-                                        <span class="mt-score-unit">wpm</span>
-                                    </div>
-                                    <span class="mt-score-acc">${t30.acc !== '-' ? `${t30.acc}% acc` : '-% acc'}</span>
-                                </div>
-
-                                <div class="mt-score-box is-tertiary-mode" data-mode="time" data-amount="60">
-                                    <span class="mt-score-title">60s</span>
-                                    <div class="mt-score-main">
-                                        <span class="mt-score-wpm">${t60.wpm}</span>
-                                        <span class="mt-score-unit">wpm</span>
-                                    </div>
-                                    <span class="mt-score-acc">${t60.acc !== '-' ? `${t60.acc}% acc` : '-% acc'}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3. Kelime (Words) Satırı -->
-                        <div class="mt-section-group">
-                            <div class="mt-section-label">Kelime (Words)</div>
-                            <div class="mt-row-grid">
-                                <div class="mt-score-box" data-mode="words" data-amount="10">
-                                    <span class="mt-score-title">10w</span>
-                                    <div class="mt-score-main">
-                                        <span class="mt-score-wpm">${w10.wpm}</span>
-                                        <span class="mt-score-unit">wpm</span>
-                                    </div>
-                                    <span class="mt-score-acc">${w10.acc !== '-' ? `${w10.acc}% acc` : '-% acc'}</span>
-                                </div>
-
-                                <div class="mt-score-box" data-mode="words" data-amount="25">
-                                    <span class="mt-score-title">25w</span>
-                                    <div class="mt-score-main">
-                                        <span class="mt-score-wpm">${w25.wpm}</span>
-                                        <span class="mt-score-unit">wpm</span>
-                                    </div>
-                                    <span class="mt-score-acc">${w25.acc !== '-' ? `${w25.acc}% acc` : '-% acc'}</span>
-                                </div>
-
-                                <div class="mt-score-box is-tertiary-mode" data-mode="words" data-amount="50">
-                                    <span class="mt-score-title">50w</span>
-                                    <div class="mt-score-main">
-                                        <span class="mt-score-wpm">${w50.wpm}</span>
-                                        <span class="mt-score-unit">wpm</span>
-                                    </div>
-                                    <span class="mt-score-acc">${w50.acc !== '-' ? `${w50.acc}% acc` : '-% acc'}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
 
                 if (detailFooter) {
                     if (isDetailEditing) {
                         detailFooter.innerHTML = `
                             <div class="companion-footer-edit-wrap">
-                                <input type="text" class="companion-footer-link-input" id="trophiesFooterLinkInput" placeholder="Monkeytype kullanıcı adı (@...)" value="${this.escapeHtml(username)}">
+                                <input type="text" class="companion-footer-link-input" id="trophiesFooterLinkInput" data-trophy-tur="${this.escapeHtml(activeTur)}" placeholder="${this.escapeHtml(meta.placeholder || meta.girdiEtiket)}" value="${this.escapeHtml(kullanici)}">
                             </div>
                         `;
                         detailFooter.style.display = 'flex';
                     } else {
+                        const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
                         detailFooter.innerHTML = `
-                            <a href="https://monkeytype.com/profile/${encodeURIComponent(username)}" target="_blank" rel="noopener noreferrer" class="companion-footer-link" title="Monkeytype Profilini Gör">
+                            <a href="${this.safeUrl(norm.profileUrl)}" target="_blank" rel="noopener noreferrer" class="companion-footer-link" title="${this.escapeHtml(norm.baslik)} Profilini Gör">
                                 <span class="companion-link-favicon-wrap">
-                                    <span class="mt-brand-icon">mt</span>
+                                    <img src="${this.escapeHtml(norm.faviconUrl)}" class="companion-row-favicon" loading="lazy" alt="${this.escapeHtml(norm.baslik)}"
+                                         onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                                    <span class="mt-brand-icon" style="display:none;">${this.escapeHtml(fallbackHarf)}</span>
                                 </span>
-                                <span class="companion-link-domain">@${this.escapeHtml(username)}</span>
+                                <span class="companion-link-domain">${this.escapeHtml(norm.handle)}</span>
                                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" class="mt-link-icon">
                                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                     <polyline points="15 3 21 3 21 9"></polyline>
@@ -500,19 +348,73 @@ const RenderEngine = {
                     }
                 }
             } else {
-                mtHtml = `<p class="placeholder-text" style="text-align: center; color: var(--text-tertiary); padding: 3cqh 0;">Henüz Monkeytype hesabı eklenmemiş.</p>`;
+                if (detailBody) {
+                    detailBody.innerHTML = `<p class="placeholder-text" style="text-align: center; color: var(--text-tertiary); padding: 3cqh 0;">Henüz ${this.escapeHtml(meta.baslik)} hesabı bağlanmamış.</p>`;
+                }
                 if (detailFooter) {
                     detailFooter.innerHTML = '';
                     detailFooter.style.display = 'none';
                 }
             }
-
-            if (detailBody) detailBody.innerHTML = mtHtml;
         }
 
         if (isUserOwner && typeof EditManager !== 'undefined' && EditManager.TrophiesView) {
             EditManager.TrophiesView.init();
         }
+    },
+
+    /**
+     * Tüm oyunları taşma yapmadan sergileyen 4 katmanlı Evrensel Root Layout şablonu.
+     */
+    renderTrophyRootLayout(norm) {
+        if (!norm) return '';
+        const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
+        const stats = Array.isArray(norm.stats) ? norm.stats.slice(0, 4) : [];
+
+        const statsHtml = stats.map(s => `
+            <div class="trophy-stat-box">
+                <span class="trophy-stat-label">${this.escapeHtml(s.label || '')}</span>
+                <span class="trophy-stat-val">${this.escapeHtml(s.value ?? '—')}</span>
+                <span class="trophy-stat-sub">${this.escapeHtml(s.sub || '')}</span>
+            </div>
+        `).join('');
+
+        return `
+            <div class="trophy-root-card" style="--trophy-accent: ${this.escapeHtml(norm.accent || '#3b5bdb')};" data-trophy-tur="${this.escapeHtml(norm.tur)}" data-username="${this.escapeHtml(norm.kullanici)}">
+                <!-- 1. KATMAN: Kimlik Başlığı -->
+                <div class="trophy-identity-bar">
+                    <div class="trophy-id-left">
+                        <div class="trophy-id-favicon-box">
+                            <img src="${this.escapeHtml(norm.faviconUrl)}" alt="${this.escapeHtml(norm.baslik)}" class="trophy-id-favicon-img" loading="lazy"
+                                 onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                            <span class="trophy-id-fallback" style="display: none;">${this.escapeHtml(fallbackHarf)}</span>
+                        </div>
+                        <div class="trophy-id-texts">
+                            <div class="trophy-id-handle" title="${this.escapeHtml(norm.handle)}">${this.escapeHtml(norm.handle)}</div>
+                            <div class="trophy-id-platform">${this.escapeHtml(norm.baslik)} • ${this.escapeHtml(norm.domain)}</div>
+                        </div>
+                    </div>
+                    <span class="trophy-id-badge">${this.escapeHtml(norm.badge || 'AKTİF')}</span>
+                </div>
+
+                <!-- 2. KATMAN: Hero Derece & Altın Zirve (Peak) Rozeti -->
+                <div class="trophy-hero-banner">
+                    <div class="trophy-hero-main">
+                        <span class="trophy-hero-label">${this.escapeHtml(norm.heroLabel || 'GÜNCEL DERECE')}</span>
+                        <span class="trophy-hero-value" title="${this.escapeHtml(norm.heroValue || '—')}">${this.escapeHtml(norm.heroValue || '—')}</span>
+                    </div>
+                    <div class="trophy-peak-box" title="${this.escapeHtml(norm.peakLabel || 'ZİRVE')}: ${this.escapeHtml(norm.peakValue || '—')}">
+                        <span class="trophy-peak-label">★ ${this.escapeHtml(norm.peakLabel || 'ZİRVE')}</span>
+                        <span class="trophy-peak-value">${this.escapeHtml(norm.peakValue || '—')}</span>
+                    </div>
+                </div>
+
+                <!-- 3. KATMAN: 2x2 Sabit İstatistik Izgarası -->
+                <div class="trophy-stats-grid">
+                    ${statsHtml}
+                </div>
+            </div>
+        `;
     },
 
     // 1.4: TOPS EŞLİKÇİ KART (SHOWCASE WING) RENDER MOTORU (MASTER & DETAIL)
@@ -910,22 +812,12 @@ const RenderEngine = {
 
     monkeytypeGuncelle(data) {
         if (!data) return;
-        const veriyiYaz = (mode, amount) => {
-            const modeData = data[mode];
-            const stat = (modeData && modeData[amount]) ? modeData[amount][0] : null;
-            if (stat && stat.wpm) {
-                const box = document.querySelector(`.mt-capsule-item[data-mode="${mode}"][data-amount="${amount}"], .mt-score-box[data-mode="${mode}"][data-amount="${amount}"]`);
-                if (box) {
-                    const wpmEl = box.querySelector('.mt-score-wpm');
-                    const accEl = box.querySelector('.mt-score-acc');
-                    if (wpmEl) wpmEl.textContent = Math.round(stat.wpm);
-                    if (accEl) accEl.textContent = `${Math.round(stat.acc)}% acc`;
-                }
-            }
-        };
-
-        ['15', '30', '60'].forEach(a => veriyiYaz('time', a));
-        ['10', '25', '50'].forEach(a => veriyiYaz('words', a));
+        if (typeof kartVerisi !== 'undefined') {
+            if (!kartVerisi._canli_trophies) kartVerisi._canli_trophies = {};
+            kartVerisi._canli_trophies.monkeytype = data;
+            kartVerisi.canli_monkeytype = data;
+            this.trophiesCiz(kartVerisi);
+        }
     },
 
     safeUrl(url) {
