@@ -81,53 +81,8 @@ const TrophiesManager = {
     },
     // #endregion
 
-    // #region 2: OYUN & BAŞARIM KATALOĞU (CATALOG)
+    // #region 2: GAMING (REKABETÇİ OYUNLAR) & WIDGET KATALOĞU
     catalog: [
-        {
-            id: 'monkeytype',
-            tur: 'monkeytype',
-            baslik: 'Monkeytype',
-            alt: 'Canlı klavye yazma hızı (WPM), doğruluk ve seri rekoru',
-            domain: 'monkeytype.com',
-            accent: '#e2b714',
-            kategori: 'yazma',
-            kategoriBaslik: 'Hız & Klavye',
-            girdiTipi: 'username',
-            girdiEtiket: 'Monkeytype Kullanıcı Adı',
-            placeholder: 'kullanıcı_adı',
-            ornek: 'miodec',
-            comingSoon: false
-        },
-        {
-            id: 'chess',
-            tur: 'chess',
-            baslik: 'Chess.com',
-            alt: 'Rapid, Blitz ve Bullet canlı & kariyer zirvesi (Peak) elo puanları',
-            domain: 'chess.com',
-            accent: '#81b64c',
-            kategori: 'strateji',
-            kategoriBaslik: 'Strateji & Zeka',
-            girdiTipi: 'username',
-            girdiEtiket: 'Chess.com Kullanıcı Adı',
-            placeholder: 'kullanıcı_adı',
-            ornek: 'hikaru',
-            comingSoon: false
-        },
-        {
-            id: 'faceit',
-            tur: 'faceit',
-            baslik: 'CS2 / FACEIT',
-            alt: 'CS2 rekabetçi lig seviyesi (1-10), güncel Elo ve maç istatistikleri',
-            domain: 'faceit.com',
-            accent: '#ff5500',
-            kategori: 'fps',
-            kategoriBaslik: 'FPS & Taktik',
-            girdiTipi: 'nickname',
-            girdiEtiket: 'FACEIT Oyuncu Nicki',
-            placeholder: 'faceit_nicki (Örn: m0NESY)',
-            ornek: 'm0NESY',
-            comingSoon: false
-        },
         {
             id: 'valorant',
             tur: 'valorant',
@@ -159,6 +114,36 @@ const TrophiesManager = {
             comingSoon: false
         },
         {
+            id: 'cs2',
+            tur: 'cs2',
+            baslik: 'Counter-Strike 2',
+            alt: 'CS2 Premier / FACEIT Elo ve rekabetçi profil vitrini',
+            domain: 'counter-strike.net',
+            accent: '#de9b35',
+            kategori: 'fps',
+            kategoriBaslik: 'FPS & Taktik',
+            girdiTipi: 'nickname',
+            girdiEtiket: 'FACEIT Nick veya Steam Künyesi',
+            placeholder: 'oyuncu_nicki (Örn: s1mple)',
+            ornek: 's1mple',
+            comingSoon: false
+        },
+        {
+            id: 'faceit',
+            tur: 'faceit',
+            baslik: 'FACEIT',
+            alt: 'FACEIT rekabetçi lig seviyesi (1-10), güncel Elo ve maç istatistikleri',
+            domain: 'faceit.com',
+            accent: '#ff5500',
+            kategori: 'fps',
+            kategoriBaslik: 'FPS & Taktik',
+            girdiTipi: 'nickname',
+            girdiEtiket: 'FACEIT Oyuncu Nicki',
+            placeholder: 'faceit_nicki (Örn: m0NESY)',
+            ornek: 'm0NESY',
+            comingSoon: false
+        },
+        {
             id: 'tft',
             tur: 'tft',
             baslik: 'Teamfight Tactics',
@@ -166,7 +151,7 @@ const TrophiesManager = {
             domain: 'teamfighttactics.leagueoflegends.com',
             accent: '#f59f00',
             kategori: 'strateji',
-            kategoriBaslik: 'Strateji & Zeka',
+            kategoriBaslik: 'Strateji & Taktik',
             girdiTipi: 'riot_id',
             girdiEtiket: 'Riot ID (Oyuncu#Tag)',
             placeholder: 'Oyuncu#TR1',
@@ -187,33 +172,52 @@ const TrophiesManager = {
             placeholder: 'Brawlhalla ID veya Nick',
             ornek: 'Sandstorm',
             comingSoon: false
+        }
+    ],
+
+    // 3. Adımda kurulacak Widgets kanadı için hazır tutulan katalog
+    widgetCatalog: [
+        {
+            id: 'monkeytype',
+            tur: 'monkeytype',
+            baslik: 'Monkeytype',
+            alt: 'Canlı klavye yazma hızı (WPM), doğruluk ve seri rekoru',
+            domain: 'monkeytype.com',
+            accent: '#e2b714',
+            kategori: 'yazma',
+            kategoriBaslik: 'Hız & Klavye',
+            girdiTipi: 'username',
+            girdiEtiket: 'Monkeytype Kullanıcı Adı',
+            placeholder: 'kullanıcı_adı',
+            ornek: 'miodec',
+            comingSoon: false
         },
         {
-            id: 'cs2',
-            tur: 'cs2',
-            baslik: 'Counter-Strike 2',
-            alt: 'CS2 Premier / FACEIT Elo ve rekabetçi profil vitrini',
-            domain: 'counter-strike.net',
-            accent: '#de9b35',
-            kategori: 'fps',
-            kategoriBaslik: 'FPS & Taktik',
-            girdiTipi: 'nickname',
-            girdiEtiket: 'FACEIT Nick veya Steam Kunyesi',
-            placeholder: 'oyuncu_nicki (Örn: s1mple)',
-            ornek: 's1mple',
+            id: 'chess',
+            tur: 'chess',
+            baslik: 'Chess.com',
+            alt: 'Rapid, Blitz ve Bullet canlı & kariyer zirvesi (Peak) elo puanları',
+            domain: 'chess.com',
+            accent: '#81b64c',
+            kategori: 'strateji',
+            kategoriBaslik: 'Strateji & Zeka',
+            girdiTipi: 'username',
+            girdiEtiket: 'Chess.com Kullanıcı Adı',
+            placeholder: 'kullanıcı_adı',
+            ornek: 'hikaru',
             comingSoon: false
         },
         {
             id: 'osu',
             tur: 'osu',
-            baslik: 'Osu! Ritim',
+            baslik: 'osu!',
             alt: 'Global sıralama, Performans Puanı (PP) ve doğruluk oranı',
             domain: 'osu.ppy.sh',
             accent: '#ff66aa',
-            kategori: 'diger',
-            kategoriBaslik: 'Diğer Platformlar',
+            kategori: 'ritim',
+            kategoriBaslik: 'Ritim & Yetenek',
             girdiTipi: 'username',
-            girdiEtiket: 'Osu! Kullanıcı Adı',
+            girdiEtiket: 'osu! Kullanıcı Adı',
             placeholder: 'oyuncu_adi',
             ornek: 'mrekk',
             comingSoon: true
@@ -221,31 +225,16 @@ const TrophiesManager = {
         {
             id: 'duolingo',
             tur: 'duolingo',
-            baslik: 'Duolingo Streak',
+            baslik: 'Duolingo',
             alt: 'Günlük dil öğrenme serisi (streak) ve toplam XP',
             domain: 'duolingo.com',
             accent: '#58cc02',
-            kategori: 'diger',
-            kategoriBaslik: 'Diğer Platformlar',
+            kategori: 'dil',
+            kategoriBaslik: 'Alışkanlık & Dil',
             girdiTipi: 'username',
             girdiEtiket: 'Duolingo Kullanıcı Adı',
             placeholder: 'kullanıcı_adı',
             ornek: 'duofan',
-            comingSoon: true
-        },
-        {
-            id: 'github',
-            tur: 'github',
-            baslik: 'GitHub Katkıları',
-            alt: 'Açık kaynak repo, takipçi ve katkı istatistikleri',
-            domain: 'github.com',
-            accent: '#f0f6fc',
-            kategori: 'diger',
-            kategoriBaslik: 'Diğer Platformlar',
-            girdiTipi: 'username',
-            girdiEtiket: 'GitHub Kullanıcı Adı',
-            placeholder: 'kullanıcı_adı',
-            ornek: 'torvalds',
             comingSoon: true
         }
     ],
@@ -264,6 +253,13 @@ const TrophiesManager = {
 
     katalogOgesiBul(idVeyaTur) {
         if (!idVeyaTur) return null;
+        return this.catalog.find(c => c.id === idVeyaTur || c.tur === idVeyaTur)
+            || (this.widgetCatalog ? this.widgetCatalog.find(c => c.id === idVeyaTur || c.tur === idVeyaTur) : null)
+            || null;
+    },
+
+    gamingKatalogOgesiBul(idVeyaTur) {
+        if (!idVeyaTur) return null;
         return this.catalog.find(c => c.id === idVeyaTur || c.tur === idVeyaTur) || null;
     },
 
@@ -274,7 +270,7 @@ const TrophiesManager = {
         const item = this.katalogOgesiBul(tur);
         const val = String(rawValue || '').trim().replace(/^@/, '');
         if (!val) {
-            return { ok: false, error: `Lütfen ${item?.girdiEtiket || 'kullanıcı adı'} girin.` };
+            return { ok: false, error: `Lütfen ${item?.girdiEtiket || 'oyuncu kimliği'} girin.` };
         }
         if (val.length > 42) {
             return { ok: false, error: 'Girdi çok uzun (en fazla 42 karakter).' };
@@ -298,47 +294,56 @@ const TrophiesManager = {
     },
 
     /**
-     * Kart verisindeki tüm aktif başarımları (geriye dönük uyumlu) düz dizi olarak döndürür.
-     * @returns {Array<{tur: string, kullanici: string}>}
+     * Kart verisindeki aktif Gaming (rekabetçi oyun) öğelerini düz dizi olarak döndürür.
+     * @returns {Array<{tur: string, kullanici: string, snap?: object}>}
      */
     aktifTrophyleriAl(kart) {
         if (!kart) return [];
         const sonuc = [];
         const gorulen = new Set();
 
-        const ekle = (tur, kullanici) => {
+        const ekle = (tur, kullanici, snap = null) => {
             if (!tur || !kullanici) return;
             const normTur = String(tur).trim().toLowerCase();
             const normUser = String(kullanici).trim();
             if (!normUser || gorulen.has(normTur)) return;
-            if (!this.katalogOgesiBul(normTur)) return;
+            // Yalnızca Gaming kataloğundaki rekabetçi oyunları kabul et
+            if (!this.gamingKatalogOgesiBul(normTur)) return;
             gorulen.add(normTur);
-            sonuc.push({ tur: normTur, kullanici: normUser });
+            const kayit = { tur: normTur, kullanici: normUser };
+            if (snap && typeof snap === 'object') kayit.snap = snap;
+            sonuc.push(kayit);
         };
 
+        // 1. Birincil kaynak: kart.gaming sütunu
+        if (Array.isArray(kart.gaming)) {
+            kart.gaming.flat(Infinity).forEach(g => {
+                if (g && typeof g === 'object') {
+                    ekle(g.tur || g.id, g.kullanici || g.username || g.ayarlar?.kullanici, g.snap);
+                }
+            });
+        }
+
+        // 2. Geriye dönük uyumluluk: kart.trophies içinde kalmış rekabetçi oyunlar varsa
         if (Array.isArray(kart.trophies)) {
             kart.trophies.flat(Infinity).forEach(t => {
                 if (t && typeof t === 'object') {
-                    ekle(t.tur || t.id, t.kullanici || t.username || t.ayarlar?.kullanici);
+                    ekle(t.tur || t.id, t.kullanici || t.username || t.ayarlar?.kullanici, t.snap);
                 }
             });
         } else if (kart.trophies && typeof kart.trophies === 'object') {
             Object.entries(kart.trophies).forEach(([k, v]) => {
                 if (v && typeof v === 'object') {
-                    ekle(v.tur || k, v.kullanici || v.username || v.ayarlar?.kullanici);
+                    ekle(v.tur || k, v.kullanici || v.username || v.ayarlar?.kullanici, v.snap);
                 }
             });
         }
 
-        // Geriye dönük widgets.monkeytype kontrolü
-        if (Array.isArray(kart.widgets)) {
-            const mtW = kart.widgets.find(w => w && w.tur === 'monkeytype');
-            if (mtW) {
-                ekle('monkeytype', mtW.kullanici || mtW.username || mtW.ayarlar?.kullanici);
-            }
-        }
-
         return sonuc;
+    },
+
+    aktifOyunlariAl(kart) {
+        return this.aktifTrophyleriAl(kart);
     },
     // #endregion
 
@@ -762,5 +767,6 @@ const TrophiesManager = {
 
 if (typeof window !== 'undefined') {
     window.TrophiesManager = TrophiesManager;
+    window.GamingManager = TrophiesManager;
     window.canliMonkeytypeVerisiCek = (u) => TrophiesManager.canliMonkeytypeVerisiCek(u);
 }

@@ -112,9 +112,29 @@ async function tumVerileriCek() {
         }
 
         kartVerisi.tops = normalizeTops;
-        kartVerisi.trophies = guvenliDizi(profil.trophies);
-        kartVerisi.widgets = guvenliDizi(profil.widgets);
-        kartVerisi.working_on = guvenliObje(profil.working_on);
+        const rawGaming = guvenliDizi(profil.gaming);
+        const rawTrophies = guvenliDizi(profil.trophies);
+        const rawWidgets = guvenliDizi(profil.widgets);
+
+        const gamingTurleri = new Set(['valorant', 'lol', 'cs2', 'faceit', 'tft', 'brawlhalla']);
+        const widgetTurleri = new Set(['monkeytype', 'chess', 'duolingo', 'osu', 'lichess']);
+
+        // Eğer yeni 'gaming' sütunu henüz boşsa ama eski 'trophies' içinde oyun kaydı varsa otomatik taşı
+        if (rawGaming.length === 0 && rawTrophies.length > 0) {
+            rawTrophies.forEach(item => {
+                if (item && typeof item === 'object' && gamingTurleri.has(item.tur)) {
+                    rawGaming.push(item);
+                } else if (item && typeof item === 'object' && widgetTurleri.has(item.tur)) {
+                    if (!rawWidgets.some(w => w && w.tur === item.tur)) {
+                        rawWidgets.push({ tur: item.tur, kullanici: item.kullanici || item.ayarlar?.kullanici || '' });
+                    }
+                }
+            });
+        }
+
+        kartVerisi.gaming = rawGaming;
+        kartVerisi.trophies = rawTrophies.filter(item => item && typeof item === 'object' && !gamingTurleri.has(item.tur) && !widgetTurleri.has(item.tur));
+        kartVerisi.widgets = rawWidgets;
         kartVerisi.theme_config = guvenliObje(profil.theme_config);
         kartVerisi.kullanici_notlari = guvenliObje(profil.kullanici_notlari);
 

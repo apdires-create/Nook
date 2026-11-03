@@ -566,7 +566,7 @@ const EditManager = {
             document.body.appendChild(searchModal);
         }
 
-        // 10. Başarım Seçici Modalı (Trophy Picker Modal)
+        // 10. Oyun Seçici Modalı (Gaming Picker Modal)
         if (!document.getElementById('trophy-picker-modal')) {
             const trophyModal = document.createElement('div');
             trophyModal.id = 'trophy-picker-modal';
@@ -576,8 +576,8 @@ const EditManager = {
                 <div class="trophy-picker-panel section-picker-panel">
                     <div class="section-picker-header">
                         <div>
-                            <h3 class="section-picker-title">Başarım Ekle</h3>
-                            <p class="section-picker-desc">Profilinde sergilemek istediğin başarım veya oyun rekorunu seç.</p>
+                            <h3 class="section-picker-title">Oyun Ekle</h3>
+                            <p class="section-picker-desc">Profilinde sergilemek istediğin rekabetçi oyunu seç.</p>
                         </div>
                         <button type="button" class="section-picker-close" id="trophy-picker-close">&times;</button>
                     </div>
@@ -587,7 +587,7 @@ const EditManager = {
                                 <circle cx="11" cy="11" r="8"></circle>
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
-                            <input type="text" id="trophyPickerSearchInput" class="trophy-search-input" placeholder="Oyun veya başarım ara (LoL, Valorant, Chess, CS2, vb.)..." autocomplete="off" spellcheck="false">
+                            <input type="text" id="trophyPickerSearchInput" class="trophy-search-input" placeholder="Oyun ara (Valorant, LoL, CS2, FACEIT, TFT, Brawlhalla)..." autocomplete="off" spellcheck="false">
                             <button type="button" id="trophyPickerSearchClear" class="trophy-search-clear-btn" title="Aramayı Temizle">&times;</button>
                         </div>
                     </div>
@@ -1152,6 +1152,7 @@ EditManager.Global = {
                 listeler: temizListeler
             };
         }
+        const gaming = (Array.isArray(veri.gaming) && veri.gaming.length > 0) ? veri.gaming : null;
         let trophies = null;
         if (Array.isArray(veri.trophies) && veri.trophies.length > 0) {
             trophies = veri.trophies;
@@ -1159,19 +1160,15 @@ EditManager.Global = {
             trophies = veri.trophies;
         }
         const widgets = (Array.isArray(veri.widgets) && veri.widgets.length > 0) ? veri.widgets : null;
-        let working_on = null;
-        if (veri.working_on && veri.working_on.metin && veri.working_on.metin.trim() !== '') {
-            working_on = { metin: veri.working_on.metin.trim() };
-        }
         const theme_config = veri.theme_config || {};
         const kullanici_notlari = (veri.kullanici_notlari && typeof veri.kullanici_notlari === 'object') ? veri.kullanici_notlari : {};
         return {
             front_data: front,
             links,
             tops,
+            gaming,
             trophies,
             widgets,
-            working_on,
             theme_config,
             kullanici_notlari
         };
@@ -1292,13 +1289,6 @@ EditManager.Global = {
                 return (typeof v === 'object' && !Array.isArray(v)) ? v : {};
             };
 
-            let workingOnPayload = {};
-            if (kartVerisi.working_on && typeof kartVerisi.working_on === 'object' && !Array.isArray(kartVerisi.working_on)) {
-                if (kartVerisi.working_on.metin && kartVerisi.working_on.metin.trim() !== '') {
-                    workingOnPayload = { metin: kartVerisi.working_on.metin.trim().slice(0, 160) };
-                }
-            }
-
             const temizLinkler = (Array.isArray(kartVerisi.links) ? kartVerisi.links : [])
                 .filter(l => l && typeof l === 'object' && l.url && typeof l.url === 'string' && l.url.trim() !== '')
                 .map(l => ({
@@ -1310,9 +1300,14 @@ EditManager.Global = {
             // Yerel state'teki links dizisini de temizlenmiş versiyonla güncelle
             kartVerisi.links = temizLinkler;
 
+            let gamingPayload = [];
+            if (Array.isArray(kartVerisi.gaming)) {
+                gamingPayload = kartVerisi.gaming.flat(Infinity).filter(item => item && typeof item === 'object' && !Array.isArray(item));
+            }
+            kartVerisi.gaming = gamingPayload;
+
             let trophiesPayload = [];
             if (Array.isArray(kartVerisi.trophies)) {
-                // Diziyi düzleştir ve sadece geçerli düz objeleri filtrele
                 const duzlesmis = kartVerisi.trophies.flat(Infinity);
                 trophiesPayload = duzlesmis.filter(item => item && typeof item === 'object' && !Array.isArray(item));
             } else if (kartVerisi.trophies && typeof kartVerisi.trophies === 'object') {
@@ -1327,9 +1322,9 @@ EditManager.Global = {
                     front_data: guvenliObje(kartVerisi.front_data),
                     links: temizLinkler,
                     tops: guvenliObje(kartVerisi.tops),
+                    gaming: gamingPayload,
                     trophies: trophiesPayload,
                     widgets: Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets : [],
-                    working_on: workingOnPayload,
                     theme_config: guvenliObje(kartVerisi.theme_config),
                     kullanici_notlari: guvenliObje(kartVerisi.kullanici_notlari)
                 })
@@ -2524,13 +2519,13 @@ EditManager.TrophiesView = {
                 e.stopPropagation();
                 const isNowEditing = trophiesCompanion.classList.toggle('is-detail-editing');
                 editToggleBtn.classList.toggle('is-active', isNowEditing);
-                editToggleBtn.title = isNowEditing ? "Düzenlemeyi Bitir" : "Başarıyı Düzenle";
+                editToggleBtn.title = isNowEditing ? "Düzenlemeyi Bitir" : "Oyunu Düzenle";
                 RenderEngine.trophiesCiz(kartVerisi);
                 this.init();
             };
         }
 
-        // 2. AKTİF BAŞARIMI SİLME BUTONU
+        // 2. AKTİF OYUNU SİLME BUTONU
         if (deleteActiveBtn) {
             deleteActiveBtn.onclick = async (e) => {
                 e.stopPropagation();
@@ -2590,13 +2585,11 @@ EditManager.TrophiesView = {
         } else {
             mevcutListe.push({ tur, kullanici: temizKullanici });
         }
-        kartVerisi.trophies = mevcutListe;
+        kartVerisi.gaming = mevcutListe;
 
-        // Geriye dönük Monkeytype widget senkronizasyonu
-        if (tur === 'monkeytype') {
-            if (!Array.isArray(kartVerisi.widgets)) kartVerisi.widgets = [];
-            kartVerisi.widgets = kartVerisi.widgets.filter(x => x && x.tur !== 'monkeytype');
-            kartVerisi.widgets.push({ tur: 'monkeytype', kullanici: temizKullanici });
+        // Eski trophies dizisinde aynı oyun kalmışsa temizle
+        if (Array.isArray(kartVerisi.trophies)) {
+            kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== tur);
         }
 
         window._activeTrophyDetail = tur;
@@ -2608,25 +2601,22 @@ EditManager.TrophiesView = {
         if (canliVeri) {
             if (!kartVerisi._canli_trophies) kartVerisi._canli_trophies = {};
             kartVerisi._canli_trophies[tur] = canliVeri;
-            if (tur === 'monkeytype') {
-                kartVerisi.canli_monkeytype = canliVeri;
-            }
             RenderEngine.trophiesCiz(kartVerisi);
         }
     },
 
-    async trophySil(tur, baslik = 'Başarım') {
+    async trophySil(tur, baslik = 'Oyun') {
         if (!tur) return;
         let onay = false;
         if (typeof window.onayPopupiGoster === 'function') {
             onay = await window.onayPopupiGoster({
-                baslik: `${baslik} Başarımını Kaldır`,
-                aciklama: `${baslik} başarımını vitrinden kaldırmak istediğinize emin misiniz?`,
-                onayMetni: "Başarımı Kaldır",
+                baslik: `${baslik} Oyununu Kaldır`,
+                aciklama: `${baslik} oyun profilini vitrinden kaldırmak istediğinize emin misiniz?`,
+                onayMetni: "Oyunu Kaldır",
                 tehlikeliMi: true
             });
         } else {
-            onay = confirm(`${baslik} başarımını kaldırmak istediğinize emin misiniz?`);
+            onay = confirm(`${baslik} oyununu kaldırmak istediğinize emin misiniz?`);
         }
 
         if (!onay) return;
@@ -2634,14 +2624,11 @@ EditManager.TrophiesView = {
         const mevcutListe = (typeof TrophiesManager !== 'undefined')
             ? TrophiesManager.aktifTrophyleriAl(kartVerisi)
             : [];
-        kartVerisi.trophies = mevcutListe.filter(x => x.tur !== tur);
-
-        if (tur === 'monkeytype') {
-            if (Array.isArray(kartVerisi.widgets)) {
-                kartVerisi.widgets = kartVerisi.widgets.filter(x => x && x.tur !== 'monkeytype');
-            }
-            delete kartVerisi.canli_monkeytype;
+        kartVerisi.gaming = mevcutListe.filter(x => x.tur !== tur);
+        if (Array.isArray(kartVerisi.trophies)) {
+            kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== tur);
         }
+
         if (kartVerisi._canli_trophies) {
             delete kartVerisi._canli_trophies[tur];
         }
@@ -2655,7 +2642,7 @@ EditManager.TrophiesView = {
         EditManager.Global.degisiklikYapildi();
 
         if (typeof window.toastBildirimiGoster === 'function') {
-            window.toastBildirimiGoster(`${baslik} başarımı kaldırıldı.`, 3000, 'success');
+            window.toastBildirimiGoster(`${baslik} oyunu kaldırıldı.`, 3000, 'success');
         }
     },
 
@@ -3981,17 +3968,21 @@ EditManager.CompanionViews = {
                 onDrop: () => {
                     const mevcutListe = typeof TrophiesManager !== 'undefined'
                         ? TrophiesManager.aktifTrophyleriAl(kartVerisi)
-                        : (Array.isArray(kartVerisi.trophies) ? kartVerisi.trophies : []);
+                        : (Array.isArray(kartVerisi.gaming) ? kartVerisi.gaming : []);
                     if (mevcutListe.length > 0) {
                         const rows = Array.from(trophiesMasterList.querySelectorAll('.companion-row-item'));
-                        const newTrophies = [];
+                        const newGaming = [];
                         rows.forEach(r => {
                             const tId = r.dataset.trophyId;
                             const found = mevcutListe.find(t => t && (t.id === tId || t.tur === tId));
-                            if (found) newTrophies.push({ tur: found.tur, kullanici: found.kullanici });
+                            if (found) {
+                                const kayit = { tur: found.tur, kullanici: found.kullanici };
+                                if (found.snap) kayit.snap = found.snap;
+                                newGaming.push(kayit);
+                            }
                         });
-                        if (newTrophies.length === mevcutListe.length) {
-                            kartVerisi.trophies = newTrophies;
+                        if (newGaming.length === mevcutListe.length) {
+                            kartVerisi.gaming = newGaming;
                         }
                     }
                     EditManager.Global.degisiklikYapildi();

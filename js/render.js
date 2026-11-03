@@ -165,7 +165,7 @@ const RenderEngine = {
                             </div>
                             ${summaryPill}
                             ${isUserOwner ? `
-                                <button type="button" class="companion-row-del-btn" data-del-trophy="${this.escapeHtml(item.tur)}" data-trophy-title="${this.escapeHtml(norm.baslik)}" title="${this.escapeHtml(norm.baslik)} Başarımını Kaldır">
+                                <button type="button" class="companion-row-del-btn" data-del-trophy="${this.escapeHtml(item.tur)}" data-trophy-title="${this.escapeHtml(norm.baslik)}" title="${this.escapeHtml(norm.baslik)} Oyununu Kaldır">
                                     <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
                                         <polyline points="3 6 5 6 21 6"></polyline>
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -183,7 +183,7 @@ const RenderEngine = {
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
-                            <span>Başarını Sergile</span>
+                            <span>Oyun Ekle</span>
                         </button>
                     `;
                 }
@@ -191,22 +191,22 @@ const RenderEngine = {
                 if (isUserOwner) {
                     itemsHtml = `
                         <div class="companion-empty-state" style="padding: 4cqh 2cqw; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                            <div class="companion-empty-title" style="margin-bottom: 0.8cqh;">Başarı Ekle</div>
-                            <p class="companion-empty-desc" style="margin-bottom: 2.2cqh; color: var(--text-tertiary);">Oyun derecelerini, elo puanlarını veya klavye hız rekorlarını profilinde sergile.</p>
+                            <div class="companion-empty-title" style="margin-bottom: 0.8cqh;">Oyun Ekle</div>
+                            <p class="companion-empty-desc" style="margin-bottom: 2.2cqh; color: var(--text-tertiary);">Rekabetçi oyun derecelerini, aktif ve zirve (peak) elolarını profilinde sergile.</p>
                             <button type="button" class="companion-add-row-btn" id="trophiesMasterAddBtn" style="width: auto; padding: 1.2cqh 5cqw;">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
                                     <line x1="12" y1="5" x2="12" y2="19"></line>
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>
-                                <span>Başarını Sergile</span>
+                                <span>Oyun Ekle</span>
                             </button>
                         </div>
                     `;
                 } else {
                     itemsHtml = `
                         <div class="companion-empty-state" style="padding: 4cqh 2cqw; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                            <div class="companion-empty-title">Henüz Bir Başarı Yok</div>
-                            <p class="companion-empty-desc" style="color: var(--text-tertiary);">Kullanıcı bu vitrinde henüz bir başarım paylaşmamış.</p>
+                            <div class="companion-empty-title">Henüz Oyun Eklenmemiş</div>
+                            <p class="companion-empty-desc" style="color: var(--text-tertiary);">Kullanıcı bu vitrinde henüz bir rekabetçi oyun profili paylaşmamış.</p>
                         </div>
                     `;
                 }
@@ -276,7 +276,7 @@ const RenderEngine = {
             if (editToggleBtn) {
                 editToggleBtn.style.display = (isUserOwner && kullanici) ? 'inline-flex' : 'none';
                 editToggleBtn.classList.toggle('is-active', isDetailEditing);
-                editToggleBtn.title = isDetailEditing ? "Düzenlemeyi Bitir" : "Başarıyı Düzenle";
+                editToggleBtn.title = isDetailEditing ? "Düzenlemeyi Bitir" : "Oyunu Düzenle";
             }
 
             if (deleteActiveBtn) {
@@ -285,7 +285,7 @@ const RenderEngine = {
 
             // Geri butonu
             if (backBtn) {
-                backBtn.title = "Başarılara Geri Dön";
+                backBtn.title = "Oyunlara Geri Dön";
                 backBtn.onclick = () => {
                     window._activeTrophyDetail = null;
                     window._manualTrophyMaster = true;

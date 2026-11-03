@@ -77,11 +77,9 @@ let kartVerisi = {
         aktifListeId: null,
         listeler: []
     },
+    gaming: [],
     trophies: [],
     widgets: [],
-    working_on: {
-        metin: ""
-    },
     theme_config: {
         font: "inter",
         preset: "default",
