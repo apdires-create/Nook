@@ -120,18 +120,22 @@ const RenderEngine = {
 
         // Dinamik Üst Başlık ve İkon Güncellemesi (Gaming / Widgets / Trophies)
         if (masterTitle) {
-            masterTitle.textContent = isAchievementsMode ? 'Trophies' : (isWidgetsMode ? 'Widgets' : 'Gaming');
+            if (isAchievementsMode) {
+                masterTitle.innerHTML = `Trophies <span class="picker-soon-badge" style="margin-left: 6px; font-size: 0.62rem; vertical-align: middle;">BETA</span>`;
+            } else {
+                masterTitle.textContent = isWidgetsMode ? 'Widgets' : 'Gaming';
+            }
         }
         if (brandIcon) {
             if (isAchievementsMode) {
                 brandIcon.style.color = '#fcc419';
-                brandIcon.innerHTML = `<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>`;
+                brandIcon.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>`;
             } else if (isWidgetsMode) {
                 brandIcon.style.color = '#20c997';
-                brandIcon.innerHTML = `<rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect>`;
+                brandIcon.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg>`;
             } else {
                 brandIcon.style.color = '#5c7cfa';
-                brandIcon.innerHTML = `<line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line><rect x="2" y="6" width="20" height="12" rx="2"></rect>`;
+                brandIcon.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line><rect x="2" y="6" width="20" height="12" rx="4"></rect></svg>`;
             }
         }
 
@@ -142,15 +146,16 @@ const RenderEngine = {
             kart._canli_trophies.monkeytype = kart.canli_monkeytype;
         }
 
-        // Eğer Trophies (Başarılar) modundaysak (Adım 3B hazırlık ekranı)
+        // Eğer Trophies (Başarılar) modundaysak (Beta Ekranı)
         if (isAchievementsMode) {
             masterView.style.display = 'flex';
             if (detailView) detailView.style.display = 'none';
             if (detailFooter) { detailFooter.innerHTML = ''; detailFooter.style.display = 'none'; }
             masterList.innerHTML = `
-                <div class="companion-empty-state" style="padding: 4cqh 2cqw; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                    <div class="companion-empty-title" style="margin-bottom: 0.8cqh; color: #fcc419;">🏆 Trophies & Başarılar</div>
-                    <p class="companion-empty-desc" style="color: var(--text-tertiary);">Kişisel başarılar, ödüller ve dönüm noktaları vitrini bir sonraki adımda burada yer alacak.</p>
+                <div class="companion-empty-state" style="padding: 4cqh 2cqw; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 1cqh;">
+                    <span class="picker-soon-badge" style="font-size: 0.72rem; padding: 4px 10px;">BETA SÜRECİNDE</span>
+                    <div class="companion-empty-title" style="margin-top: 0.4cqh; color: #fcc419;">Kişisel Başarılar & Kupalar</div>
+                    <p class="companion-empty-desc" style="color: var(--text-tertiary); max-width: 240px;">Ödüller, sertifikalar ve kişisel dönüm noktaları vitrini şu an geliştirme aşamasında.</p>
                 </div>
             `;
             return;

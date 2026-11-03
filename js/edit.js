@@ -979,7 +979,7 @@ EditManager.Appearance = {
             RenderEngine.vitrinCiz(kartVerisi);
             RenderEngine.linklerCiz(kartVerisi);
             if (kartVerisi?.tops) RenderEngine.companionCiz(kartVerisi.tops);
-            if (typeof RenderEngine.trophiesCiz === 'function' && kartVerisi?.trophies) {
+            if (typeof RenderEngine.trophiesCiz === 'function') {
                 RenderEngine.trophiesCiz(kartVerisi);
             }
         }
@@ -1018,7 +1018,7 @@ EditManager.Appearance = {
                 RenderEngine.vitrinCiz(kartVerisi);
                 RenderEngine.linklerCiz(kartVerisi);
                 if (kartVerisi?.tops) RenderEngine.companionCiz(kartVerisi.tops);
-                if (typeof RenderEngine.trophiesCiz === 'function' && kartVerisi?.trophies) {
+                if (typeof RenderEngine.trophiesCiz === 'function') {
                     RenderEngine.trophiesCiz(kartVerisi);
                 }
             }
@@ -1316,6 +1316,12 @@ EditManager.Global = {
             }
             kartVerisi.trophies = trophiesPayload;
 
+            let widgetsPayload = [];
+            if (Array.isArray(kartVerisi.widgets)) {
+                widgetsPayload = kartVerisi.widgets.flat(Infinity).filter(item => item && typeof item === 'object' && !Array.isArray(item));
+            }
+            kartVerisi.widgets = widgetsPayload;
+
             const { data: guncellenen, error } = await supabaseClient
                 .from('profiles')
                 .update({
@@ -1324,7 +1330,7 @@ EditManager.Global = {
                     tops: guvenliObje(kartVerisi.tops),
                     gaming: gamingPayload,
                     trophies: trophiesPayload,
-                    widgets: Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets : [],
+                    widgets: widgetsPayload,
                     theme_config: guvenliObje(kartVerisi.theme_config),
                     kullanici_notlari: guvenliObje(kartVerisi.kullanici_notlari)
                 })
