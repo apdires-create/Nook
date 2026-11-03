@@ -2522,6 +2522,11 @@ EditManager.TrophiesView = {
                 editToggleBtn.title = isNowEditing ? "Düzenlemeyi Bitir" : "Oyunu Düzenle";
                 RenderEngine.trophiesCiz(kartVerisi);
                 this.init();
+                if (isNowEditing && window._activeTrophyDetail) {
+                    const aktifler = TrophiesManager.aktifTrophyleriAl(kartVerisi);
+                    const mevcut = aktifler.find(x => x.tur === window._activeTrophyDetail);
+                    this.acTrophyFormu(window._activeTrophyDetail, mevcut ? mevcut.kullanici : '');
+                }
             };
         }
 
@@ -2574,16 +2579,25 @@ EditManager.TrophiesView = {
         }
     },
 
-    async trophyKaydet(tur, temizKullanici) {
+    async trophyKaydet(tur, temizKullanici, manualAktif = '', manualPeak = '', preFetchedLive = null) {
         if (!tur || !temizKullanici || typeof TrophiesManager === 'undefined') return;
         const meta = TrophiesManager.katalogOgesiBul(tur) || { baslik: tur };
+
+        const canliVeri = preFetchedLive || await TrophiesManager.canliVeriCek(tur, temizKullanici, true);
+        if (canliVeri) {
+            if (!kartVerisi._canli_trophies) kartVerisi._canli_trophies = {};
+            kartVerisi._canli_trophies[tur] = canliVeri;
+        }
+
+        const snap = TrophiesManager.buildSnapshot(tur, temizKullanici, canliVeri, manualAktif, manualPeak);
 
         const mevcutListe = TrophiesManager.aktifTrophyleriAl(kartVerisi);
         const idx = mevcutListe.findIndex(x => x.tur === tur);
         if (idx > -1) {
             mevcutListe[idx].kullanici = temizKullanici;
+            mevcutListe[idx].snap = snap;
         } else {
-            mevcutListe.push({ tur, kullanici: temizKullanici });
+            mevcutListe.push({ tur, kullanici: temizKullanici, snap });
         }
         kartVerisi.gaming = mevcutListe;
 
@@ -2592,17 +2606,13 @@ EditManager.TrophiesView = {
             kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== tur);
         }
 
+        const trophiesCompanion = document.getElementById('trophiesCompanionCard');
+        if (trophiesCompanion) trophiesCompanion.classList.remove('is-detail-editing');
+
         window._activeTrophyDetail = tur;
         RenderEngine.trophiesCiz(kartVerisi);
         EditManager.Global.degisiklikYapildi();
-        EditManager.Global.toastGoster(`${meta.baslik} hesabı güncellendi.`, 'success');
-
-        const canliVeri = await TrophiesManager.canliVeriCek(tur, temizKullanici, true);
-        if (canliVeri) {
-            if (!kartVerisi._canli_trophies) kartVerisi._canli_trophies = {};
-            kartVerisi._canli_trophies[tur] = canliVeri;
-            RenderEngine.trophiesCiz(kartVerisi);
-        }
+        EditManager.Global.toastGoster(`${meta.baslik} profili güncellendi.`, 'success');
     },
 
     async trophySil(tur, baslik = 'Oyun') {
@@ -2661,33 +2671,111 @@ EditManager.TrophiesView = {
         const existingForm = body.querySelector('.mt-form-wrap');
         if (existingForm) existingForm.remove();
 
+        const aktifler = TrophiesManager.aktifTrophyleriAl(kartVerisi);
+        const mevcutOge = aktifler.find(t => t.tur === tur) || null;
+        const mevcutSnap = mevcutOge?.snap || {};
+        const tiers = Array.isArray(meta.tiers) ? meta.tiers : [];
+
+        const buildTierOptions = (selectedVal, defaultLabel) => {
+            let html = `<option value="">${RenderEngine.escapeHtml(defaultLabel)}</option>`;
+            tiers.forEach(tier => {
+                const isSel = selectedVal && selectedVal === tier ? 'selected' : '';
+                html += `<option value="${RenderEngine.escapeHtml(tier)}" ${isSel}>${RenderEngine.escapeHtml(tier)}</option>`;
+            });
+            return html;
+        };
+
         const formWrap = document.createElement('div');
         formWrap.className = 'inline-form-card mt-form-wrap';
         formWrap.style.marginBottom = '12px';
         formWrap.innerHTML = `
-            <div style="font-size: var(--cq-fs-desc); font-weight: 600; margin-bottom: 8px;">${RenderEngine.escapeHtml(meta.girdiEtiket || 'Kullanıcı Adı')}:</div>
-            <input type="text" class="inline-form-input mt-user-input" placeholder="${RenderEngine.escapeHtml(meta.placeholder || 'kullanıcı_adı')} (Örn: ${RenderEngine.escapeHtml(meta.ornek || '')})" value="${RenderEngine.escapeHtml(mevcutKullanici)}" maxlength="42" autocomplete="off" spellcheck="false">
-            <div class="inline-form-actions" style="margin-top: 8px; display: flex; justify-content: flex-end; gap: 8px;">
+            <div style="font-size: var(--cq-fs-desc); font-weight: 600; margin-bottom: 6px;">${RenderEngine.escapeHtml(meta.girdiEtiket || 'Oyuncu Kimliği')}:</div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <input type="text" class="inline-form-input mt-user-input" style="flex: 1;" placeholder="${RenderEngine.escapeHtml(meta.placeholder || 'kullanıcı_adı')} (Örn: ${RenderEngine.escapeHtml(meta.ornek || '')})" value="${RenderEngine.escapeHtml(mevcutKullanici)}" maxlength="42" autocomplete="off" spellcheck="false">
+                <button type="button" class="form-btn-sm form-btn-cancel mt-form-lookup" style="white-space: nowrap; padding: 0 10px; height: 34px;" title="Canlı Aktif & Peak Verisini Sorgula">Sorgula</button>
+            </div>
+            <div class="mt-lookup-status" style="font-size: 0.72rem; color: var(--text-tertiary); margin-top: 5px; min-height: 14px;">
+                Nick girip <b>Sorgula</b> diyebilir veya kademeni aşağıdan doğrudan seçebilirsin.
+            </div>
+            ${tiers.length > 0 ? `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                    <div>
+                        <label style="display: block; font-size: 0.68rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px;">Aktif Kademe</label>
+                        <select class="inline-form-input mt-aktif-select" style="width: 100%; padding: 6px 8px; font-size: 0.78rem;">
+                            ${buildTierOptions(mevcutSnap.manualAktif ? mevcutSnap.aktif : '', 'Otomatik (API)')}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 0.68rem; font-weight: 700; color: #f59f00; text-transform: uppercase; margin-bottom: 4px;">Kariyer Zirvesi (Peak)</label>
+                        <select class="inline-form-input mt-peak-select" style="width: 100%; padding: 6px 8px; font-size: 0.78rem;">
+                            ${buildTierOptions(mevcutSnap.manualPeak ? mevcutSnap.peak : '', 'Otomatik / Aktif')}
+                        </select>
+                    </div>
+                </div>
+            ` : ''}
+            <div class="inline-form-actions" style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 8px;">
                 <button type="button" class="form-btn-sm form-btn-cancel mt-form-cancel">İptal</button>
                 <button type="button" class="form-btn-sm form-btn-save mt-form-save">Kaydet</button>
             </div>
         `;
 
+        let sonSorgulananCanliVeri = null;
+
+        const lookupBtn = formWrap.querySelector('.mt-form-lookup');
+        const statusEl = formWrap.querySelector('.mt-lookup-status');
+        if (lookupBtn) {
+            lookupBtn.onclick = async (e) => {
+                e.stopPropagation();
+                const input = formWrap.querySelector('.mt-user-input');
+                const check = TrophiesManager.validateInput(tur, input ? input.value : '');
+                if (!check.ok) {
+                    EditManager.Global.toastGoster(check.error, 'warning');
+                    return;
+                }
+                lookupBtn.disabled = true;
+                lookupBtn.textContent = '...';
+                if (statusEl) {
+                    statusEl.style.color = 'var(--text-secondary)';
+                    statusEl.textContent = `${meta.baslik} sunucusundan sorgulanıyor...`;
+                }
+                const live = await TrophiesManager.canliVeriCek(tur, check.clean, true);
+                lookupBtn.disabled = false;
+                lookupBtn.textContent = 'Sorgula';
+                if (live) {
+                    sonSorgulananCanliVeri = live;
+                    const norm = TrophiesManager.getNormalizedTrophyData(tur, check.clean, live, null);
+                    if (statusEl) {
+                        statusEl.style.color = '#51cf66';
+                        statusEl.textContent = `✓ Bulundu: Aktif ${norm.heroValue} • Zirve ${norm.peakValue}`;
+                    }
+                } else {
+                    if (statusEl) {
+                        statusEl.style.color = '#fcc419';
+                        statusEl.textContent = `Canlı API yanıt vermedi; aşağıdan Aktif ve Peak kademeni seçip kaydedebilirsin.`;
+                    }
+                }
+            };
+        }
+
         formWrap.querySelector('.mt-form-cancel').onclick = (e) => {
             e.stopPropagation();
             formWrap.remove();
-            const aktifler = TrophiesManager.aktifTrophyleriAl(kartVerisi);
-            const hasCurrent = aktifler.some(t => t.tur === tur);
+            const trophiesCompanion = document.getElementById('trophiesCompanionCard');
+            if (trophiesCompanion) trophiesCompanion.classList.remove('is-detail-editing');
+            const guncelAktifler = TrophiesManager.aktifTrophyleriAl(kartVerisi);
+            const hasCurrent = guncelAktifler.some(t => t.tur === tur);
             if (!mevcutKullanici && !hasCurrent) {
                 window._activeTrophyDetail = null;
                 window._manualTrophyMaster = true;
-                RenderEngine.trophiesCiz(kartVerisi);
             }
+            RenderEngine.trophiesCiz(kartVerisi);
         };
 
         const kaydetAction = async (e) => {
             if (e) e.stopPropagation();
             const input = formWrap.querySelector('.mt-user-input');
+            const aktifSelect = formWrap.querySelector('.mt-aktif-select');
+            const peakSelect = formWrap.querySelector('.mt-peak-select');
             const saveBtn = formWrap.querySelector('.mt-form-save');
             const check = TrophiesManager.validateInput(tur, input ? input.value : '');
             if (!check.ok) {
@@ -2698,7 +2786,9 @@ EditManager.TrophiesView = {
                 saveBtn.disabled = true;
                 saveBtn.textContent = 'Bağlanıyor...';
             }
-            await this.trophyKaydet(tur, check.clean);
+            const secilenAktif = aktifSelect ? aktifSelect.value : '';
+            const secilenPeak = peakSelect ? peakSelect.value : '';
+            await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, sonSorgulananCanliVeri);
             if (formWrap.isConnected) formWrap.remove();
         };
 

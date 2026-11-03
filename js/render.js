@@ -146,9 +146,10 @@ const RenderEngine = {
             if (aktifTrophyler.length > 0) {
                 itemsHtml += aktifTrophyler.map(item => {
                     const rawLive = kart._canli_trophies?.[item.tur] || TrophiesManager._getCache(item.tur, item.kullanici) || null;
-                    const norm = TrophiesManager.getNormalizedTrophyData(item.tur, item.kullanici, rawLive);
+                    const norm = TrophiesManager.getNormalizedTrophyData(item.tur, item.kullanici, rawLive, item.snap);
                     const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
-                    const summaryPill = (rawLive && norm.heroValue && norm.heroValue !== '—')
+                    const isPlaceholderHero = !norm.heroValue || norm.heroValue === '—' || norm.heroValue === 'Profil Bağlı' || norm.heroValue === 'FACEIT' || norm.heroValue === 'CS2';
+                    const summaryPill = (!isPlaceholderHero && (rawLive || item.snap?.aktif))
                         ? `<span class="companion-row-live-pill">${this.escapeHtml(norm.heroValue)}</span>`
                         : '';
 
@@ -296,7 +297,7 @@ const RenderEngine = {
 
             if (kullanici && typeof TrophiesManager !== 'undefined') {
                 let rawLive = kart._canli_trophies?.[activeTur] || TrophiesManager._getCache(activeTur, kullanici) || null;
-                const norm = TrophiesManager.getNormalizedTrophyData(activeTur, kullanici, rawLive);
+                const norm = TrophiesManager.getNormalizedTrophyData(activeTur, kullanici, rawLive, seciliOge?.snap);
 
                 if (detailBody) {
                     detailBody.innerHTML = this.renderTrophyRootLayout(norm);
@@ -320,32 +321,23 @@ const RenderEngine = {
                 }
 
                 if (detailFooter) {
-                    if (isDetailEditing) {
-                        detailFooter.innerHTML = `
-                            <div class="companion-footer-edit-wrap">
-                                <input type="text" class="companion-footer-link-input" id="trophiesFooterLinkInput" data-trophy-tur="${this.escapeHtml(activeTur)}" placeholder="${this.escapeHtml(meta.placeholder || meta.girdiEtiket)}" value="${this.escapeHtml(kullanici)}">
-                            </div>
-                        `;
-                        detailFooter.style.display = 'flex';
-                    } else {
-                        const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
-                        detailFooter.innerHTML = `
-                            <a href="${this.safeUrl(norm.profileUrl)}" target="_blank" rel="noopener noreferrer" class="companion-footer-link" title="${this.escapeHtml(norm.baslik)} Profilini Gör">
-                                <span class="companion-link-favicon-wrap">
-                                    <img src="${this.escapeHtml(norm.faviconUrl)}" class="companion-row-favicon" loading="lazy" alt="${this.escapeHtml(norm.baslik)}"
-                                         onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
-                                    <span class="mt-brand-icon" style="display:none;">${this.escapeHtml(fallbackHarf)}</span>
-                                </span>
-                                <span class="companion-link-domain">${this.escapeHtml(norm.handle)}</span>
-                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" class="mt-link-icon">
-                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                    <polyline points="15 3 21 3 21 9"></polyline>
-                                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                                </svg>
-                            </a>
-                        `;
-                        detailFooter.style.display = 'flex';
-                    }
+                    const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
+                    detailFooter.innerHTML = `
+                        <a href="${this.safeUrl(norm.profileUrl)}" target="_blank" rel="noopener noreferrer" class="companion-footer-link" title="${this.escapeHtml(norm.baslik)} Profilini Gör">
+                            <span class="companion-link-favicon-wrap">
+                                <img src="${this.escapeHtml(norm.faviconUrl)}" class="companion-row-favicon" loading="lazy" alt="${this.escapeHtml(norm.baslik)}"
+                                     onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                                <span class="mt-brand-icon" style="display:none;">${this.escapeHtml(fallbackHarf)}</span>
+                            </span>
+                            <span class="companion-link-domain">${this.escapeHtml(norm.handle)}</span>
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" class="mt-link-icon">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                    `;
+                    detailFooter.style.display = 'flex';
                 }
             } else {
                 if (detailBody) {

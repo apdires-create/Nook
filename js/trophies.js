@@ -96,7 +96,15 @@ const TrophiesManager = {
             girdiEtiket: 'Riot ID (Oyuncu#Tag)',
             placeholder: 'Oyuncu#TR1',
             ornek: 'TenZ#0505',
-            comingSoon: false
+            comingSoon: false,
+            tiers: [
+                'Radiant', 'Immortal 3', 'Immortal 2', 'Immortal 1',
+                'Ascendant 3', 'Ascendant 2', 'Ascendant 1',
+                'Diamond 3', 'Diamond 2', 'Diamond 1',
+                'Platinum 3', 'Platinum 2', 'Platinum 1',
+                'Gold 3', 'Gold 2', 'Gold 1',
+                'Silver', 'Bronze', 'Iron', 'Unranked'
+            ]
         },
         {
             id: 'lol',
@@ -111,7 +119,13 @@ const TrophiesManager = {
             girdiEtiket: 'Riot ID (Sihirdar#Tag)',
             placeholder: 'Sihirdar#TR1',
             ornek: 'Faker#KR1',
-            comingSoon: false
+            comingSoon: false,
+            tiers: [
+                'Challenger', 'Grandmaster', 'Master',
+                'Diamond I', 'Diamond II', 'Diamond III', 'Diamond IV',
+                'Emerald I', 'Emerald II', 'Emerald III', 'Emerald IV',
+                'Platinum', 'Gold', 'Silver', 'Bronze', 'Iron', 'Unranked'
+            ]
         },
         {
             id: 'cs2',
@@ -126,7 +140,14 @@ const TrophiesManager = {
             girdiEtiket: 'FACEIT Nick veya Steam Künyesi',
             placeholder: 'oyuncu_nicki (Örn: s1mple)',
             ornek: 's1mple',
-            comingSoon: false
+            comingSoon: false,
+            tiers: [
+                '30.000+ CS Rating', '25.000+ CS Rating', '20.000+ CS Rating',
+                '15.000+ CS Rating', '10.000+ CS Rating', '5.000+ CS Rating',
+                'Global Elite', 'Supreme (SMFC)', 'Legendary Eagle Master (LEM)',
+                'Legendary Eagle (LE)', 'Distinguished Master Guardian (DMG)',
+                'Master Guardian', 'Gold Nova', 'Silver', 'FACEIT Level 10'
+            ]
         },
         {
             id: 'faceit',
@@ -141,7 +162,12 @@ const TrophiesManager = {
             girdiEtiket: 'FACEIT Oyuncu Nicki',
             placeholder: 'faceit_nicki (Örn: m0NESY)',
             ornek: 'm0NESY',
-            comingSoon: false
+            comingSoon: false,
+            tiers: [
+                'Level 10 (2000+ Elo)', 'Level 9 (1751-2000)', 'Level 8 (1531-1750)',
+                'Level 7 (1351-1530)', 'Level 6 (1201-1350)', 'Level 5 (1051-1200)',
+                'Level 4 (901-1050)', 'Level 3 (751-900)', 'Level 2 (501-750)', 'Level 1 (100-500)'
+            ]
         },
         {
             id: 'tft',
@@ -156,7 +182,12 @@ const TrophiesManager = {
             girdiEtiket: 'Riot ID (Oyuncu#Tag)',
             placeholder: 'Oyuncu#TR1',
             ornek: 'Dishsoap#NA1',
-            comingSoon: false
+            comingSoon: false,
+            tiers: [
+                'Challenger', 'Grandmaster', 'Master',
+                'Diamond', 'Emerald', 'Platinum', 'Gold', 'Silver', 'Bronze', 'Iron',
+                'Hyper Tier (Hiper)'
+            ]
         },
         {
             id: 'brawlhalla',
@@ -171,7 +202,11 @@ const TrophiesManager = {
             girdiEtiket: 'Brawlhalla ID veya Oyuncu Adı',
             placeholder: 'Brawlhalla ID veya Nick',
             ornek: 'Sandstorm',
-            comingSoon: false
+            comingSoon: false,
+            tiers: [
+                'Valhallan', 'Diamond (2000+ Elo)', 'Platinum (1680-1999)',
+                'Gold (1390-1679)', 'Silver (1100-1389)', 'Bronze', 'Tin'
+            ]
         }
     ],
 
@@ -662,9 +697,10 @@ const TrophiesManager = {
     },
 
     /**
-     * Herhangi bir oyun için ham veriyi (veya null'ı) Evrensel Root Layout şemasına dönüştürür.
+     * Herhangi bir oyun için ham veriyi ve kaydedilmiş mikro-snapshot'ı (snap)
+     * Evrensel Root Layout şemasına dönüştürür.
      */
-    getNormalizedTrophyData(tur, kullanici, rawData = null) {
+    getNormalizedTrophyData(tur, kullanici, rawData = null, snap = null) {
         const meta = this.katalogOgesiBul(tur) || {
             id: tur,
             tur: tur,
@@ -687,6 +723,35 @@ const TrophiesManager = {
                 profileUrl: `https://${meta.domain}`
             };
 
+        const isPlaceholderVal = (v) => !v || v === '—' || v === 'Profil Bağlı' || v === 'FACEIT' || v === 'CS2' || v === 'Ranked 1v1' || v === 'Belirtilmedi';
+
+        // Snapshot (veya kullanıcı tarafından onaylanmış Aktif/Peak kademesi) birleştirmesi
+        if (snap && typeof snap === 'object') {
+            if (snap.aktif && (snap.manualAktif || isPlaceholderVal(mapped.heroValue))) {
+                mapped.heroValue = snap.aktif;
+            }
+            if (snap.aktifAlt && isPlaceholderVal(mapped.heroSub)) {
+                mapped.heroSub = snap.aktifAlt;
+            }
+            if (snap.peak && (snap.manualPeak || isPlaceholderVal(mapped.peakValue) || mapped.peakValue === mapped.heroValue)) {
+                mapped.peakValue = snap.peak;
+            }
+            // Stat grid içindeki eksik ilk kademe ve zirve kutularını da doldur
+            if (Array.isArray(mapped.stats)) {
+                if (mapped.stats[0] && isPlaceholderVal(mapped.stats[0].value) && mapped.heroValue && !isPlaceholderVal(mapped.heroValue)) {
+                    mapped.stats[0] = { ...mapped.stats[0], value: mapped.heroValue };
+                }
+                if (mapped.stats[1] && isPlaceholderVal(mapped.stats[1].value) && mapped.peakValue && !isPlaceholderVal(mapped.peakValue)) {
+                    mapped.stats[1] = { ...mapped.stats[1], value: mapped.peakValue };
+                }
+            }
+        }
+
+        // Eğer Peak hâlâ boşsa ama Aktif derece biliniyorsa Peak olarak en azından Aktif dereceyi göster
+        if (isPlaceholderVal(mapped.peakValue) && !isPlaceholderVal(mapped.heroValue)) {
+            mapped.peakValue = mapped.heroValue;
+        }
+
         return {
             tur: meta.tur,
             baslik: meta.baslik,
@@ -700,7 +765,30 @@ const TrophiesManager = {
     },
 
     /**
-     * Türüne göre canlı veriyi önce sessionStorage önbelleğinden, yoksa ağdan çeker.
+     * Canlı veriden ve opsiyonel manuel kademe seçimlerinden hafif (60 byte) bir snapshot üretir.
+     */
+    buildSnapshot(tur, kullanici, rawData = null, manualAktif = '', manualPeak = '') {
+        const norm = this.getNormalizedTrophyData(tur, kullanici, rawData, null);
+        const isPlaceholderVal = (v) => !v || v === '—' || v === 'Profil Bağlı' || v === 'FACEIT' || v === 'CS2' || v === 'Ranked 1v1' || v === 'Belirtilmedi';
+
+        const cleanManualAktif = String(manualAktif || '').trim();
+        const cleanManualPeak = String(manualPeak || '').trim();
+
+        const aktif = cleanManualAktif || (!isPlaceholderVal(norm.heroValue) ? norm.heroValue : '');
+        const peak = cleanManualPeak || (!isPlaceholderVal(norm.peakValue) ? norm.peakValue : aktif);
+
+        const snap = { ts: Date.now() };
+        if (aktif) snap.aktif = aktif;
+        if (norm.heroSub) snap.aktifAlt = norm.heroSub;
+        if (peak) snap.peak = peak;
+        if (cleanManualAktif) snap.manualAktif = true;
+        if (cleanManualPeak) snap.manualPeak = true;
+        return snap;
+    },
+
+    /**
+     * Türüne göre canlı veriyi önce sessionStorage önbelleğinden,
+     * oturum açıksa 'bright-task' Edge Function köprüsünden, yoksa istemci adaptöründen çeker.
      */
     async canliVeriCek(tur, kullanici, forceRefresh = false) {
         if (!tur || !kullanici) return null;
@@ -711,6 +799,26 @@ const TrophiesManager = {
             if (cached) return cached;
         }
 
+        // 1. Öncelik: Supabase Edge Function ('bright-task' -> gaming_lookup)
+        if (typeof supabaseClient !== 'undefined' && supabaseClient?.functions && typeof aktifKullaniciOturumu !== 'undefined' && aktifKullaniciOturumu) {
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('bright-task', {
+                    body: {
+                        action: 'gaming_lookup',
+                        tur: normTur,
+                        kullanici: String(kullanici).trim()
+                    }
+                });
+                if (!error && data?.sonuc) {
+                    this._setCache(normTur, kullanici, data.sonuc);
+                    return data.sonuc;
+                }
+            } catch (e) {
+                console.warn(`[GamingManager] Edge lookup yedek akışa geçiyor (${normTur}):`, e);
+            }
+        }
+
+        // 2. Yedek: İstemci taraflı adaptör
         const adapter = this.ADAPTERS[normTur];
         if (!adapter || typeof adapter.fetch !== 'function') return null;
 
