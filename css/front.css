@@ -55,7 +55,7 @@
     transition: transform 0.3s ease;
 }
 
-/* 🟥 Trophies Canlı Kırmızı/Yakut Ribbon */
+/* 🟥 Gaming Canlı Kırmızı/Yakut Ribbon */
 .card-flag-btn.flag-trophies {
     background: linear-gradient(135deg, #ff3b56 0%, #e03131 65%, #c92a2a 100%);
     box-shadow: -4px 4px 14px rgba(224, 49, 49, 0.45), -2px 2px 6px rgba(0, 0, 0, 0.4);
@@ -67,9 +67,45 @@
     filter: brightness(1.1);
 }
 
-.stage.has-companion-open.is-trophies-active .card-flag-btn.flag-trophies {
+.stage.has-companion-open.is-gaming-mode .card-flag-btn.flag-trophies {
     transform: translateX(-3px);
     box-shadow: 0 0 24px rgba(255, 59, 86, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
+    filter: brightness(1.15);
+}
+
+/* 🟩 Widgets Canlı Zümrüt Ribbon */
+.card-flag-btn.flag-widgets {
+    background: linear-gradient(135deg, #20c997 0%, #12b886 60%, #099268 100%);
+    box-shadow: -4px 4px 14px rgba(18, 184, 134, 0.45), -2px 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.card-flag-btn.flag-widgets:hover {
+    transform: translateX(-4px) scale(1.04);
+    box-shadow: -6px 4px 20px rgba(32, 201, 151, 0.65), -2px 2px 8px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.1);
+}
+
+.stage.has-companion-open.is-widgets-mode .card-flag-btn.flag-widgets {
+    transform: translateX(-3px);
+    box-shadow: 0 0 24px rgba(32, 201, 151, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
+    filter: brightness(1.15);
+}
+
+/* 🟨 Trophies (Başarılar) Altın/Kehribar Ribbon */
+.card-flag-btn.flag-achievements {
+    background: linear-gradient(135deg, #fcc419 0%, #f59f00 60%, #e67700 100%);
+    box-shadow: -4px 4px 14px rgba(245, 159, 0, 0.45), -2px 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.card-flag-btn.flag-achievements:hover {
+    transform: translateX(-4px) scale(1.04);
+    box-shadow: -6px 4px 20px rgba(252, 196, 25, 0.65), -2px 2px 8px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.1);
+}
+
+.stage.has-companion-open.is-achievements-mode .card-flag-btn.flag-achievements {
+    transform: translateX(-3px);
+    box-shadow: 0 0 24px rgba(252, 196, 25, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
     filter: brightness(1.15);
 }
 

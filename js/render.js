@@ -99,11 +99,13 @@ const RenderEngine = {
         }
     },
 
-    // 1.3: Trophies Eşlikçi Kart Render Motoru (Master & Universal Root Layout Detail)
+    // 1.3: Sol Eşlikçi Kart Render Motoru (Gaming / Widgets / Trophies — Master & Universal Root Layout Detail)
     trophiesCiz(data) {
         const masterView = document.getElementById('trophiesMasterView');
         const detailView = document.getElementById('trophiesDetailView');
         const masterList = document.getElementById('trophiesMasterList');
+        const masterTitle = document.getElementById('trophiesMasterTitle');
+        const brandIcon = document.getElementById('trophiesBrandIcon');
         const detailTitle = document.getElementById('trophiesDetailTitle');
         const detailBody = document.getElementById('trophiesDetailBody');
         const detailFooter = document.getElementById('trophiesDetailFooter');
@@ -112,6 +114,27 @@ const RenderEngine = {
 
         if (!masterView || !masterList) return;
 
+        const mode = window._activeLeftWingMode || 'gaming';
+        const isWidgetsMode = (mode === 'widgets');
+        const isAchievementsMode = (mode === 'achievements');
+
+        // Dinamik Üst Başlık ve İkon Güncellemesi (Gaming / Widgets / Trophies)
+        if (masterTitle) {
+            masterTitle.textContent = isAchievementsMode ? 'Trophies' : (isWidgetsMode ? 'Widgets' : 'Gaming');
+        }
+        if (brandIcon) {
+            if (isAchievementsMode) {
+                brandIcon.style.color = '#fcc419';
+                brandIcon.innerHTML = `<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>`;
+            } else if (isWidgetsMode) {
+                brandIcon.style.color = '#20c997';
+                brandIcon.innerHTML = `<rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect>`;
+            } else {
+                brandIcon.style.color = '#5c7cfa';
+                brandIcon.innerHTML = `<line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line><rect x="2" y="6" width="20" height="12" rx="2"></rect>`;
+            }
+        }
+
         const kart = (data && data.kullanici_adi) ? data : (typeof kartVerisi !== 'undefined' ? kartVerisi : {});
         const isUserOwner = (typeof isOwner !== 'undefined' && isOwner);
         if (!kart._canli_trophies) kart._canli_trophies = {};
@@ -119,11 +142,35 @@ const RenderEngine = {
             kart._canli_trophies.monkeytype = kart.canli_monkeytype;
         }
 
+        // Eğer Trophies (Başarılar) modundaysak (Adım 3B hazırlık ekranı)
+        if (isAchievementsMode) {
+            masterView.style.display = 'flex';
+            if (detailView) detailView.style.display = 'none';
+            if (detailFooter) { detailFooter.innerHTML = ''; detailFooter.style.display = 'none'; }
+            masterList.innerHTML = `
+                <div class="companion-empty-state" style="padding: 4cqh 2cqw; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div class="companion-empty-title" style="margin-bottom: 0.8cqh; color: #fcc419;">🏆 Trophies & Başarılar</div>
+                    <p class="companion-empty-desc" style="color: var(--text-tertiary);">Kişisel başarılar, ödüller ve dönüm noktaları vitrini bir sonraki adımda burada yer alacak.</p>
+                </div>
+            `;
+            return;
+        }
+
         const aktifTrophyler = (typeof TrophiesManager !== 'undefined')
-            ? TrophiesManager.aktifTrophyleriAl(kart)
+            ? (isWidgetsMode ? TrophiesManager.aktifWidgetlariAl(kart) : TrophiesManager.aktifOyunlariAl(kart))
             : [];
 
-        // Sadece 1 başarım varsa ve kullanıcı manuel olarak ana listeye dönmediyse doğrudan detayı aç
+        const tekilIsim = isWidgetsMode ? 'Widget' : 'Oyun';
+        const ekleButonMetni = isWidgetsMode ? 'Widget Ekle' : 'Oyun Ekle';
+        const bosAciklamaSahip = isWidgetsMode
+            ? 'Monkeytype, Chess.com, Duolingo ve osu! istatistiklerini ve serilerini profilinde sergile.'
+            : 'Rekabetçi oyun derecelerini, aktif ve zirve (peak) elolarını profilinde sergile.';
+        const bosBaslikZiyaretci = isWidgetsMode ? 'Henüz Widget Eklenmemiş' : 'Henüz Oyun Eklenmemiş';
+        const bosAciklamaZiyaretci = isWidgetsMode
+            ? 'Kullanıcı bu vitrinde henüz bir yetenek veya alışkanlık widget\'ı paylaşmamış.'
+            : 'Kullanıcı bu vitrinde henüz bir rekabetçi oyun profili paylaşmamış.';
+
+        // Sadece 1 öğe varsa ve kullanıcı manuel olarak ana listeye dönmediyse doğrudan detayı aç
         if (aktifTrophyler.length === 1 && !window._manualTrophyMaster && !window._activeTrophyDetail) {
             window._activeTrophyDetail = aktifTrophyler[0].tur;
         }
@@ -132,7 +179,7 @@ const RenderEngine = {
 
         if (!activeTur) {
             // ==========================================
-            // MASTER GÖRÜNÜMÜ: Kompakt Başarımlar Listesi (Lazy Detail)
+            // MASTER GÖRÜNÜMÜ: Kompakt Liste (Lazy Detail)
             // ==========================================
             masterView.style.display = 'flex';
             if (detailView) detailView.style.display = 'none';
@@ -166,7 +213,7 @@ const RenderEngine = {
                             </div>
                             ${summaryPill}
                             ${isUserOwner ? `
-                                <button type="button" class="companion-row-del-btn" data-del-trophy="${this.escapeHtml(item.tur)}" data-trophy-title="${this.escapeHtml(norm.baslik)}" title="${this.escapeHtml(norm.baslik)} Oyununu Kaldır">
+                                <button type="button" class="companion-row-del-btn" data-del-trophy="${this.escapeHtml(item.tur)}" data-trophy-title="${this.escapeHtml(norm.baslik)}" title="${this.escapeHtml(norm.baslik)} ${tekilIsim} Kaldır">
                                     <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
                                         <polyline points="3 6 5 6 21 6"></polyline>
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -184,7 +231,7 @@ const RenderEngine = {
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
-                            <span>Oyun Ekle</span>
+                            <span>${ekleButonMetni}</span>
                         </button>
                     `;
                 }
@@ -192,22 +239,22 @@ const RenderEngine = {
                 if (isUserOwner) {
                     itemsHtml = `
                         <div class="companion-empty-state" style="padding: 4cqh 2cqw; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                            <div class="companion-empty-title" style="margin-bottom: 0.8cqh;">Oyun Ekle</div>
-                            <p class="companion-empty-desc" style="margin-bottom: 2.2cqh; color: var(--text-tertiary);">Rekabetçi oyun derecelerini, aktif ve zirve (peak) elolarını profilinde sergile.</p>
+                            <div class="companion-empty-title" style="margin-bottom: 0.8cqh;">${ekleButonMetni}</div>
+                            <p class="companion-empty-desc" style="margin-bottom: 2.2cqh; color: var(--text-tertiary);">${bosAciklamaSahip}</p>
                             <button type="button" class="companion-add-row-btn" id="trophiesMasterAddBtn" style="width: auto; padding: 1.2cqh 5cqw;">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
                                     <line x1="12" y1="5" x2="12" y2="19"></line>
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>
-                                <span>Oyun Ekle</span>
+                                <span>${ekleButonMetni}</span>
                             </button>
                         </div>
                     `;
                 } else {
                     itemsHtml = `
                         <div class="companion-empty-state" style="padding: 4cqh 2cqw; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                            <div class="companion-empty-title">Henüz Oyun Eklenmemiş</div>
-                            <p class="companion-empty-desc" style="color: var(--text-tertiary);">Kullanıcı bu vitrinde henüz bir rekabetçi oyun profili paylaşmamış.</p>
+                            <div class="companion-empty-title">${bosBaslikZiyaretci}</div>
+                            <p class="companion-empty-desc" style="color: var(--text-tertiary);">${bosAciklamaZiyaretci}</p>
                         </div>
                     `;
                 }
@@ -232,7 +279,7 @@ const RenderEngine = {
                 delBtn.onclick = async (e) => {
                     e.stopPropagation();
                     const trophyId = delBtn.dataset.delTrophy;
-                    const trophyTitle = delBtn.dataset.trophyTitle || 'Başarım';
+                    const trophyTitle = delBtn.dataset.trophyTitle || tekilIsim;
                     if (trophyId && typeof EditManager !== 'undefined' && EditManager.TrophiesView) {
                         await EditManager.TrophiesView.trophySil(trophyId, trophyTitle);
                     }
@@ -277,7 +324,7 @@ const RenderEngine = {
             if (editToggleBtn) {
                 editToggleBtn.style.display = (isUserOwner && kullanici) ? 'inline-flex' : 'none';
                 editToggleBtn.classList.toggle('is-active', isDetailEditing);
-                editToggleBtn.title = isDetailEditing ? "Düzenlemeyi Bitir" : "Oyunu Düzenle";
+                editToggleBtn.title = isDetailEditing ? "Düzenlemeyi Bitir" : `${tekilIsim} Düzenle`;
             }
 
             if (deleteActiveBtn) {
@@ -286,7 +333,7 @@ const RenderEngine = {
 
             // Geri butonu
             if (backBtn) {
-                backBtn.title = "Oyunlara Geri Dön";
+                backBtn.title = isWidgetsMode ? "Widget'lara Geri Dön" : "Oyunlara Geri Dön";
                 backBtn.onclick = () => {
                     window._activeTrophyDetail = null;
                     window._manualTrophyMaster = true;

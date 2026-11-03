@@ -2499,6 +2499,21 @@ EditManager.BackViews = {
 };
 
 EditManager.TrophiesView = {
+    _isWidgetTur(tur) {
+        if (tur && typeof TrophiesManager !== 'undefined' && typeof TrophiesManager.widgetKatalogOgesiBul === 'function') {
+            if (TrophiesManager.widgetKatalogOgesiBul(tur)) return true;
+        }
+        return window._activeLeftWingMode === 'widgets';
+    },
+
+    _aktifModListesiniAl(tur = null) {
+        if (typeof TrophiesManager === 'undefined') return [];
+        if (this._isWidgetTur(tur)) {
+            return TrophiesManager.aktifWidgetlariAl(kartVerisi);
+        }
+        return TrophiesManager.aktifOyunlariAl(kartVerisi);
+    },
+
     init() {
         if (typeof isOwner === 'undefined' || !isOwner || (typeof EditManager !== 'undefined' && EditManager.Appearance?.isPreviewActive)) return;
         const trophiesCompanion = document.getElementById('trophiesCompanionCard');
@@ -2519,18 +2534,19 @@ EditManager.TrophiesView = {
                 e.stopPropagation();
                 const isNowEditing = trophiesCompanion.classList.toggle('is-detail-editing');
                 editToggleBtn.classList.toggle('is-active', isNowEditing);
-                editToggleBtn.title = isNowEditing ? "Düzenlemeyi Bitir" : "Oyunu Düzenle";
+                const tekil = (window._activeLeftWingMode === 'widgets') ? 'Widget' : 'Oyun';
+                editToggleBtn.title = isNowEditing ? "Düzenlemeyi Bitir" : `${tekil} Düzenle`;
                 RenderEngine.trophiesCiz(kartVerisi);
                 this.init();
                 if (isNowEditing && window._activeTrophyDetail) {
-                    const aktifler = TrophiesManager.aktifTrophyleriAl(kartVerisi);
+                    const aktifler = this._aktifModListesiniAl(window._activeTrophyDetail);
                     const mevcut = aktifler.find(x => x.tur === window._activeTrophyDetail);
                     this.acTrophyFormu(window._activeTrophyDetail, mevcut ? mevcut.kullanici : '');
                 }
             };
         }
 
-        // 2. AKTİF OYUNU SİLME BUTONU
+        // 2. AKTİF OYUNU / WIDGET'I SİLME BUTONU
         if (deleteActiveBtn) {
             deleteActiveBtn.onclick = async (e) => {
                 e.stopPropagation();
@@ -2550,7 +2566,7 @@ EditManager.TrophiesView = {
                 const activeTur = linkInput.dataset.trophyTur || window._activeTrophyDetail;
                 if (!activeTur || typeof TrophiesManager === 'undefined') return;
 
-                const aktifler = TrophiesManager.aktifTrophyleriAl(kartVerisi);
+                const aktifler = this._aktifModListesiniAl(activeTur);
                 const mevcutOge = aktifler.find(x => x.tur === activeTur);
                 const eskiUser = mevcutOge ? mevcutOge.kullanici : '';
                 const hamDeger = linkInput.value.trim();
@@ -2582,16 +2598,18 @@ EditManager.TrophiesView = {
     async trophyKaydet(tur, temizKullanici, manualAktif = '', manualPeak = '', preFetchedLive = null) {
         if (!tur || !temizKullanici || typeof TrophiesManager === 'undefined') return;
         const meta = TrophiesManager.katalogOgesiBul(tur) || { baslik: tur };
+        const isWidget = this._isWidgetTur(tur);
 
         const canliVeri = preFetchedLive || await TrophiesManager.canliVeriCek(tur, temizKullanici, true);
         if (canliVeri) {
             if (!kartVerisi._canli_trophies) kartVerisi._canli_trophies = {};
             kartVerisi._canli_trophies[tur] = canliVeri;
+            if (tur === 'monkeytype') kartVerisi.canli_monkeytype = canliVeri;
         }
 
         const snap = TrophiesManager.buildSnapshot(tur, temizKullanici, canliVeri, manualAktif, manualPeak);
 
-        const mevcutListe = TrophiesManager.aktifTrophyleriAl(kartVerisi);
+        const mevcutListe = this._aktifModListesiniAl(tur);
         const idx = mevcutListe.findIndex(x => x.tur === tur);
         if (idx > -1) {
             mevcutListe[idx].kullanici = temizKullanici;
@@ -2599,9 +2617,14 @@ EditManager.TrophiesView = {
         } else {
             mevcutListe.push({ tur, kullanici: temizKullanici, snap });
         }
-        kartVerisi.gaming = mevcutListe;
 
-        // Eski trophies dizisinde aynı oyun kalmışsa temizle
+        if (isWidget) {
+            kartVerisi.widgets = mevcutListe;
+        } else {
+            kartVerisi.gaming = mevcutListe;
+        }
+
+        // Eski trophies dizisinde aynı kayıt kalmışsa temizle
         if (Array.isArray(kartVerisi.trophies)) {
             kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== tur);
         }
@@ -2617,24 +2640,28 @@ EditManager.TrophiesView = {
 
     async trophySil(tur, baslik = 'Oyun') {
         if (!tur) return;
+        const isWidget = this._isWidgetTur(tur);
+        const tekilIsim = isWidget ? 'Widget' : 'Oyun';
         let onay = false;
         if (typeof window.onayPopupiGoster === 'function') {
             onay = await window.onayPopupiGoster({
-                baslik: `${baslik} Oyununu Kaldır`,
-                aciklama: `${baslik} oyun profilini vitrinden kaldırmak istediğinize emin misiniz?`,
-                onayMetni: "Oyunu Kaldır",
+                baslik: `${baslik} ${tekilIsim} Kaldır`,
+                aciklama: `${baslik} profilini vitrinden kaldırmak istediğinize emin misiniz?`,
+                onayMetni: `${tekilIsim} Kaldır`,
                 tehlikeliMi: true
             });
         } else {
-            onay = confirm(`${baslik} oyununu kaldırmak istediğinize emin misiniz?`);
+            onay = confirm(`${baslik} profilini kaldırmak istediğinize emin misiniz?`);
         }
 
         if (!onay) return;
 
-        const mevcutListe = (typeof TrophiesManager !== 'undefined')
-            ? TrophiesManager.aktifTrophyleriAl(kartVerisi)
-            : [];
-        kartVerisi.gaming = mevcutListe.filter(x => x.tur !== tur);
+        const mevcutListe = this._aktifModListesiniAl(tur);
+        if (isWidget) {
+            kartVerisi.widgets = mevcutListe.filter(x => x.tur !== tur);
+        } else {
+            kartVerisi.gaming = mevcutListe.filter(x => x.tur !== tur);
+        }
         if (Array.isArray(kartVerisi.trophies)) {
             kartVerisi.trophies = kartVerisi.trophies.filter(x => x && x.tur !== tur);
         }
@@ -2652,7 +2679,7 @@ EditManager.TrophiesView = {
         EditManager.Global.degisiklikYapildi();
 
         if (typeof window.toastBildirimiGoster === 'function') {
-            window.toastBildirimiGoster(`${baslik} oyunu kaldırıldı.`, 3000, 'success');
+            window.toastBildirimiGoster(`${baslik} vitrinden kaldırıldı.`, 3000, 'success');
         }
     },
 
@@ -2671,7 +2698,7 @@ EditManager.TrophiesView = {
         const existingForm = body.querySelector('.mt-form-wrap');
         if (existingForm) existingForm.remove();
 
-        const aktifler = TrophiesManager.aktifTrophyleriAl(kartVerisi);
+        const aktifler = this._aktifModListesiniAl(tur);
         const mevcutOge = aktifler.find(t => t.tur === tur) || null;
         const mevcutSnap = mevcutOge?.snap || {};
         const tiers = Array.isArray(meta.tiers) ? meta.tiers : [];
@@ -2762,7 +2789,7 @@ EditManager.TrophiesView = {
             formWrap.remove();
             const trophiesCompanion = document.getElementById('trophiesCompanionCard');
             if (trophiesCompanion) trophiesCompanion.classList.remove('is-detail-editing');
-            const guncelAktifler = TrophiesManager.aktifTrophyleriAl(kartVerisi);
+            const guncelAktifler = this._aktifModListesiniAl(tur);
             const hasCurrent = guncelAktifler.some(t => t.tur === tur);
             if (!mevcutKullanici && !hasCurrent) {
                 window._activeTrophyDetail = null;
@@ -2875,6 +2902,7 @@ EditManager.TrophyPicker = {
 
     ac() {
         const modal = document.getElementById('trophy-picker-modal');
+        const titleEl = document.getElementById('trophyPickerTitle');
         const searchInput = document.getElementById('trophyPickerSearchInput');
         const searchClear = document.getElementById('trophyPickerSearchClear');
 
@@ -2882,8 +2910,16 @@ EditManager.TrophyPicker = {
         this.init();
 
         this._aramaMetni = '';
-
-        if (searchInput) searchInput.value = '';
+        const isWidgetsMode = (window._activeLeftWingMode === 'widgets');
+        if (titleEl) {
+            titleEl.textContent = isWidgetsMode ? 'Widget Ekle' : 'Oyun Ekle';
+        }
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.placeholder = isWidgetsMode
+                ? 'Widget ara (Monkeytype, Chess, Duolingo, osu!)...'
+                : 'Oyun ara (Valorant, LoL, CS2, Faceit...)...';
+        }
         if (searchClear) searchClear.classList.remove('is-visible');
 
         this.renderListe();
@@ -2908,20 +2944,24 @@ EditManager.TrophyPicker = {
             return;
         }
 
-        const items = TrophiesManager.katalogFiltrele(this._aramaMetni);
+        const mode = window._activeLeftWingMode || 'gaming';
+        const isWidgetsMode = (mode === 'widgets');
+        const items = TrophiesManager.katalogFiltrele(this._aramaMetni, mode);
 
         if (items.length === 0) {
             const aramaGoster = this._aramaMetni ? `"${RenderEngine.escapeHtml(this._aramaMetni)}"` : '';
             list.innerHTML = `
                 <div class="trophy-picker-empty">
                     <span style="font-size: 1.6rem; opacity: 0.6; margin-bottom: 4px;">🔍</span>
-                    <span>${aramaGoster ? aramaGoster + ' ile eşleşen' : 'Eşleşen'} başarım veya oyun bulunamadı.</span>
+                    <span>${aramaGoster ? aramaGoster + ' ile eşleşen' : 'Eşleşen'} ${isWidgetsMode ? 'widget' : 'oyun'} bulunamadı.</span>
                 </div>
             `;
             return;
         }
 
-        const aktifler = TrophiesManager.aktifTrophyleriAl(kartVerisi);
+        const aktifler = isWidgetsMode
+            ? TrophiesManager.aktifWidgetlariAl(kartVerisi)
+            : TrophiesManager.aktifOyunlariAl(kartVerisi);
 
         list.innerHTML = items.map(item => {
             const varMi = aktifler.some(t => t.tur === item.id);
@@ -4046,7 +4086,7 @@ EditManager.CompanionViews = {
             });
         }
 
-        // 2. Trophies Master Listesi Reorder
+        // 2. Gaming & Widgets Master Listesi Reorder
         const trophiesMasterList = document.getElementById('trophiesMasterList');
         if (trophiesMasterList && !trophiesMasterList._reorderInit) {
             trophiesMasterList._reorderInit = true;
@@ -4056,23 +4096,28 @@ EditManager.CompanionViews = {
                 canDrag: () => typeof isOwner !== 'undefined' && isOwner,
                 excludedDragSelectors: '.companion-row-del-btn, button, input, a',
                 onDrop: () => {
+                    const isWidgetsMode = (window._activeLeftWingMode === 'widgets');
                     const mevcutListe = typeof TrophiesManager !== 'undefined'
-                        ? TrophiesManager.aktifTrophyleriAl(kartVerisi)
-                        : (Array.isArray(kartVerisi.gaming) ? kartVerisi.gaming : []);
+                        ? (isWidgetsMode ? TrophiesManager.aktifWidgetlariAl(kartVerisi) : TrophiesManager.aktifOyunlariAl(kartVerisi))
+                        : (isWidgetsMode ? (Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets : []) : (Array.isArray(kartVerisi.gaming) ? kartVerisi.gaming : []));
                     if (mevcutListe.length > 0) {
                         const rows = Array.from(trophiesMasterList.querySelectorAll('.companion-row-item'));
-                        const newGaming = [];
+                        const newList = [];
                         rows.forEach(r => {
                             const tId = r.dataset.trophyId;
                             const found = mevcutListe.find(t => t && (t.id === tId || t.tur === tId));
                             if (found) {
                                 const kayit = { tur: found.tur, kullanici: found.kullanici };
                                 if (found.snap) kayit.snap = found.snap;
-                                newGaming.push(kayit);
+                                newList.push(kayit);
                             }
                         });
-                        if (newGaming.length === mevcutListe.length) {
-                            kartVerisi.gaming = newGaming;
+                        if (newList.length === mevcutListe.length) {
+                            if (isWidgetsMode) {
+                                kartVerisi.widgets = newList;
+                            } else {
+                                kartVerisi.gaming = newList;
+                            }
                         }
                     }
                     EditManager.Global.degisiklikYapildi();

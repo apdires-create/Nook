@@ -365,14 +365,31 @@
                         </svg>
                     </span>
                 </button>
+                <button type="button" class="card-flag-btn flag-widgets" id="triggerWidgetsBtn" aria-label="Widgets" title="Widgets (Yetenek & Alışkanlık)">
+                    <span class="flag-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                        </svg>
+                    </span>
+                </button>
+                <button type="button" class="card-flag-btn flag-achievements" id="triggerAchievementsBtn" aria-label="Trophies" title="Trophies (Başarılar)">
+                    <span class="flag-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                            <path d="M4 22h16"></path>
+                            <path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"></path>
+                            <path d="M6 4h12a2 2 0 0 1 2 2v3a6 6 0 0 1-12 0V6a2 2 0 0 1 2-2z"></path>
+                        </svg>
+                    </span>
+                </button>
                 <button type="button" class="card-flag-btn flag-showcase" id="triggerShowcaseBtn" aria-label="Showcase" title="Showcase (Vitrin)">
                     <span class="flag-icon">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M8 21h8"></path>
-                            <path d="M12 17v4"></path>
-                            <path d="M7 4h10v5a5 5 0 0 1-10 0V4z"></path>
-                            <path d="M7 6H4a2 2 0 0 0-2 2v1a4 4 0 0 0 4 4h1"></path>
-                            <path d="M17 6h3a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-1"></path>
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                         </svg>
                     </span>
                 </button>
@@ -429,14 +446,14 @@
             </div>
         </div>
 
-        <!-- SOL SAHNE: GAMING EŞLİKÇİ KART (GAMING WING) -->
+        <!-- SOL SAHNE: DİNAMİK EŞLİKÇİ KART (GAMING / WIDGETS / TROPHIES WING) -->
         <div class="companion-card trophies-companion-card" id="trophiesCompanionCard" style="display: none;">
-            <!-- Gaming Kök İçerik Alanı (Master & Detail) -->
+            <!-- Kök İçerik Alanı (Master & Detail) -->
             <div class="companion-view-master" id="trophiesMasterView">
                 <div class="companion-header">
                     <div class="companion-title-row">
-                        <div class="companion-brand brand-trophies">
-                            <div class="companion-brand-icon icon-trophies">
+                        <div class="companion-brand brand-trophies" id="trophiesBrandWrap">
+                            <div class="companion-brand-icon icon-trophies" id="trophiesBrandIcon">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="6" y1="12" x2="10" y2="12"></line>
                                     <line x1="8" y1="10" x2="8" y2="14"></line>
@@ -445,7 +462,7 @@
                                     <rect x="2" y="6" width="20" height="12" rx="4"></rect>
                                 </svg>
                             </div>
-                            <h3 class="companion-title">Gaming</h3>
+                            <h3 class="companion-title" id="trophiesMasterTitle">Gaming</h3>
                         </div>
                         <button class="nook-icon-btn companion-close-btn" id="trophiesCloseBtn" title="Kapat" aria-label="Kapat">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

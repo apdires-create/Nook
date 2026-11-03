@@ -18,6 +18,8 @@ const Router = {
         const flipToFrontBtn = document.getElementById('flipToFrontBtn');
         const triggerShowcaseBtn = document.getElementById('triggerShowcaseBtn');
         const triggerTrophiesBtn = document.getElementById('triggerTrophiesBtn');
+        const triggerWidgetsBtn = document.getElementById('triggerWidgetsBtn');
+        const triggerAchievementsBtn = document.getElementById('triggerAchievementsBtn');
         const companionCloseBtn = document.getElementById('companionCloseBtn');
         const showcaseDetailCloseBtn = document.getElementById('showcaseDetailCloseBtn');
         const trophiesCloseBtn = document.getElementById('trophiesCloseBtn');
@@ -31,7 +33,7 @@ const Router = {
             });
         }
 
-        // Showcase & Trophies Bayrakları
+        // 4 Bayrak Dinleyicileri (Gaming, Widgets, Trophies, Showcase)
         if (triggerShowcaseBtn) {
             triggerShowcaseBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -42,7 +44,21 @@ const Router = {
         if (triggerTrophiesBtn) {
             triggerTrophiesBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                this.toggleCompanion(null, 'trophies');
+                this.toggleCompanion(null, 'gaming');
+            });
+        }
+
+        if (triggerWidgetsBtn) {
+            triggerWidgetsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleCompanion(null, 'widgets');
+            });
+        }
+
+        if (triggerAchievementsBtn) {
+            triggerAchievementsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleCompanion(null, 'achievements');
             });
         }
 
@@ -344,22 +360,24 @@ const Router = {
 
         const isShowcaseOpen = stage.classList.contains('is-showcase-active');
         const isTrophiesOpen = stage.classList.contains('is-trophies-active');
+        const normalizedType = (type === 'trophies') ? 'gaming' : type;
+        const currentLeftMode = window._activeLeftWingMode || 'gaming';
 
         let nextState;
         if (typeof forceState === 'boolean') {
             nextState = forceState;
         } else {
-            if (type === 'showcase' && isShowcaseOpen) {
+            if (normalizedType === 'showcase' && isShowcaseOpen) {
                 nextState = false;
-            } else if (type === 'trophies' && isTrophiesOpen) {
+            } else if (['gaming', 'widgets', 'achievements'].includes(normalizedType) && isTrophiesOpen && currentLeftMode === normalizedType) {
                 nextState = false;
             } else {
                 nextState = true;
             }
         }
 
-        const activeCompanion = (type === 'showcase') ? topsCard : trophiesCard;
-        const otherCompanion = (type === 'showcase') ? trophiesCard : topsCard;
+        const activeCompanion = (normalizedType === 'showcase') ? topsCard : trophiesCard;
+        const otherCompanion = (normalizedType === 'showcase') ? trophiesCard : topsCard;
 
         if (nextState) {
             // ==========================================
@@ -374,13 +392,13 @@ const Router = {
 
             const wasAnyOpen = stage.classList.contains('has-companion-open');
 
-            // Kullanıcı profilin arka yüzündeyken Showcase veya Trophies'e geçerse profil kartını otomatik ön yüzüne çevir
+            // Kullanıcı profilin arka yüzündeyken kanatlardan birine geçerse profil kartını otomatik ön yüzüne çevir
             if (this.isFlipped) {
                 this.setFlipped(false);
             }
 
-            if (type === 'showcase') {
-                stage.classList.remove('is-trophies-active');
+            if (normalizedType === 'showcase') {
+                stage.classList.remove('is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
                 stage.classList.add('is-showcase-active');
                 if (kartVerisi?.tops) {
                     delete kartVerisi.tops._manualMaster;
@@ -396,13 +414,22 @@ const Router = {
                     EditManager.CompanionViews?.init();
                 }
             } else {
-                stage.classList.remove('is-showcase-active');
-                stage.classList.add('is-trophies-active');
+                window._activeLeftWingMode = normalizedType;
+                stage.classList.remove('is-showcase-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
+                stage.classList.add('is-trophies-active', `is-${normalizedType}-mode`);
                 delete window._manualTrophyMaster;
-                const aktifTrophyler = (typeof TrophiesManager !== 'undefined' && typeof TrophiesManager.aktifTrophyleriAl === 'function')
-                    ? TrophiesManager.aktifTrophyleriAl(kartVerisi)
-                    : [];
-                window._activeTrophyDetail = (aktifTrophyler.length === 1) ? aktifTrophyler[0].tur : null;
+                const trophiesCompanion = document.getElementById('trophiesCompanionCard');
+                if (trophiesCompanion) trophiesCompanion.classList.remove('is-detail-editing');
+
+                let aktifListe = [];
+                if (typeof TrophiesManager !== 'undefined') {
+                    if (normalizedType === 'widgets' && typeof TrophiesManager.aktifWidgetlariAl === 'function') {
+                        aktifListe = TrophiesManager.aktifWidgetlariAl(kartVerisi);
+                    } else if (normalizedType === 'gaming' && typeof TrophiesManager.aktifOyunlariAl === 'function') {
+                        aktifListe = TrophiesManager.aktifOyunlariAl(kartVerisi);
+                    }
+                }
+                window._activeTrophyDetail = (aktifListe.length === 1) ? aktifListe[0].tur : null;
                 if (typeof RenderEngine !== 'undefined') {
                     RenderEngine.trophiesCiz(kartVerisi);
                 }
@@ -480,7 +507,7 @@ const Router = {
             }
 
             this._companionTimer = setTimeout(() => {
-                stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-showcase-active', 'is-trophies-active');
+                stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-showcase-active', 'is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
                 if (topsCard) {
                     topsCard.classList.remove('is-closing');
                     if (isDesktop) topsCard.style.display = 'none';
@@ -718,34 +745,44 @@ const TouchGestureManager = {
 
         this.hasSwiped = true;
 
-        if (!isAnyOpen) {
-            // [1. Profil Kartı Merkezde]:
-            // Sola kaydırma (Swipe Left) -> Showcase'e (Sağ kanat) geç
-            if (deltaX < -this.threshold) {
-                Router.toggleCompanion(true, 'showcase');
+        const deckOrder = ['achievements', 'widgets', 'gaming', 'main', 'showcase'];
+        let currentPos = 'main';
+        if (isAnyOpen) {
+            if (isShowcaseOpen) {
+                currentPos = 'showcase';
+            } else if (isTrophiesOpen) {
+                currentPos = window._activeLeftWingMode || 'gaming';
             }
-            // Sağa kaydırma (Swipe Right) -> Trophies'e (Sol kanat) geç
-            else if (deltaX > this.threshold) {
-                Router.toggleCompanion(true, 'trophies');
-            }
-        } else if (isShowcaseOpen) {
-            // [2. Showcase Açık]:
-            // Sağa kaydırma (Swipe Right) -> Profil Kartına dön
-            if (deltaX > this.threshold) {
+        }
+        const currentIdx = deckOrder.indexOf(currentPos);
+
+        // Sola kaydırma (Swipe Left, deltaX < -threshold) -> Deste dizisinde sağa doğru ilerle
+        if (deltaX < -this.threshold) {
+            const nextIdx = currentIdx + 1;
+            if (nextIdx < deckOrder.length) {
+                const target = deckOrder[nextIdx];
+                if (target === 'main') {
+                    Router.toggleCompanion(false);
+                } else {
+                    Router.toggleCompanion(true, target);
+                }
+            } else {
+                // Showcase'deyken tekrar sola kaydırılırsa ana karta dön
                 Router.toggleCompanion(false);
             }
-            // Sola kaydırma (Swipe Left) -> Profil Kartına dön
-            else if (deltaX < -this.threshold) {
-                Router.toggleCompanion(false);
-            }
-        } else if (isTrophiesOpen) {
-            // [3. Trophies Açık]:
-            // Sola kaydırma (Swipe Left) -> Profil Kartına dön
-            if (deltaX < -this.threshold) {
-                Router.toggleCompanion(false);
-            }
-            // Sağa kaydırma (Swipe Right) -> Profil Kartına dön
-            else if (deltaX > this.threshold) {
+        }
+        // Sağa kaydırma (Swipe Right, deltaX > threshold) -> Deste dizisinde sola doğru ilerle
+        else if (deltaX > this.threshold) {
+            const prevIdx = currentIdx - 1;
+            if (prevIdx >= 0) {
+                const target = deckOrder[prevIdx];
+                if (target === 'main') {
+                    Router.toggleCompanion(false);
+                } else {
+                    Router.toggleCompanion(true, target);
+                }
+            } else {
+                // En soldaki karttayken (Trophies) tekrar sağa kaydırılırsa ana karta dön
                 Router.toggleCompanion(false);
             }
         }

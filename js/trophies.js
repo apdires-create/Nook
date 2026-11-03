@@ -210,7 +210,7 @@ const TrophiesManager = {
         }
     ],
 
-    // 3. Adımda kurulacak Widgets kanadı için hazır tutulan katalog
+    // 3. Adımda kurulan Widgets kanadı kataloğu (Monkeytype, Chess.com, Duolingo, osu!)
     widgetCatalog: [
         {
             id: 'monkeytype',
@@ -243,6 +243,26 @@ const TrophiesManager = {
             comingSoon: false
         },
         {
+            id: 'duolingo',
+            tur: 'duolingo',
+            baslik: 'Duolingo',
+            alt: 'Günlük dil öğrenme serisi (streak 🔥), toplam XP ve aktif dil kursu',
+            domain: 'duolingo.com',
+            accent: '#58cc02',
+            kategori: 'dil',
+            kategoriBaslik: 'Alışkanlık & Dil',
+            girdiTipi: 'username',
+            girdiEtiket: 'Duolingo Kullanıcı Adı',
+            placeholder: 'kullanıcı_adı',
+            ornek: 'duofan',
+            comingSoon: false,
+            tiers: [
+                '1000+ Gün Seri 🔥', '730+ Gün Seri (2 Yıl)', '365+ Gün Seri (1 Yıl)',
+                '200+ Gün Seri', '100+ Gün Seri', '50+ Gün Seri', '30+ Gün Seri',
+                'Elmas Lig (Diamond)', 'Obsidyen Lig', 'İnci Lig'
+            ]
+        },
+        {
             id: 'osu',
             tur: 'osu',
             baslik: 'osu!',
@@ -252,32 +272,23 @@ const TrophiesManager = {
             kategori: 'ritim',
             kategoriBaslik: 'Ritim & Yetenek',
             girdiTipi: 'username',
-            girdiEtiket: 'osu! Kullanıcı Adı',
+            girdiEtiket: 'osu! Kullanıcı Adı veya ID',
             placeholder: 'oyuncu_adi',
             ornek: 'mrekk',
-            comingSoon: true
-        },
-        {
-            id: 'duolingo',
-            tur: 'duolingo',
-            baslik: 'Duolingo',
-            alt: 'Günlük dil öğrenme serisi (streak) ve toplam XP',
-            domain: 'duolingo.com',
-            accent: '#58cc02',
-            kategori: 'dil',
-            kategoriBaslik: 'Alışkanlık & Dil',
-            girdiTipi: 'username',
-            girdiEtiket: 'Duolingo Kullanıcı Adı',
-            placeholder: 'kullanıcı_adı',
-            ornek: 'duofan',
-            comingSoon: true
+            comingSoon: false,
+            tiers: [
+                'Top 100 Global', '3 Digit (#100 - #999)', '4 Digit (#1K - #9.9K)',
+                '5 Digit (#10K - #99K)', '6 Digit', '15.000+ PP', '10.000+ PP',
+                '7.500+ PP', '5.000+ PP', '3.000+ PP'
+            ]
         }
     ],
 
-    katalogFiltrele(arama = '') {
+    katalogFiltrele(arama = '', mode = 'gaming') {
+        const kaynak = (mode === 'widgets') ? this.widgetCatalog : this.catalog;
         const q = (arama || '').toLowerCase().trim();
-        if (!q) return this.catalog;
-        return this.catalog.filter(item => {
+        if (!q) return kaynak;
+        return kaynak.filter(item => {
             return item.baslik.toLowerCase().includes(q)
                 || item.alt.toLowerCase().includes(q)
                 || item.id.toLowerCase().includes(q)
@@ -296,6 +307,11 @@ const TrophiesManager = {
     gamingKatalogOgesiBul(idVeyaTur) {
         if (!idVeyaTur) return null;
         return this.catalog.find(c => c.id === idVeyaTur || c.tur === idVeyaTur) || null;
+    },
+
+    widgetKatalogOgesiBul(idVeyaTur) {
+        if (!idVeyaTur || !this.widgetCatalog) return null;
+        return this.widgetCatalog.find(c => c.id === idVeyaTur || c.tur === idVeyaTur) || null;
     },
 
     /**
@@ -379,6 +395,47 @@ const TrophiesManager = {
 
     aktifOyunlariAl(kart) {
         return this.aktifTrophyleriAl(kart);
+    },
+
+    /**
+     * Kart verisindeki aktif Widgets (Monkeytype, Chess.com, Duolingo, osu!) öğelerini döndürür.
+     * @returns {Array<{tur: string, kullanici: string, snap?: object}>}
+     */
+    aktifWidgetlariAl(kart) {
+        if (!kart) return [];
+        const sonuc = [];
+        const gorulen = new Set();
+
+        const ekle = (tur, kullanici, snap = null) => {
+            if (!tur || !kullanici) return;
+            const normTur = String(tur).trim().toLowerCase();
+            const normUser = String(kullanici).trim();
+            if (!normUser || gorulen.has(normTur)) return;
+            if (!this.widgetKatalogOgesiBul(normTur)) return;
+            gorulen.add(normTur);
+            const kayit = { tur: normTur, kullanici: normUser };
+            if (snap && typeof snap === 'object') kayit.snap = snap;
+            sonuc.push(kayit);
+        };
+
+        if (Array.isArray(kart.widgets)) {
+            kart.widgets.flat(Infinity).forEach(w => {
+                if (w && typeof w === 'object') {
+                    ekle(w.tur || w.id, w.kullanici || w.username || w.ayarlar?.kullanici, w.snap);
+                }
+            });
+        }
+
+        // Geriye dönük trophies içinde kalmış widget kayıtları
+        if (Array.isArray(kart.trophies)) {
+            kart.trophies.flat(Infinity).forEach(t => {
+                if (t && typeof t === 'object') {
+                    ekle(t.tur || t.id, t.kullanici || t.username || t.ayarlar?.kullanici, t.snap);
+                }
+            });
+        }
+
+        return sonuc;
     },
     // #endregion
 
@@ -674,23 +731,104 @@ const TrophiesManager = {
             map(d, kullanici) {
                 const clean = String(kullanici).trim();
                 const isNumericId = /^\d+$/.test(clean);
+                const ratingVal = d?.rating ? `${d.rating} ELO` : (d?.tier || clean);
+                const peakVal = d?.peakRating ? `${d.peakRating} ELO` : (d?.peak ? `${d.peak} ELO` : 'Ranked');
                 return {
                     handle: isNumericId ? `ID #${clean}` : clean,
                     badge: '1v1 RANKED',
                     heroLabel: 'BRAWLHALLA 1V1',
-                    heroValue: d?.rating ? `${d.rating} ELO` : clean,
+                    heroValue: ratingVal,
                     peakLabel: 'ZİRVE (PEAK)',
-                    peakValue: d?.peak ? `${d.peak} ELO` : 'Ranked',
-                    summaryText: d?.rating ? `${d.rating} ELO` : clean,
+                    peakValue: peakVal,
+                    summaryText: ratingVal,
                     stats: [
+                        { label: 'AKTİF KADEME', value: d?.tier || ratingVal, sub: '1v1 Solo Dereceli' },
+                        { label: 'ZİRVE ELO', value: peakVal, sub: 'Kariyer Rekoru' },
                         { label: 'OYUNCU KİMLİĞİ', value: clean, sub: isNumericId ? 'Brawlhalla ID' : 'Oyuncu Adı' },
-                        { label: 'REKABETÇİ MOD', value: '1v1 Solo', sub: 'Dereceli Arena' },
-                        { label: 'SEZON DURUMU', value: 'Aktif', sub: 'Brawlhalla Ranked' },
                         { label: 'SIRALAMA', value: 'Corehalla', sub: 'Detaylı Efsane İstatistiği' }
                     ],
                     profileUrl: isNumericId
                         ? `https://corehalla.com/stats/player/${encodeURIComponent(clean)}`
                         : `https://www.brawlhalla.com/rankings/game/all/1v1/`
+                };
+            }
+        },
+
+        // 9. DUOLINGO
+        duolingo: {
+            async fetch(kullanici) {
+                const clean = String(kullanici || '').trim().replace(/^@/, '');
+                try {
+                    const url = `https://www.duolingo.com/2017-06-30/users?username=${encodeURIComponent(clean)}`;
+                    const json = await TrophiesManager.fetchJsonWithCorsFallback(url);
+                    const u = Array.isArray(json?.users) ? json.users[0] : null;
+                    if (u) {
+                        const courses = Array.isArray(u.courses) ? u.courses : [];
+                        const topCourse = courses.sort((a, b) => (b.xp || 0) - (a.xp || 0))[0];
+                        return {
+                            username: u.username || clean,
+                            streak: u.streak ?? 0,
+                            totalXp: u.totalXp ?? 0,
+                            topLang: topCourse?.title || u.learningLanguage || 'Dil',
+                            topLangXp: topCourse?.xp ?? 0,
+                            coursesCount: courses.length
+                        };
+                    }
+                } catch {}
+                return null;
+            },
+            map(d, kullanici) {
+                const clean = String(kullanici || '').trim().replace(/^@/, '');
+                const streakStr = (d && d.streak != null) ? `${d.streak} Gün 🔥` : '—';
+                const xpStr = (d && d.totalXp != null) ? `${Number(d.totalXp).toLocaleString('tr-TR')} XP` : '—';
+                return {
+                    handle: `@${clean}`,
+                    badge: 'STREAK',
+                    heroLabel: 'GÜNLÜK SERİ',
+                    heroValue: streakStr,
+                    heroSub: d?.topLang ? `Aktif: ${d.topLang}` : 'Dil Pratiği',
+                    peakLabel: 'TOPLAM XP',
+                    peakValue: xpStr,
+                    peakSub: d?.coursesCount ? `${d.coursesCount} Dil Kursu` : 'Kariyer XP',
+                    summaryText: streakStr !== '—' ? streakStr : `@${clean}`,
+                    stats: [
+                        { label: 'AKTİF SERİ', value: streakStr, sub: 'Kesintisiz Gün' },
+                        { label: 'TOPLAM XP', value: xpStr, sub: 'Tüm Zamanlar' },
+                        { label: 'ANA DİL KURSU', value: d?.topLang || '—', sub: d?.topLangXp ? `${Number(d.topLangXp).toLocaleString('tr-TR')} XP` : 'Öğreniliyor' },
+                        { label: 'KURS SAYISI', value: d?.coursesCount ? `${d.coursesCount} Dil` : '—', sub: 'Duolingo Profili' }
+                    ],
+                    profileUrl: `https://www.duolingo.com/profile/${encodeURIComponent(clean)}`
+                };
+            }
+        },
+
+        // 10. OSU!
+        osu: {
+            async fetch(kullanici) {
+                return null;
+            },
+            map(d, kullanici) {
+                const clean = String(kullanici || '').trim().replace(/^@/, '');
+                const ppStr = d?.pp ? `${Number(d.pp).toLocaleString('tr-TR')} PP` : '—';
+                const rankStr = d?.globalRank ? `#${Number(d.globalRank).toLocaleString('tr-TR')}` : ppStr;
+                const peakStr = d?.peakRank ? `#${Number(d.peakRank).toLocaleString('tr-TR')}` : rankStr;
+                return {
+                    handle: `@${d?.username || clean}`,
+                    badge: 'OSU! STD',
+                    heroLabel: 'PERFORMANS / RANK',
+                    heroValue: ppStr !== '—' ? ppStr : rankStr,
+                    heroSub: d?.globalRank ? `Global ${rankStr}` : 'Ritim & Aim',
+                    peakLabel: 'ZİRVE SIRALAMA',
+                    peakValue: peakStr,
+                    peakSub: d?.countryRank ? `${d.country || 'Ülke'} #${Number(d.countryRank).toLocaleString('tr-TR')}` : 'Kariyer Zirvesi',
+                    summaryText: ppStr !== '—' ? ppStr : `@${clean}`,
+                    stats: [
+                        { label: 'PERFORMANS (PP)', value: ppStr, sub: 'Toplam PP' },
+                        { label: 'GLOBAL RANK', value: rankStr, sub: peakStr !== '—' ? `Peak: ${peakStr}` : 'Dünya Sıralaması' },
+                        { label: 'DOĞRULUK (ACC)', value: d?.accuracy || '—', sub: 'Hit Accuracy' },
+                        { label: 'OYUN SAYISI', value: d?.playCount ? Number(d.playCount).toLocaleString('tr-TR') : '—', sub: 'Play Count' }
+                    ],
+                    profileUrl: `https://osu.ppy.sh/users/${encodeURIComponent(clean)}`
                 };
             }
         }
@@ -851,10 +989,12 @@ const TrophiesManager = {
         if (!kart) return;
         if (!kart._canli_trophies) kart._canli_trophies = {};
 
-        const aktifler = this.aktifTrophyleriAl(kart);
-        if (aktifler.length === 0) return;
+        const aktifOyunlar = this.aktifOyunlariAl(kart);
+        const aktifWidgetlar = this.aktifWidgetlariAl(kart);
+        const tumAktifler = [...aktifOyunlar, ...aktifWidgetlar];
+        if (tumAktifler.length === 0) return;
 
-        const sorgular = aktifler.map(async (item) => {
+        const sorgular = tumAktifler.map(async (item) => {
             const raw = await this.canliVeriCek(item.tur, item.kullanici);
             if (raw) {
                 kart._canli_trophies[item.tur] = raw;
