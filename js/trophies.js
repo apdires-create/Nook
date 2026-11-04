@@ -243,6 +243,21 @@ const TrophiesManager = {
             comingSoon: false
         },
         {
+            id: 'lichess',
+            tur: 'lichess',
+            baslik: 'Lichess',
+            alt: 'Açık kaynak satranç: Rapid, Blitz, Bullet ve Puzzle canlı eloları',
+            domain: 'lichess.org',
+            accent: '#ffffff',
+            kategori: 'strateji',
+            kategoriBaslik: 'Strateji & Zeka',
+            girdiTipi: 'username',
+            girdiEtiket: 'Lichess Kullanıcı Adı',
+            placeholder: 'kullanıcı_adı',
+            ornek: 'magnuscarlsen',
+            comingSoon: false
+        },
+        {
             id: 'duolingo',
             tur: 'duolingo',
             baslik: 'Duolingo',
@@ -578,6 +593,56 @@ const TrophiesManager = {
                         { label: 'GALİBİYET', value: totalGames > 0 ? `${w.toLocaleString('tr-TR')}` : (puzzlePeak ? `${puzzlePeak}` : '—'), sub: winRate !== null ? `%${winRate} kazanma (${totalGames} maç)` : 'Bulmaca Zirvesi' }
                     ],
                     profileUrl: `https://www.chess.com/member/${encodeURIComponent(kullanici)}`
+                };
+            }
+        },
+
+        // 2.1 LICHESS (Doğrudan Açık REST API - Sıfır Auth)
+        lichess: {
+            async fetch(kullanici) {
+                const clean = String(kullanici).trim().toLowerCase().replace(/^@/, '');
+                try {
+                    const res = await fetch(`https://lichess.org/api/user/${encodeURIComponent(clean)}`, {
+                        signal: AbortSignal.timeout ? AbortSignal.timeout(8000) : undefined
+                    });
+                    if (!res.ok) return null;
+                    return await res.json();
+                } catch {
+                    return null;
+                }
+            },
+            map(d, kullanici) {
+                const clean = String(kullanici).trim().replace(/^@/, '');
+                const perfs = d?.perfs || {};
+                const rapid = perfs.rapid?.rating || null;
+                const blitz = perfs.blitz?.rating || null;
+                const bullet = perfs.bullet?.rating || null;
+                const puzzle = perfs.puzzle?.rating || null;
+
+                let heroMode = 'RAPID ELO';
+                let heroRating = rapid;
+                if (!heroRating && blitz) { heroMode = 'BLITZ ELO'; heroRating = blitz; }
+                else if (!heroRating && bullet) { heroMode = 'BULLET ELO'; heroRating = bullet; }
+
+                const ratings = [rapid, blitz, bullet].filter(Boolean);
+                const maxRating = ratings.length > 0 ? Math.max(...ratings) : null;
+                const totalGames = d?.count?.all || 0;
+
+                return {
+                    handle: `@${d?.username || clean}`,
+                    badge: d?.title ? `${d.title} • LICHESS` : 'LICHESS',
+                    heroLabel: heroMode,
+                    heroValue: heroRating ? `${heroRating}` : '—',
+                    peakLabel: 'EN YÜKSEK',
+                    peakValue: maxRating ? `${maxRating} ELO` : '—',
+                    summaryText: heroRating ? `${heroRating} ELO` : `@${clean}`,
+                    stats: [
+                        { label: 'RAPID ELO', value: rapid ? `${rapid}` : '—', sub: perfs.rapid?.games ? `${perfs.rapid.games} maç` : 'Dereceli' },
+                        { label: 'BLITZ ELO', value: blitz ? `${blitz}` : '—', sub: perfs.blitz?.games ? `${perfs.blitz.games} maç` : 'Dereceli' },
+                        { label: 'BULLET ELO', value: bullet ? `${bullet}` : '—', sub: perfs.bullet?.games ? `${perfs.bullet.games} maç` : 'Dereceli' },
+                        { label: 'BULMACA (PUZZLE)', value: puzzle ? `${puzzle}` : '—', sub: totalGames > 0 ? `${totalGames} maç oynandı` : 'Taktik' }
+                    ],
+                    profileUrl: `https://lichess.org/@/${encodeURIComponent(d?.username || clean)}`
                 };
             }
         },
