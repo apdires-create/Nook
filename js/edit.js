@@ -2601,7 +2601,7 @@ EditManager.TrophiesView = {
         }
     },
 
-    async trophyKaydet(tur, temizKullanici, manualAktif = '', manualPeak = '', preFetchedLive = null) {
+    async trophyKaydet(tur, temizKullanici, manualAktif = '', manualPeak = '', preFetchedLive = null, kuyruk = '') {
         if (!tur || !temizKullanici || typeof TrophiesManager === 'undefined') return;
         const meta = TrophiesManager.katalogOgesiBul(tur) || { baslik: tur };
         const isWidget = this._isWidgetTur(tur);
@@ -2613,7 +2613,7 @@ EditManager.TrophiesView = {
             if (tur === 'monkeytype') kartVerisi.canli_monkeytype = canliVeri;
         }
 
-        const snap = TrophiesManager.buildSnapshot(tur, temizKullanici, canliVeri, manualAktif, manualPeak);
+        const snap = TrophiesManager.buildSnapshot(tur, temizKullanici, canliVeri, manualAktif, manualPeak, kuyruk);
 
         const mevcutListe = this._aktifModListesiniAl(tur);
         const idx = mevcutListe.findIndex(x => x.tur === tur);
@@ -2746,6 +2746,20 @@ EditManager.TrophiesView = {
                     </div>
                 </div>
             ` : ''}
+            ${(tur === 'lol' || tur === 'tft') ? `
+                <div style="margin-top: 8px;">
+                    <label style="display: block; font-size: 0.68rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px;">Öne Çıkan Dereceli Modu</label>
+                    <select class="inline-form-input mt-kuyruk-select" style="width: 100%; padding: 6px 8px; font-size: 0.78rem;">
+                        ${tur === 'lol' ? `
+                            <option value="solo" ${(mevcutSnap.kuyruk === 'solo' || !mevcutSnap.kuyruk) ? 'selected' : ''}>Tek / Çift Dereceli (Solo / Duo)</option>
+                            <option value="flex" ${mevcutSnap.kuyruk === 'flex' ? 'selected' : ''}>Esnek Dereceli (Flex 5v5)</option>
+                        ` : `
+                            <option value="standard" ${(mevcutSnap.kuyruk === 'standard' || !mevcutSnap.kuyruk) ? 'selected' : ''}>Standart Dereceli (TFT Solo)</option>
+                            <option value="double" ${mevcutSnap.kuyruk === 'double' ? 'selected' : ''}>Muhteşem İkili (Double Up 2v2)</option>
+                        `}
+                    </select>
+                </div>
+            ` : ''}
             <div class="inline-form-actions" style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 8px;">
                 <button type="button" class="form-btn-sm form-btn-cancel mt-form-cancel">İptal</button>
                 <button type="button" class="form-btn-sm form-btn-save mt-form-save">Kaydet</button>
@@ -2779,7 +2793,25 @@ EditManager.TrophiesView = {
                     const norm = TrophiesManager.getNormalizedTrophyData(tur, check.clean, live, null);
                     if (statusEl) {
                         statusEl.style.color = '#51cf66';
-                        statusEl.textContent = `✓ Bulundu: Aktif ${norm.heroValue} • Zirve ${norm.peakValue}`;
+                        if (tur === 'lol') {
+                            const s = live.solo?.tier ? `Solo: ${live.solo.tier}` : 'Solo: Derecesiz';
+                            const f = live.flex?.tier ? `Flex: ${live.flex.tier}` : 'Flex: Derecesiz';
+                            statusEl.textContent = `✓ Bulundu: ${s} • ${f}`;
+                            const kuyrukSelect = formWrap.querySelector('.mt-kuyruk-select');
+                            if (kuyrukSelect && !live.solo?.tier && live.flex?.tier) {
+                                kuyrukSelect.value = 'flex';
+                            }
+                        } else if (tur === 'tft') {
+                            const st = live.standard?.tier ? `Standart: ${live.standard.tier}` : 'Standart: Derecesiz';
+                            const d = live.doubleUp?.tier ? `İkili: ${live.doubleUp.tier}` : 'İkili: Derecesiz';
+                            statusEl.textContent = `✓ Bulundu: ${st} • ${d}`;
+                            const kuyrukSelect = formWrap.querySelector('.mt-kuyruk-select');
+                            if (kuyrukSelect && !live.standard?.tier && live.doubleUp?.tier) {
+                                kuyrukSelect.value = 'double';
+                            }
+                        } else {
+                            statusEl.textContent = `✓ Bulundu: Aktif ${norm.heroValue} • Zirve ${norm.peakValue}`;
+                        }
                     }
                 } else {
                     if (statusEl) {
@@ -2821,7 +2853,9 @@ EditManager.TrophiesView = {
             }
             const secilenAktif = aktifSelect ? aktifSelect.value : '';
             const secilenPeak = peakSelect ? peakSelect.value : '';
-            await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, sonSorgulananCanliVeri);
+            const kuyrukSelect = formWrap.querySelector('.mt-kuyruk-select');
+            const secilenKuyruk = kuyrukSelect ? kuyrukSelect.value : '';
+            await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, sonSorgulananCanliVeri, secilenKuyruk);
             if (formWrap.isConnected) formWrap.remove();
         };
 

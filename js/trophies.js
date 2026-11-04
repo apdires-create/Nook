@@ -729,7 +729,7 @@ const TrophiesManager = {
             }
         },
 
-        // 6. LEAGUE OF LEGENDS (Riot ID -> Bölge & Dereceli Özet)
+        // 6. LEAGUE OF LEGENDS (Riot ID -> Tek/Çift & Esnek Ayrımı)
         lol: {
             async fetch(kullanici) {
                 const parsed = TrophiesManager.parseRiotId(kullanici);
@@ -737,35 +737,47 @@ const TrophiesManager = {
             },
             map(d, kullanici) {
                 const parsed = d?.parsed || TrophiesManager.parseRiotId(kullanici);
-                const tier = d?.tier || null;
-                const lp = d?.lp ?? null;
-                const peak = d?.peak || tier || null;
-                const wr = d?.winrate || null;
                 const region = d?.region || parsed.displayRegion || 'TR';
 
-                const displayRank = tier || 'Derecesiz (Unranked)';
+                // Solo ve Flex verileri
+                const solo = d?.solo || (d?.activeQueue === 'solo' ? d : null);
+                const flex = d?.flex || (d?.activeQueue === 'flex' ? d : null);
+
+                // Kullanıcının tercihi (snap.secilenKuyruk) veya otomatik öncelik
+                const secilen = d?.secilenKuyruk || d?.kuyruk || (solo?.tier ? 'solo' : (flex?.tier ? 'flex' : 'solo'));
+                const activeQueue = (secilen === 'flex' && flex) ? flex : (solo || flex || d);
+                const isFlex = secilen === 'flex' && Boolean(flex);
+
+                const displayRank = activeQueue?.tier || d?.tier || 'Derecesiz (Unranked)';
+                const lp = activeQueue?.lp || d?.lp || null;
+                const wr = activeQueue?.winrate || d?.winrate || null;
+                const peak = d?.peak || (displayRank !== 'Derecesiz (Unranked)' ? displayRank : `#${parsed.tag}`);
+
+                // Stat kutucuklarında hem Solo hem Flex aynı anda sergilenir!
+                const soloText = solo?.tier ? `${solo.tier}${solo.lp ? ` (${solo.lp})` : ''}` : 'Derecesiz';
+                const flexText = flex?.tier ? `${flex.tier}${flex.lp ? ` (${flex.lp})` : ''}` : 'Derecesiz';
 
                 return {
                     handle: parsed.full,
                     badge: `${region} • RIOT`,
-                    heroLabel: 'TEK / ÇİFT DERECELİ',
+                    heroLabel: isFlex ? 'ESNEK (FLEX) DERECELİ' : 'TEK / ÇİFT DERECELİ',
                     heroValue: displayRank,
-                    heroSub: lp ? `${lp}${wr ? ` • %${wr} WR` : ''}` : 'League of Legends',
+                    heroSub: lp ? `${lp}${wr && wr !== '—' ? ` • %${wr} WR` : ''}` : 'League of Legends',
                     peakLabel: 'ZİRVE (PEAK)',
-                    peakValue: peak || displayRank,
-                    summaryText: tier ? `${tier}${lp ? ` (${lp})` : ''}` : parsed.full,
+                    peakValue: peak,
+                    summaryText: displayRank !== 'Derecesiz (Unranked)' ? `${displayRank}${lp ? ` (${lp})` : ''}` : parsed.full,
                     stats: [
-                        { label: 'GÜNCEL KADEME', value: displayRank, sub: lp ? `${lp}` : 'Tek/Çift Kuyruğu' },
-                        { label: 'KAZANMA ORANI', value: wr ? `%${wr}` : '—', sub: 'Galibiyet Oranı' },
+                        { label: 'TEK / ÇİFT (SOLO)', value: soloText, sub: solo?.winrate && solo.winrate !== '—' ? `%${solo.winrate} galibiyet` : 'Solo/Duo Kuyruğu' },
+                        { label: 'ESNEK (FLEX)', value: flexText, sub: flex?.winrate && flex.winrate !== '—' ? `%${flex.winrate} galibiyet` : 'Flex 5v5 Kuyruğu' },
                         { label: 'SUNUCU BÖLGESİ', value: region, sub: 'Resmi Riot Sunucusu' },
-                        { label: 'SİHİRDAR', value: parsed.name, sub: `Etiket: #${parsed.tag}` }
+                        { label: 'SİHİRDAR KİMLİĞİ', value: parsed.name, sub: `Etiket: #${parsed.tag}` }
                     ],
                     profileUrl: `https://www.op.gg/summoners/${region.toLowerCase().replace(/[0-9]/g, '') || 'tr'}/${encodeURIComponent(parsed.name)}-${encodeURIComponent(parsed.tag)}`
                 };
             }
         },
 
-        // 7. TEAMFIGHT TACTICS (TFT)
+        // 7. TEAMFIGHT TACTICS (TFT - Standart & Muhteşem İkili)
         tft: {
             async fetch(kullanici) {
                 const parsed = TrophiesManager.parseRiotId(kullanici);
@@ -773,30 +785,37 @@ const TrophiesManager = {
             },
             map(d, kullanici) {
                 const parsed = d?.parsed || TrophiesManager.parseRiotId(kullanici);
-                const tier = d?.tier || null;
-                const lp = d?.lp ?? null;
-                const wr = d?.winrate || null;
                 const region = d?.region || parsed.displayRegion || 'TR';
 
-                const displayRank = tier || 'Derecesiz (Unranked)';
-                // Riot resmi API'si geçmiş sezon zirvesini (peak) tutmaz.
-                // Eğer snapshot'tan gelen özel bir peak varsa onu, yoksa aktif ligi, o da yoksa etiketi basıyoruz.
-                const peakVal = d?.peak || (tier ? tier : `#${parsed.tag}`);
+                const standard = d?.standard || (d?.activeQueue === 'standard' ? d : null);
+                const doubleUp = d?.doubleUp || (d?.activeQueue === 'double' ? d : null);
+
+                const secilen = d?.secilenKuyruk || d?.kuyruk || (standard?.tier ? 'standard' : (doubleUp?.tier ? 'double' : 'standard'));
+                const activeQueue = (secilen === 'double' && doubleUp) ? doubleUp : (standard || doubleUp || d);
+                const isDouble = secilen === 'double' && Boolean(doubleUp);
+
+                const displayRank = activeQueue?.tier || d?.tier || 'Derecesiz (Unranked)';
+                const lp = activeQueue?.lp || d?.lp || null;
+                const wr = activeQueue?.winrate || d?.winrate || null;
+                const peak = d?.peak || (displayRank !== 'Derecesiz (Unranked)' ? displayRank : `#${parsed.tag}`);
+
+                const standardText = standard?.tier ? `${standard.tier}${standard.lp ? ` (${standard.lp})` : ''}` : 'Derecesiz';
+                const doubleText = doubleUp?.tier ? `${doubleUp.tier}${doubleUp.lp ? ` (${doubleUp.lp})` : ''}` : 'Derecesiz';
 
                 return {
                     handle: parsed.full,
                     badge: `TFT • ${region}`,
-                    heroLabel: 'TFT DERECELİ KADEME',
+                    heroLabel: isDouble ? 'MUHTEŞEM İKİLİ (DOUBLE UP)' : 'TFT DERECELİ KADEME',
                     heroValue: displayRank,
                     heroSub: lp ? `${lp}${wr && wr !== '—' ? ` • %${wr} WR` : ''}` : 'Strateji Modu',
                     peakLabel: 'ZİRVE (PEAK)',
-                    peakValue: peakVal,
-                    summaryText: tier ? `${tier}${lp ? ` (${lp})` : ''}` : parsed.full,
+                    peakValue: peak,
+                    summaryText: displayRank !== 'Derecesiz (Unranked)' ? `${displayRank}${lp ? ` (${lp})` : ''}` : parsed.full,
                     stats: [
-                        { label: 'GÜNCEL KADEME', value: displayRank, sub: lp ? `${lp}` : 'TFT Ranked' },
-                        { label: 'STRATEJİST', value: parsed.name, sub: `Etiket: #${parsed.tag}` },
+                        { label: 'STANDART DERECELİ', value: standardText, sub: standard?.winrate && standard.winrate !== '—' ? `%${standard.winrate} galibiyet` : 'TFT Ranked Solo' },
+                        { label: 'İKİLİ (DOUBLE UP)', value: doubleText, sub: doubleUp?.winrate && doubleUp.winrate !== '—' ? `%${doubleUp.winrate} galibiyet` : 'TFT 2v2 Modu' },
                         { label: 'SUNUCU BÖLGESİ', value: region, sub: 'Riot Resmi' },
-                        { label: 'DETAYLI ANALİZ', value: 'LoLCHESS', sub: 'Kompozisyon & İstatistik' }
+                        { label: 'STRATEJİST', value: parsed.name, sub: `Etiket: #${parsed.tag}` }
                     ],
                     profileUrl: `https://lolchess.gg/profile/${region.toLowerCase().replace(/[0-9]/g, '') || 'tr'}/${encodeURIComponent(parsed.name)}-${encodeURIComponent(parsed.tag)}`
                 };
@@ -927,8 +946,12 @@ const TrophiesManager = {
             accent: '#3b5bdb'
         };
         const adapter = this.ADAPTERS[tur];
+        let mergedRaw = rawData;
+        if (snap && snap.kuyruk) {
+            mergedRaw = { ...(rawData || {}), secilenKuyruk: snap.kuyruk };
+        }
         const mapped = adapter && typeof adapter.map === 'function'
-            ? adapter.map(rawData, kullanici)
+            ? adapter.map(mergedRaw, kullanici)
             : {
                 handle: `@${kullanici}`,
                 badge: 'AKTİF',
@@ -985,7 +1008,7 @@ const TrophiesManager = {
     /**
      * Canlı veriden ve opsiyonel manuel kademe seçimlerinden hafif (60 byte) bir snapshot üretir.
      */
-    buildSnapshot(tur, kullanici, rawData = null, manualAktif = '', manualPeak = '') {
+    buildSnapshot(tur, kullanici, rawData = null, manualAktif = '', manualPeak = '', kuyruk = '') {
         const norm = this.getNormalizedTrophyData(tur, kullanici, rawData, null);
         const isPlaceholderVal = (v) => !v || v === '—' || v === 'Profil Bağlı' || v === 'FACEIT' || v === 'CS2' || v === 'Ranked 1v1' || v === 'Belirtilmedi' || String(v).includes('Derecesiz') || String(v).startsWith('#');
 
@@ -1001,6 +1024,7 @@ const TrophiesManager = {
         if (peak) snap.peak = peak;
         if (cleanManualAktif) snap.manualAktif = true;
         if (cleanManualPeak) snap.manualPeak = true;
+        if (kuyruk) snap.kuyruk = kuyruk;
         return snap;
     },
 
