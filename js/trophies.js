@@ -775,19 +775,22 @@ const TrophiesManager = {
                 const parsed = d?.parsed || TrophiesManager.parseRiotId(kullanici);
                 const tier = d?.tier || null;
                 const lp = d?.lp ?? null;
-                const peak = d?.peak || tier || null;
+                const wr = d?.winrate || null;
                 const region = d?.region || parsed.displayRegion || 'TR';
 
                 const displayRank = tier || 'Derecesiz (Unranked)';
+                // Riot resmi API'si geçmiş sezon zirvesini (peak) tutmaz.
+                // Eğer snapshot'tan gelen özel bir peak varsa onu, yoksa aktif ligi, o da yoksa etiketi basıyoruz.
+                const peakVal = d?.peak || (tier ? tier : `#${parsed.tag}`);
 
                 return {
                     handle: parsed.full,
                     badge: `TFT • ${region}`,
                     heroLabel: 'TFT DERECELİ KADEME',
                     heroValue: displayRank,
-                    heroSub: lp ? `${lp}` : 'Strateji Modu',
+                    heroSub: lp ? `${lp}${wr && wr !== '—' ? ` • %${wr} WR` : ''}` : 'Strateji Modu',
                     peakLabel: 'ZİRVE (PEAK)',
-                    peakValue: peak || displayRank,
+                    peakValue: peakVal,
                     summaryText: tier ? `${tier}${lp ? ` (${lp})` : ''}` : parsed.full,
                     stats: [
                         { label: 'GÜNCEL KADEME', value: displayRank, sub: lp ? `${lp}` : 'TFT Ranked' },
@@ -938,7 +941,7 @@ const TrophiesManager = {
                 profileUrl: `https://${meta.domain}`
             };
 
-        const isPlaceholderVal = (v) => !v || v === '—' || v === 'Profil Bağlı' || v === 'FACEIT' || v === 'CS2' || v === 'Ranked 1v1' || v === 'Belirtilmedi';
+        const isPlaceholderVal = (v) => !v || v === '—' || v === 'Profil Bağlı' || v === 'FACEIT' || v === 'CS2' || v === 'Ranked 1v1' || v === 'Belirtilmedi' || String(v).includes('Derecesiz') || String(v).startsWith('#');
 
         // Snapshot (veya kullanıcı tarafından onaylanmış Aktif/Peak kademesi) birleştirmesi
         if (snap && typeof snap === 'object') {
@@ -984,7 +987,7 @@ const TrophiesManager = {
      */
     buildSnapshot(tur, kullanici, rawData = null, manualAktif = '', manualPeak = '') {
         const norm = this.getNormalizedTrophyData(tur, kullanici, rawData, null);
-        const isPlaceholderVal = (v) => !v || v === '—' || v === 'Profil Bağlı' || v === 'FACEIT' || v === 'CS2' || v === 'Ranked 1v1' || v === 'Belirtilmedi';
+        const isPlaceholderVal = (v) => !v || v === '—' || v === 'Profil Bağlı' || v === 'FACEIT' || v === 'CS2' || v === 'Ranked 1v1' || v === 'Belirtilmedi' || String(v).includes('Derecesiz') || String(v).startsWith('#');
 
         const cleanManualAktif = String(manualAktif || '').trim();
         const cleanManualPeak = String(manualPeak || '').trim();
