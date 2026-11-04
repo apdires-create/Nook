@@ -741,22 +741,26 @@ const TrophiesManager = {
                 const lp = d?.lp ?? null;
                 const peak = d?.peak || tier || null;
                 const wr = d?.winrate || null;
+                const region = d?.region || parsed.displayRegion || 'TR';
+
+                const displayRank = tier || 'Derecesiz (Unranked)';
 
                 return {
                     handle: parsed.full,
-                    badge: `${parsed.displayRegion} SUNUCUSU`,
+                    badge: `${region} • RIOT`,
                     heroLabel: 'TEK / ÇİFT DERECELİ',
-                    heroValue: tier || parsed.name,
-                    peakLabel: 'ZİRVE / ETİKET',
-                    peakValue: peak || `#${parsed.tag}`,
-                    summaryText: tier ? `${tier} ${lp !== null ? `${lp} LP` : ''}` : parsed.full,
+                    heroValue: displayRank,
+                    heroSub: lp ? `${lp}${wr ? ` • %${wr} WR` : ''}` : 'League of Legends',
+                    peakLabel: 'ZİRVE (PEAK)',
+                    peakValue: peak || displayRank,
+                    summaryText: tier ? `${tier}${lp ? ` (${lp})` : ''}` : parsed.full,
                     stats: [
-                        { label: 'SİHİRDAR ADI', value: parsed.name, sub: `Etiket: #${parsed.tag}` },
-                        { label: 'SUNUCU / BÖLGE', value: parsed.displayRegion, sub: parsed.lolPlatform.toUpperCase() },
-                        { label: 'LİG PUANI (LP)', value: lp !== null ? `${lp} LP` : 'Aktif Sezon', sub: 'Tek/Çift Kuyruğu' },
-                        { label: 'KAZANMA ORANI', value: wr ? `%${wr}` : 'OP.GG Canlı', sub: 'Resmi Maç Geçmişi' }
+                        { label: 'GÜNCEL KADEME', value: displayRank, sub: lp ? `${lp}` : 'Tek/Çift Kuyruğu' },
+                        { label: 'KAZANMA ORANI', value: wr ? `%${wr}` : '—', sub: 'Galibiyet Oranı' },
+                        { label: 'SUNUCU BÖLGESİ', value: region, sub: 'Resmi Riot Sunucusu' },
+                        { label: 'SİHİRDAR', value: parsed.name, sub: `Etiket: #${parsed.tag}` }
                     ],
-                    profileUrl: `https://www.op.gg/summoners/${parsed.displayRegion.toLowerCase()}/${encodeURIComponent(parsed.name)}-${encodeURIComponent(parsed.tag)}`
+                    profileUrl: `https://www.op.gg/summoners/${region.toLowerCase().replace(/[0-9]/g, '') || 'tr'}/${encodeURIComponent(parsed.name)}-${encodeURIComponent(parsed.tag)}`
                 };
             }
         },
@@ -769,21 +773,29 @@ const TrophiesManager = {
             },
             map(d, kullanici) {
                 const parsed = d?.parsed || TrophiesManager.parseRiotId(kullanici);
+                const tier = d?.tier || null;
+                const lp = d?.lp ?? null;
+                const peak = d?.peak || tier || null;
+                const region = d?.region || parsed.displayRegion || 'TR';
+
+                const displayRank = tier || 'Derecesiz (Unranked)';
+
                 return {
                     handle: parsed.full,
-                    badge: `TFT • ${parsed.displayRegion}`,
+                    badge: `TFT • ${region}`,
                     heroLabel: 'TFT DERECELİ KADEME',
-                    heroValue: d?.tier || parsed.name,
-                    peakLabel: 'ZİRVE / ETİKET',
-                    peakValue: d?.peak || `#${parsed.tag}`,
-                    summaryText: d?.tier || parsed.full,
+                    heroValue: displayRank,
+                    heroSub: lp ? `${lp}` : 'Strateji Modu',
+                    peakLabel: 'ZİRVE (PEAK)',
+                    peakValue: peak || displayRank,
+                    summaryText: tier ? `${tier}${lp ? ` (${lp})` : ''}` : parsed.full,
                     stats: [
+                        { label: 'GÜNCEL KADEME', value: displayRank, sub: lp ? `${lp}` : 'TFT Ranked' },
                         { label: 'STRATEJİST', value: parsed.name, sub: `Etiket: #${parsed.tag}` },
-                        { label: 'BÖLGE', value: parsed.displayRegion, sub: parsed.lolPlatform.toUpperCase() },
-                        { label: 'MOD', value: 'TFT Ranked', sub: 'Aktif Set' },
-                        { label: 'DETAYLI ANALİZ', value: 'LoLCHESS', sub: 'Kompozisyon & İlk 4' }
+                        { label: 'SUNUCU BÖLGESİ', value: region, sub: 'Riot Resmi' },
+                        { label: 'DETAYLI ANALİZ', value: 'LoLCHESS', sub: 'Kompozisyon & İstatistik' }
                     ],
-                    profileUrl: `https://lolchess.gg/profile/${parsed.displayRegion.toLowerCase()}/${encodeURIComponent(parsed.name)}-${encodeURIComponent(parsed.tag)}`
+                    profileUrl: `https://lolchess.gg/profile/${region.toLowerCase().replace(/[0-9]/g, '') || 'tr'}/${encodeURIComponent(parsed.name)}-${encodeURIComponent(parsed.tag)}`
                 };
             }
         },
