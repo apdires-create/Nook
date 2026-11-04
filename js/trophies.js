@@ -1041,9 +1041,12 @@ const TrophiesManager = {
             if (cached) return cached;
         }
 
+        console.log(`[TrophiesManager.canliVeriCek] Başlatılıyor -> Tür: ${normTur}, Kullanıcı: ${kullanici}, Oturum:`, typeof aktifKullaniciOturumu !== 'undefined' && Boolean(aktifKullaniciOturumu));
+
         // 1. Öncelik: Supabase Edge Function ('bright-task' -> gaming_lookup)
         if (typeof supabaseClient !== 'undefined' && supabaseClient?.functions && typeof aktifKullaniciOturumu !== 'undefined' && aktifKullaniciOturumu) {
             try {
+                console.log(`[TrophiesManager.canliVeriCek] Edge Function ('bright-task') çağrılıyor...`);
                 const { data, error } = await supabaseClient.functions.invoke('bright-task', {
                     body: {
                         action: 'gaming_lookup',
@@ -1051,6 +1054,7 @@ const TrophiesManager = {
                         kullanici: String(kullanici).trim()
                     }
                 });
+                console.log(`[TrophiesManager.canliVeriCek] Edge Function Yanıtı:`, { data, error });
                 if (!error && data?.sonuc) {
                     this._setCache(normTur, kullanici, data.sonuc);
                     return data.sonuc;
@@ -1058,6 +1062,8 @@ const TrophiesManager = {
             } catch (e) {
                 console.warn(`[GamingManager] Edge lookup yedek akışa geçiyor (${normTur}):`, e);
             }
+        } else {
+            console.warn(`[TrophiesManager.canliVeriCek] Edge Function ATLANDI! Sebebi: aktifKullaniciOturumu yok veya supabaseClient hazır değil.`);
         }
 
         // 2. Yedek: İstemci taraflı adaptör
