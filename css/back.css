@@ -1397,6 +1397,44 @@ body.is-owner .top-item-unit:active {
     flex-shrink: 0;
 }
 
+/* 1.1: Sağ Üst Mod / Kuyruk Switcher (Faceit | Premier vb.) */
+.trophy-mode-switcher {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    padding: 2.5px;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.trophy-mode-pill {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: clamp(9.5px, 2.2cqw, 11px);
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.trophy-mode-pill:hover {
+    color: var(--text-primary);
+}
+
+.trophy-mode-pill.is-active {
+    background: var(--trophy-accent, var(--accent-color));
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
 /* 2. KATMAN: Hero Derece / Elo + Altın Peak Rozeti */
 .trophy-hero-banner {
     display: flex;

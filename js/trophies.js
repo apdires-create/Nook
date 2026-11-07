@@ -131,42 +131,26 @@ const TrophiesManager = {
             id: 'cs2',
             tur: 'cs2',
             baslik: 'Counter-Strike 2',
-            alt: 'CS2 Premier / FACEIT Elo ve rekabetçi profil vitrini',
+            alt: 'CS2 FACEIT Elo / Seviye veya Premier Rating profil vitrini',
             domain: 'counter-strike.net',
             accent: '#de9b35',
             kategori: 'fps',
             kategoriBaslik: 'FPS & Taktik',
             girdiTipi: 'nickname',
-            girdiEtiket: 'FACEIT Nick veya Steam Künyesi',
-            placeholder: 'oyuncu_nicki (Örn: s1mple)',
-            ornek: 's1mple',
-            comingSoon: false,
-            tiers: [
-                '30.000+ CS Rating', '25.000+ CS Rating', '20.000+ CS Rating',
-                '15.000+ CS Rating', '10.000+ CS Rating', '5.000+ CS Rating',
-                'Global Elite', 'Supreme (SMFC)', 'Legendary Eagle Master (LEM)',
-                'Legendary Eagle (LE)', 'Distinguished Master Guardian (DMG)',
-                'Master Guardian', 'Gold Nova', 'Silver', 'FACEIT Level 10'
-            ]
-        },
-        {
-            id: 'faceit',
-            tur: 'faceit',
-            baslik: 'FACEIT',
-            alt: 'FACEIT rekabetçi lig seviyesi (1-10), güncel Elo ve maç istatistikleri',
-            domain: 'faceit.com',
-            accent: '#ff5500',
-            kategori: 'fps',
-            kategoriBaslik: 'FPS & Taktik',
-            girdiTipi: 'nickname',
-            girdiEtiket: 'FACEIT Oyuncu Nicki',
-            placeholder: 'faceit_nicki (Örn: m0NESY)',
+            girdiEtiket: 'FACEIT Oyuncu Nicki veya CS2 Adı',
+            placeholder: 'oyuncu_nicki (Örn: m0NESY)',
             ornek: 'm0NESY',
             comingSoon: false,
+            modes: [
+                { id: 'faceit', baslik: 'FACEIT' },
+                { id: 'premier', baslik: 'Premier' }
+            ],
             tiers: [
                 'Level 10 (2000+ Elo)', 'Level 9 (1751-2000)', 'Level 8 (1531-1750)',
                 'Level 7 (1351-1530)', 'Level 6 (1201-1350)', 'Level 5 (1051-1200)',
-                'Level 4 (901-1050)', 'Level 3 (751-900)', 'Level 2 (501-750)', 'Level 1 (100-500)'
+                'Level 4 (901-1050)', 'Level 3 (751-900)', 'Level 2 (501-750)', 'Level 1 (100-500)',
+                '30.000+ CS Rating', '25.000+ CS Rating', '20.000+ CS Rating',
+                '15.000+ CS Rating', '10.000+ CS Rating', '5.000+ CS Rating'
             ]
         },
         {
@@ -647,8 +631,8 @@ const TrophiesManager = {
             }
         },
 
-        // 3. FACEIT / CS2 (Açık Web API + CORS Yedekli)
-        faceit: {
+        // 3. CS2 & FACEIT (Evrensel Counter-Strike Motoru)
+        cs2: {
             async fetch(kullanici) {
                 const nick = String(kullanici).trim();
                 const url = `https://www.faceit.com/api/users/v1/nicknames/${encodeURIComponent(nick)}`;
@@ -656,42 +640,52 @@ const TrophiesManager = {
                 return json?.payload || null;
             },
             map(d, kullanici) {
-                // Hem Edge Function çıktısını ({ level, elo, region, nickname })
-                // hem de doğrudan FACEIT API payload çıktısını ({ games: { cs2: ... } }) destekler
+                const secilenMod = d?.secilenKuyruk || d?.kuyruk || 'faceit';
                 const cs2 = d?.games?.cs2 || d?.games?.csgo || null;
                 const elo = d?.elo ?? cs2?.faceit_elo ?? null;
                 const lvl = d?.level ?? cs2?.skill_level ?? null;
                 const region = d?.region || cs2?.region || d?.country?.toUpperCase() || 'EU';
                 const nick = d?.nickname || d?.name || kullanici;
 
+                const isPremier = secilenMod === 'premier';
+                const heroLabel = isPremier ? 'PREMIER CS RATING' : 'FACEIT ELO';
+                const heroValue = isPremier ? (d?.premierRating || (elo ? `${elo} Rating` : 'Premier')) : (elo ? `${elo} ELO` : (lvl ? `SEVİYE ${lvl}` : 'Profilli Oyuncu'));
+                const heroSub = isPremier ? 'Valve Resmi Mod' : (lvl ? `Seviye ${lvl} • Rekabetçi` : 'FACEIT Matchmaking');
+                const peakLabel = isPremier ? 'ZİRVE RATING' : 'FACEIT SEVİYESİ';
+                const peakValue = isPremier ? (d?.peakPremier || heroValue) : (lvl ? `Level ${lvl}` : (elo ? `${elo} ELO` : 'CS2'));
+
                 return {
                     handle: nick,
-                    badge: `BÖLGE: ${region}`,
-                    heroLabel: 'GÜNCEL FACEIT ELO',
-                    heroValue: elo ? `${elo} ELO` : (lvl ? `SEVİYE ${lvl}` : 'Profilli Oyuncu'),
-                    peakLabel: 'SEVİYE (LEVEL)',
-                    peakValue: lvl ? `SEVİYE ${lvl}` : (elo ? `${elo} ELO` : 'CS2'),
+                    badge: isPremier ? `VALVE • ${region}` : `FACEIT • ${region}`,
+                    heroLabel,
+                    heroValue,
+                    heroSub,
+                    peakLabel,
+                    peakValue,
                     summaryText: elo ? `Lvl ${lvl || '?'} • ${elo} ELO` : nick,
+                    activeMode: secilenMod,
+                    modes: [
+                        { id: 'faceit', label: 'FACEIT' },
+                        { id: 'premier', label: 'Premier' }
+                    ],
                     stats: [
-                        { label: 'FACEIT SEVİYESİ', value: lvl ? `Level ${lvl} / 10` : '—', sub: 'Rekabetçi Kademe' },
-                        { label: 'AKTİF ELO', value: elo ? `${elo} ELO` : '—', sub: 'CS2 Eşleştirme' },
+                        { label: 'FACEIT ELO', value: elo ? `${elo} ELO` : '—', sub: lvl ? `Level ${lvl} / 10` : 'Rekabetçi' },
+                        { label: 'PREMIER MODU', value: isPremier ? heroValue : (lvl ? `Lvl ${lvl}` : '—'), sub: 'Valve Eşleştirme' },
                         { label: 'BÖLGE / ÜLKE', value: region, sub: d?.country ? d.country.toUpperCase() : 'Uluslararası' },
-                        { label: 'PLATFORM DURUMU', value: d?.verified ? 'Doğrulanmış' : 'Aktif', sub: 'FACEIT Rekabetçi' }
+                        { label: 'PLATFORM DURUMU', value: d?.verified ? 'Doğrulanmış' : 'Aktif', sub: 'CS2 Oyuncusu' }
                     ],
                     profileUrl: `https://www.faceit.com/en/players/${encodeURIComponent(nick)}`
                 };
             }
         },
 
-        // 4. CS2 (FACEIT motorunu paylaşır)
-        cs2: {
+        // Geriye dönük uyumluluk için faceit adaptörü cs2 motoruna yönlendirir
+        faceit: {
             async fetch(kullanici) {
-                return await TrophiesManager.ADAPTERS.faceit.fetch(kullanici);
+                return await TrophiesManager.ADAPTERS.cs2.fetch(kullanici);
             },
             map(d, kullanici) {
-                const mapped = TrophiesManager.ADAPTERS.faceit.map(d, kullanici);
-                mapped.heroLabel = 'CS2 REKABETÇİ ELO';
-                return mapped;
+                return TrophiesManager.ADAPTERS.cs2.map(d, kullanici);
             }
         },
 

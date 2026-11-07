@@ -353,6 +353,22 @@ const RenderEngine = {
 
                 if (detailBody) {
                     detailBody.innerHTML = this.renderTrophyRootLayout(norm);
+
+                    // Mod Switcher Buton Dinleyicileri (Faceit, Premier vb.)
+                    detailBody.querySelectorAll('.trophy-mode-pill').forEach(pill => {
+                        pill.onclick = (e) => {
+                            e.stopPropagation();
+                            const targetMode = pill.dataset.modeId;
+                            if (!targetMode) return;
+                            if (!seciliOge.snap) seciliOge.snap = {};
+                            seciliOge.snap.kuyruk = targetMode;
+                            // Kullanıcı profil sahibiyse otomatik kayda işaretle
+                            if (isUserOwner && typeof EditManager !== 'undefined') {
+                                EditManager.Global.degisiklikYapildi();
+                            }
+                            this.trophiesCiz(kart);
+                        };
+                    });
                 }
 
                 // Eğer canlı veri henüz bellekte yoksa arka planda lazy olarak çek ve görünümü tazele
@@ -438,7 +454,17 @@ const RenderEngine = {
                             <div class="trophy-id-platform">${this.escapeHtml(norm.baslik)} • ${this.escapeHtml(norm.domain)}</div>
                         </div>
                     </div>
-                    <span class="trophy-id-badge">${this.escapeHtml(norm.badge || 'AKTİF')}</span>
+                    ${Array.isArray(norm.modes) && norm.modes.length > 1 ? `
+                        <div class="trophy-mode-switcher" data-trophy-tur="${this.escapeHtml(norm.tur)}">
+                            ${norm.modes.map(m => `
+                                <button type="button" class="trophy-mode-pill ${norm.activeMode === m.id ? 'is-active' : ''}" data-mode-id="${this.escapeHtml(m.id)}" title="${this.escapeHtml(m.label)} Modu">
+                                    ${this.escapeHtml(m.label)}
+                                </button>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <span class="trophy-id-badge">${this.escapeHtml(norm.badge || 'AKTİF')}</span>
+                    `}
                 </div>
 
                 <!-- 2. KATMAN: Hero Derece & Altın Zirve (Peak) Rozeti -->
