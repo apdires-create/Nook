@@ -2605,7 +2605,7 @@ EditManager.TrophiesView = {
         if (!tur || !temizKullanici || typeof TrophiesManager === 'undefined') return;
         const meta = TrophiesManager.katalogOgesiBul(tur) || { baslik: tur };
         const isWidget = this._isWidgetTur(tur);
-        const isOnayli = (tur === 'lol' || tur === 'tft' || tur === 'valorant');
+        const isManualAllowed = (tur === 'brawlhalla');
 
         const canliVeri = preFetchedLive || await TrophiesManager.canliVeriCek(tur, temizKullanici, true, region);
         if (canliVeri) {
@@ -2614,8 +2614,8 @@ EditManager.TrophiesView = {
             if (tur === 'monkeytype') kartVerisi.canli_monkeytype = canliVeri;
         }
 
-        const effectiveManualAktif = isOnayli ? '' : manualAktif;
-        const effectiveManualPeak = isOnayli ? '' : manualPeak;
+        const effectiveManualAktif = isManualAllowed ? manualAktif : '';
+        const effectiveManualPeak = isManualAllowed ? manualPeak : '';
 
         const snap = TrophiesManager.buildSnapshot(tur, temizKullanici, canliVeri, effectiveManualAktif, effectiveManualPeak, kuyruk);
         if (region) snap.region = region.toUpperCase();
@@ -2710,7 +2710,8 @@ EditManager.TrophiesView = {
         const existingForm = body.querySelector('.mt-form-wrap');
         if (existingForm) existingForm.remove();
 
-        const isOnayliOyun = (tur === 'lol' || tur === 'tft' || tur === 'valorant');
+        const isManualAllowed = (tur === 'brawlhalla');
+        const isRiotGame = (tur === 'lol' || tur === 'tft' || tur === 'valorant');
         const aktifler = this._aktifModListesiniAl(tur);
         const mevcutOge = aktifler.find(t => t.tur === tur) || null;
         const mevcutSnap = mevcutOge?.snap || {};
@@ -2736,6 +2737,15 @@ EditManager.TrophiesView = {
             return html;
         };
 
+        let initialStatusHtml = `${RenderEngine.escapeHtml(meta.baslik)} kullanıcı adını girip <b>Sorgula</b> diyerek profilini doğrula.`;
+        if (isRiotGame) {
+            initialStatusHtml = 'Riot ID ve sunucu bölgesini seçip <b>Sorgula</b> diyerek resmi dereceni doğrula.';
+        } else if (tur === 'cs2' || tur === 'faceit') {
+            initialStatusHtml = 'FACEIT kullanıcı adını girip <b>Sorgula</b> diyerek resmi dereceni doğrula.';
+        } else if (isManualAllowed) {
+            initialStatusHtml = 'Brawlhalla ID veya nick girip kademeni aşağıdan seçebilirsin.';
+        }
+
         const formWrap = document.createElement('div');
         formWrap.className = 'inline-form-card mt-form-wrap';
         formWrap.style.marginBottom = '12px';
@@ -2743,7 +2753,7 @@ EditManager.TrophiesView = {
             <div style="font-size: var(--cq-fs-desc); font-weight: 600; margin-bottom: 6px;">${RenderEngine.escapeHtml(meta.girdiEtiket || 'Oyuncu Kimliği')}:</div>
             <div style="display: flex; gap: 6px; align-items: center;">
                 <input type="text" class="inline-form-input mt-user-input" style="flex: 1; min-width: 0;" placeholder="${RenderEngine.escapeHtml(meta.placeholder || 'kullanıcı_adı')} (Örn: ${RenderEngine.escapeHtml(meta.ornek || '')})" value="${RenderEngine.escapeHtml(mevcutKullanici)}" maxlength="42" autocomplete="off" spellcheck="false">
-                ${isOnayliOyun ? `
+                ${isRiotGame ? `
                     <select class="inline-form-input mt-region-select" style="width: 82px; flex-shrink: 0; padding: 0 6px; height: 34px; font-weight: 600; text-align: center; font-size: 0.78rem;" title="Sunucu / Bölge Seçin">
                         <option value="tr" ${aktifBolge === 'tr' ? 'selected' : ''}>TR</option>
                         <option value="euw" ${aktifBolge === 'euw' ? 'selected' : ''}>EUW</option>
@@ -2764,11 +2774,9 @@ EditManager.TrophiesView = {
                 </button>
             </div>
             <div class="mt-lookup-status" style="font-size: 0.72rem; color: var(--text-tertiary); margin-top: 5px; min-height: 14px;">
-                ${isOnayliOyun 
-                    ? 'Riot ID ve sunucu bölgesini seçip <b>Sorgula</b> diyerek resmi dereceni doğrula.'
-                    : 'Nick girip <b>Sorgula</b> diyebilir veya kademeni aşağıdan doğrudan seçebilirsin.'}
+                ${initialStatusHtml}
             </div>
-            ${(tiers.length > 0 && !isOnayliOyun) ? `
+            ${(tiers.length > 0 && isManualAllowed) ? `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
                     <div>
                         <label style="display: block; font-size: 0.68rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px;">Aktif Kademe</label>
@@ -2784,17 +2792,20 @@ EditManager.TrophiesView = {
                     </div>
                 </div>
             ` : ''}
-            ${(tur === 'lol' || tur === 'tft') ? `
+            ${(tur === 'lol' || tur === 'tft' || tur === 'cs2') ? `
                 <div style="margin-top: 8px;">
-                    <label style="display: block; font-size: 0.68rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px;">Öne Çıkan Dereceli Modu</label>
+                    <label style="display: block; font-size: 0.68rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px;">Öne Çıkan Mod</label>
                     <select class="inline-form-input mt-kuyruk-select" style="width: 100%; padding: 6px 8px; font-size: 0.78rem;">
                         ${tur === 'lol' ? `
                             <option value="solo" ${(mevcutSnap.kuyruk === 'solo' || !mevcutSnap.kuyruk) ? 'selected' : ''}>Tek / Çift Dereceli (Solo / Duo)</option>
                             <option value="flex" ${mevcutSnap.kuyruk === 'flex' ? 'selected' : ''}>Esnek Dereceli (Flex 5v5)</option>
-                        ` : `
+                        ` : (tur === 'tft' ? `
                             <option value="standard" ${(mevcutSnap.kuyruk === 'standard' || !mevcutSnap.kuyruk) ? 'selected' : ''}>Standart Dereceli (TFT Solo)</option>
                             <option value="double" ${mevcutSnap.kuyruk === 'double' ? 'selected' : ''}>Muhteşem İkili (Double Up 2v2)</option>
-                        `}
+                        ` : `
+                            <option value="faceit" ${(mevcutSnap.kuyruk === 'faceit' || !mevcutSnap.kuyruk) ? 'selected' : ''}>FACEIT Dereceli (Elo & Seviye)</option>
+                            <option value="premier" ${mevcutSnap.kuyruk === 'premier' ? 'selected' : ''}>Premier CS Rating</option>
+                        `)}
                     </select>
                 </div>
             ` : ''}
@@ -2860,6 +2871,18 @@ EditManager.TrophiesView = {
                         if (kuyrukSelect && !live.standard?.tier && live.doubleUp?.tier) {
                             kuyrukSelect.value = 'double';
                         }
+                    } else if (tur === 'cs2' || tur === 'faceit') {
+                        const elo = live.elo ? `${live.elo} ELO` : '';
+                        const lvl = live.level ? `Level ${live.level}` : '';
+                        const info = [lvl, elo].filter(Boolean).join(' • ') || 'FACEIT Aktif';
+                        statusEl.textContent = `✓ Doğrulandı: ${live.nickname || check.clean} (${info})`;
+                    } else if (tur === 'chess') {
+                        const rapid = live.chess_rapid?.last?.rating || live.rapid || '';
+                        const blitz = live.chess_blitz?.last?.rating || live.blitz || '';
+                        const cInfo = [rapid ? `Rapid: ${rapid}` : '', blitz ? `Blitz: ${blitz}` : ''].filter(Boolean).join(' • ') || 'Satranç Profili';
+                        statusEl.textContent = `✓ Doğrulandı: ${live.username || check.clean} (${cInfo})`;
+                    } else if (tur === 'duolingo') {
+                        statusEl.textContent = `✓ Doğrulandı: ${live.username || check.clean} (${live.streak ?? 0} Gün Seri 🔥 • ${live.topLang || 'Dil'})`;
                     } else {
                         statusEl.textContent = `✓ Doğrulandı: Aktif ${norm.heroValue} • Zirve ${norm.peakValue}`;
                     }
@@ -2867,13 +2890,17 @@ EditManager.TrophiesView = {
                 return live;
             } else {
                 if (statusEl) {
-                    if (isOnayliOyun) {
-                        statusEl.style.color = '#fa5252';
+                    statusEl.style.color = '#fa5252';
+                    if (isRiotGame) {
                         const bUpper = (secilenBolge || 'TR').toUpperCase();
                         statusEl.textContent = `✕ Oyuncu ${bUpper} sunucusunda bulunamadı. Lütfen Riot ID ve bölgeyi kontrol edin.`;
-                    } else {
+                    } else if (tur === 'cs2' || tur === 'faceit') {
+                        statusEl.textContent = `✕ FACEIT oyuncusu bulunamadı. Lütfen oyuncu adını kontrol edin.`;
+                    } else if (isManualAllowed) {
                         statusEl.style.color = '#fcc419';
                         statusEl.textContent = `Canlı API yanıt vermedi; aşağıdan Aktif ve Peak kademeni seçip kaydedebilirsin.`;
+                    } else {
+                        statusEl.textContent = `✕ ${meta.baslik} hesabı bulunamadı. Lütfen kullanıcı adını kontrol edin.`;
                     }
                 }
                 return null;
@@ -2917,17 +2944,23 @@ EditManager.TrophiesView = {
                 saveBtn.textContent = 'Doğrulanıyor...';
             }
 
-            // Onaylı oyunlarda API doğrulaması şart
+            // Brawlhalla dışındaki tüm içeriklerde API doğrulaması şart
             let canli = sonSorgulananCanliVeri;
-            if (isOnayliOyun && !canli) {
+            if (!isManualAllowed && !canli) {
                 canli = await runLookup();
                 if (!canli) {
                     if (saveBtn) {
                         saveBtn.disabled = false;
                         saveBtn.textContent = 'Kaydet';
                     }
-                    const bUpper = (secilenBolge || 'TR').toUpperCase();
-                    EditManager.Global.toastGoster(`Oyuncu ${bUpper} sunucusunda doğrulanamadı. Lütfen geçerli bir Riot ID girin.`, 'warning');
+                    if (isRiotGame) {
+                        const bUpper = (secilenBolge || 'TR').toUpperCase();
+                        EditManager.Global.toastGoster(`Oyuncu ${bUpper} sunucusunda doğrulanamadı. Lütfen geçerli bir Riot ID girin.`, 'warning');
+                    } else if (tur === 'cs2' || tur === 'faceit') {
+                        EditManager.Global.toastGoster('FACEIT oyuncusu bulunamadı. Vitrine eklemek için geçerli bir FACEIT nicki girmelisiniz.', 'warning');
+                    } else {
+                        EditManager.Global.toastGoster(`${meta.baslik} hesabı doğrulanamadı. Vitrine eklemek için geçerli bir hesap belirtmelisiniz.`, 'warning');
+                    }
                     return;
                 }
             }

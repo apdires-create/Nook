@@ -1115,9 +1115,9 @@ const TrophiesManager = {
         const norm = this.getNormalizedTrophyData(tur, kullanici, rawData, null);
         const isPlaceholderVal = (v) => !v || v === '—' || v === 'Profil Bağlı' || v === 'FACEIT' || v === 'CS2' || v === 'Ranked 1v1' || v === 'Belirtilmedi' || String(v).includes('Derecesiz') || String(v).startsWith('#');
 
-        const isOnayli = (tur === 'lol' || tur === 'tft' || tur === 'valorant');
-        const cleanManualAktif = isOnayli ? '' : String(manualAktif || '').trim();
-        const cleanManualPeak = isOnayli ? '' : String(manualPeak || '').trim();
+        const isManualAllowed = (tur === 'brawlhalla');
+        const cleanManualAktif = isManualAllowed ? String(manualAktif || '').trim() : '';
+        const cleanManualPeak = isManualAllowed ? String(manualPeak || '').trim() : '';
 
         const aktif = cleanManualAktif || (!isPlaceholderVal(norm.heroValue) ? norm.heroValue : '');
         const peak = cleanManualPeak || (!isPlaceholderVal(norm.peakValue) ? norm.peakValue : aktif);
