@@ -7,14 +7,14 @@
 /* Sol Kenar: Ribbon / Flag Butonları */
 .card-flags-wrapper {
     position: absolute;
-    top: 36px;
+    top: clamp(28px, 5.2cqh, 48px);
     right: 100%;
     left: auto;
     margin-right: -2px;
     margin-left: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: clamp(8px, 1.4cqh, 14px);
     z-index: 35;
     pointer-events: auto;
     transition: left 0.32s var(--ease-spring),
@@ -28,8 +28,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 42px;
+    width: clamp(36px, 7.6cqw, 46px);
+    height: clamp(40px, 6.2cqh, 50px);
     padding: 0;
     border-radius: 12px 0 0 12px;
     border: none;
@@ -133,8 +133,8 @@
 }
 
 .card-container.is-flipped:not(.flags-inward) .card-flag-btn {
-    width: 42px;
-    height: 42px;
+    width: clamp(40px, 8cqw, 50px);
+    height: clamp(40px, 8cqw, 50px);
     border-radius: 50%;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.3);
 }
@@ -281,8 +281,7 @@
     flex-shrink: 0;
     width: 100%;
     position: relative;
-    padding-top: 8px;
-    margin-top: calc(auto - 8px);
+    padding-top: 6px;
     overflow: visible;
 }
 

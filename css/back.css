@@ -421,8 +421,23 @@ body.is-owner .nook-link-row.is-expanded input {
 .tops-container-wrap {
     display: flex;
     flex-direction: column;
-    gap: var(--tops-gap, clamp(14px, 2.2cqh, 20px));
+    gap: var(--tops-gap, clamp(8px, 1.8cqh, 20px));
     width: 100%;
+    flex: 1;
+}
+
+.tops-container-wrap:not(.has-expanded-item) > .top-item-unit {
+    flex: 1 0 auto;
+    max-height: 23.5cqh;
+}
+
+.tops-container-wrap:not(.has-expanded-item) > .top-item-unit:first-child {
+    max-height: 26.5cqh;
+}
+
+.tops-container-wrap:not(.has-expanded-item) > .top-item-unit > .top-item-card {
+    flex: 1;
+    align-items: center;
 }
 
 .top-item-unit {
@@ -449,7 +464,7 @@ body.is-owner .top-item-unit:active {
     position: relative;
     display: flex;
     gap: 3cqw;
-    padding: 2.2cqw 2.8cqw;
+    padding: clamp(6px, 1.85cqh, 18px) 2.8cqw;
     background: var(--bg-card-subtle);
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-item);
@@ -545,8 +560,8 @@ body.is-owner .top-item-unit:active {
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 1.4cqw;
-    margin-top: 1.6cqh;
-    padding-top: 1cqh;
+    margin-top: clamp(4px, 1.2cqh, 14px);
+    padding-top: clamp(3px, 0.8cqh, 10px);
     border-top: 1px dashed rgba(255, 255, 255, 0.08);
 }
 
@@ -606,8 +621,8 @@ body.is-owner .top-item-unit:active {
     border-color: var(--color-tier-gold-border, rgba(245, 158, 11, 0.75));
     box-shadow: 0 6px 24px var(--color-tier-gold-glow, rgba(245, 158, 11, 0.25)),
                 inset 0 0 16px rgba(245, 158, 11, 0.05);
-    padding: 3.2cqw 3.6cqw;
-    min-height: 108px;
+    padding: clamp(7px, 2.3cqh, 22px) 3.4cqw;
+    min-height: clamp(82px, 16.5cqh, 160px);
     z-index: 1;
 }
 
@@ -976,7 +991,7 @@ body.is-owner .top-item-unit:active {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    gap: clamp(14px, 2.2cqh, 20px);
+    gap: clamp(9px, 1.9cqh, 20px);
     width: 100%;
     flex: 1;
     box-shadow: none;
@@ -988,12 +1003,12 @@ body.is-owner .top-item-unit:active {
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-card, 16px);
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
-    padding: clamp(15px, 2.6cqh, 20px) clamp(14px, 3.8cqw, 20px);
+    padding: clamp(11px, 2.3cqh, 24px) clamp(12px, 3.6cqw, 24px);
     width: 100%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: clamp(12px, 1.8cqh, 15px);
+    gap: clamp(8px, 1.6cqh, 16px);
     position: relative;
     overflow: hidden;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
@@ -1230,14 +1245,14 @@ body.is-owner .top-item-unit:active {
     background: var(--bg-card-subtle);
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-card, 12px);
-    padding: clamp(10px, 1.8cqh, 14px) clamp(6px, 1.5cqw, 10px);
-    min-height: clamp(76px, 11cqh, 92px);
+    padding: clamp(8px, 1.8cqh, 20px) clamp(6px, 1.5cqw, 14px);
+    min-height: clamp(64px, 11cqh, 114px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: clamp(3px, 0.6cqh, 5px);
+    gap: clamp(3px, 0.6cqh, 6px);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1296,7 +1311,7 @@ body.is-owner .top-item-unit:active {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    gap: clamp(10px, 1.8cqh, 15px);
+    gap: clamp(8px, 1.8cqh, 18px);
     width: 100%;
     flex: 1;
     min-width: 0;
@@ -1309,7 +1324,7 @@ body.is-owner .top-item-unit:active {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: clamp(11px, 1.9cqh, 15px) clamp(12px, 3.2cqw, 16px);
+    padding: clamp(9px, 1.9cqh, 20px) clamp(10px, 3.2cqw, 22px);
     background: var(--bg-card-subtle);
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-card, 14px);
@@ -1321,14 +1336,14 @@ body.is-owner .top-item-unit:active {
 .trophy-id-left {
     display: flex;
     align-items: center;
-    gap: 11px;
+    gap: clamp(9px, 2.4cqw, 14px);
     min-width: 0;
     flex: 1;
 }
 
 .trophy-id-favicon-box {
-    width: clamp(36px, 9.5cqw, 42px);
-    height: clamp(36px, 9.5cqw, 42px);
+    width: clamp(32px, 9.2cqw, 52px);
+    height: clamp(32px, 9.2cqw, 52px);
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.06);
     border: 1.5px solid var(--trophy-accent, rgba(255, 255, 255, 0.16));
@@ -1351,7 +1366,7 @@ body.is-owner .top-item-unit:active {
 
 .trophy-id-fallback {
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: clamp(11px, 2.6cqw, 15px);
     font-weight: 800;
     color: var(--text-primary);
 }
@@ -1366,7 +1381,7 @@ body.is-owner .top-item-unit:active {
 
 .trophy-id-handle {
     font-family: var(--font-sans);
-    font-size: clamp(14px, 3.8cqw, 17px);
+    font-size: clamp(13px, 3.8cqw, 22px);
     font-weight: 750;
     color: var(--text-primary);
     white-space: nowrap;
@@ -1376,7 +1391,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-id-platform {
-    font-size: clamp(10.5px, 2.5cqw, 12px);
+    font-size: clamp(10px, 2.5cqw, 15px);
     color: var(--text-tertiary);
     white-space: nowrap;
     overflow: hidden;
@@ -1386,9 +1401,9 @@ body.is-owner .top-item-unit:active {
 
 .trophy-id-badge {
     font-family: var(--font-mono);
-    font-size: clamp(10px, 2.4cqw, 11.5px);
+    font-size: clamp(9.5px, 2.4cqw, 14px);
     font-weight: 700;
-    padding: 4px 9px;
+    padding: clamp(3px, 0.6cqh, 6px) clamp(8px, 2cqw, 12px);
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid var(--border-soft);
@@ -1415,9 +1430,9 @@ body.is-owner .top-item-unit:active {
     outline: none;
     color: var(--text-tertiary);
     font-family: var(--font-mono);
-    font-size: clamp(9.5px, 2.2cqw, 11px);
+    font-size: clamp(9px, 2.2cqw, 13.5px);
     font-weight: 700;
-    padding: 3px 8px;
+    padding: clamp(2.5px, 0.5cqh, 5px) clamp(7px, 1.8cqw, 12px);
     border-radius: 999px;
     cursor: pointer;
     transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1441,7 +1456,9 @@ body.is-owner .top-item-unit:active {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    padding: clamp(14px, 2.4cqh, 18px) clamp(14px, 3.5cqw, 18px);
+    padding: clamp(11px, 2.5cqh, 26px) clamp(12px, 3.8cqw, 26px);
+    flex: 1 0 auto;
+    max-height: 20cqh;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.045) 0%, rgba(255, 255, 255, 0.01) 100%), var(--bg-card-subtle);
     border: 1px solid var(--border-soft);
     border-left: 3px solid var(--trophy-accent, var(--accent-color));
@@ -1456,13 +1473,13 @@ body.is-owner .top-item-unit:active {
 .trophy-hero-main {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: clamp(3px, 0.6cqh, 6px);
     min-width: 0;
     flex: 1;
 }
 
 .trophy-hero-label {
-    font-size: clamp(9.5px, 2.2cqw, 11px);
+    font-size: clamp(9px, 2.2cqw, 13.5px);
     font-weight: 700;
     letter-spacing: 0.07em;
     text-transform: uppercase;
@@ -1474,7 +1491,7 @@ body.is-owner .top-item-unit:active {
 
 .trophy-hero-value {
     font-family: var(--font-mono);
-    font-size: clamp(20px, 5.4cqw, 26px);
+    font-size: clamp(18px, 5.4cqw, 34px);
     font-weight: 800;
     color: var(--text-primary);
     line-height: 1.1;
@@ -1490,7 +1507,7 @@ body.is-owner .top-item-unit:active {
     align-items: flex-end;
     justify-content: center;
     gap: 3px;
-    padding: 7px 11px;
+    padding: clamp(5px, 1cqh, 10px) clamp(9px, 2.2cqw, 15px);
     border-radius: 10px;
     background: rgba(245, 158, 11, 0.1);
     border: 1px solid rgba(245, 158, 11, 0.32);
@@ -1503,7 +1520,7 @@ body.is-owner .top-item-unit:active {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: clamp(8.5px, 2cqw, 10px);
+    font-size: clamp(8px, 2cqw, 12px);
     font-weight: 750;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -1513,7 +1530,7 @@ body.is-owner .top-item-unit:active {
 
 .trophy-peak-value {
     font-family: var(--font-mono);
-    font-size: clamp(12.5px, 3.2cqw, 15px);
+    font-size: clamp(11.5px, 3.2cqw, 19px);
     font-weight: 800;
     color: #fde68a;
     white-space: nowrap;
@@ -1527,8 +1544,11 @@ body.is-owner .top-item-unit:active {
 .trophy-stats-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(8px, 2cqw, 12px);
+    grid-auto-rows: 1fr;
+    gap: clamp(7px, 1.8cqh, 16px) clamp(8px, 2cqw, 16px);
     width: 100%;
+    flex: 2 0 auto;
+    max-height: 44cqh;
     box-sizing: border-box;
 }
 
@@ -1536,11 +1556,11 @@ body.is-owner .top-item-unit:active {
     background: var(--bg-card-subtle);
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-card, 12px);
-    padding: clamp(10px, 1.8cqh, 14px) clamp(10px, 2.5cqw, 14px);
+    padding: clamp(8px, 2cqh, 22px) clamp(9px, 2.5cqw, 18px);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 4px;
+    gap: clamp(3px, 0.6cqh, 6px);
     min-width: 0;
     box-sizing: border-box;
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.18);
@@ -1555,7 +1575,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-stat-label {
-    font-size: clamp(9px, 2.1cqw, 10.5px);
+    font-size: clamp(8.5px, 2.1cqw, 13px);
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -1567,7 +1587,7 @@ body.is-owner .top-item-unit:active {
 
 .trophy-stat-val {
     font-family: var(--font-mono);
-    font-size: clamp(15px, 4cqw, 19px);
+    font-size: clamp(14px, 4cqw, 25px);
     font-weight: 750;
     color: var(--text-primary);
     line-height: 1.15;
@@ -1577,7 +1597,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-stat-sub {
-    font-size: clamp(10px, 2.2cqw, 11.5px);
+    font-size: clamp(9.5px, 2.2cqw, 14px);
     color: var(--text-secondary);
     opacity: 0.8;
     white-space: nowrap;
@@ -1588,8 +1608,8 @@ body.is-owner .top-item-unit:active {
 
 /* Master Liste Satırlarındaki Favicon ve Canlı Derece Rozeti */
 .companion-row-favicon {
-    width: 20px;
-    height: 20px;
+    width: clamp(18px, 4.5cqw, 26px);
+    height: clamp(18px, 4.5cqw, 26px);
     object-fit: contain;
     border-radius: 4px;
     pointer-events: none;
@@ -1597,13 +1617,13 @@ body.is-owner .top-item-unit:active {
 
 .companion-row-live-pill {
     font-family: var(--font-mono);
-    font-size: clamp(10.5px, 2.4cqw, 12px);
+    font-size: clamp(10px, 2.4cqw, 15px);
     font-weight: 700;
     color: var(--text-primary);
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid var(--border-soft);
     border-radius: 6px;
-    padding: 3px 7px;
+    padding: clamp(2.5px, 0.5cqh, 5px) clamp(6px, 1.5cqw, 10px);
     white-space: nowrap;
     flex-shrink: 0;
 }

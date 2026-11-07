@@ -155,11 +155,13 @@
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.18);
     color: rgb(var(--landing-white-rgb));
-    padding: 8px 22px;
+    padding: 8px 20px;
     border-radius: var(--landing-radius-pill);
     font-size: 0.88rem;
     font-weight: var(--landing-fw-semibold);
     cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: all var(--landing-transition-fast);
 }
 
@@ -258,7 +260,7 @@
 .landing-main-wrap {
     position: relative;
     z-index: 2;
-    max-width: 1240px;
+    max-width: min(1540px, 92vw);
     margin: 0 auto;
     padding: 0 32px 40px;
     min-height: 100vh;
@@ -274,17 +276,17 @@
     justify-content: space-between;
     flex: 1;
     padding: 120px 4% 60px; 
-    gap: 60px; 
+    gap: clamp(48px, 5vw, 88px); 
     box-sizing: border-box;
 }
 
 .landing-hero-left {
     flex: 1.1;
-    max-width: 520px;
+    max-width: clamp(480px, 38vw, 660px);
 }
 
 .landing-hero-title {
-    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    font-size: clamp(2.8rem, 4.6vw, 5.1rem);
     font-weight: var(--landing-fw-extrabold);
     color: #ffffff;
     margin: 0 0 1rem;
@@ -293,7 +295,7 @@
 }
 
 .landing-hero-subtitle {
-    font-size: var(--landing-fs-md);
+    font-size: clamp(1.05rem, 1.3vw, 1.32rem);
     color: var(--landing-text-muted);
     line-height: 1.6;
     margin: 0 0 2.2rem;
@@ -378,8 +380,8 @@
 }
 
 .tilted-visual-wrapper {
-    width: 380px;  
-    height: 480px; 
+    width: clamp(360px, 25vw, 470px);  
+    height: clamp(460px, 32.5vw, 600px); 
     transform: rotateY(-14deg) rotateX(7deg) rotateZ(-2deg) translateZ(0px); 
     transform-style: preserve-3d;
     transition: transform var(--landing-transition-flip); 
@@ -466,7 +468,8 @@
 
 .user-card-preview-banner {
     width: 100%;
-    height: 130px;
+    height: 27%;
+    min-height: 125px;
     flex-shrink: 0;
     position: relative;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -489,16 +492,16 @@
 }
 
 .user-card-preview-avatar {
-    width: 68px;
-    height: 68px;
+    width: clamp(68px, 4.8vw, 84px);
+    height: clamp(68px, 4.8vw, 84px);
     border-radius: var(--landing-radius-circle);
-    margin: -34px auto 0;
+    margin: -36px auto 0;
     border: 3.5px solid #14172a;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: clamp(24px, 1.8vw, 30px);
     font-weight: 700;
     color: #111111;
     position: relative;
@@ -507,7 +510,7 @@
 }
 
 .user-card-preview-body {
-    padding: 10px 22px 22px;
+    padding: 12px 24px 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -517,7 +520,7 @@
 }
 
 .user-card-preview-name {
-    font-size: 1.25rem;
+    font-size: clamp(1.25rem, 1.4vw, 1.55rem);
     font-weight: 700;
     color: var(--landing-text-primary);
     margin-top: 6px;
@@ -525,17 +528,17 @@
 }
 
 .user-card-preview-role {
-    font-size: 0.85rem;
+    font-size: clamp(0.85rem, 0.95vw, 1.02rem);
     font-weight: 500;
     margin-top: 4px;
 }
 
 .user-card-preview-bio {
-    font-size: 0.88rem;
+    font-size: clamp(0.88rem, 0.96vw, 1.04rem);
     color: var(--landing-text-muted);
-    line-height: 1.5;
-    margin: 12px 0 auto;
-    max-height: 70px;
+    line-height: 1.55;
+    margin: auto 0;
+    max-height: 92px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -814,6 +817,27 @@
 }
 
 @media (max-width: 560px) {
+    .landing-navbar {
+        padding: 0.85rem 4%;
+    }
+
+    .landing-nav-brand {
+        gap: 8px;
+    }
+
+    .landing-nav-brand-text {
+        font-size: 1.35rem;
+    }
+
+    .landing-nav-actions {
+        gap: 8px;
+    }
+
+    .landing-nav-login-btn {
+        padding: 6px 13px;
+        font-size: 0.8rem;
+    }
+
     .landing-hero-title {
         font-size: 2.1rem;
     }

@@ -64,7 +64,7 @@
     
     /* Kart odaklı spot ışığı: Sabit renksiz, tamamen bg-stage ile kenarlara akar */
     --stage-gradient: radial-gradient(
-        ellipse clamp(320px, 85vw, 560px) clamp(550px, 75vh, 850px) at 50% 46%,
+        ellipse clamp(340px, 65vw, 960px) clamp(550px, 78vh, 1100px) at 50% 46%,
         color-mix(in oklch, var(--bg-stage) 5%, transparent) 0%,
         color-mix(in oklch, var(--bg-stage) 55%, transparent) 45%,
         color-mix(in oklch, var(--bg-stage) 92%, transparent) 75%,
@@ -235,7 +235,7 @@
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] {
    /* Cormorant Garamond'un optik inceliğini dengelemek için isme özel daha tok akış */
-   --cq-fs-name: clamp(24px, 7.2cqw, 36px);
+   --cq-fs-name: clamp(23px, 7.2cqw, 48px);
 }
 
 [data-theme="obsidian-minimal"] .profile-name {

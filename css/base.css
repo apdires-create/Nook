@@ -266,15 +266,14 @@ body.is-pointer-dragging * {
     overscroll-behavior-y: contain;
     touch-action: pan-y;
     transform: translateZ(0);
-    scrollbar-gutter: stable;
-    padding-top: 1cqh;
-    padding-bottom: 3.5cqh;
+    padding-top: 0.8cqh;
+    padding-bottom: 2.2cqh;
     padding-inline: 1.2cqw;
     display: flex;
     flex-direction: column;
-    gap: 2.5cqw;
-    mask-image: linear-gradient(to bottom, black 0%, black 95%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 95%, transparent 100%);
+    gap: 2.2cqw;
+    mask-image: linear-gradient(to bottom, black 0%, black 98.5%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 98.5%, transparent 100%);
 }
 
 .scrollable-fade::-webkit-scrollbar {
@@ -508,13 +507,22 @@ html.is-profile-loading #landing-screen {
 
 /* 1. MASAÜSTÜ DUAL STAGE (Yan Yana Çift Kart) */
 @media (min-width: 900px) {
+    .stage {
+        padding-top: calc(52px + clamp(10px, 1.8vh, 24px));
+        padding-bottom: clamp(14px, 2.4vh, 32px);
+        padding-inline: var(--stage-padding);
+        box-sizing: border-box;
+    }
+
     .stage.has-companion-open {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
         gap: var(--stage-gap);
-        padding: var(--stage-padding);
+        padding-top: calc(52px + clamp(10px, 1.8vh, 24px));
+        padding-bottom: clamp(14px, 2.4vh, 32px);
+        padding-inline: var(--stage-padding);
         box-sizing: border-box;
         overflow: hidden;
     }
@@ -524,18 +532,24 @@ html.is-profile-loading #landing-screen {
         z-index: 5;
     }
 
+    .stage .card-container,
+    .stage .companion-card,
     .stage.has-companion-open .card-container,
     .stage.has-companion-open .companion-card {
         flex-shrink: 0;
         aspect-ratio: var(--card-aspect-ratio);
-        /* Duvarlar ve kartlar arası gap tam dengeli; kartlar asla ekran dışına taşmaz */
-        height: min(
+        /* Duvarlar, üst bar ve kartlar arası gap tam dengeli; 5:7 oran kilitli */
+        --desktop-avail-h: calc(100dvh - 52px - clamp(24px, 4.2vh, 56px));
+        --desktop-dual-avail-w: calc((100vw - (2 * var(--stage-padding)) - var(--stage-gap) - 42px) / 2);
+        --effective-card-h: min(
             var(--card-height),
-            calc((100vw - (2 * var(--stage-padding)) - var(--stage-gap)) / 2 * 7 / 5)
+            var(--desktop-avail-h),
+            calc(var(--desktop-dual-avail-w) * 7 / 5)
         );
-        max-height: calc(100vh - (2 * var(--stage-padding)));
-        max-width: calc((100vw - (2 * var(--stage-padding)) - var(--stage-gap)) / 2);
-        width: auto;
+        height: var(--effective-card-h);
+        width: calc(var(--effective-card-h) * 5 / 7);
+        max-height: none;
+        max-width: none;
     }
 
     /* Masaüstünde aktif olan kanat görünür, diğeri gizlenir */
@@ -583,8 +597,8 @@ html.is-profile-loading #landing-screen {
         justify-content: center;
         perspective: 1200px;
         overflow: hidden !important;
-        padding-top: calc(54px + env(safe-area-inset-top, 0px));
-        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        padding-top: calc(52px + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
         padding-left: 0;
         padding-right: 0;
         box-sizing: border-box;
@@ -594,11 +608,11 @@ html.is-profile-loading #landing-screen {
     /* Sabit 5:7 Geometrisi */
     .stage .card-container,
     .stage .companion-card {
-        --mobile-available-h: calc(100dvh - 54px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px);
+        --mobile-available-h: calc(100dvh - 52px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 18px);
         --mobile-card-max-h: min(var(--card-height), var(--mobile-available-h));
         --mobile-card-w: min(
             var(--card-narrow-width),
-            calc(100vw - 32px),
+            calc(100vw - 22px),
             calc(var(--mobile-card-max-h) * 5 / 7)
         );
         width: var(--mobile-card-w);
@@ -790,10 +804,10 @@ html.is-profile-loading #landing-screen {
 /* Companion Card Header */
 .companion-header {
     flex-shrink: 0;
-    padding: var(--companion-padding-top, 28px) 4.5cqw 2.2cqh 4.5cqw;
+    padding: var(--companion-padding-top, 20px) 4.5cqw 1.8cqh 4.5cqw;
     display: flex;
     flex-direction: column;
-    gap: var(--companion-header-gap, 14px);
+    gap: var(--companion-header-gap, 12px);
     border-bottom: 1px solid var(--border-soft);
     background: rgba(255, 255, 255, 0.015);
 }
@@ -1004,9 +1018,9 @@ body:not(.is-pointer-dragging) .companion-row-item.is-touch-pressed {
 }
 
 .companion-row-icon-wrap {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
+    width: clamp(28px, 7.2cqw, 42px);
+    height: clamp(28px, 7.2cqw, 42px);
+    min-width: clamp(28px, 7.2cqw, 42px);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.06);
     display: flex;
@@ -1370,10 +1384,14 @@ body.is-owner .companion-tab-btn:hover .companion-tab-edit-btn {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
-    padding: var(--companion-body-gap, 14px) 4.5cqw 4.5cqw 4.5cqw;
+    padding: var(--companion-body-gap, 10px) 4.5cqw clamp(10px, 2.2cqh, 22px) 4.5cqw;
     display: flex;
     flex-direction: column;
-    gap: var(--companion-body-gap, 14px);
+    gap: var(--companion-body-gap, 10px);
+}
+
+.companion-view-detail .companion-body {
+    padding-bottom: clamp(6px, 1.4cqh, 14px);
 }
 
 .companion-empty-state {
