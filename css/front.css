@@ -16,9 +16,10 @@
     gap: clamp(8px, 1.4cqh, 14px);
     z-index: 35;
     pointer-events: auto;
-    transition: left 0.32s var(--ease-spring),
-                right 0.32s var(--ease-spring),
-                transform 0.32s var(--ease-spring),
+    transform: translate3d(0, 0, 0);
+    transition: left 0.45s var(--ease-spring),
+                right 0.45s var(--ease-spring),
+                transform 0.45s var(--ease-spring),
                 opacity 0.25s ease;
 }
 
@@ -35,10 +36,12 @@
     cursor: pointer;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    transition: transform 0.32s var(--ease-spring),
-                border-radius 0.32s var(--ease-smooth),
-                width 0.32s var(--ease-spring),
-                height 0.32s var(--ease-spring),
+    transition: transform 0.36s var(--ease-spring),
+                border-radius 0.36s var(--ease-spring),
+                width 0.36s var(--ease-spring),
+                height 0.36s var(--ease-spring),
+                background 0.22s ease,
+                border-color 0.22s ease,
                 box-shadow 0.22s ease,
                 filter 0.22s ease;
     user-select: none;
@@ -128,10 +131,6 @@
 
 /* 🔄 FLIP DURUMU 1: Masaüstü (Taşma Yokken) -> Havada Asılı Dairesel Forma Dönüşüm */
 .card-container.is-flipped:not(.flags-inward) .card-flags-wrapper {
-    transform: translateX(-12px);
-}
-
-.card-container.is-flipping:not(.flags-inward) .card-flags-wrapper {
     transform: translateX(-12px) translateZ(40px);
 }
 
@@ -144,6 +143,14 @@
 
 .card-container.is-flipped:not(.flags-inward) .card-flag-btn:hover {
     transform: scale(1.12);
+}
+
+.card-container.is-flipped:not(.flags-inward) .card-flag-btn:active {
+    transform: scale(0.94);
+}
+
+.card-container:not(.is-flipped) .card-flag-btn:active {
+    transform: translateX(-2px) scale(0.96);
 }
 
 /* 📐 TAŞMA DURUMU (Masaüstünde Pencere Daraldığında KART İÇİNE DOĞRU DÖNÜŞ) */

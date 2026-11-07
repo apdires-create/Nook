@@ -112,11 +112,6 @@ html, body {
 }
 
 .card-container {
-    transform-style: flat;
-}
-
-.card-container.is-flipping,
-.card-container.is-tilting {
     transform-style: preserve-3d;
 }
 
@@ -157,19 +152,11 @@ html, body {
     position: relative;
     width: 100%;
     height: 100%;
-    transform-style: flat;
-}
-
-.card-container.is-flipping .nook-card {
     transform-style: preserve-3d;
     transition: transform 0.6s var(--ease-spring), box-shadow 0.3s ease;
 }
 
-.card-container.is-flipped:not(.is-flipping) .nook-card {
-    transform: none;
-}
-
-.card-container.is-flipped.is-flipping .nook-card {
+.card-container.is-flipped .nook-card {
     transform: rotateY(180deg);
 }
 
@@ -202,23 +189,12 @@ body.is-pointer-dragging * {
     transform: translateZ(1px);
 }
 
-.card-container.is-flipped:not(.is-flipping) .card-front {
-    visibility: hidden;
-}
-
 .card-back {
     transform: rotateY(180deg);
-    visibility: hidden;
 }
 
 .card-container.is-flipping .card-back {
-    visibility: visible;
     transform: rotateY(180deg) translateZ(1px);
-}
-
-.card-container.is-flipped:not(.is-flipping) .card-back {
-    visibility: visible;
-    transform: none;
 }
 /* #endregion */
 
@@ -276,7 +252,6 @@ body.is-pointer-dragging * {
 .nook-link-row:active,
 .top-item-card:active,
 .trophy-card-unit:active,
-.card-flag-btn:active,
 .flip-trigger-btn:active,
 .nook-icon-btn:active,
 .companion-back-btn:active,
@@ -651,7 +626,6 @@ html.is-profile-loading #landing-screen {
         margin: 0 auto;
         flex-shrink: 0;
         box-sizing: border-box;
-        transition: transform 0.40s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease !important;
     }
 
     /* Profil Kartı: Normalde merkezde */
@@ -711,6 +685,15 @@ html.is-profile-loading #landing-screen {
         pointer-events: auto !important;
     }
 
+    /* Mobil Deste (Deck) İçi Kaydırma Hayalet Kart Katmanı */
+    .stage .deck-swipe-ghost-card {
+        position: absolute !important;
+        z-index: 5 !important;
+        pointer-events: none !important;
+        margin: 0 auto !important;
+        animation: none !important;
+    }
+
     .stage.is-companion-closing .companion-card {
         pointer-events: none !important;
     }
@@ -745,36 +728,16 @@ html.is-profile-loading #landing-screen {
     flex-direction: column;
     overflow: hidden;
     container-type: size;
-    animation: companionCard3DEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
     transform-origin: left center;
     z-index: 4;
 }
 
-/* Sol kanat kendi sekmeleri (Gaming <-> Widgets <-> Trophies) arasında geçiş yaparken dış kartı baştan sıçratma, içerik yumuşakça aksın */
-.companion-card.is-mode-switching {
-    animation: none !important;
-}
-
-.companion-card.is-mode-switching .companion-header,
-.companion-card.is-mode-switching .companion-body {
-    animation: companionModeSwitchFade 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes companionModeSwitchFade {
-    0% {
-        opacity: 0;
-        transform: translateY(6px);
+@media (min-width: 900px) {
+    /* Kapanırken ana kartın arkasına yumuşakça saklanma */
+    .companion-card.is-closing {
+        animation: companionCard3DExit 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+        pointer-events: none;
     }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Kapanırken ana kartın arkasına yumuşakça saklanma */
-.companion-card.is-closing {
-    animation: companionCard3DExit 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
-    pointer-events: none;
 }
 
 /* Masaüstü: Profil kartının arkasından katı ve tok bir şekilde süzülerek çıkış */

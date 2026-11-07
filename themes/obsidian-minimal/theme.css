@@ -410,7 +410,9 @@
     border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
-[data-theme="obsidian-minimal"] .card-flag-btn.flag-trophies {
+[data-theme="obsidian-minimal"] .card-flag-btn.flag-trophies,
+[data-theme="obsidian-minimal"] .card-flag-btn.flag-widgets,
+[data-theme="obsidian-minimal"] .card-flag-btn.flag-achievements {
     background: #13141b !important;
     color: #ffffff !important;
 }
@@ -418,6 +420,23 @@
 [data-theme="obsidian-minimal"] .card-flag-btn.flag-showcase {
     background: #171822 !important;
     color: #ffffff !important;
+}
+
+[data-theme="obsidian-minimal"] .stage.has-companion-open.is-gaming-mode .card-flag-btn.flag-trophies,
+[data-theme="obsidian-minimal"] .stage.has-companion-open.is-widgets-mode .card-flag-btn.flag-widgets,
+[data-theme="obsidian-minimal"] .stage.has-companion-open.is-achievements-mode .card-flag-btn.flag-achievements,
+[data-theme="obsidian-minimal"] .stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.28) !important;
+}
+
+[data-theme="obsidian-minimal"] .stage.has-companion-open.is-gaming-mode .card-flag-btn.flag-trophies .flag-icon svg,
+[data-theme="obsidian-minimal"] .stage.has-companion-open.is-widgets-mode .card-flag-btn.flag-widgets .flag-icon svg,
+[data-theme="obsidian-minimal"] .stage.has-companion-open.is-achievements-mode .card-flag-btn.flag-achievements .flag-icon svg,
+[data-theme="obsidian-minimal"] .stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase .flag-icon svg {
+    stroke: #000000 !important;
 }
 
 [data-theme="obsidian-minimal"] .card-flag-btn:hover {

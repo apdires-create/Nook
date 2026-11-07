@@ -310,15 +310,8 @@ const Router = {
         if (back) back.inert = !flipped;
 
         this.isFlipping = true;
-
-        if (!flipped) {
-            // Ön yüze dönerken kartı önce 3D 180deg başlangıç konumuna oturt, sonra 0deg'e animasyonla çevir
-            container.classList.add('is-flipping');
-            void card.offsetWidth;
-            container.classList.remove('is-flipped');
-        } else {
-            container.classList.add('is-flipping', 'is-flipped');
-        }
+        container.classList.add('is-flipping');
+        container.classList.toggle('is-flipped', flipped);
 
         const finish = () => {
             this._cancelPending?.();
@@ -340,7 +333,7 @@ const Router = {
         };
     },
 
-    toggleCompanion(forceState, type = 'showcase') {
+    toggleCompanion(forceState, type = 'showcase', swipeDir = 0) {
         const stage = document.getElementById('profileStage');
         const topsCard = document.getElementById('topsCompanionCard');
         const trophiesCard = document.getElementById('trophiesCompanionCard');
@@ -364,6 +357,13 @@ const Router = {
             } catch (err) {}
             this._activeCompanionAnim = null;
         }
+        if (this._activeCompanionCardAnim) {
+            try {
+                this._activeCompanionCardAnim.cancel();
+            } catch (err) {}
+            this._activeCompanionCardAnim = null;
+        }
+        stage.querySelectorAll('.deck-swipe-ghost-card').forEach(el => el.remove());
 
         const isShowcaseOpen = stage.classList.contains('is-showcase-active');
         const isTrophiesOpen = stage.classList.contains('is-trophies-active');
@@ -393,19 +393,67 @@ const Router = {
             this._companionTransitioning = true;
             stage.classList.remove('is-companion-closing');
 
-            if (otherCompanion) {
-                otherCompanion.style.display = 'none';
-                otherCompanion.classList.remove('is-closing', 'is-mode-switching');
+            const wasAnyOpen = stage.classList.contains('has-companion-open');
+            const isLeftModeSwitch = wasAnyOpen && isTrophiesOpen && ['gaming', 'widgets', 'achievements'].includes(normalizedType) && currentLeftMode !== normalizedType;
+            const leftDeckOrder = ['achievements', 'widgets', 'gaming'];
+            const fullDeckOrder = ['achievements', 'widgets', 'gaming', 'main', 'showcase'];
+
+            let oldDeckPos = 'main';
+            if (wasAnyOpen) {
+                oldDeckPos = isShowcaseOpen ? 'showcase' : currentLeftMode;
+            }
+            const oldDeckIdx = fullDeckOrder.indexOf(oldDeckPos);
+            const newDeckIdx = fullDeckOrder.indexOf(normalizedType);
+
+            // Mobilde sol kanat içi (Gaming <-> Widgets <-> Trophies) kaydırmalarda, içerik değişmeden önce
+            // mevcut kartın görsel kopyasını (ghost) al ki ilk kaydırmadaki gibi gerçek deste (deck) geçişi oluşsun
+            let mobileOutgoingClone = null;
+            let mobileSwipeDir = 0; // -1: sola kaydırma (kart sola çıkar, yeni sağdan gelir), +1: sağa kaydırma (kart sağa çıkar, yeni soldan gelir)
+            if (!isDesktop && isLeftModeSwitch && activeCompanion) {
+                const oldIdx = leftDeckOrder.indexOf(currentLeftMode);
+                const newIdx = leftDeckOrder.indexOf(normalizedType);
+                mobileSwipeDir = (newIdx > oldIdx) ? -1 : 1;
+                mobileOutgoingClone = activeCompanion.cloneNode(true);
+                mobileOutgoingClone.removeAttribute('id');
+                mobileOutgoingClone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+                mobileOutgoingClone.classList.add('deck-swipe-ghost-card');
             }
 
-            const wasAnyOpen = stage.classList.contains('has-companion-open');
-            const isLeftModeSwitch = wasAnyOpen && isTrophiesOpen && ['gaming', 'widgets', 'achievements'].includes(normalizedType);
+            if (otherCompanion) {
+                if (isDesktop) otherCompanion.style.display = 'none';
+                otherCompanion.classList.remove('is-closing');
+            }
+
+            if (activeCompanion) {
+                activeCompanion.classList.remove('is-closing');
+            }
 
             // Kullanıcı profilin arka yüzündeyken kanatlardan birine geçerse profil kartını otomatik ön yüzüne çevir
             if (this.isFlipped) {
                 this.setFlipped(false);
             }
 
+            // 1. MASAÜSTÜ İLK AÇILIŞ İSE: İçeriği çizmeden önce FLIP ölçümünü yap ve kartı görünür kıl
+            // Böylece cqw/cqh container query birimleri (0x0 yerine gerçek boyutta) tek seferde doğru hesaplanır!
+            let firstRect = null;
+            if (isDesktop && cardContainer) {
+                cardContainer.style.transform = '';
+                cardContainer.classList.remove('is-tilting');
+                if (!wasAnyOpen) {
+                    firstRect = cardContainer.getBoundingClientRect();
+                }
+                if (activeCompanion) {
+                    activeCompanion.style.display = 'flex';
+                }
+                stage.classList.add('has-companion-open');
+            } else {
+                if (activeCompanion) {
+                    activeCompanion.style.display = 'flex';
+                }
+                stage.classList.add('has-companion-open');
+            }
+
+            // 2. AKTİF KANAT SINIFLARINI VE İÇERİĞİNİ ÇİZ (RenderEngine kendi içinde EditManager.init() çağırır)
             if (normalizedType === 'showcase') {
                 stage.classList.remove('is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
                 stage.classList.add('is-showcase-active');
@@ -415,12 +463,9 @@ const Router = {
                     kartVerisi.tops.aktifListeId = (listeler.length === 1) ? listeler[0].id : null;
                 }
                 const topsCompanion = document.getElementById('topsCompanionCard');
-                if (topsCompanion) topsCompanion.classList.remove('is-detail-editing', 'is-mode-switching');
+                if (topsCompanion) topsCompanion.classList.remove('is-detail-editing');
                 if (typeof RenderEngine !== 'undefined') {
                     RenderEngine.companionCiz(kartVerisi.tops);
-                }
-                if (typeof EditManager !== 'undefined' && isOwner) {
-                    EditManager.CompanionViews?.init();
                 }
             } else {
                 window._activeLeftWingMode = normalizedType;
@@ -442,68 +487,94 @@ const Router = {
                 if (typeof RenderEngine !== 'undefined') {
                     RenderEngine.trophiesCiz(kartVerisi);
                 }
-                if (typeof EditManager !== 'undefined' && isOwner) {
-                    EditManager.TrophiesView?.init();
-                }
             }
 
-            if (activeCompanion) {
-                activeCompanion.classList.remove('is-closing');
-                if (isLeftModeSwitch) {
-                    // Sol 3 sekme (Gaming <-> Widgets <-> Trophies) kendi içinde yumuşak içerik geçişi yapar
-                    activeCompanion.classList.remove('is-mode-switching');
-                    void activeCompanion.offsetWidth;
-                    activeCompanion.classList.add('is-mode-switching');
-                    activeCompanion.style.display = 'flex';
-                } else {
-                    // İlk açılış veya Showcase <-> Sol Kanat geçişinde tam sürgü animasyonunu dinamik kart boyutuna göre tetikle
-                    activeCompanion.classList.remove('is-mode-switching');
-                    activeCompanion.style.display = 'flex';
-                    if (isDesktop) {
-                        activeCompanion.style.animation = 'none';
-                        void activeCompanion.offsetWidth;
-                        activeCompanion.style.animation = '';
-                    }
-                }
-            }
-
+            // 3. ANİMASYONLARI BAŞLAT (Masaüstü FLIP + WAAPI / Mobil Çift Kartlı Deck Swipe)
             if (isDesktop && cardContainer) {
-                // Tilt motorundan kalan açı varsa FLIP ölçümünden önce temizle
-                cardContainer.style.transform = '';
-                cardContainer.classList.remove('is-tilting');
+                const lastRect = cardContainer.getBoundingClientRect();
+                const slideDist = Math.round(Math.max(48, lastRect.width * 0.14));
 
-                if (!wasAnyOpen) {
-                    const firstRect = cardContainer.getBoundingClientRect();
-                    stage.classList.add('has-companion-open');
-                    const lastRect = cardContainer.getBoundingClientRect();
+                if (!wasAnyOpen && firstRect) {
                     const deltaX = (firstRect.left + firstRect.width / 2) - (lastRect.left + lastRect.width / 2);
                     const deltaY = (firstRect.top + firstRect.height / 2) - (lastRect.top + lastRect.height / 2);
-
-                    if (activeCompanion) {
-                        const slideDist = Math.round(Math.max(48, lastRect.width * 0.14));
-                        activeCompanion.style.setProperty('--companion-enter-x', `-${slideDist}px`);
-                    }
 
                     if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
                         this._activeCompanionAnim = cardContainer.animate([
                             { transform: `translate3d(${deltaX}px, ${deltaY}px, 0)` },
                             { transform: 'translate3d(0, 0, 0)' }
                         ], {
-                            duration: 400,
+                            duration: 420,
                             easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
                         });
                     }
-                } else {
-                    stage.classList.add('has-companion-open');
-                    if (activeCompanion && !isLeftModeSwitch) {
-                        const rect = cardContainer.getBoundingClientRect();
-                        const slideDist = Math.round(Math.max(48, rect.width * 0.14));
-                        activeCompanion.style.setProperty('--companion-enter-x', `-${slideDist}px`);
-                    }
                 }
-            } else {
-                stage.classList.remove('is-companion-closing');
-                stage.classList.add('has-companion-open');
+
+                if (activeCompanion) {
+                    activeCompanion.style.setProperty('--companion-enter-x', `-${slideDist}px`);
+                    this._activeCompanionCardAnim = activeCompanion.animate([
+                        {
+                            opacity: 0,
+                            transform: `translate3d(-${slideDist}px, 0, -20px) scale(0.96)`
+                        },
+                        {
+                            opacity: 1,
+                            offset: 0.35
+                        },
+                        {
+                            opacity: 1,
+                            transform: 'translate3d(0, 0, 0) scale(1)'
+                        }
+                    ], {
+                        duration: 420,
+                        easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                    });
+                }
+            } else if (!isDesktop && isLeftModeSwitch && activeCompanion && mobileOutgoingClone) {
+                // Mobilde sol kanat içi kaydırmada: eski kart kaydırma yönüne çıkar, yeni kart karşı yönden merkeze kayar
+                stage.appendChild(mobileOutgoingClone);
+                const travelPx = window.innerWidth + 40;
+                const outEndX = mobileSwipeDir < 0 ? -travelPx : travelPx;
+                const inStartX = mobileSwipeDir < 0 ? travelPx : -travelPx;
+
+                mobileOutgoingClone.animate([
+                    { transform: 'translate3d(0, 0, 0)', opacity: 1 },
+                    { transform: `translate3d(${outEndX}px, 0, 0)`, opacity: 0 }
+                ], {
+                    duration: 400,
+                    easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    fill: 'forwards'
+                });
+
+                this._activeCompanionCardAnim = activeCompanion.animate([
+                    { transform: `translate3d(${inStartX}px, 0, 0)`, opacity: 0 },
+                    { transform: 'translate3d(0, 0, 0)', opacity: 1 }
+                ], {
+                    duration: 400,
+                    easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                });
+            } else if (!isDesktop && !wasAnyOpen && cardContainer && activeCompanion) {
+                // Mobilde ilk kaydırma (main <-> gaming veya main <-> showcase):
+                // Her iki kart da WAAPI ile aynı anda senkronize kayar
+                const travelPx = window.innerWidth + 40;
+                const dir = (newDeckIdx > oldDeckIdx) ? -1 : 1; // -1: sola swipe (main->showcase), +1: sağa swipe (main->gaming)
+                const outEndX = dir < 0 ? -travelPx : travelPx;
+                const inStartX = dir < 0 ? travelPx : -travelPx;
+
+                this._activeCompanionAnim = cardContainer.animate([
+                    { transform: 'translate3d(0, 0, 0)', opacity: 1 },
+                    { transform: `translate3d(${outEndX}px, 0, 0)`, opacity: 0 }
+                ], {
+                    duration: 400,
+                    easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                });
+
+                this._activeCompanionCardAnim = activeCompanion.animate([
+                    { transform: `translate3d(${inStartX}px, 0, 0)`, opacity: 0 },
+                    { transform: 'translate3d(0, 0, 0)', opacity: 1 }
+                ], {
+                    duration: 400,
+                    easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                });
             }
 
             if (typeof checkRibbonOverflow === 'function') {
@@ -511,17 +582,18 @@ const Router = {
             }
 
             this._companionTimer = setTimeout(() => {
-                if (activeCompanion) activeCompanion.classList.remove('is-mode-switching');
+                stage.querySelectorAll('.deck-swipe-ghost-card').forEach(el => el.remove());
                 this._companionTransitioning = false;
                 this._companionTimer = null;
                 this._activeCompanionAnim = null;
+                this._activeCompanionCardAnim = null;
                 if (typeof checkRibbonOverflow === 'function') {
                     checkRibbonOverflow();
                 }
                 if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
                     TiltEngine.wake();
                 }
-            }, isDesktop ? (isLeftModeSwitch ? 250 : 400) : 200);
+            }, isDesktop ? 430 : 410);
 
         } else {
             // ==========================================
@@ -531,7 +603,6 @@ const Router = {
 
             const currentCard = isShowcaseOpen ? topsCard : trophiesCard;
             if (currentCard && isDesktop) {
-                currentCard.classList.remove('is-mode-switching');
                 if (cardContainer) {
                     const rect = cardContainer.getBoundingClientRect();
                     const slideDist = Math.round(Math.max(42, rect.width * 0.12));
@@ -559,17 +630,45 @@ const Router = {
                     fill: 'forwards'
                 });
             } else {
+                // Mobilde ana profil kartına geri dönüş (gaming -> main, showcase -> main veya uçtan sarmal dönüş)
                 stage.classList.remove('has-companion-open');
+                if (cardContainer && currentCard) {
+                    const travelPx = window.innerWidth + 40;
+                    // swipeDir verilmişse doğrudan o yönü kullan (-1: sola kaydırma, +1: sağa kaydırma);
+                    // verilmemişse showcase için sağa (+1), sol kanat için sola (-1) varsay
+                    const dir = swipeDir !== 0 ? swipeDir : (isShowcaseOpen ? 1 : -1);
+                    const outEndX = dir < 0 ? -travelPx : travelPx;
+                    const inStartX = dir < 0 ? travelPx : -travelPx;
+
+                    this._activeCompanionCardAnim = currentCard.animate([
+                        { transform: 'translate3d(0, 0, 0)', opacity: 1 },
+                        { transform: `translate3d(${outEndX}px, 0, 0)`, opacity: 0 }
+                    ], {
+                        duration: 400,
+                        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                        fill: 'forwards'
+                    });
+
+                    this._activeCompanionAnim = cardContainer.animate([
+                        { transform: `translate3d(${inStartX}px, 0, 0)`, opacity: 0 },
+                        { transform: 'translate3d(0, 0, 0)', opacity: 1 }
+                    ], {
+                        duration: 400,
+                        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                        fill: 'forwards'
+                    });
+                }
             }
 
             this._companionTimer = setTimeout(() => {
                 stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-showcase-active', 'is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
+                stage.querySelectorAll('.deck-swipe-ghost-card').forEach(el => el.remove());
                 if (topsCard) {
-                    topsCard.classList.remove('is-closing', 'is-mode-switching');
+                    topsCard.classList.remove('is-closing');
                     if (isDesktop) topsCard.style.display = 'none';
                 }
                 if (trophiesCard) {
-                    trophiesCard.classList.remove('is-closing', 'is-mode-switching');
+                    trophiesCard.classList.remove('is-closing');
                     if (isDesktop) trophiesCard.style.display = 'none';
                 }
                 // Bir sonraki açılış için her iki kartın da durumunu sıfırla
@@ -586,6 +685,10 @@ const Router = {
                     try { this._activeCompanionAnim.cancel(); } catch (err) {}
                     this._activeCompanionAnim = null;
                 }
+                if (this._activeCompanionCardAnim) {
+                    try { this._activeCompanionCardAnim.cancel(); } catch (err) {}
+                    this._activeCompanionCardAnim = null;
+                }
                 if (cardContainer && isDesktop) cardContainer.style.transform = '';
                 this._companionTransitioning = false;
                 this._companionTimer = null;
@@ -595,7 +698,7 @@ const Router = {
                 if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
                     TiltEngine.wake();
                 }
-            }, isDesktop ? 380 : 200);
+            }, isDesktop ? 380 : 410);
         }
     }
 };
@@ -821,13 +924,13 @@ const TouchGestureManager = {
             if (nextIdx < deckOrder.length) {
                 const target = deckOrder[nextIdx];
                 if (target === 'main') {
-                    Router.toggleCompanion(false);
+                    Router.toggleCompanion(false, 'showcase', -1);
                 } else {
-                    Router.toggleCompanion(true, target);
+                    Router.toggleCompanion(true, target, -1);
                 }
             } else {
                 // Showcase'deyken tekrar sola kaydırılırsa ana karta dön
-                Router.toggleCompanion(false);
+                Router.toggleCompanion(false, 'showcase', -1);
             }
         }
         // Sağa kaydırma (Swipe Right, deltaX > threshold) -> Deste dizisinde sola doğru ilerle
@@ -836,13 +939,13 @@ const TouchGestureManager = {
             if (prevIdx >= 0) {
                 const target = deckOrder[prevIdx];
                 if (target === 'main') {
-                    Router.toggleCompanion(false);
+                    Router.toggleCompanion(false, 'showcase', 1);
                 } else {
-                    Router.toggleCompanion(true, target);
+                    Router.toggleCompanion(true, target, 1);
                 }
             } else {
                 // En soldaki karttayken (Trophies) tekrar sağa kaydırılırsa ana karta dön
-                Router.toggleCompanion(false);
+                Router.toggleCompanion(false, 'showcase', 1);
             }
         }
     }
