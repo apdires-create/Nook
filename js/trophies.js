@@ -656,26 +656,29 @@ const TrophiesManager = {
                 return json?.payload || null;
             },
             map(d, kullanici) {
+                // Hem Edge Function çıktısını ({ level, elo, region, nickname })
+                // hem de doğrudan FACEIT API payload çıktısını ({ games: { cs2: ... } }) destekler
                 const cs2 = d?.games?.cs2 || d?.games?.csgo || null;
-                const elo = cs2?.faceit_elo || null;
-                const lvl = cs2?.skill_level || null;
-                const region = cs2?.region || d?.country?.toUpperCase() || 'EU';
+                const elo = d?.elo ?? cs2?.faceit_elo ?? null;
+                const lvl = d?.level ?? cs2?.skill_level ?? null;
+                const region = d?.region || cs2?.region || d?.country?.toUpperCase() || 'EU';
+                const nick = d?.nickname || d?.name || kullanici;
 
                 return {
-                    handle: d?.nickname || kullanici,
+                    handle: nick,
                     badge: `BÖLGE: ${region}`,
                     heroLabel: 'GÜNCEL FACEIT ELO',
-                    heroValue: elo ? `${elo} ELO` : 'Profilli Oyuncu',
+                    heroValue: elo ? `${elo} ELO` : (lvl ? `SEVİYE ${lvl}` : 'Profilli Oyuncu'),
                     peakLabel: 'SEVİYE (LEVEL)',
-                    peakValue: lvl ? `SEVİYE ${lvl}` : 'CS2',
-                    summaryText: elo ? `Lvl ${lvl || '?'} • ${elo} ELO` : kullanici,
+                    peakValue: lvl ? `SEVİYE ${lvl}` : (elo ? `${elo} ELO` : 'CS2'),
+                    summaryText: elo ? `Lvl ${lvl || '?'} • ${elo} ELO` : nick,
                     stats: [
                         { label: 'FACEIT SEVİYESİ', value: lvl ? `Level ${lvl} / 10` : '—', sub: 'Rekabetçi Kademe' },
-                        { label: 'AKTİF ELO', value: elo ? `${elo}` : '—', sub: 'CS2 Eşleştirme' },
+                        { label: 'AKTİF ELO', value: elo ? `${elo} ELO` : '—', sub: 'CS2 Eşleştirme' },
                         { label: 'BÖLGE / ÜLKE', value: region, sub: d?.country ? d.country.toUpperCase() : 'Uluslararası' },
                         { label: 'PLATFORM DURUMU', value: d?.verified ? 'Doğrulanmış' : 'Aktif', sub: 'FACEIT Rekabetçi' }
                     ],
-                    profileUrl: `https://www.faceit.com/en/players/${encodeURIComponent(d?.nickname || kullanici)}`
+                    profileUrl: `https://www.faceit.com/en/players/${encodeURIComponent(nick)}`
                 };
             }
         },
@@ -692,7 +695,7 @@ const TrophiesManager = {
             }
         },
 
-        // 5. VALORANT (Riot ID -> HenrikDev MMR v2 API)
+        // 5. VALORANT (Edge Function veya HenrikDev v2 API)
         valorant: {
             async fetch(kullanici) {
                 const parsed = TrophiesManager.parseRiotId(kullanici);
@@ -703,26 +706,31 @@ const TrophiesManager = {
             },
             map(d, kullanici) {
                 const parsed = TrophiesManager.parseRiotId(kullanici);
-                const curTier = d?.current_data?.currenttierpatched || null;
-                const rr = d?.current_data?.ranking_in_tier;
-                const mmr = d?.current_data?.elo || null;
+                // Hem Edge Function formatı ({ currentRank, currentRR, peakRank, elo })
+                // hem de doğrudan HenrikDev API formatı ({ current_data, highest_rank })
+                const curTier = d?.currentRank || d?.current_data?.currenttierpatched || null;
+                const rr = d?.currentRR !== undefined ? d.currentRR : d?.current_data?.ranking_in_tier;
+                const mmr = d?.elo !== undefined ? d.elo : (d?.current_data?.elo || null);
                 const lastChange = d?.current_data?.mmr_change_to_last_game;
-                const peakTier = d?.highest_rank?.patched_tier || curTier || null;
-                const peakSeason = d?.highest_rank?.season ? d.highest_rank.season.toUpperCase() : null;
+                const peakTier = d?.peakRank || d?.highest_rank?.patched_tier || curTier || null;
+                const peakSeason = d?.peakSeason || (d?.highest_rank?.season ? d.highest_rank.season.toUpperCase() : null);
+
+                const tierWithRr = curTier ? (rr !== undefined && rr !== null ? `${curTier} (${rr} RR)` : curTier) : 'Riot ID Bağlı';
 
                 return {
                     handle: parsed.full,
-                    badge: `${parsed.valRegion.toUpperCase()} • RIOT`,
+                    badge: `${(d?.region || parsed.valRegion).toUpperCase()} • RIOT`,
                     heroLabel: 'GÜNCEL KADEME (RANK)',
                     heroValue: curTier || 'Riot ID Bağlı',
+                    heroSub: rr !== undefined && rr !== null ? `${rr} RR` : 'Valorant Rekabetçi',
                     peakLabel: 'KARİYER ZİRVESİ',
                     peakValue: peakTier || `#${parsed.tag}`,
                     summaryText: curTier ? `${curTier}${rr !== undefined ? ` (${rr} RR)` : ''}` : parsed.full,
                     stats: [
                         { label: 'KADEME PUANI', value: rr !== undefined && rr !== null ? `${rr} RR` : '—', sub: curTier || 'Rekabetçi Mod' },
                         { label: 'KARİYER ZİRVESİ', value: peakTier || '—', sub: peakSeason ? `Sezon: ${peakSeason}` : 'Tüm Zamanlar' },
-                        { label: 'TOPLAM MMR', value: mmr ? `${mmr}` : '—', sub: 'Gizli Eşleştirme Puanı' },
-                        { label: 'SON MAÇ DEĞİŞİMİ', value: lastChange !== undefined && lastChange !== null ? `${lastChange > 0 ? '+' : ''}${lastChange} RR` : parsed.displayRegion, sub: 'Rekabetçi Güncelleme' }
+                        { label: 'TOPLAM MMR / ELO', value: mmr ? `${mmr}` : '—', sub: 'Eşleştirme Puanı' },
+                        { label: 'SON MAÇ DEĞİŞİMİ', value: lastChange !== undefined && lastChange !== null ? `${lastChange > 0 ? '+' : ''}${lastChange} RR` : (d?.region || parsed.displayRegion), sub: 'Rekabetçi Güncelleme' }
                     ],
                     profileUrl: `https://tracker.gg/valorant/profile/riot/${encodeURIComponent(parsed.full)}/overview`
                 };
@@ -1044,9 +1052,10 @@ const TrophiesManager = {
         console.log(`[TrophiesManager.canliVeriCek] Başlatılıyor -> Tür: ${normTur}, Kullanıcı: ${kullanici}, Oturum:`, typeof aktifKullaniciOturumu !== 'undefined' && Boolean(aktifKullaniciOturumu));
 
         // 1. Öncelik: Supabase Edge Function ('bright-task' -> gaming_lookup)
-        if (typeof supabaseClient !== 'undefined' && supabaseClient?.functions && typeof aktifKullaniciOturumu !== 'undefined' && aktifKullaniciOturumu) {
+        // Giriş yapılmış oturum varsa token ile gider, ziyaretçiyse anon key ile çağrılır
+        if (typeof supabaseClient !== 'undefined' && supabaseClient?.functions) {
             try {
-                console.log(`[TrophiesManager.canliVeriCek] Edge Function ('bright-task') çağrılıyor...`);
+                console.log(`[TrophiesManager.canliVeriCek] Edge Function ('bright-task') çağrılıyor... (${normTur})`);
                 const { data, error } = await supabaseClient.functions.invoke('bright-task', {
                     body: {
                         action: 'gaming_lookup',
@@ -1062,8 +1071,6 @@ const TrophiesManager = {
             } catch (e) {
                 console.warn(`[GamingManager] Edge lookup yedek akışa geçiyor (${normTur}):`, e);
             }
-        } else {
-            console.warn(`[TrophiesManager.canliVeriCek] Edge Function ATLANDI! Sebebi: aktifKullaniciOturumu yok veya supabaseClient hazır değil.`);
         }
 
         // 2. Yedek: İstemci taraflı adaptör
