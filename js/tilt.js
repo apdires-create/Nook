@@ -319,7 +319,7 @@ const TiltEngine = {
 
         const diffTiltX = Math.abs(targetTiltX - this.currentTiltX);
         const diffTiltY = Math.abs(targetTiltY - this.currentTiltY);
-        const isTiltConverged = diffTiltX < 0.005 && diffTiltY < 0.005;
+        const isTiltConverged = diffTiltX < 0.04 && diffTiltY < 0.04;
 
         if (isTiltConverged) {
             this.currentTiltX = targetTiltX;
@@ -328,7 +328,9 @@ const TiltEngine = {
 
         if ((isCompanionOpen && !isTransitioning) || (isTiltConverged && targetTiltX === 0 && targetTiltY === 0)) {
             this.cardContainer.style.transform = '';
+            this.cardContainer.classList.remove('is-tilting');
         } else {
+            this.cardContainer.classList.add('is-tilting');
             this.cardContainer.style.transform = `rotateX(${this.currentTiltX.toFixed(2)}deg) rotateY(${this.currentTiltY.toFixed(2)}deg)`;
         }
 

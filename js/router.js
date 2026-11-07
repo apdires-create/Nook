@@ -310,8 +310,15 @@ const Router = {
         if (back) back.inert = !flipped;
 
         this.isFlipping = true;
-        container.classList.add('is-flipping');
-        container.classList.toggle('is-flipped', flipped);
+
+        if (!flipped) {
+            // Ön yüze dönerken kartı önce 3D 180deg başlangıç konumuna oturt, sonra 0deg'e animasyonla çevir
+            container.classList.add('is-flipping');
+            void card.offsetWidth;
+            container.classList.remove('is-flipped');
+        } else {
+            container.classList.add('is-flipping', 'is-flipped');
+        }
 
         const finish = () => {
             this._cancelPending?.();
@@ -384,13 +391,15 @@ const Router = {
             // AÇILIŞ VE KANAT GEÇİŞ SEKANSI
             // ==========================================
             this._companionTransitioning = true;
+            stage.classList.remove('is-companion-closing');
 
             if (otherCompanion) {
                 otherCompanion.style.display = 'none';
-                otherCompanion.classList.remove('is-closing');
+                otherCompanion.classList.remove('is-closing', 'is-mode-switching');
             }
 
             const wasAnyOpen = stage.classList.contains('has-companion-open');
+            const isLeftModeSwitch = wasAnyOpen && isTrophiesOpen && ['gaming', 'widgets', 'achievements'].includes(normalizedType);
 
             // Kullanıcı profilin arka yüzündeyken kanatlardan birine geçerse profil kartını otomatik ön yüzüne çevir
             if (this.isFlipped) {
@@ -406,7 +415,7 @@ const Router = {
                     kartVerisi.tops.aktifListeId = (listeler.length === 1) ? listeler[0].id : null;
                 }
                 const topsCompanion = document.getElementById('topsCompanionCard');
-                if (topsCompanion) topsCompanion.classList.remove('is-detail-editing');
+                if (topsCompanion) topsCompanion.classList.remove('is-detail-editing', 'is-mode-switching');
                 if (typeof RenderEngine !== 'undefined') {
                     RenderEngine.companionCiz(kartVerisi.tops);
                 }
@@ -440,17 +449,40 @@ const Router = {
 
             if (activeCompanion) {
                 activeCompanion.classList.remove('is-closing');
-                activeCompanion.style.display = 'flex';
+                if (isLeftModeSwitch) {
+                    // Sol 3 sekme (Gaming <-> Widgets <-> Trophies) kendi içinde yumuşak içerik geçişi yapar
+                    activeCompanion.classList.remove('is-mode-switching');
+                    void activeCompanion.offsetWidth;
+                    activeCompanion.classList.add('is-mode-switching');
+                    activeCompanion.style.display = 'flex';
+                } else {
+                    // İlk açılış veya Showcase <-> Sol Kanat geçişinde tam sürgü animasyonunu dinamik kart boyutuna göre tetikle
+                    activeCompanion.classList.remove('is-mode-switching');
+                    activeCompanion.style.display = 'flex';
+                    if (isDesktop) {
+                        activeCompanion.style.animation = 'none';
+                        void activeCompanion.offsetWidth;
+                        activeCompanion.style.animation = '';
+                    }
+                }
             }
 
             if (isDesktop && cardContainer) {
-                // Eğer zaten bir kanat açıksa (Showcase <-> Trophies arası direkt geçiş), profil kartını gereksiz zıplatma
+                // Tilt motorundan kalan açı varsa FLIP ölçümünden önce temizle
+                cardContainer.style.transform = '';
+                cardContainer.classList.remove('is-tilting');
+
                 if (!wasAnyOpen) {
                     const firstRect = cardContainer.getBoundingClientRect();
                     stage.classList.add('has-companion-open');
                     const lastRect = cardContainer.getBoundingClientRect();
                     const deltaX = (firstRect.left + firstRect.width / 2) - (lastRect.left + lastRect.width / 2);
                     const deltaY = (firstRect.top + firstRect.height / 2) - (lastRect.top + lastRect.height / 2);
+
+                    if (activeCompanion) {
+                        const slideDist = Math.round(Math.max(48, lastRect.width * 0.14));
+                        activeCompanion.style.setProperty('--companion-enter-x', `-${slideDist}px`);
+                    }
 
                     if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
                         this._activeCompanionAnim = cardContainer.animate([
@@ -463,20 +495,33 @@ const Router = {
                     }
                 } else {
                     stage.classList.add('has-companion-open');
+                    if (activeCompanion && !isLeftModeSwitch) {
+                        const rect = cardContainer.getBoundingClientRect();
+                        const slideDist = Math.round(Math.max(48, rect.width * 0.14));
+                        activeCompanion.style.setProperty('--companion-enter-x', `-${slideDist}px`);
+                    }
                 }
             } else {
                 stage.classList.remove('is-companion-closing');
                 stage.classList.add('has-companion-open');
             }
 
+            if (typeof checkRibbonOverflow === 'function') {
+                checkRibbonOverflow();
+            }
+
             this._companionTimer = setTimeout(() => {
+                if (activeCompanion) activeCompanion.classList.remove('is-mode-switching');
                 this._companionTransitioning = false;
                 this._companionTimer = null;
                 this._activeCompanionAnim = null;
+                if (typeof checkRibbonOverflow === 'function') {
+                    checkRibbonOverflow();
+                }
                 if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
                     TiltEngine.wake();
                 }
-            }, isDesktop ? 400 : 200);
+            }, isDesktop ? (isLeftModeSwitch ? 250 : 400) : 200);
 
         } else {
             // ==========================================
@@ -485,10 +530,21 @@ const Router = {
             this._companionTransitioning = true;
 
             const currentCard = isShowcaseOpen ? topsCard : trophiesCard;
-            if (currentCard && isDesktop) currentCard.classList.add('is-closing');
+            if (currentCard && isDesktop) {
+                currentCard.classList.remove('is-mode-switching');
+                if (cardContainer) {
+                    const rect = cardContainer.getBoundingClientRect();
+                    const slideDist = Math.round(Math.max(42, rect.width * 0.12));
+                    currentCard.style.setProperty('--companion-enter-x', `-${slideDist}px`);
+                }
+                currentCard.classList.add('is-closing');
+            }
             stage.classList.add('is-companion-closing');
 
             if (isDesktop && cardContainer) {
+                cardContainer.style.transform = '';
+                cardContainer.classList.remove('is-tilting');
+
                 const stageRect = stage.getBoundingClientRect();
                 const cardRect = cardContainer.getBoundingClientRect();
                 const returnDeltaX = (stageRect.left + stageRect.width / 2) - (cardRect.left + cardRect.width / 2);
@@ -509,11 +565,11 @@ const Router = {
             this._companionTimer = setTimeout(() => {
                 stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-showcase-active', 'is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
                 if (topsCard) {
-                    topsCard.classList.remove('is-closing');
+                    topsCard.classList.remove('is-closing', 'is-mode-switching');
                     if (isDesktop) topsCard.style.display = 'none';
                 }
                 if (trophiesCard) {
-                    trophiesCard.classList.remove('is-closing');
+                    trophiesCard.classList.remove('is-closing', 'is-mode-switching');
                     if (isDesktop) trophiesCard.style.display = 'none';
                 }
                 // Bir sonraki açılış için her iki kartın da durumunu sıfırla
@@ -533,6 +589,9 @@ const Router = {
                 if (cardContainer && isDesktop) cardContainer.style.transform = '';
                 this._companionTransitioning = false;
                 this._companionTimer = null;
+                if (typeof checkRibbonOverflow === 'function') {
+                    checkRibbonOverflow();
+                }
                 if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
                     TiltEngine.wake();
                 }

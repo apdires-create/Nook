@@ -235,7 +235,7 @@
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] {
    /* Cormorant Garamond'un optik inceliğini dengelemek için isme özel daha tok akış */
-   --cq-fs-name: clamp(23px, 7.2cqw, 48px);
+   --cq-fs-name: clamp(24px, 7.4cqw, 62px);
 }
 
 [data-theme="obsidian-minimal"] .profile-name {

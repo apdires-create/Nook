@@ -1,7 +1,6 @@
 /* #region 1: ÖN YÜZ VİTRİN KAPSAYICISI */
 .card-front {
     padding: 0 4.5cqw 4.5cqw 4.5cqw;
-    transform: translateZ(2px);
 }
 
 /* Sol Kenar: Ribbon / Flag Butonları */
@@ -129,6 +128,10 @@
 
 /* 🔄 FLIP DURUMU 1: Masaüstü (Taşma Yokken) -> Havada Asılı Dairesel Forma Dönüşüm */
 .card-container.is-flipped:not(.flags-inward) .card-flags-wrapper {
+    transform: translateX(-12px);
+}
+
+.card-container.is-flipping:not(.flags-inward) .card-flags-wrapper {
     transform: translateX(-12px) translateZ(40px);
 }
 

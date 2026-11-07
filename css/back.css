@@ -1,6 +1,5 @@
 /* #region 1: ARKA YÜZ GÖVDESİ VE SAF LİNKLER LİSTESİ */
 .card-back {
-    transform: rotateY(180deg) translateZ(2px);
     background: var(--bg-card);
     padding: 4.5cqw;
 }

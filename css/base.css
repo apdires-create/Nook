@@ -112,8 +112,12 @@ html, body {
 }
 
 .card-container {
+    transform-style: flat;
+}
+
+.card-container.is-flipping,
+.card-container.is-tilting {
     transform-style: preserve-3d;
-    will-change: transform;
 }
 
 @media (max-aspect-ratio: 5/7) {
@@ -153,11 +157,19 @@ html, body {
     position: relative;
     width: 100%;
     height: 100%;
+    transform-style: flat;
+}
+
+.card-container.is-flipping .nook-card {
     transform-style: preserve-3d;
     transition: transform 0.6s var(--ease-spring), box-shadow 0.3s ease;
 }
 
-.card-container.is-flipped .nook-card {
+.card-container.is-flipped:not(.is-flipping) .nook-card {
+    transform: none;
+}
+
+.card-container.is-flipped.is-flipping .nook-card {
     transform: rotateY(180deg);
 }
 
@@ -180,15 +192,33 @@ body.is-pointer-dragging * {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transform: translateZ(0);
 }
 
 .card-front {
-    transform: translateZ(2px);
+    transform: none;
+}
+
+.card-container.is-flipping .card-front {
+    transform: translateZ(1px);
+}
+
+.card-container.is-flipped:not(.is-flipping) .card-front {
+    visibility: hidden;
 }
 
 .card-back {
-    transform: rotateY(180deg) translateZ(2px);
+    transform: rotateY(180deg);
+    visibility: hidden;
+}
+
+.card-container.is-flipping .card-back {
+    visibility: visible;
+    transform: rotateY(180deg) translateZ(1px);
+}
+
+.card-container.is-flipped:not(.is-flipping) .card-back {
+    visibility: visible;
+    transform: none;
 }
 /* #endregion */
 
@@ -508,8 +538,7 @@ html.is-profile-loading #landing-screen {
 /* 1. MASAÜSTÜ DUAL STAGE (Yan Yana Çift Kart) */
 @media (min-width: 900px) {
     .stage {
-        padding-top: calc(52px + clamp(10px, 1.8vh, 24px));
-        padding-bottom: clamp(14px, 2.4vh, 32px);
+        padding-block: clamp(18px, 3.2vh, 36px);
         padding-inline: var(--stage-padding);
         box-sizing: border-box;
     }
@@ -520,8 +549,7 @@ html.is-profile-loading #landing-screen {
         align-items: center;
         justify-content: center;
         gap: var(--stage-gap);
-        padding-top: calc(52px + clamp(10px, 1.8vh, 24px));
-        padding-bottom: clamp(14px, 2.4vh, 32px);
+        padding-block: clamp(18px, 3.2vh, 36px);
         padding-inline: var(--stage-padding);
         box-sizing: border-box;
         overflow: hidden;
@@ -538,8 +566,8 @@ html.is-profile-loading #landing-screen {
     .stage.has-companion-open .companion-card {
         flex-shrink: 0;
         aspect-ratio: var(--card-aspect-ratio);
-        /* Duvarlar, üst bar ve kartlar arası gap tam dengeli; 5:7 oran kilitli */
-        --desktop-avail-h: calc(100dvh - 52px - clamp(24px, 4.2vh, 56px));
+        /* Duvarlar ve kartlar arası gap tam dengeli; 5:7 oran kilitli */
+        --desktop-avail-h: calc(100dvh - clamp(36px, 6.4vh, 72px));
         --desktop-dual-avail-w: calc((100vw - (2 * var(--stage-padding)) - var(--stage-gap) - 42px) / 2);
         --effective-card-h: min(
             var(--card-height),
@@ -720,7 +748,27 @@ html.is-profile-loading #landing-screen {
     animation: companionCard3DEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
     transform-origin: left center;
     z-index: 4;
-    will-change: transform, opacity;
+}
+
+/* Sol kanat kendi sekmeleri (Gaming <-> Widgets <-> Trophies) arasında geçiş yaparken dış kartı baştan sıçratma, içerik yumuşakça aksın */
+.companion-card.is-mode-switching {
+    animation: none !important;
+}
+
+.companion-card.is-mode-switching .companion-header,
+.companion-card.is-mode-switching .companion-body {
+    animation: companionModeSwitchFade 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes companionModeSwitchFade {
+    0% {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Kapanırken ana kartın arkasına yumuşakça saklanma */
@@ -729,12 +777,15 @@ html.is-profile-loading #landing-screen {
     pointer-events: none;
 }
 
-/* Masaüstü: Profil kartının arkasından katı ve tok bir şekilde süzülerek çıkış (Opaklık yırtılması önlendi) */
+/* Masaüstü: Profil kartının arkasından katı ve tok bir şekilde süzülerek çıkış */
 @keyframes companionCard3DEnter {
     0% {
-        opacity: 0.95;
-        transform: translate3d(-40px, 0, -20px) scale(0.97);
+        opacity: 0;
+        transform: translate3d(var(--companion-enter-x, -48px), 0, -20px) scale(0.96);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+    }
+    35% {
+        opacity: 1;
     }
     100% {
         opacity: 1;
@@ -752,7 +803,7 @@ html.is-profile-loading #landing-screen {
     }
     100% {
         opacity: 0;
-        transform: translate3d(-35px, 0, -20px) scale(0.97);
+        transform: translate3d(var(--companion-enter-x, -42px), 0, -20px) scale(0.96);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
     }
 }
@@ -973,8 +1024,18 @@ html.is-profile-loading #landing-screen {
 .companion-rows-list {
     display: flex;
     flex-direction: column;
-    gap: 2cqh;
+    gap: clamp(6px, 1.95cqh, 24px);
     width: 100%;
+}
+
+@media (min-width: 900px) {
+    .companion-rows-list {
+        gap: clamp(12px, 2.2cqh, 28px);
+    }
+    .companion-row-item,
+    .companion-add-row-btn {
+        padding: clamp(14px, 2.7cqh, 34px) 3.8cqw;
+    }
 }
 
 .companion-row-item {
@@ -982,7 +1043,7 @@ html.is-profile-loading #landing-screen {
     align-items: center;
     justify-content: flex-start;
     gap: 3cqw;
-    padding: var(--companion-row-padding, 2.2cqh 3.5cqw);
+    padding: var(--companion-row-padding, 2.2cqh 3.6cqw);
     background: var(--companion-row-bg, rgba(255, 255, 255, 0.03));
     border: var(--companion-row-border, 1px solid rgba(255, 255, 255, 0.07));
     border-radius: var(--companion-row-radius, var(--radius-btn, 10px));
@@ -1018,9 +1079,9 @@ body:not(.is-pointer-dragging) .companion-row-item.is-touch-pressed {
 }
 
 .companion-row-icon-wrap {
-    width: clamp(28px, 7.2cqw, 42px);
-    height: clamp(28px, 7.2cqw, 42px);
-    min-width: clamp(28px, 7.2cqw, 42px);
+    width: clamp(28px, 7.6cqw, 56px);
+    height: clamp(28px, 7.6cqw, 56px);
+    min-width: clamp(28px, 7.6cqw, 56px);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.06);
     display: flex;
@@ -1116,7 +1177,7 @@ body.is-owner .companion-row-del-btn {
     align-items: center;
     justify-content: center;
     gap: 2cqw;
-    padding: 2cqh 3cqw;
+    padding: clamp(7px, 2.2cqh, 30px) 3.6cqw;
     width: 100%;
     background: transparent;
     border: 1.5px dashed var(--border-highlight);
