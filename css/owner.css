@@ -608,13 +608,36 @@ textarea.inline-form-input {
     color: var(--text-primary);
 }
 
-.form-btn-submit {
+.form-btn-submit,
+.form-btn-save {
     background: var(--accent-color);
     color: #ffffff;
 }
 
-.form-btn-submit:hover {
+.form-btn-submit:hover,
+.form-btn-save:hover {
     box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.mt-region-select {
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-sm, 6px);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.mt-region-select:hover,
+.mt-region-select:focus {
+    border-color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.mt-region-select option {
+    background: #181a22;
+    color: #ffffff;
 }
 /* #endregion */
 

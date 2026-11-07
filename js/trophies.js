@@ -21,38 +21,54 @@ const TrophiesManager = {
     /**
      * Riot ID ("Oyuncu#TR1") metnini { name, tag, region, platform } olarak ayrıştırır.
      */
-    parseRiotId(rawInput) {
+    parseRiotId(rawInput, preferredRegion = '') {
         const clean = String(rawInput || '').trim();
         const parts = clean.split('#');
         const name = (parts[0] || '').trim();
-        const tag = (parts[1] || 'TR1').trim().toUpperCase();
 
-        const tagUpper = tag.toUpperCase();
-        let valRegion = 'eu';
-        let lolPlatform = 'tr1';
-        let displayRegion = 'TR';
+        const REGION_PLATFORMS = {
+            tr: { val: 'eu', lol: 'tr1', display: 'TR', defaultTag: 'TR1' },
+            euw: { val: 'eu', lol: 'euw1', display: 'EUW', defaultTag: 'EUW' },
+            eune: { val: 'eu', lol: 'eun1', display: 'EUNE', defaultTag: 'EUNE' },
+            na: { val: 'na', lol: 'na1', display: 'NA', defaultTag: 'NA1' },
+            kr: { val: 'kr', lol: 'kr', display: 'KR', defaultTag: 'KR1' },
+            br: { val: 'latam', lol: 'br1', display: 'BR', defaultTag: 'BR1' },
+            lan: { val: 'latam', lol: 'la1', display: 'LAN', defaultTag: 'LAN' },
+            las: { val: 'latam', lol: 'la2', display: 'LAS', defaultTag: 'LAS' },
+            oce: { val: 'ap', lol: 'oc1', display: 'OCE', defaultTag: 'OCE' },
+            jp: { val: 'ap', lol: 'jp1', display: 'JP', defaultTag: 'JP1' },
+            ru: { val: 'eu', lol: 'ru', display: 'RU', defaultTag: 'RU1' }
+        };
 
-        if (tagUpper === 'NA1' || tagUpper === 'NA') {
-            valRegion = 'na'; lolPlatform = 'na1'; displayRegion = 'NA';
-        } else if (tagUpper === 'EUW' || tagUpper === 'EUW1') {
-            valRegion = 'eu'; lolPlatform = 'euw1'; displayRegion = 'EUW';
-        } else if (tagUpper === 'EUNE' || tagUpper === 'EUN1') {
-            valRegion = 'eu'; lolPlatform = 'eun1'; displayRegion = 'EUNE';
-        } else if (tagUpper === 'KR' || tagUpper === 'KR1') {
-            valRegion = 'kr'; lolPlatform = 'kr'; displayRegion = 'KR';
-        } else if (tagUpper === 'BR' || tagUpper === 'BR1') {
-            valRegion = 'latam'; lolPlatform = 'br1'; displayRegion = 'BR';
-        } else if (tagUpper === 'TR' || tagUpper === 'TR1') {
-            valRegion = 'eu'; lolPlatform = 'tr1'; displayRegion = 'TR';
+        const pref = String(preferredRegion || '').trim().toLowerCase();
+        let targetMap = REGION_PLATFORMS[pref] || null;
+
+        let tag = '';
+        if (parts.length > 1 && parts[1].trim()) {
+            tag = parts[1].trim().toUpperCase();
+            if (!targetMap) {
+                const tagClean = tag.replace(/[0-9]/g, '').toLowerCase();
+                if (REGION_PLATFORMS[tagClean]) targetMap = REGION_PLATFORMS[tagClean];
+                else if (tag.startsWith('EUW')) targetMap = REGION_PLATFORMS.euw;
+                else if (tag.startsWith('EUN')) targetMap = REGION_PLATFORMS.eune;
+                else if (tag.startsWith('NA')) targetMap = REGION_PLATFORMS.na;
+                else if (tag.startsWith('KR')) targetMap = REGION_PLATFORMS.kr;
+                else if (tag.startsWith('BR')) targetMap = REGION_PLATFORMS.br;
+                else if (tag.startsWith('TR')) targetMap = REGION_PLATFORMS.tr;
+            }
+        } else {
+            tag = targetMap?.defaultTag || 'TR1';
         }
+
+        if (!targetMap) targetMap = REGION_PLATFORMS.tr;
 
         return {
             full: `${name}#${tag}`,
             name,
             tag,
-            valRegion,
-            lolPlatform,
-            displayRegion
+            valRegion: targetMap.val,
+            lolPlatform: targetMap.lol,
+            displayRegion: targetMap.display
         };
     },
 
@@ -316,7 +332,7 @@ const TrophiesManager = {
     /**
      * Kullanıcı girdisini oyun türüne göre doğrular ve temizler.
      */
-    validateInput(tur, rawValue) {
+    validateInput(tur, rawValue, preferredRegion = '') {
         const item = this.katalogOgesiBul(tur);
         const val = String(rawValue || '').trim().replace(/^@/, '');
         if (!val) {
@@ -328,6 +344,12 @@ const TrophiesManager = {
 
         if (item?.girdiTipi === 'riot_id') {
             if (!val.includes('#')) {
+                if (preferredRegion) {
+                    const parsed = this.parseRiotId(val, preferredRegion);
+                    if (parsed.name) {
+                        return { ok: true, clean: parsed.full };
+                    }
+                }
                 return { ok: false, error: 'Lütfen Riot ID formatında girin (Örn: Oyuncu#TR1).' };
             }
             const [name, tag] = val.split('#');
@@ -1093,8 +1115,9 @@ const TrophiesManager = {
         const norm = this.getNormalizedTrophyData(tur, kullanici, rawData, null);
         const isPlaceholderVal = (v) => !v || v === '—' || v === 'Profil Bağlı' || v === 'FACEIT' || v === 'CS2' || v === 'Ranked 1v1' || v === 'Belirtilmedi' || String(v).includes('Derecesiz') || String(v).startsWith('#');
 
-        const cleanManualAktif = String(manualAktif || '').trim();
-        const cleanManualPeak = String(manualPeak || '').trim();
+        const isOnayli = (tur === 'lol' || tur === 'tft' || tur === 'valorant');
+        const cleanManualAktif = isOnayli ? '' : String(manualAktif || '').trim();
+        const cleanManualPeak = isOnayli ? '' : String(manualPeak || '').trim();
 
         const aktif = cleanManualAktif || (!isPlaceholderVal(norm.heroValue) ? norm.heroValue : '');
         const peak = cleanManualPeak || (!isPlaceholderVal(norm.peakValue) ? norm.peakValue : aktif);
@@ -1106,6 +1129,7 @@ const TrophiesManager = {
         if (cleanManualAktif) snap.manualAktif = true;
         if (cleanManualPeak) snap.manualPeak = true;
         if (kuyruk) snap.kuyruk = kuyruk;
+        if (rawData?.region) snap.region = String(rawData.region).toUpperCase();
         return snap;
     },
 
@@ -1113,32 +1137,35 @@ const TrophiesManager = {
      * Türüne göre canlı veriyi önce sessionStorage önbelleğinden,
      * oturum açıksa 'bright-task' Edge Function köprüsünden, yoksa istemci adaptöründen çeker.
      */
-    async canliVeriCek(tur, kullanici, forceRefresh = false) {
+    async canliVeriCek(tur, kullanici, forceRefresh = false, bolge = '') {
         if (!tur || !kullanici) return null;
         const normTur = String(tur).toLowerCase().trim();
+        const normBolge = String(bolge || '').toLowerCase().trim();
+        const cacheKey = normBolge ? `${kullanici}_${normBolge}` : String(kullanici);
 
         if (!forceRefresh) {
-            const cached = this._getCache(normTur, kullanici);
+            const cached = this._getCache(normTur, cacheKey);
             if (cached) return cached;
         }
 
-        console.log(`[TrophiesManager.canliVeriCek] Başlatılıyor -> Tür: ${normTur}, Kullanıcı: ${kullanici}, Oturum:`, typeof aktifKullaniciOturumu !== 'undefined' && Boolean(aktifKullaniciOturumu));
+        console.log(`[TrophiesManager.canliVeriCek] Başlatılıyor -> Tür: ${normTur}, Kullanıcı: ${kullanici}, Bölge: ${normBolge || 'otomatik'}, Oturum:`, typeof aktifKullaniciOturumu !== 'undefined' && Boolean(aktifKullaniciOturumu));
 
         // 1. Öncelik: Supabase Edge Function ('bright-task' -> gaming_lookup)
         // Giriş yapılmış oturum varsa token ile gider, ziyaretçiyse anon key ile çağrılır
         if (typeof supabaseClient !== 'undefined' && supabaseClient?.functions) {
             try {
-                console.log(`[TrophiesManager.canliVeriCek] Edge Function ('bright-task') çağrılıyor... (${normTur})`);
+                console.log(`[TrophiesManager.canliVeriCek] Edge Function ('bright-task') çağrılıyor... (${normTur}, ${normBolge || 'auto'})`);
                 const { data, error } = await supabaseClient.functions.invoke('bright-task', {
                     body: {
                         action: 'gaming_lookup',
                         tur: normTur,
-                        kullanici: String(kullanici).trim()
+                        kullanici: String(kullanici).trim(),
+                        bolge: normBolge
                     }
                 });
                 console.log(`[TrophiesManager.canliVeriCek] Edge Function Yanıtı:`, { data, error });
                 if (!error && data?.sonuc) {
-                    this._setCache(normTur, kullanici, data.sonuc);
+                    this._setCache(normTur, cacheKey, data.sonuc);
                     return data.sonuc;
                 }
             } catch (e) {
@@ -1151,9 +1178,9 @@ const TrophiesManager = {
         if (!adapter || typeof adapter.fetch !== 'function') return null;
 
         try {
-            const data = await adapter.fetch(kullanici);
+            const data = await adapter.fetch(kullanici, normBolge);
             if (data) {
-                this._setCache(normTur, kullanici, data);
+                this._setCache(normTur, cacheKey, data);
             }
             return data;
         } catch (err) {

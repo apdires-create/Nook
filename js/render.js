@@ -374,7 +374,8 @@ const RenderEngine = {
                 // Eğer canlı veri henüz bellekte yoksa arka planda lazy olarak çek ve görünümü tazele
                 if (!rawLive && !window[`_fetchingTrophy_${activeTur}_${kullanici}`]) {
                     window[`_fetchingTrophy_${activeTur}_${kullanici}`] = true;
-                    TrophiesManager.canliVeriCek(activeTur, kullanici).then(fetched => {
+                    const savedRegion = seciliOge?.snap?.region || '';
+                    TrophiesManager.canliVeriCek(activeTur, kullanici, false, savedRegion).then(fetched => {
                         delete window[`_fetchingTrophy_${activeTur}_${kullanici}`];
                         if (fetched) {
                             kart._canli_trophies[activeTur] = fetched;

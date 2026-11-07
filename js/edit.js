@@ -2601,19 +2601,25 @@ EditManager.TrophiesView = {
         }
     },
 
-    async trophyKaydet(tur, temizKullanici, manualAktif = '', manualPeak = '', preFetchedLive = null, kuyruk = '') {
+    async trophyKaydet(tur, temizKullanici, manualAktif = '', manualPeak = '', preFetchedLive = null, kuyruk = '', region = '') {
         if (!tur || !temizKullanici || typeof TrophiesManager === 'undefined') return;
         const meta = TrophiesManager.katalogOgesiBul(tur) || { baslik: tur };
         const isWidget = this._isWidgetTur(tur);
+        const isOnayli = (tur === 'lol' || tur === 'tft' || tur === 'valorant');
 
-        const canliVeri = preFetchedLive || await TrophiesManager.canliVeriCek(tur, temizKullanici, true);
+        const canliVeri = preFetchedLive || await TrophiesManager.canliVeriCek(tur, temizKullanici, true, region);
         if (canliVeri) {
             if (!kartVerisi._canli_trophies) kartVerisi._canli_trophies = {};
             kartVerisi._canli_trophies[tur] = canliVeri;
             if (tur === 'monkeytype') kartVerisi.canli_monkeytype = canliVeri;
         }
 
-        const snap = TrophiesManager.buildSnapshot(tur, temizKullanici, canliVeri, manualAktif, manualPeak, kuyruk);
+        const effectiveManualAktif = isOnayli ? '' : manualAktif;
+        const effectiveManualPeak = isOnayli ? '' : manualPeak;
+
+        const snap = TrophiesManager.buildSnapshot(tur, temizKullanici, canliVeri, effectiveManualAktif, effectiveManualPeak, kuyruk);
+        if (region) snap.region = region.toUpperCase();
+        else if (canliVeri?.region) snap.region = canliVeri.region.toUpperCase();
 
         const mevcutListe = this._aktifModListesiniAl(tur);
         const idx = mevcutListe.findIndex(x => x.tur === tur);
@@ -2704,10 +2710,22 @@ EditManager.TrophiesView = {
         const existingForm = body.querySelector('.mt-form-wrap');
         if (existingForm) existingForm.remove();
 
+        const isOnayliOyun = (tur === 'lol' || tur === 'tft' || tur === 'valorant');
         const aktifler = this._aktifModListesiniAl(tur);
         const mevcutOge = aktifler.find(t => t.tur === tur) || null;
         const mevcutSnap = mevcutOge?.snap || {};
         const tiers = Array.isArray(meta.tiers) ? meta.tiers : [];
+
+        // Aktif bölge belirleme (mevcut kayıttan veya Riot ID etiketinden)
+        let aktifBolge = 'tr';
+        if (mevcutSnap.region) {
+            aktifBolge = String(mevcutSnap.region).toLowerCase().replace(/[0-9]/g, '');
+        } else if (mevcutKullanici && mevcutKullanici.includes('#')) {
+            const parsed = TrophiesManager.parseRiotId(mevcutKullanici);
+            if (parsed.displayRegion) {
+                aktifBolge = parsed.displayRegion.toLowerCase();
+            }
+        }
 
         const buildTierOptions = (selectedVal, defaultLabel) => {
             let html = `<option value="">${RenderEngine.escapeHtml(defaultLabel)}</option>`;
@@ -2724,13 +2742,33 @@ EditManager.TrophiesView = {
         formWrap.innerHTML = `
             <div style="font-size: var(--cq-fs-desc); font-weight: 600; margin-bottom: 6px;">${RenderEngine.escapeHtml(meta.girdiEtiket || 'Oyuncu Kimliği')}:</div>
             <div style="display: flex; gap: 6px; align-items: center;">
-                <input type="text" class="inline-form-input mt-user-input" style="flex: 1;" placeholder="${RenderEngine.escapeHtml(meta.placeholder || 'kullanıcı_adı')} (Örn: ${RenderEngine.escapeHtml(meta.ornek || '')})" value="${RenderEngine.escapeHtml(mevcutKullanici)}" maxlength="42" autocomplete="off" spellcheck="false">
-                <button type="button" class="form-btn-sm form-btn-cancel mt-form-lookup" style="white-space: nowrap; padding: 0 10px; height: 34px;" title="Canlı Aktif & Peak Verisini Sorgula">Sorgula</button>
+                <input type="text" class="inline-form-input mt-user-input" style="flex: 1; min-width: 0;" placeholder="${RenderEngine.escapeHtml(meta.placeholder || 'kullanıcı_adı')} (Örn: ${RenderEngine.escapeHtml(meta.ornek || '')})" value="${RenderEngine.escapeHtml(mevcutKullanici)}" maxlength="42" autocomplete="off" spellcheck="false">
+                ${isOnayliOyun ? `
+                    <select class="inline-form-input mt-region-select" style="width: 82px; flex-shrink: 0; padding: 0 6px; height: 34px; font-weight: 600; text-align: center; font-size: 0.78rem;" title="Sunucu / Bölge Seçin">
+                        <option value="tr" ${aktifBolge === 'tr' ? 'selected' : ''}>TR</option>
+                        <option value="euw" ${aktifBolge === 'euw' ? 'selected' : ''}>EUW</option>
+                        <option value="eune" ${aktifBolge === 'eune' ? 'selected' : ''}>EUNE</option>
+                        <option value="na" ${aktifBolge === 'na' ? 'selected' : ''}>NA</option>
+                        <option value="kr" ${aktifBolge === 'kr' ? 'selected' : ''}>KR</option>
+                        <option value="br" ${aktifBolge === 'br' ? 'selected' : ''}>BR</option>
+                        <option value="lan" ${aktifBolge === 'lan' ? 'selected' : ''}>LAN</option>
+                        <option value="las" ${aktifBolge === 'las' ? 'selected' : ''}>LAS</option>
+                        <option value="oce" ${aktifBolge === 'oce' ? 'selected' : ''}>OCE</option>
+                        <option value="jp" ${aktifBolge === 'jp' ? 'selected' : ''}>JP</option>
+                        <option value="ru" ${aktifBolge === 'ru' ? 'selected' : ''}>RU</option>
+                    </select>
+                ` : ''}
+                <button type="button" class="form-btn-sm form-btn-submit mt-form-lookup" style="white-space: nowrap; padding: 0 12px; height: 34px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; font-weight: 600;" title="Canlı Bilgileri Sorgula">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span>Sorgula</span>
+                </button>
             </div>
             <div class="mt-lookup-status" style="font-size: 0.72rem; color: var(--text-tertiary); margin-top: 5px; min-height: 14px;">
-                Nick girip <b>Sorgula</b> diyebilir veya kademeni aşağıdan doğrudan seçebilirsin.
+                ${isOnayliOyun 
+                    ? 'Riot ID ve sunucu bölgesini seçip <b>Sorgula</b> diyerek resmi dereceni doğrula.'
+                    : 'Nick girip <b>Sorgula</b> diyebilir veya kademeni aşağıdan doğrudan seçebilirsin.'}
             </div>
-            ${tiers.length > 0 ? `
+            ${(tiers.length > 0 && !isOnayliOyun) ? `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
                     <div>
                         <label style="display: block; font-size: 0.68rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px;">Aktif Kademe</label>
@@ -2760,9 +2798,9 @@ EditManager.TrophiesView = {
                     </select>
                 </div>
             ` : ''}
-            <div class="inline-form-actions" style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 8px;">
-                <button type="button" class="form-btn-sm form-btn-cancel mt-form-cancel">İptal</button>
-                <button type="button" class="form-btn-sm form-btn-save mt-form-save">Kaydet</button>
+            <div class="inline-form-actions" style="margin-top: 12px; display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" class="form-btn-sm form-btn-cancel mt-form-cancel" style="height: 34px; padding: 0 14px;">İptal</button>
+                <button type="button" class="form-btn-sm form-btn-submit mt-form-save" style="height: 34px; padding: 0 16px; font-weight: 600;">Kaydet</button>
             </div>
         `;
 
@@ -2770,55 +2808,82 @@ EditManager.TrophiesView = {
 
         const lookupBtn = formWrap.querySelector('.mt-form-lookup');
         const statusEl = formWrap.querySelector('.mt-lookup-status');
-        if (lookupBtn) {
-            lookupBtn.onclick = async (e) => {
-                e.stopPropagation();
-                const input = formWrap.querySelector('.mt-user-input');
-                const check = TrophiesManager.validateInput(tur, input ? input.value : '');
-                if (!check.ok) {
-                    EditManager.Global.toastGoster(check.error, 'warning');
-                    return;
-                }
+        const regionSelect = formWrap.querySelector('.mt-region-select');
+
+        const runLookup = async () => {
+            const input = formWrap.querySelector('.mt-user-input');
+            const secilenBolge = regionSelect ? regionSelect.value : '';
+            const check = TrophiesManager.validateInput(tur, input ? input.value : '', secilenBolge);
+            if (!check.ok) {
+                EditManager.Global.toastGoster(check.error, 'warning');
+                return null;
+            }
+            if (input && check.clean) input.value = check.clean;
+
+            if (lookupBtn) {
                 lookupBtn.disabled = true;
-                lookupBtn.textContent = '...';
-                if (statusEl) {
-                    statusEl.style.color = 'var(--text-secondary)';
-                    statusEl.textContent = `${meta.baslik} sunucusundan sorgulanıyor...`;
-                }
-                const live = await TrophiesManager.canliVeriCek(tur, check.clean, true);
+                lookupBtn.innerHTML = '<span>...</span>';
+            }
+            if (statusEl) {
+                statusEl.style.color = 'var(--text-secondary)';
+                const bolgeStr = secilenBolge ? ` (${secilenBolge.toUpperCase()})` : '';
+                statusEl.textContent = `${meta.baslik}${bolgeStr} sunucusundan sorgulanıyor...`;
+            }
+
+            const live = await TrophiesManager.canliVeriCek(tur, check.clean, true, secilenBolge);
+            if (lookupBtn) {
                 lookupBtn.disabled = false;
-                lookupBtn.textContent = 'Sorgula';
-                if (live) {
-                    sonSorgulananCanliVeri = live;
-                    const norm = TrophiesManager.getNormalizedTrophyData(tur, check.clean, live, null);
-                    if (statusEl) {
-                        statusEl.style.color = '#51cf66';
-                        if (tur === 'lol') {
-                            const s = live.solo?.tier ? `Solo: ${live.solo.tier}` : 'Solo: Derecesiz';
-                            const f = live.flex?.tier ? `Flex: ${live.flex.tier}` : 'Flex: Derecesiz';
-                            statusEl.textContent = `✓ Bulundu: ${s} • ${f}`;
-                            const kuyrukSelect = formWrap.querySelector('.mt-kuyruk-select');
-                            if (kuyrukSelect && !live.solo?.tier && live.flex?.tier) {
-                                kuyrukSelect.value = 'flex';
-                            }
-                        } else if (tur === 'tft') {
-                            const st = live.standard?.tier ? `Standart: ${live.standard.tier}` : 'Standart: Derecesiz';
-                            const d = live.doubleUp?.tier ? `İkili: ${live.doubleUp.tier}` : 'İkili: Derecesiz';
-                            statusEl.textContent = `✓ Bulundu: ${st} • ${d}`;
-                            const kuyrukSelect = formWrap.querySelector('.mt-kuyruk-select');
-                            if (kuyrukSelect && !live.standard?.tier && live.doubleUp?.tier) {
-                                kuyrukSelect.value = 'double';
-                            }
-                        } else {
-                            statusEl.textContent = `✓ Bulundu: Aktif ${norm.heroValue} • Zirve ${norm.peakValue}`;
+                lookupBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <span>Sorgula</span>
+                `;
+            }
+
+            if (live) {
+                sonSorgulananCanliVeri = live;
+                const norm = TrophiesManager.getNormalizedTrophyData(tur, check.clean, live, null);
+                if (statusEl) {
+                    statusEl.style.color = '#51cf66';
+                    if (tur === 'lol') {
+                        const s = live.solo?.tier ? `Solo: ${live.solo.tier}` : 'Solo: Derecesiz';
+                        const f = live.flex?.tier ? `Flex: ${live.flex.tier}` : 'Flex: Derecesiz';
+                        statusEl.textContent = `✓ Doğrulandı: ${s} • ${f}`;
+                        const kuyrukSelect = formWrap.querySelector('.mt-kuyruk-select');
+                        if (kuyrukSelect && !live.solo?.tier && live.flex?.tier) {
+                            kuyrukSelect.value = 'flex';
                         }
+                    } else if (tur === 'tft') {
+                        const st = live.standard?.tier ? `Standart: ${live.standard.tier}` : 'Standart: Derecesiz';
+                        const d = live.doubleUp?.tier ? `İkili: ${live.doubleUp.tier}` : 'İkili: Derecesiz';
+                        statusEl.textContent = `✓ Doğrulandı: ${st} • ${d}`;
+                        const kuyrukSelect = formWrap.querySelector('.mt-kuyruk-select');
+                        if (kuyrukSelect && !live.standard?.tier && live.doubleUp?.tier) {
+                            kuyrukSelect.value = 'double';
+                        }
+                    } else {
+                        statusEl.textContent = `✓ Doğrulandı: Aktif ${norm.heroValue} • Zirve ${norm.peakValue}`;
                     }
-                } else {
-                    if (statusEl) {
+                }
+                return live;
+            } else {
+                if (statusEl) {
+                    if (isOnayliOyun) {
+                        statusEl.style.color = '#fa5252';
+                        const bUpper = (secilenBolge || 'TR').toUpperCase();
+                        statusEl.textContent = `✕ Oyuncu ${bUpper} sunucusunda bulunamadı. Lütfen Riot ID ve bölgeyi kontrol edin.`;
+                    } else {
                         statusEl.style.color = '#fcc419';
                         statusEl.textContent = `Canlı API yanıt vermedi; aşağıdan Aktif ve Peak kademeni seçip kaydedebilirsin.`;
                     }
                 }
+                return null;
+            }
+        };
+
+        if (lookupBtn) {
+            lookupBtn.onclick = async (e) => {
+                e.stopPropagation();
+                await runLookup();
             };
         }
 
@@ -2839,23 +2904,42 @@ EditManager.TrophiesView = {
         const kaydetAction = async (e) => {
             if (e) e.stopPropagation();
             const input = formWrap.querySelector('.mt-user-input');
-            const aktifSelect = formWrap.querySelector('.mt-aktif-select');
-            const peakSelect = formWrap.querySelector('.mt-peak-select');
-            const saveBtn = formWrap.querySelector('.mt-form-save');
-            const check = TrophiesManager.validateInput(tur, input ? input.value : '');
+            const secilenBolge = regionSelect ? regionSelect.value : '';
+            const check = TrophiesManager.validateInput(tur, input ? input.value : '', secilenBolge);
             if (!check.ok) {
                 EditManager.Global.toastGoster(check.error, 'warning');
                 return;
             }
+
+            const saveBtn = formWrap.querySelector('.mt-form-save');
             if (saveBtn) {
                 saveBtn.disabled = true;
-                saveBtn.textContent = 'Bağlanıyor...';
+                saveBtn.textContent = 'Doğrulanıyor...';
             }
+
+            // Onaylı oyunlarda API doğrulaması şart
+            let canli = sonSorgulananCanliVeri;
+            if (isOnayliOyun && !canli) {
+                canli = await runLookup();
+                if (!canli) {
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = 'Kaydet';
+                    }
+                    const bUpper = (secilenBolge || 'TR').toUpperCase();
+                    EditManager.Global.toastGoster(`Oyuncu ${bUpper} sunucusunda doğrulanamadı. Lütfen geçerli bir Riot ID girin.`, 'warning');
+                    return;
+                }
+            }
+
+            const aktifSelect = formWrap.querySelector('.mt-aktif-select');
+            const peakSelect = formWrap.querySelector('.mt-peak-select');
             const secilenAktif = aktifSelect ? aktifSelect.value : '';
             const secilenPeak = peakSelect ? peakSelect.value : '';
             const kuyrukSelect = formWrap.querySelector('.mt-kuyruk-select');
             const secilenKuyruk = kuyrukSelect ? kuyrukSelect.value : '';
-            await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, sonSorgulananCanliVeri, secilenKuyruk);
+
+            await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, canli, secilenKuyruk, secilenBolge);
             if (formWrap.isConnected) formWrap.remove();
         };
 
