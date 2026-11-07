@@ -114,8 +114,14 @@ function landingEkraniniBaslat() {
     const visualWrapper = document.querySelector('.tilted-visual-wrapper');
     const heroLoginBtn = document.getElementById('hero-login-btn');
     const heroStartBtn = document.getElementById('hero-start-btn');
+    const heroDemoLink = document.getElementById('hero-demo-link');
     const flipFrontTrigger = document.getElementById('flip-front-trigger');
     const flipBackBtn = document.getElementById('flip-back-btn');
+
+    // Örnek Profil (@apdi) bağlantısını ortam desteğine göre (localhost / subfolder / prod) dinamik ayarla
+    if (heroDemoLink && typeof buildProfileUrl === 'function') {
+        heroDemoLink.href = buildProfileUrl('apdi');
+    }
 
     let isLandingLoginMode = true;
 

@@ -329,6 +329,45 @@
     box-shadow: 0 6px 26px rgba(245, 158, 11, 0.5);
 }
 
+.landing-hero-demo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 22px;
+    border-radius: var(--landing-radius-pill);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--landing-text-primary);
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: var(--landing-fw-medium);
+    transition: all var(--landing-transition-fast);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.landing-hero-demo-link strong {
+    color: var(--landing-amber);
+    font-weight: var(--landing-fw-semibold);
+}
+
+.landing-hero-demo-link .landing-demo-arrow {
+    opacity: 0.6;
+    transition: transform var(--landing-transition-fast), opacity var(--landing-transition-fast);
+}
+
+.landing-hero-demo-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+.landing-hero-demo-link:hover .landing-demo-arrow {
+    opacity: 1;
+    transform: translate(2px, -2px);
+}
+
 /* Sağ Masa & 3D Kart */
 .landing-hero-right {
     flex: 0.9;
@@ -779,9 +818,17 @@
         font-size: 2.1rem;
     }
 
-    .landing-hero-cta-btn {
+    .landing-hero-cta-group {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+    }
+
+    .landing-hero-cta-btn,
+    .landing-hero-demo-link {
         width: 100%;
         justify-content: center;
+        box-sizing: border-box;
     }
 
     .tilted-visual-wrapper {

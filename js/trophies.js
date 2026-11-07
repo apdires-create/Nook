@@ -487,39 +487,70 @@ const TrophiesManager = {
                 };
             },
             map(d, kullanici) {
+                // Mod: 'time' (Saniye) veya 'words' (Kelime)
+                const secilenMod = d?.secilenKuyruk || d?.kuyruk || 'time';
+                const isWords = secilenMod === 'words';
+
                 const getBest = (mode, amount) => {
                     const pBests = d?.personalBests || d || {};
                     const arr = pBests?.[mode]?.[amount];
                     const item = Array.isArray(arr) ? arr[0] : null;
-                    if (!item || !item.wpm) return { wpm: null, acc: null };
-                    return { wpm: Math.round(item.wpm), acc: Math.round(item.acc || 0) };
+                    if (!item || !item.wpm) return { wpm: null, acc: null, raw: null };
+                    return { wpm: Math.round(item.wpm), acc: Math.round(item.acc || 0), raw: Math.round(item.raw || item.wpm) };
                 };
 
+                // Süre Modları (15s & 30s)
                 const t15 = getBest('time', '15');
                 const t30 = getBest('time', '30');
                 const t60 = getBest('time', '60');
-                const w25 = getBest('words', '25');
 
-                const allWpms = [t15.wpm, t30.wpm, t60.wpm, w25.wpm].filter(Boolean);
+                // Kelime Modları (10w & 25w)
+                const w10 = getBest('words', '10');
+                const w25 = getBest('words', '25');
+                const w50 = getBest('words', '50');
+
+                // Tüm rekorlar içindeki zirve (Peak)
+                const allWpms = [t15.wpm, t30.wpm, t60.wpm, w10.wpm, w25.wpm, w50.wpm].filter(Boolean);
                 const peakWpm = allWpms.length > 0 ? Math.max(...allWpms) : null;
-                const heroWpm = t15.wpm || t30.wpm || t60.wpm || peakWpm;
+
+                // Hero alanı: Saniye modundaysa 15s öncelikli (yoksa 30s), Kelime modundaysa 10w öncelikli (yoksa 25w)
+                const heroScore = isWords ? (w10.wpm ? w10 : w25) : (t15.wpm ? t15 : t30);
+                const heroLabel = isWords ? '10 KELİME HIZI' : '15 SANİYE HIZI';
+                const heroVal = heroScore.wpm ? `${heroScore.wpm} WPM` : '—';
+                const heroSub = heroScore.acc ? `%${heroScore.acc} doğruluk • ${isWords ? 'Kelime Modu' : 'Süre Modu'}` : (isWords ? 'Kelime Testi' : 'Süre Testi');
 
                 const tests = d?.typingStats?.completedTests;
-                const maxStreak = d?.maxStreak || d?.streak || 0;
+                const streak = d?.streak || 0;
+                const maxStreak = d?.maxStreak || streak;
+
+                // Alt stat kutuları: Mod'a göre değişen 1. ve 2. kutu
+                const stat1 = isWords
+                    ? { label: '10 KELİME', value: w10.wpm ? `${w10.wpm} WPM` : '—', sub: w10.acc ? `%${w10.acc} doğruluk` : 'Hızlı kelime' }
+                    : { label: '15 SANİYE', value: t15.wpm ? `${t15.wpm} WPM` : '—', sub: t15.acc ? `%${t15.acc} doğruluk` : 'Kısa sprint' };
+
+                const stat2 = isWords
+                    ? { label: '25 KELİME', value: w25.wpm ? `${w25.wpm} WPM` : '—', sub: w25.acc ? `%${w25.acc} doğruluk` : 'Standart kelime' }
+                    : { label: '30 SANİYE', value: t30.wpm ? `${t30.wpm} WPM` : '—', sub: t30.acc ? `%${t30.acc} doğruluk` : 'Orta tempo' };
 
                 return {
                     handle: `@${kullanici}`,
-                    badge: d?.streak ? `🔥 ${d.streak} Gün` : 'KLAVYE',
-                    heroLabel: '15S HIZ SKORU',
-                    heroValue: heroWpm ? `${heroWpm} WPM` : '—',
-                    peakLabel: 'ZİRVE (PEAK)',
+                    badge: streak ? `🔥 ${streak} GÜN` : 'KLAVYE',
+                    heroLabel,
+                    heroValue: heroVal,
+                    heroSub,
+                    peakLabel: 'EN YÜKSEK (PEAK)',
                     peakValue: peakWpm ? `${peakWpm} WPM` : '—',
-                    summaryText: heroWpm ? `${heroWpm} WPM` : `@${kullanici}`,
+                    summaryText: heroVal !== '—' ? heroVal : `@${kullanici}`,
+                    activeMode: isWords ? 'words' : 'time',
+                    modes: [
+                        { id: 'time', label: 'Saniye' },
+                        { id: 'words', label: 'Kelime' }
+                    ],
                     stats: [
-                        { label: '15 SANİYE', value: t15.wpm ? `${t15.wpm} WPM` : '—', sub: t15.acc ? `%${t15.acc} doğruluk` : 'Süre modu' },
-                        { label: '60 SANİYE', value: t60.wpm ? `${t60.wpm} WPM` : '—', sub: t60.acc ? `%${t60.acc} doğruluk` : 'Dayanıklılık' },
-                        { label: '25 KELİME', value: w25.wpm ? `${w25.wpm} WPM` : '—', sub: w25.acc ? `%${w25.acc} doğruluk` : 'Kelime modu' },
-                        { label: 'BİTEN TEST', value: tests !== undefined ? Number(tests).toLocaleString('tr-TR') : '—', sub: maxStreak ? `Rekor seri: ${maxStreak} gün` : 'Toplam test' }
+                        stat1,
+                        stat2,
+                        { label: 'BİTEN TEST', value: tests !== undefined ? Number(tests).toLocaleString('tr-TR') : '—', sub: maxStreak ? `Rekor seri: ${maxStreak} gün` : 'Toplam test' },
+                        { label: 'AKTİF SERİ', value: streak ? `${streak} Gün` : '—', sub: 'Günlük Alışkanlık' }
                     ],
                     profileUrl: `https://monkeytype.com/profile/${encodeURIComponent(kullanici)}`
                 };
@@ -537,6 +568,8 @@ const TrophiesManager = {
                 return await res.json();
             },
             map(d, kullanici) {
+                const secilenMod = d?.secilenKuyruk || d?.kuyruk || 'rapid';
+
                 const rapid = d?.chess_rapid?.last?.rating || null;
                 const rapidPeak = d?.chess_rapid?.best?.rating || rapid || null;
                 const blitz = d?.chess_blitz?.last?.rating || null;
@@ -545,11 +578,23 @@ const TrophiesManager = {
                 const bulletPeak = d?.chess_bullet?.best?.rating || bullet || null;
                 const puzzlePeak = d?.tactics?.highest?.rating || null;
 
-                // Aktif ana elo: Rapid -> Blitz -> Bullet sırasıyla mevcut olan
+                // Mod Seçimine göre Hero belirleme
                 let heroMode = 'RAPID ELO';
                 let heroRating = rapid;
-                if (!heroRating && blitz) { heroMode = 'BLITZ ELO'; heroRating = blitz; }
-                else if (!heroRating && bullet) { heroMode = 'BULLET ELO'; heroRating = bullet; }
+                let activePeak = rapidPeak;
+                let modeSub = '10+ dakikalık standart tempo';
+
+                if (secilenMod === 'blitz') {
+                    heroMode = 'BLITZ ELO';
+                    heroRating = blitz;
+                    activePeak = blitzPeak;
+                    modeSub = '3-5 dakikalık hızlı tempo';
+                } else if (secilenMod === 'bullet') {
+                    heroMode = 'BULLET ELO';
+                    heroRating = bullet;
+                    activePeak = bulletPeak;
+                    modeSub = '1-2 dakikalık hiper tempo';
+                }
 
                 // Kariyer zirvesi: Tüm modlar içindeki en yüksek best rating
                 const peaks = [rapidPeak, blitzPeak, bulletPeak].filter(Boolean);
@@ -564,17 +609,24 @@ const TrophiesManager = {
 
                 return {
                     handle: `@${kullanici}`,
-                    badge: d?.fide ? `FIDE ${d.fide}` : 'SATRANÇ',
+                    badge: d?.fide ? `FIDE ${d.fide}` : 'CHESS.COM',
                     heroLabel: heroMode,
-                    heroValue: heroRating ? `${heroRating}` : '—',
-                    peakLabel: 'ZİRVE (PEAK)',
+                    heroValue: heroRating ? `${heroRating} ELO` : '—',
+                    heroSub: activePeak ? `Zirve: ${activePeak} • ${modeSub}` : modeSub,
+                    peakLabel: 'KARİYER ZİRVESİ',
                     peakValue: maxPeak ? `${maxPeak} ELO` : '—',
                     summaryText: heroRating ? `${heroRating} ELO` : `@${kullanici}`,
+                    activeMode: secilenMod,
+                    modes: [
+                        { id: 'rapid', label: 'Rapid' },
+                        { id: 'blitz', label: 'Blitz' },
+                        { id: 'bullet', label: 'Bullet' }
+                    ],
                     stats: [
-                        { label: 'RAPID ELO', value: rapid ? `${rapid}` : '—', sub: rapidPeak ? `Zirve: ${rapidPeak}` : 'Derecesiz' },
-                        { label: 'BLITZ ELO', value: blitz ? `${blitz}` : '—', sub: blitzPeak ? `Zirve: ${blitzPeak}` : 'Derecesiz' },
-                        { label: 'BULLET ELO', value: bullet ? `${bullet}` : '—', sub: bulletPeak ? `Zirve: ${bulletPeak}` : 'Derecesiz' },
-                        { label: 'GALİBİYET', value: totalGames > 0 ? `${w.toLocaleString('tr-TR')}` : (puzzlePeak ? `${puzzlePeak}` : '—'), sub: winRate !== null ? `%${winRate} kazanma (${totalGames} maç)` : 'Bulmaca Zirvesi' }
+                        { label: 'RAPID ELO', value: rapid ? `${rapid} ELO` : '—', sub: rapidPeak ? `Peak: ${rapidPeak}` : '10m+ Tempo' },
+                        { label: 'BLITZ ELO', value: blitz ? `${blitz} ELO` : '—', sub: blitzPeak ? `Peak: ${blitzPeak}` : '3m-5m Tempo' },
+                        { label: 'BULLET ELO', value: bullet ? `${bullet} ELO` : '—', sub: bulletPeak ? `Peak: ${bulletPeak}` : '1m-2m Tempo' },
+                        { label: 'GALİBİYET', value: totalGames > 0 ? `${w.toLocaleString('tr-TR')}` : (puzzlePeak ? `${puzzlePeak}` : '—'), sub: winRate !== null ? `%${winRate} kazanma (${totalGames} maç)` : 'Taktik Zirvesi' }
                     ],
                     profileUrl: `https://www.chess.com/member/${encodeURIComponent(kullanici)}`
                 };
@@ -596,6 +648,7 @@ const TrophiesManager = {
                 }
             },
             map(d, kullanici) {
+                const secilenMod = d?.secilenKuyruk || d?.kuyruk || 'rapid';
                 const clean = String(kullanici).trim().replace(/^@/, '');
                 const perfs = d?.perfs || {};
                 const rapid = perfs.rapid?.rating || null;
@@ -605,8 +658,17 @@ const TrophiesManager = {
 
                 let heroMode = 'RAPID ELO';
                 let heroRating = rapid;
-                if (!heroRating && blitz) { heroMode = 'BLITZ ELO'; heroRating = blitz; }
-                else if (!heroRating && bullet) { heroMode = 'BULLET ELO'; heroRating = bullet; }
+                let modeSub = 'Standart Lichess Modu';
+
+                if (secilenMod === 'blitz') {
+                    heroMode = 'BLITZ ELO';
+                    heroRating = blitz;
+                    modeSub = 'Hızlı Blitz Modu';
+                } else if (secilenMod === 'bullet') {
+                    heroMode = 'BULLET ELO';
+                    heroRating = bullet;
+                    modeSub = 'Yıldırım Bullet Modu';
+                }
 
                 const ratings = [rapid, blitz, bullet].filter(Boolean);
                 const maxRating = ratings.length > 0 ? Math.max(...ratings) : null;
@@ -616,14 +678,21 @@ const TrophiesManager = {
                     handle: `@${d?.username || clean}`,
                     badge: d?.title ? `${d.title} • LICHESS` : 'LICHESS',
                     heroLabel: heroMode,
-                    heroValue: heroRating ? `${heroRating}` : '—',
+                    heroValue: heroRating ? `${heroRating} ELO` : '—',
+                    heroSub: modeSub,
                     peakLabel: 'EN YÜKSEK',
                     peakValue: maxRating ? `${maxRating} ELO` : '—',
                     summaryText: heroRating ? `${heroRating} ELO` : `@${clean}`,
+                    activeMode: secilenMod,
+                    modes: [
+                        { id: 'rapid', label: 'Rapid' },
+                        { id: 'blitz', label: 'Blitz' },
+                        { id: 'bullet', label: 'Bullet' }
+                    ],
                     stats: [
-                        { label: 'RAPID ELO', value: rapid ? `${rapid}` : '—', sub: perfs.rapid?.games ? `${perfs.rapid.games} maç` : 'Dereceli' },
-                        { label: 'BLITZ ELO', value: blitz ? `${blitz}` : '—', sub: perfs.blitz?.games ? `${perfs.blitz.games} maç` : 'Dereceli' },
-                        { label: 'BULLET ELO', value: bullet ? `${bullet}` : '—', sub: perfs.bullet?.games ? `${perfs.bullet.games} maç` : 'Dereceli' },
+                        { label: 'RAPID ELO', value: rapid ? `${rapid} ELO` : '—', sub: perfs.rapid?.games ? `${perfs.rapid.games} maç` : 'Dereceli' },
+                        { label: 'BLITZ ELO', value: blitz ? `${blitz} ELO` : '—', sub: perfs.blitz?.games ? `${perfs.blitz.games} maç` : 'Dereceli' },
+                        { label: 'BULLET ELO', value: bullet ? `${bullet} ELO` : '—', sub: perfs.bullet?.games ? `${perfs.bullet.games} maç` : 'Dereceli' },
                         { label: 'BULMACA (PUZZLE)', value: puzzle ? `${puzzle}` : '—', sub: totalGames > 0 ? `${totalGames} maç oynandı` : 'Taktik' }
                     ],
                     profileUrl: `https://lichess.org/@/${encodeURIComponent(d?.username || clean)}`
@@ -768,6 +837,11 @@ const TrophiesManager = {
                     peakLabel: 'ZİRVE (PEAK)',
                     peakValue: peak,
                     summaryText: displayRank !== 'Derecesiz (Unranked)' ? `${displayRank}${lp ? ` (${lp})` : ''}` : parsed.full,
+                    activeMode: secilen,
+                    modes: [
+                        { id: 'solo', label: 'Solo/Duo' },
+                        { id: 'flex', label: 'Flex 5v5' }
+                    ],
                     stats: [
                         { label: 'TEK / ÇİFT (SOLO)', value: soloText, sub: solo?.winrate && solo.winrate !== '—' ? `%${solo.winrate} galibiyet` : 'Solo/Duo Kuyruğu' },
                         { label: 'ESNEK (FLEX)', value: flexText, sub: flex?.winrate && flex.winrate !== '—' ? `%${flex.winrate} galibiyet` : 'Flex 5v5 Kuyruğu' },
@@ -813,6 +887,11 @@ const TrophiesManager = {
                     peakLabel: 'ZİRVE (PEAK)',
                     peakValue: peak,
                     summaryText: displayRank !== 'Derecesiz (Unranked)' ? `${displayRank}${lp ? ` (${lp})` : ''}` : parsed.full,
+                    activeMode: secilen,
+                    modes: [
+                        { id: 'standard', label: 'Standart' },
+                        { id: 'double', label: 'Double Up' }
+                    ],
                     stats: [
                         { label: 'STANDART DERECELİ', value: standardText, sub: standard?.winrate && standard.winrate !== '—' ? `%${standard.winrate} galibiyet` : 'TFT Ranked Solo' },
                         { label: 'İKİLİ (DOUBLE UP)', value: doubleText, sub: doubleUp?.winrate && doubleUp.winrate !== '—' ? `%${doubleUp.winrate} galibiyet` : 'TFT 2v2 Modu' },
