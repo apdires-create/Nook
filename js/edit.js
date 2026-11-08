@@ -2773,15 +2773,6 @@ EditManager.TrophiesView = {
             return html;
         };
 
-        let initialStatusHtml = `${RenderEngine.escapeHtml(meta.baslik)} kullanıcı adını girip <b>Sorgula</b> diyerek profilini doğrula.`;
-        if (isRiotGame) {
-            initialStatusHtml = 'Riot ID ve sunucu bölgesini seçip <b>Sorgula</b> diyerek resmi dereceni doğrula.';
-        } else if (tur === 'cs2' || tur === 'faceit') {
-            initialStatusHtml = 'FACEIT kullanıcı adını girip <b>Sorgula</b> diyerek resmi dereceni doğrula.';
-        } else if (isManualAllowed) {
-            initialStatusHtml = 'Brawlhalla ID veya nick girip kademeni aşağıdan seçebilirsin.';
-        }
-
         const faviconUrl = TrophiesManager.getFaviconUrl(meta.domain, 128);
         const fallbackHarf = (meta.baslik || 'NK').substring(0, 2).toUpperCase();
 
@@ -2825,9 +2816,7 @@ EditManager.TrophiesView = {
                 </div>
             </div>
 
-            <div class="mt-status-box mt-lookup-status">
-                ${initialStatusHtml}
-            </div>
+            <div class="mt-status-box mt-lookup-status" style="display: none;"></div>
 
             ${(tiers.length > 0 && isManualAllowed) ? `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -2843,24 +2832,6 @@ EditManager.TrophiesView = {
                             ${buildTierOptions(mevcutSnap.manualPeak ? mevcutSnap.peak : '', 'Otomatik / Aktif')}
                         </select>
                     </div>
-                </div>
-            ` : ''}
-
-            ${(tur === 'lol' || tur === 'tft' || tur === 'cs2') ? `
-                <div class="mt-form-field">
-                    <label class="mt-field-label">Öne Çıkan Mod</label>
-                    <select class="mt-form-input is-select mt-kuyruk-select">
-                        ${tur === 'lol' ? `
-                            <option value="solo" ${(mevcutSnap.kuyruk === 'solo' || !mevcutSnap.kuyruk) ? 'selected' : ''}>Tek / Çift Dereceli (Solo / Duo)</option>
-                            <option value="flex" ${mevcutSnap.kuyruk === 'flex' ? 'selected' : ''}>Esnek Dereceli (Flex 5v5)</option>
-                        ` : (tur === 'tft' ? `
-                            <option value="standard" ${(mevcutSnap.kuyruk === 'standard' || !mevcutSnap.kuyruk) ? 'selected' : ''}>Standart Dereceli (TFT Solo)</option>
-                            <option value="double" ${mevcutSnap.kuyruk === 'double' ? 'selected' : ''}>Muhteşem İkili (Double Up 2v2)</option>
-                        ` : `
-                            <option value="faceit" ${(mevcutSnap.kuyruk === 'faceit' || !mevcutSnap.kuyruk) ? 'selected' : ''}>FACEIT Dereceli (Elo & Seviye)</option>
-                            <option value="premier" ${mevcutSnap.kuyruk === 'premier' ? 'selected' : ''}>Premier CS Rating</option>
-                        `)}
-                    </select>
                 </div>
             ` : ''}
 
@@ -2891,6 +2862,7 @@ EditManager.TrophiesView = {
                 lookupBtn.innerHTML = '<span>...</span>';
             }
             if (statusEl) {
+                statusEl.style.display = 'flex';
                 statusEl.className = 'mt-status-box mt-lookup-status';
                 const bolgeStr = secilenBolge ? ` (${secilenBolge.toUpperCase()})` : '';
                 statusEl.textContent = `${meta.baslik}${bolgeStr} sunucusundan sorgulanıyor...`;
@@ -2909,23 +2881,16 @@ EditManager.TrophiesView = {
                 sonSorgulananCanliVeri = live;
                 const norm = TrophiesManager.getNormalizedTrophyData(tur, check.clean, live, null);
                 if (statusEl) {
+                    statusEl.style.display = 'flex';
                     statusEl.className = 'mt-status-box mt-lookup-status is-success';
                     if (tur === 'lol') {
                         const s = live.solo?.tier ? `Solo: ${live.solo.tier}` : 'Solo: Derecesiz';
                         const f = live.flex?.tier ? `Flex: ${live.flex.tier}` : 'Flex: Derecesiz';
                         statusEl.textContent = `✓ Doğrulandı: ${s} • ${f}`;
-                        const kuyrukSelect = formWrap.querySelector('.mt-kuyruk-select');
-                        if (kuyrukSelect && !live.solo?.tier && live.flex?.tier) {
-                            kuyrukSelect.value = 'flex';
-                        }
                     } else if (tur === 'tft') {
                         const st = live.standard?.tier ? `Standart: ${live.standard.tier}` : 'Standart: Derecesiz';
                         const d = live.doubleUp?.tier ? `İkili: ${live.doubleUp.tier}` : 'İkili: Derecesiz';
                         statusEl.textContent = `✓ Doğrulandı: ${st} • ${d}`;
-                        const kuyrukSelect = formWrap.querySelector('.mt-kuyruk-select');
-                        if (kuyrukSelect && !live.standard?.tier && live.doubleUp?.tier) {
-                            kuyrukSelect.value = 'double';
-                        }
                     } else if (tur === 'cs2' || tur === 'faceit') {
                         const elo = live.elo ? `${live.elo} ELO` : '';
                         const lvl = live.level ? `Level ${live.level}` : '';
@@ -2945,6 +2910,7 @@ EditManager.TrophiesView = {
                 return live;
             } else {
                 if (statusEl) {
+                    statusEl.style.display = 'flex';
                     if (isManualAllowed) {
                         statusEl.className = 'mt-status-box mt-lookup-status is-warn';
                         statusEl.textContent = `Canlı API yanıt vermedi; aşağıdan Aktif ve Peak kademeni seçip kaydedebilirsin.`;
@@ -3025,10 +2991,9 @@ EditManager.TrophiesView = {
             const peakSelect = formWrap.querySelector('.mt-peak-select');
             const secilenAktif = aktifSelect ? aktifSelect.value : '';
             const secilenPeak = peakSelect ? peakSelect.value : '';
-            const kuyrukSelect = formWrap.querySelector('.mt-kuyruk-select');
-            const secilenKuyruk = kuyrukSelect ? kuyrukSelect.value : '';
+            const mevcutKuyruk = mevcutSnap.kuyruk || '';
 
-            await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, canli, secilenKuyruk, secilenBolge);
+            await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, canli, mevcutKuyruk, secilenBolge);
             if (formWrap.isConnected) formWrap.remove();
         };
 
