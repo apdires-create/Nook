@@ -2647,7 +2647,24 @@ EditManager.TrophiesView = {
         window._activeTrophyDetail = tur;
         RenderEngine.trophiesCiz(kartVerisi);
         EditManager.Global.degisiklikYapildi();
-        EditManager.Global.toastGoster(`${meta.baslik} profili güncellendi.`, 'success');
+
+        // Otomatik arka plan kalıcı kaydı (sayfa yenilendiğinde veri kaybını önler)
+        if (typeof supabaseClient !== 'undefined' && supabaseClient && kartVerisi?.auth_id) {
+            const updateField = isWidget ? { widgets: kartVerisi.widgets } : { gaming: kartVerisi.gaming };
+            supabaseClient
+                .from('profiles')
+                .update(updateField)
+                .eq('auth_id', kartVerisi.auth_id)
+                .then(({ error }) => {
+                    if (error) console.warn('[trophyKaydet] Arka plan otomatik kayıt uyarısı:', error);
+                    else {
+                        if (typeof yerelOnbellekKaydet === 'function') yerelOnbellekKaydet(kartVerisi);
+                    }
+                })
+                .catch(() => {});
+        }
+
+        EditManager.Global.toastGoster(meta.baslik + ' profili güncellendi.', 'success');
     },
 
     async trophySil(tur, baslik = 'Oyun') {

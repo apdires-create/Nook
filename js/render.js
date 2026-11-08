@@ -197,7 +197,7 @@ const RenderEngine = {
 
             if (aktifTrophyler.length > 0) {
                 itemsHtml += aktifTrophyler.map(item => {
-                    const rawLive = kart._canli_trophies?.[item.tur] || TrophiesManager._getCache(item.tur, item.kullanici) || null;
+                    const rawLive = kart._canli_trophies?.[item.tur] || TrophiesManager._getCache(item.tur, item.kullanici, item.snap?.region || '') || null;
                     const norm = TrophiesManager.getNormalizedTrophyData(item.tur, item.kullanici, rawLive, item.snap);
                     const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
                     const isPlaceholderHero = !norm.heroValue || norm.heroValue === '—' || norm.heroValue === 'Profil Bağlı' || norm.heroValue === 'FACEIT' || norm.heroValue === 'CS2';
@@ -348,7 +348,7 @@ const RenderEngine = {
             }
 
             if (kullanici && typeof TrophiesManager !== 'undefined') {
-                let rawLive = kart._canli_trophies?.[activeTur] || TrophiesManager._getCache(activeTur, kullanici) || null;
+                let rawLive = kart._canli_trophies?.[activeTur] || TrophiesManager._getCache(activeTur, kullanici, seciliOge?.snap?.region || '') || null;
                 const norm = TrophiesManager.getNormalizedTrophyData(activeTur, kullanici, rawLive, seciliOge?.snap);
 
                 if (detailBody) {

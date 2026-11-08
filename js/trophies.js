@@ -465,13 +465,24 @@ const TrophiesManager = {
         return `${this.CACHE_PREFIX}${tur}_${String(kullanici || '').toLowerCase().trim()}`;
     },
 
-    _getCache(tur, kullanici) {
+    _getCache(tur, kullanici, bolge = '') {
         try {
+            const normBolge = String(bolge || '').toLowerCase().trim();
+            if (normBolge) {
+                const rawWithRegion = sessionStorage.getItem(this._cacheKey(tur, String(kullanici) + '_' + normBolge));
+                if (rawWithRegion) {
+                    const parsed = JSON.parse(rawWithRegion);
+                    if (parsed && parsed.ts && (Date.now() - parsed.ts < this.CACHE_TTL_MS)) {
+                        return parsed.data;
+                    }
+                }
+            }
             const raw = sessionStorage.getItem(this._cacheKey(tur, kullanici));
-            if (!raw) return null;
-            const parsed = JSON.parse(raw);
-            if (parsed && parsed.ts && (Date.now() - parsed.ts < this.CACHE_TTL_MS)) {
-                return parsed.data;
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && parsed.ts && (Date.now() - parsed.ts < this.CACHE_TTL_MS)) {
+                    return parsed.data;
+                }
             }
         } catch {}
         return null;
@@ -1049,7 +1060,7 @@ const TrophiesManager = {
             accent: '#3b5bdb'
         };
         const adapter = this.ADAPTERS[tur];
-        let mergedRaw = rawData;
+        let mergedRaw = rawData || snap?.raw || null;
         if (snap && snap.kuyruk) {
             mergedRaw = { ...(rawData || {}), secilenKuyruk: snap.kuyruk };
         }
@@ -1130,6 +1141,11 @@ const TrophiesManager = {
         if (cleanManualPeak) snap.manualPeak = true;
         if (kuyruk) snap.kuyruk = kuyruk;
         if (rawData?.region) snap.region = String(rawData.region).toUpperCase();
+        if (rawData && typeof rawData === 'object') {
+            try {
+                snap.raw = JSON.parse(JSON.stringify(rawData));
+            } catch {}
+        }
         return snap;
     },
 
@@ -1212,7 +1228,8 @@ const TrophiesManager = {
         if (tumAktifler.length === 0) return;
 
         const sorgular = tumAktifler.map(async (item) => {
-            const raw = await this.canliVeriCek(item.tur, item.kullanici);
+            const region = item.snap?.region || '';
+            const raw = await this.canliVeriCek(item.tur, item.kullanici, false, region);
             if (raw) {
                 kart._canli_trophies[item.tur] = raw;
                 if (item.tur === 'monkeytype') {
