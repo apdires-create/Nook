@@ -722,6 +722,7 @@ textarea.inline-form-input {
     flex-direction: column;
     gap: 5px;
     width: 100%;
+    min-width: 0;
 }
 
 .mt-field-label {
@@ -753,7 +754,12 @@ textarea.inline-form-input {
 .mt-form-input.is-select {
     cursor: pointer;
     background-color: rgba(0, 0, 0, 0.45);
-    padding-right: 28px;
+    padding-right: 24px;
+    width: 100%;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .mt-form-input.is-select option {
