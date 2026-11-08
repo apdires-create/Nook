@@ -2720,11 +2720,30 @@ EditManager.TrophiesView = {
         window._activeTrophyDetail = tur;
         RenderEngine.trophiesCiz(kartVerisi);
 
+        const trophiesCompanion = document.getElementById('trophiesCompanionCard');
+        if (trophiesCompanion) trophiesCompanion.classList.add('is-detail-editing');
+
+        const editToggleBtn = document.getElementById('trophiesEditToggleBtn');
+        if (editToggleBtn) {
+            editToggleBtn.classList.add('is-active');
+            editToggleBtn.title = 'Düzenlemeyi Bitir';
+        }
+
+        const deleteActiveBtn = document.getElementById('trophiesDeleteActiveBtn');
+        if (deleteActiveBtn) {
+            deleteActiveBtn.style.display = mevcutKullanici ? 'inline-flex' : 'none';
+        }
+
+        const detailTitle = document.getElementById('trophiesDetailTitle');
+        if (detailTitle) {
+            detailTitle.textContent = `${meta.baslik} Düzenle`;
+        }
+
         const detailBody = document.getElementById('trophiesDetailBody');
         const body = detailBody || document.getElementById('trophiesMasterList');
         if (!body) return;
 
-        const existingForm = body.querySelector('.mt-form-wrap');
+        const existingForm = body.querySelector('.mt-form-card, .mt-form-wrap');
         if (existingForm) existingForm.remove();
 
         const isManualAllowed = (tur === 'brawlhalla');
@@ -2763,56 +2782,74 @@ EditManager.TrophiesView = {
             initialStatusHtml = 'Brawlhalla ID veya nick girip kademeni aşağıdan seçebilirsin.';
         }
 
+        const faviconUrl = TrophiesManager.getFaviconUrl(meta.domain, 128);
+        const fallbackHarf = (meta.baslik || 'NK').substring(0, 2).toUpperCase();
+
         const formWrap = document.createElement('div');
-        formWrap.className = 'inline-form-card mt-form-wrap';
-        formWrap.style.marginBottom = '12px';
+        formWrap.className = 'mt-form-card';
         formWrap.innerHTML = `
-            <div style="font-size: var(--cq-fs-desc); font-weight: 600; margin-bottom: 6px;">${RenderEngine.escapeHtml(meta.girdiEtiket || 'Oyuncu Kimliği')}:</div>
-            <div style="display: flex; gap: 6px; align-items: center;">
-                <input type="text" class="inline-form-input mt-user-input" style="flex: 1; min-width: 0;" placeholder="${RenderEngine.escapeHtml(meta.placeholder || 'kullanıcı_adı')} (Örn: ${RenderEngine.escapeHtml(meta.ornek || '')})" value="${RenderEngine.escapeHtml(mevcutKullanici)}" maxlength="42" autocomplete="off" spellcheck="false">
-                ${isRiotGame ? `
-                    <select class="inline-form-input mt-region-select" style="width: 82px; flex-shrink: 0; padding: 0 6px; height: 34px; font-weight: 600; text-align: center; font-size: 0.78rem;" title="Sunucu / Bölge Seçin">
-                        <option value="tr" ${aktifBolge === 'tr' ? 'selected' : ''}>TR</option>
-                        <option value="euw" ${aktifBolge === 'euw' ? 'selected' : ''}>EUW</option>
-                        <option value="eune" ${aktifBolge === 'eune' ? 'selected' : ''}>EUNE</option>
-                        <option value="na" ${aktifBolge === 'na' ? 'selected' : ''}>NA</option>
-                        <option value="kr" ${aktifBolge === 'kr' ? 'selected' : ''}>KR</option>
-                        <option value="br" ${aktifBolge === 'br' ? 'selected' : ''}>BR</option>
-                        <option value="lan" ${aktifBolge === 'lan' ? 'selected' : ''}>LAN</option>
-                        <option value="las" ${aktifBolge === 'las' ? 'selected' : ''}>LAS</option>
-                        <option value="oce" ${aktifBolge === 'oce' ? 'selected' : ''}>OCE</option>
-                        <option value="jp" ${aktifBolge === 'jp' ? 'selected' : ''}>JP</option>
-                        <option value="ru" ${aktifBolge === 'ru' ? 'selected' : ''}>RU</option>
-                    </select>
-                ` : ''}
-                <button type="button" class="form-btn-sm form-btn-submit mt-form-lookup" style="white-space: nowrap; padding: 0 12px; height: 34px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0; font-weight: 600;" title="Canlı Bilgileri Sorgula">
-                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <span>Sorgula</span>
-                </button>
+            <div class="mt-form-header">
+                <div class="mt-form-icon-wrap">
+                    <img src="${RenderEngine.escapeHtml(faviconUrl)}" alt="${RenderEngine.escapeHtml(meta.baslik)}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                    <span style="display:none; font-weight:800; font-size:0.75rem;">${RenderEngine.escapeHtml(fallbackHarf)}</span>
+                </div>
+                <div class="mt-form-title-group">
+                    <div class="mt-form-title">${RenderEngine.escapeHtml(meta.baslik)}</div>
+                    <div class="mt-form-subtitle">${RenderEngine.escapeHtml(meta.domain || 'Profil Entegrasyonu')}</div>
+                </div>
             </div>
-            <div class="mt-lookup-status" style="font-size: 0.72rem; color: var(--text-tertiary); margin-top: 5px; min-height: 14px;">
+
+            <div class="mt-form-field">
+                <label class="mt-field-label">${RenderEngine.escapeHtml(meta.girdiEtiket || 'Oyuncu Kimliği')}</label>
+                <div class="mt-form-row">
+                    <input type="text" class="mt-form-input mt-user-input" style="flex: 1; min-width: 0;" placeholder="${RenderEngine.escapeHtml(meta.placeholder || 'kullanıcı_adı')} (Örn: ${RenderEngine.escapeHtml(meta.ornek || '')})" value="${RenderEngine.escapeHtml(mevcutKullanici)}" maxlength="42" autocomplete="off" spellcheck="false">
+                    ${isRiotGame ? `
+                        <select class="mt-form-input is-select mt-region-select" style="width: 78px; flex-shrink: 0; text-align: center; font-weight: 700;" title="Sunucu / Bölge Seçin">
+                            <option value="tr" ${aktifBolge === 'tr' ? 'selected' : ''}>TR</option>
+                            <option value="euw" ${aktifBolge === 'euw' ? 'selected' : ''}>EUW</option>
+                            <option value="eune" ${aktifBolge === 'eune' ? 'selected' : ''}>EUNE</option>
+                            <option value="na" ${aktifBolge === 'na' ? 'selected' : ''}>NA</option>
+                            <option value="kr" ${aktifBolge === 'kr' ? 'selected' : ''}>KR</option>
+                            <option value="br" ${aktifBolge === 'br' ? 'selected' : ''}>BR</option>
+                            <option value="lan" ${aktifBolge === 'lan' ? 'selected' : ''}>LAN</option>
+                            <option value="las" ${aktifBolge === 'las' ? 'selected' : ''}>LAS</option>
+                            <option value="oce" ${aktifBolge === 'oce' ? 'selected' : ''}>OCE</option>
+                            <option value="jp" ${aktifBolge === 'jp' ? 'selected' : ''}>JP</option>
+                            <option value="ru" ${aktifBolge === 'ru' ? 'selected' : ''}>RU</option>
+                        </select>
+                    ` : ''}
+                    <button type="button" class="mt-lookup-btn mt-form-lookup" title="Canlı Bilgileri Sorgula">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <span>Sorgula</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-status-box mt-lookup-status">
                 ${initialStatusHtml}
             </div>
+
             ${(tiers.length > 0 && isManualAllowed) ? `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-                    <div>
-                        <label style="display: block; font-size: 0.68rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px;">Aktif Kademe</label>
-                        <select class="inline-form-input mt-aktif-select" style="width: 100%; padding: 6px 8px; font-size: 0.78rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div class="mt-form-field">
+                        <label class="mt-field-label">Aktif Kademe</label>
+                        <select class="mt-form-input is-select mt-aktif-select">
                             ${buildTierOptions(mevcutSnap.manualAktif ? mevcutSnap.aktif : '', 'Otomatik (API)')}
                         </select>
                     </div>
-                    <div>
-                        <label style="display: block; font-size: 0.68rem; font-weight: 700; color: #f59f00; text-transform: uppercase; margin-bottom: 4px;">Kariyer Zirvesi (Peak)</label>
-                        <select class="inline-form-input mt-peak-select" style="width: 100%; padding: 6px 8px; font-size: 0.78rem;">
+                    <div class="mt-form-field">
+                        <label class="mt-field-label" style="color: #f59f00;">Kariyer Zirvesi (Peak)</label>
+                        <select class="mt-form-input is-select mt-peak-select">
                             ${buildTierOptions(mevcutSnap.manualPeak ? mevcutSnap.peak : '', 'Otomatik / Aktif')}
                         </select>
                     </div>
                 </div>
             ` : ''}
+
             ${(tur === 'lol' || tur === 'tft' || tur === 'cs2') ? `
-                <div style="margin-top: 8px;">
-                    <label style="display: block; font-size: 0.68rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px;">Öne Çıkan Mod</label>
-                    <select class="inline-form-input mt-kuyruk-select" style="width: 100%; padding: 6px 8px; font-size: 0.78rem;">
+                <div class="mt-form-field">
+                    <label class="mt-field-label">Öne Çıkan Mod</label>
+                    <select class="mt-form-input is-select mt-kuyruk-select">
                         ${tur === 'lol' ? `
                             <option value="solo" ${(mevcutSnap.kuyruk === 'solo' || !mevcutSnap.kuyruk) ? 'selected' : ''}>Tek / Çift Dereceli (Solo / Duo)</option>
                             <option value="flex" ${mevcutSnap.kuyruk === 'flex' ? 'selected' : ''}>Esnek Dereceli (Flex 5v5)</option>
@@ -2826,9 +2863,10 @@ EditManager.TrophiesView = {
                     </select>
                 </div>
             ` : ''}
-            <div class="inline-form-actions" style="margin-top: 12px; display: flex; justify-content: flex-end; gap: 8px;">
-                <button type="button" class="form-btn-sm form-btn-cancel mt-form-cancel" style="height: 34px; padding: 0 14px;">İptal</button>
-                <button type="button" class="form-btn-sm form-btn-submit mt-form-save" style="height: 34px; padding: 0 16px; font-weight: 600;">Kaydet</button>
+
+            <div class="mt-form-actions-bar">
+                <button type="button" class="mt-action-btn mt-btn-cancel mt-form-cancel">İptal</button>
+                <button type="button" class="mt-action-btn mt-btn-submit mt-form-save">Kaydet</button>
             </div>
         `;
 
@@ -2853,7 +2891,7 @@ EditManager.TrophiesView = {
                 lookupBtn.innerHTML = '<span>...</span>';
             }
             if (statusEl) {
-                statusEl.style.color = 'var(--text-secondary)';
+                statusEl.className = 'mt-status-box mt-lookup-status';
                 const bolgeStr = secilenBolge ? ` (${secilenBolge.toUpperCase()})` : '';
                 statusEl.textContent = `${meta.baslik}${bolgeStr} sunucusundan sorgulanıyor...`;
             }
@@ -2871,7 +2909,7 @@ EditManager.TrophiesView = {
                 sonSorgulananCanliVeri = live;
                 const norm = TrophiesManager.getNormalizedTrophyData(tur, check.clean, live, null);
                 if (statusEl) {
-                    statusEl.style.color = '#51cf66';
+                    statusEl.className = 'mt-status-box mt-lookup-status is-success';
                     if (tur === 'lol') {
                         const s = live.solo?.tier ? `Solo: ${live.solo.tier}` : 'Solo: Derecesiz';
                         const f = live.flex?.tier ? `Flex: ${live.flex.tier}` : 'Flex: Derecesiz';
@@ -2907,17 +2945,19 @@ EditManager.TrophiesView = {
                 return live;
             } else {
                 if (statusEl) {
-                    statusEl.style.color = '#fa5252';
-                    if (isRiotGame) {
-                        const bUpper = (secilenBolge || 'TR').toUpperCase();
-                        statusEl.textContent = `✕ Oyuncu ${bUpper} sunucusunda bulunamadı. Lütfen Riot ID ve bölgeyi kontrol edin.`;
-                    } else if (tur === 'cs2' || tur === 'faceit') {
-                        statusEl.textContent = `✕ FACEIT oyuncusu bulunamadı. Lütfen oyuncu adını kontrol edin.`;
-                    } else if (isManualAllowed) {
-                        statusEl.style.color = '#fcc419';
+                    if (isManualAllowed) {
+                        statusEl.className = 'mt-status-box mt-lookup-status is-warn';
                         statusEl.textContent = `Canlı API yanıt vermedi; aşağıdan Aktif ve Peak kademeni seçip kaydedebilirsin.`;
                     } else {
-                        statusEl.textContent = `✕ ${meta.baslik} hesabı bulunamadı. Lütfen kullanıcı adını kontrol edin.`;
+                        statusEl.className = 'mt-status-box mt-lookup-status is-error';
+                        if (isRiotGame) {
+                            const bUpper = (secilenBolge || 'TR').toUpperCase();
+                            statusEl.textContent = `✕ Oyuncu ${bUpper} sunucusunda bulunamadı. Lütfen Riot ID ve bölgeyi kontrol edin.`;
+                        } else if (tur === 'cs2' || tur === 'faceit') {
+                            statusEl.textContent = `✕ FACEIT oyuncusu bulunamadı. Lütfen oyuncu adını kontrol edin.`;
+                        } else {
+                            statusEl.textContent = `✕ ${meta.baslik} hesabı bulunamadı. Lütfen kullanıcı adını kontrol edin.`;
+                        }
                     }
                 }
                 return null;
@@ -2934,7 +2974,6 @@ EditManager.TrophiesView = {
         formWrap.querySelector('.mt-form-cancel').onclick = (e) => {
             e.stopPropagation();
             formWrap.remove();
-            const trophiesCompanion = document.getElementById('trophiesCompanionCard');
             if (trophiesCompanion) trophiesCompanion.classList.remove('is-detail-editing');
             const guncelAktifler = this._aktifModListesiniAl(tur);
             const hasCurrent = guncelAktifler.some(t => t.tur === tur);
