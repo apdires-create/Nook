@@ -939,7 +939,9 @@ const TrophiesManager = {
         // 8. BRAWLHALLA
         brawlhalla: {
             async fetch(kullanici) {
-                return { id: String(kullanici).trim() };
+                // İstemci tarafında doğrudan çekim yapılmaz; bright-task üzerinden döner.
+                // Ulaşılamazsa null döner, böylece snapshot / snap.raw kullanılır.
+                return null;
             },
             map(d, kullanici) {
                 const clean = String(kullanici).trim();
