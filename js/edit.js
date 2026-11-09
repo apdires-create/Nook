@@ -4290,15 +4290,16 @@ EditManager.CompanionViews = {
                                 newList.push(kayit);
                             }
                         });
-                        if (newList.length === mevcutListe.length) {
+                        const currentList = isWidgetsMode ? (Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets : []) : (Array.isArray(kartVerisi.gaming) ? kartVerisi.gaming : []);
+                        if (newList.length === mevcutListe.length && JSON.stringify(newList) !== JSON.stringify(currentList)) {
                             if (isWidgetsMode) {
                                 kartVerisi.widgets = newList;
                             } else {
                                 kartVerisi.gaming = newList;
                             }
+                            EditManager.Global.degisiklikYapildi();
                         }
                     }
-                    EditManager.Global.degisiklikYapildi();
                 }
             });
         }
