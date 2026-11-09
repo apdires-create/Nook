@@ -362,9 +362,20 @@ const RenderEngine = {
                             if (!targetMode) return;
                             if (!seciliOge.snap) seciliOge.snap = {};
                             seciliOge.snap.kuyruk = targetMode;
-                            // Kullanıcı profil sahibiyse otomatik kayda işaretle
+                            // Aktif mod derecesini de snapshot ile senkronize et
+                            const updatedNorm = TrophiesManager.getNormalizedTrophyData(activeTur, kullanici, rawLive, seciliOge.snap);
+                            if (updatedNorm && updatedNorm.heroValue && !updatedNorm.heroValue.includes('Derecesiz') && updatedNorm.heroValue !== '—') {
+                                seciliOge.snap.aktif = updatedNorm.heroValue;
+                                if (updatedNorm.heroSub) seciliOge.snap.aktifAlt = updatedNorm.heroSub;
+                            }
+                            // Kullanıcı profil sahibiyse otomatik kayda işaretle ve arka planda profiles tablosuna yaz
                             if (isUserOwner && typeof EditManager !== 'undefined') {
                                 EditManager.Global.degisiklikYapildi();
+                                if (typeof supabaseClient !== 'undefined' && supabaseClient && kart?.auth_id) {
+                                    const isWidget = activeTur === 'monkeytype' || activeTur === 'chess';
+                                    const updatePayload = isWidget ? { widgets: kart.widgets } : { gaming: kart.gaming };
+                                    supabaseClient.from('profiles').update(updatePayload).eq('auth_id', kart.auth_id).then(() => {}).catch(() => {});
+                                }
                             }
                             this.trophiesCiz(kart);
                         };

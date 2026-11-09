@@ -1094,8 +1094,14 @@ const TrophiesManager = {
         const isPlaceholderVal = (v) => !v || v === '—' || v === 'Profil Bağlı' || v === 'FACEIT' || v === 'CS2' || v === 'Ranked 1v1' || v === 'Belirtilmedi' || String(v).includes('Derecesiz') || String(v).startsWith('#');
 
         // Snapshot (veya kullanıcı tarafından onaylanmış Aktif/Peak kademesi) birleştirmesi
+        const hasMultipleModes = Array.isArray(mapped.modes) && mapped.modes.length > 1;
         if (snap && typeof snap === 'object') {
-            if (snap.aktif && (snap.manualAktif || isPlaceholderVal(mapped.heroValue))) {
+            const shouldApplySnapAktif = snap.aktif && (
+                snap.manualAktif ||
+                isPlaceholderVal(mapped.heroValue) ||
+                (!hasMultipleModes && !snap.raw)
+            );
+            if (shouldApplySnapAktif) {
                 mapped.heroValue = snap.aktif;
             }
             if (snap.aktifAlt && isPlaceholderVal(mapped.heroSub)) {
