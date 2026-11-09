@@ -944,25 +944,36 @@ const TrophiesManager = {
             map(d, kullanici) {
                 const clean = String(kullanici).trim();
                 const isNumericId = /^\d+$/.test(clean);
-                const ratingVal = d?.rating ? `${d.rating} ELO` : (d?.tier || clean);
-                const peakVal = d?.peakRating ? `${d.peakRating} ELO` : (d?.peak ? `${d.peak} ELO` : 'Ranked');
+
+                // Gelen ham canlı verideki alanları normalize et (API veya Corehalla formatı)
+                const rawRating = d?.rating ?? d?.ratingValue ?? null;
+                const rawPeak = d?.peakRating ?? d?.peak_rating ?? d?.peak ?? null;
+                const rawTier = d?.tier ?? d?.tierName ?? null;
+                const rawName = d?.name ?? d?.username ?? null;
+                const bhId = d?.brawlhalla_id ?? (isNumericId ? clean : null);
+
+                const ratingVal = rawRating ? `${rawRating} ELO` : (rawTier || clean);
+                const peakVal = rawPeak ? `${rawPeak} ELO` : (rawRating ? `${rawRating} ELO` : 'Ranked');
+
+                const stats = [
+                    { label: 'AKTİF KADEME', value: rawTier || ratingVal, sub: '1v1 Solo Dereceli' },
+                    { label: 'ZİRVE ELO', value: peakVal, sub: 'Kariyer Rekoru' },
+                    { label: 'OYUNCU KİMLİĞİ', value: rawName || clean, sub: bhId ? `ID #${bhId}` : 'Oyuncu Adı' },
+                    { label: 'SIRALAMA', value: d?.globalRank ? `#${d.globalRank}` : (d?.region ? `${d.region}` : 'Corehalla'), sub: 'Bölge / Küresel Sıralama' }
+                ];
+
                 return {
-                    handle: isNumericId ? `ID #${clean}` : clean,
-                    badge: '1v1 RANKED',
+                    handle: rawName ? `${rawName}${bhId ? ` (#${bhId})` : ''}` : (isNumericId ? `ID #${clean}` : clean),
+                    badge: rawTier ? String(rawTier).toUpperCase() : '1v1 RANKED',
                     heroLabel: 'BRAWLHALLA 1V1',
                     heroValue: ratingVal,
                     peakLabel: 'ZİRVE (PEAK)',
                     peakValue: peakVal,
                     summaryText: ratingVal,
-                    stats: [
-                        { label: 'AKTİF KADEME', value: d?.tier || ratingVal, sub: '1v1 Solo Dereceli' },
-                        { label: 'ZİRVE ELO', value: peakVal, sub: 'Kariyer Rekoru' },
-                        { label: 'OYUNCU KİMLİĞİ', value: clean, sub: isNumericId ? 'Brawlhalla ID' : 'Oyuncu Adı' },
-                        { label: 'SIRALAMA', value: 'Corehalla', sub: 'Detaylı Efsane İstatistiği' }
-                    ],
-                    profileUrl: isNumericId
-                        ? `https://corehalla.com/stats/player/${encodeURIComponent(clean)}`
-                        : `https://www.brawlhalla.com/rankings/game/all/1v1/`
+                    stats: stats,
+                    profileUrl: bhId
+                        ? `https://corehalla.com/stats/player/${encodeURIComponent(bhId)}`
+                        : `https://corehalla.com/`
                 };
             }
         },
