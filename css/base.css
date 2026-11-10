@@ -976,7 +976,8 @@ html.is-profile-loading #landing-screen {
 }
 
 .companion-action-btn.delete-all-list-btn:hover,
-.companion-action-btn.item-del-trigger-btn:hover {
+.companion-action-btn.item-del-trigger-btn:hover,
+.companion-action-btn.section-delete-btn:hover {
     background: rgba(239, 68, 68, 0.25);
     border-color: #ef4444;
     color: #ef4444;

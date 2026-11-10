@@ -1400,6 +1400,69 @@ body:not(.is-owner) .top-add-form {
 }
 /* #endregion */
 
+/* #region 7.1: ALAN YÖNETİMİ MODALI (GAMING / WIDGETS / TROPHIES / SHOWCASE) */
+.section-manager-item {
+    cursor: default;
+}
+
+.section-manager-item .picker-item-icon {
+    color: var(--section-color, var(--accent-color));
+    border-color: color-mix(in srgb, var(--section-color, #ffffff) 40%, transparent);
+    background: color-mix(in srgb, var(--section-color, #ffffff) 14%, transparent);
+}
+
+.section-picker-item.section-manager-item:hover .picker-item-icon {
+    background: color-mix(in srgb, var(--section-color, #ffffff) 22%, transparent);
+    color: var(--section-color, #ffffff);
+}
+
+.section-manager-item.is-already-added {
+    border-color: color-mix(in srgb, var(--section-color, #ffffff) 35%, transparent);
+}
+
+.section-manager-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 7px 12px;
+    border-radius: var(--radius-pill, 999px);
+    font-size: 0.78rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.section-manager-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.section-manager-btn.is-add {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+}
+
+.section-manager-btn.is-add:hover:not(:disabled) {
+    background: var(--section-color, var(--accent-color));
+    border-color: var(--section-color, var(--accent-color));
+    transform: scale(1.04);
+}
+
+.section-manager-btn.is-remove {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #f87171;
+}
+
+.section-manager-btn.is-remove:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    color: #ffffff;
+}
+/* #endregion */
+
 /* #region 8: ETİKET SEÇİCİ MODALI (TAG PICKER MODAL) */
 .tag-picker-panel {
     padding: 24px;

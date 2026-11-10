@@ -27,6 +27,7 @@ const EditManager = {
         this.CompanionViews.init();
         if (this.TrophyPicker) this.TrophyPicker.init();
         if (this.TrophiesView) this.TrophiesView.init();
+        if (this.Sections) this.Sections.init();
 
         document.body.classList.add('global-edit-mode');
     },
@@ -566,6 +567,31 @@ const EditManager = {
             document.body.appendChild(searchModal);
         }
 
+        // 9.5. Alan Yönetimi Modalı (Gaming / Widgets / Trophies / Showcase)
+        // trophy-picker-modal sınıfını paylaşır: backdrop, panel animasyonu, ESC ve swipe kilidi ortak çalışır
+        if (!document.getElementById('section-manager-modal')) {
+            const sectionModal = document.createElement('div');
+            sectionModal.id = 'section-manager-modal';
+            sectionModal.className = 'trophy-picker-modal section-manager-modal';
+            sectionModal.setAttribute('role', 'dialog');
+            sectionModal.setAttribute('aria-modal', 'true');
+            sectionModal.setAttribute('aria-labelledby', 'section-manager-title');
+            sectionModal.innerHTML = `
+                <div class="trophy-picker-backdrop" id="section-manager-backdrop"></div>
+                <div class="trophy-picker-panel section-picker-panel">
+                    <div class="section-picker-header">
+                        <div>
+                            <h3 class="section-picker-title" id="section-manager-title">Alanları Yönet</h3>
+                            <p class="section-picker-desc">Profilinde göstermek istediğin alanları ekle veya kaldır.</p>
+                        </div>
+                        <button type="button" class="section-picker-close" id="section-manager-close" aria-label="Kapat">&times;</button>
+                    </div>
+                    <div class="section-picker-list" id="sectionManagerList"></div>
+                </div>
+            `;
+            document.body.appendChild(sectionModal);
+        }
+
         // 10. Oyun Seçici Modalı (Gaming Picker Modal)
         if (!document.getElementById('trophy-picker-modal')) {
             const trophyModal = document.createElement('div');
@@ -987,6 +1013,9 @@ EditManager.Appearance = {
 
     unfreezeEditMode() {
         this.isPreviewActive = false;
+
+        // Önizleme bitince sahibe özel "+" alan flag'ini yeniden değerlendir
+        setTimeout(() => { if (typeof SectionManager !== 'undefined') SectionManager.flaglariGuncelle(kartVerisi); }, 0);
 
         // Global isOwner'ı eski durumuna getir
         if (this._actualOwner) {
@@ -3834,6 +3863,303 @@ EditManager.MediaSearchModal = {
         if (typeof tumGorselleriPreloadEt === 'function') {
             tumGorselleriPreloadEt(kartVerisi);
         }
+    }
+};
+// #endregion
+
+// #region 9.9: İSTEĞE BAĞLI ALAN YÖNETİMİ (GAMING / WIDGETS / TROPHIES / SHOWCASE)
+EditManager.Sections = {
+    _inited: false,
+    _kaydediliyor: false,
+
+    META: {
+        gaming: {
+            baslik: 'Gaming',
+            alt: 'Rekabetçi oyun derecelerini ve elolarını sergile.',
+            icerik: 'eklediğin tüm oyunlar',
+            renk: '#ff3b56',
+            ikon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="10" y2="12"></line><line x1="8" y1="10" x2="8" y2="14"></line><line x1="15" y1="13" x2="15.01" y2="13"></line><line x1="18" y1="11" x2="18.01" y2="11"></line><rect x="2" y="6" width="20" height="12" rx="4"></rect></svg>'
+        },
+        widgets: {
+            baslik: 'Widgets',
+            alt: 'Monkeytype, Chess.com, Duolingo ve osu! istatistikleri.',
+            icerik: 'eklediğin tüm widget\'lar',
+            renk: '#20c997',
+            ikon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg>'
+        },
+        achievements: {
+            baslik: 'Trophies',
+            alt: 'Ödüller, sertifikalar ve kişisel dönüm noktaları.',
+            icerik: 'eklediğin tüm başarılar',
+            renk: '#fcc419',
+            beta: true,
+            ikon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"></path><path d="M6 4h12a2 2 0 0 1 2 2v3a6 6 0 0 1-12 0V6a2 2 0 0 1 2-2z"></path></svg>'
+        },
+        showcase: {
+            baslik: 'Showcase',
+            alt: 'Favori film, dizi, oyun, anime ve kitap listelerin.',
+            icerik: 'oluşturduğun tüm listeler ve afişler',
+            renk: '#228be6',
+            ikon: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'
+        }
+    },
+
+    init() {
+        if (typeof isOwner === 'undefined' || !isOwner || typeof SectionManager === 'undefined') return;
+
+        const closeBtn = document.getElementById('section-manager-close');
+        const backdrop = document.getElementById('section-manager-backdrop');
+        if (closeBtn) closeBtn.onclick = (e) => { e.stopPropagation(); this.kapat(); };
+        if (backdrop) backdrop.onclick = (e) => { e.stopPropagation(); this.kapat(); };
+
+        // Kullanıcı menüsündeki "Alanları Yönet" öğesi (mobil + masaüstü)
+        const navItem = document.getElementById('nav-item-sections');
+        if (navItem) {
+            navItem.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const userDropdown = document.getElementById('profile-user-dropdown');
+                if (userDropdown) {
+                    userDropdown.classList.remove('is-open');
+                    userDropdown.style.display = '';
+                }
+                this.ac();
+            };
+        }
+
+        // Kanat başlıklarındaki "Alanı Kaldır" butonları (düzenleme modu gerektirmez)
+        const trophiesDelBtn = document.getElementById('trophiesSectionDeleteBtn');
+        if (trophiesDelBtn) {
+            trophiesDelBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.kaldir(window._activeLeftWingMode || 'gaming');
+            };
+        }
+        const showcaseDelBtn = document.getElementById('showcaseSectionDeleteBtn');
+        if (showcaseDelBtn) {
+            showcaseDelBtn.onclick = (e) => {
+                e.stopPropagation();
+                this.kaldir('showcase');
+            };
+        }
+
+        SectionManager.flaglariGuncelle(kartVerisi);
+
+        // Tek seferlik göç: aktif_alanlar hiç kaydedilmemişse içerikten çıkarılan listeyi sessizce kaydet
+        if (!this._inited && !SectionManager.kayitliMi(kartVerisi)) {
+            this.alanlariKaydet(SectionManager.icerikten(kartVerisi), null, true);
+        }
+        this._inited = true;
+    },
+
+    ac() {
+        if (typeof isOwner === 'undefined' || !isOwner) return;
+        const modal = document.getElementById('section-manager-modal');
+        if (!modal) return;
+        this.renderListe();
+        modal.classList.add('is-open');
+    },
+
+    kapat() {
+        const modal = document.getElementById('section-manager-modal');
+        if (modal) modal.classList.remove('is-open');
+    },
+
+    acikMi() {
+        return !!document.getElementById('section-manager-modal')?.classList.contains('is-open');
+    },
+
+    renderListe() {
+        const list = document.getElementById('sectionManagerList');
+        if (!list || typeof SectionManager === 'undefined') return;
+        const aktifler = SectionManager.aktifAlanlariAl(kartVerisi);
+        const esc = (v) => (typeof RenderEngine !== 'undefined' ? RenderEngine.escapeHtml(v) : String(v));
+
+        list.innerHTML = SectionManager.TUM_ALANLAR.map(id => {
+            const meta = this.META[id];
+            const ekli = aktifler.includes(id);
+            const rozetler = [
+                meta.beta ? '<span class="picker-soon-badge">Beta</span>' : '',
+                ekli ? '<span class="picker-added-badge">Profilde</span>' : ''
+            ].join('');
+            const aksiyon = ekli
+                ? `<button type="button" class="section-manager-btn is-remove" data-section-remove="${id}" title="${esc(meta.baslik)} alanını kaldır">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Kaldır</span>
+                   </button>`
+                : `<button type="button" class="section-manager-btn is-add" data-section-add="${id}" title="${esc(meta.baslik)} alanını ekle">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Ekle</span>
+                   </button>`;
+
+            return `
+                <div class="section-picker-item section-manager-item ${ekli ? 'is-already-added' : ''}" data-section-id="${id}" style="--section-color: ${meta.renk};">
+                    <div class="picker-item-icon">${meta.ikon}</div>
+                    <div class="picker-item-info">
+                        <div class="picker-item-title-row">
+                            <span class="picker-item-title">${esc(meta.baslik)}</span>
+                            ${rozetler}
+                        </div>
+                        <span class="picker-item-desc">${esc(meta.alt)}</span>
+                    </div>
+                    ${aksiyon}
+                </div>
+            `;
+        }).join('');
+
+        list.querySelectorAll('[data-section-add]').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                this.ekle(btn.dataset.sectionAdd);
+            };
+        });
+        list.querySelectorAll('[data-section-remove]').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                this.kaldir(btn.dataset.sectionRemove);
+            };
+        });
+    },
+
+    _butonlariKilitle(kilitli) {
+        document.querySelectorAll('#sectionManagerList .section-manager-btn, .section-delete-btn').forEach(b => {
+            b.disabled = kilitli;
+        });
+    },
+
+    async ekle(id) {
+        if (!this.META[id] || typeof SectionManager === 'undefined') return;
+        const aktifler = SectionManager.aktifAlanlariAl(kartVerisi);
+        if (aktifler.includes(id)) return;
+
+        const basarili = await this.alanlariKaydet([...aktifler, id]);
+        if (!basarili) return;
+
+        this.kapat();
+        EditManager.Global.toastGoster(`${this.META[id].baslik} alanı profiline eklendi.`, 'success');
+
+        // Yeni eklenen alanı hemen aç
+        if (typeof Router !== 'undefined') {
+            Router.toggleCompanion(true, id);
+        }
+    },
+
+    async kaldir(id) {
+        if (!this.META[id] || typeof SectionManager === 'undefined') return;
+        const meta = this.META[id];
+        const aktifler = SectionManager.aktifAlanlariAl(kartVerisi);
+        if (!aktifler.includes(id)) return;
+
+        const icerikVar = SectionManager._icerikVarMi(kartVerisi, id);
+        const onay = await EditManager.Global.confirmGoster({
+            baslik: `"${meta.baslik}" Alanını Kaldır`,
+            aciklama: icerikVar
+                ? `Bu alan profilinden kaldırılacak ve ${meta.icerik} kalıcı olarak silinecek. Emin misiniz?`
+                : 'Bu alan profilinden kaldırılacak. Daha sonra istediğin zaman tekrar ekleyebilirsin.',
+            onayMetni: 'Alanı Kaldır',
+            tehlikeliMi: true
+        });
+        if (!onay) return;
+
+        const basarili = await this.alanlariKaydet(aktifler.filter(x => x !== id), id);
+        if (!basarili) return;
+
+        EditManager.Global.toastGoster(`${meta.baslik} alanı profilinden kaldırıldı.`, 'success');
+    },
+
+    /**
+     * Aktif alan listesini anında Supabase'e kaydeder.
+     * Kaydedilmemiş başka düzenlemeler (bio vb.) gönderilmesin diye front_data, orijinalVeri tabanı üzerine birleştirilir.
+     * @param {string[]} yeniAlanlar Aktif olacak alan ID'leri
+     * @param {string|null} temizlenecekAlan İçeriği kalıcı olarak silinecek alan
+     * @param {boolean} sessiz Hata durumunda kullanıcıya toast gösterme (göç için)
+     */
+    async alanlariKaydet(yeniAlanlar, temizlenecekAlan = null, sessiz = false) {
+        if (this._kaydediliyor) return false;
+        if (typeof supabaseClient === 'undefined' || !supabaseClient || !kartVerisi?.auth_id) return false;
+        this._kaydediliyor = true;
+        this._butonlariKilitle(true);
+
+        const sirali = SectionManager.TUM_ALANLAR.filter(id => yeniAlanlar.includes(id));
+        const orij = EditManager.state.orijinalVeri;
+        const kopya = (v) => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
+        const ALANLAR = ['front_data', 'gaming', 'widgets', 'trophies', 'tops'];
+
+        // Geri alma için yedekler
+        const yedekKart = {};
+        ALANLAR.forEach(k => { yedekKart[k] = kopya(kartVerisi[k]); });
+        const yedekOrij = {};
+        if (orij) ALANLAR.forEach(k => { yedekOrij[k] = kopya(orij[k]); });
+
+        const temizDegerler = {};
+        if (temizlenecekAlan === 'gaming') temizDegerler.gaming = [];
+        if (temizlenecekAlan === 'widgets') temizDegerler.widgets = [];
+        if (temizlenecekAlan === 'achievements') temizDegerler.trophies = [];
+        if (temizlenecekAlan === 'showcase') temizDegerler.tops = { aktifListeId: null, listeler: [] };
+
+        const tabanFront = (orij?.front_data && typeof orij.front_data === 'object')
+            ? orij.front_data
+            : (kartVerisi.front_data || {});
+        const payload = {
+            front_data: { ...tabanFront, aktif_alanlar: sirali },
+            ...kopya(temizDegerler)
+        };
+
+        // Yerel state'i hem kartVerisi hem orijinalVeri üzerinde güncelle (kaydet barının diff'i bozulmasın)
+        const uygula = (hedef) => {
+            hedef.front_data = { ...(hedef.front_data || {}), aktif_alanlar: [...sirali] };
+            Object.keys(temizDegerler).forEach(k => { hedef[k] = kopya(temizDegerler[k]); });
+        };
+        uygula(kartVerisi);
+        if (orij) uygula(orij);
+
+        const geriAl = () => {
+            ALANLAR.forEach(k => {
+                if (yedekKart[k] === undefined) delete kartVerisi[k];
+                else kartVerisi[k] = yedekKart[k];
+            });
+            if (orij) {
+                ALANLAR.forEach(k => {
+                    if (yedekOrij[k] === undefined) delete orij[k];
+                    else orij[k] = yedekOrij[k];
+                });
+            }
+        };
+
+        let basarili = false;
+        try {
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .update(payload)
+                .eq('auth_id', kartVerisi.auth_id)
+                .select('id');
+            if (error) throw error;
+            if (!data || data.length === 0) throw new Error('Profil güncellenmedi: eşleşen kayıt bulunamadı.');
+
+            if (temizlenecekAlan === 'gaming' || temizlenecekAlan === 'widgets') {
+                window._activeTrophyDetail = null;
+            }
+            if (typeof yerelOnbellekKaydet === 'function') yerelOnbellekKaydet(kartVerisi);
+            basarili = true;
+        } catch (err) {
+            console.error('[Sections] Alanlar kaydedilemedi:', err);
+            geriAl();
+            if (!sessiz) EditManager.Global.toastGoster('Alanlar kaydedilemedi. Lütfen tekrar deneyin.', 'error');
+        } finally {
+            this._kaydediliyor = false;
+            this._butonlariKilitle(false);
+        }
+
+        // Arayüzü güncel duruma getir
+        SectionManager.flaglariGuncelle(kartVerisi);
+        if (basarili && temizlenecekAlan && typeof RenderEngine !== 'undefined') {
+            if (temizlenecekAlan === 'showcase') RenderEngine.companionCiz(kartVerisi.tops);
+            else if (typeof RenderEngine.trophiesCiz === 'function') RenderEngine.trophiesCiz(kartVerisi);
+        }
+        if (typeof EditManager.Global?.degisiklikYapildi === 'function') EditManager.Global.degisiklikYapildi();
+        if (this.acikMi()) this.renderListe();
+
+        return basarili;
     }
 };
 // #endregion

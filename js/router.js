@@ -62,6 +62,15 @@ const Router = {
             });
         }
 
+        // Alan Ekle (+) Flag'i: Sahip için alan yönetimi pop-up'ını açar (edit.js lazy-load edilir)
+        const triggerAddSectionBtn = document.getElementById('triggerAddSectionBtn');
+        if (triggerAddSectionBtn) {
+            triggerAddSectionBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.EditManager?.Sections) window.EditManager.Sections.ac();
+            });
+        }
+
         // Eşlikçi Kart Kapat Butonları
         if (companionCloseBtn) {
             companionCloseBtn.addEventListener('click', (e) => {
@@ -240,7 +249,9 @@ const Router = {
                     '.image-cropper-modal.is-open, .tops-search-modal.is-open, .tops-setup-modal.is-open, .tag-picker-modal.is-open, .trophy-picker-modal.is-open, .block-delete-modal.is-open, .auth-modal.is-open'
                 ));
                 if (activeModals.length > 0) {
-                    const topModal = activeModals[activeModals.length - 1];
+                    // Onay pop-up'ı (z-confirm) her zaman en üstte durur; DOM sırasından bağımsız olarak önce onu kapat
+                    const confirmModal = activeModals.find(m => m.id === 'block-delete-modal');
+                    const topModal = confirmModal || activeModals[activeModals.length - 1];
                     if (topModal.id === 'cropper-modal') {
                         const cancelBtn = document.getElementById('cropper-cancel-btn');
                         if (cancelBtn) cancelBtn.click();
@@ -381,6 +392,11 @@ const Router = {
             } else {
                 nextState = true;
             }
+        }
+
+        // Profilde ekli olmayan (pasif) bir alan açılamaz
+        if (nextState && typeof SectionManager !== 'undefined' && !SectionManager.alanAktifMi(normalizedType)) {
+            return;
         }
 
         const activeCompanion = (normalizedType === 'showcase') ? topsCard : trophiesCard;
@@ -905,9 +921,14 @@ const TouchGestureManager = {
         if (absX < this.threshold) return;
         if (absY > this.maxVerticalTolerance || absX < absY * 1.5) return;
 
+        const deckOrder = (typeof SectionManager !== 'undefined')
+            ? SectionManager.desteSirasi()
+            : ['achievements', 'widgets', 'gaming', 'main', 'showcase'];
+        // Profilde hiç alan yoksa yatay kaydırma yapılacak bir deste yok
+        if (deckOrder.length <= 1) return;
+
         this.hasSwiped = true;
 
-        const deckOrder = ['achievements', 'widgets', 'gaming', 'main', 'showcase'];
         let currentPos = 'main';
         if (isAnyOpen) {
             if (isShowcaseOpen) {

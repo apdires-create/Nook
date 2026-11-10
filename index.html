@@ -337,6 +337,16 @@
                         </svg>
                         Sayfa Linkini Kopyala
                     </button>
+                    <button type="button" class="user-dropdown-item" id="nav-item-sections">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                            <line x1="17.5" y1="14" x2="17.5" y2="21"></line>
+                            <line x1="14" y1="17.5" x2="21" y2="17.5"></line>
+                        </svg>
+                        Alanları Yönet
+                    </button>
                     <button type="button" class="user-dropdown-item" id="nav-item-appearance">
                         <span class="user-theme-dot" id="nav-theme-dot"></span>
                         <span style="flex: 1; text-align: left;">Görünüm & Tema</span>
@@ -366,7 +376,7 @@
         <div class="card-container" id="cardContainer">
             <!-- Sol Kenar: Ribbon / Flag Butonları -->
             <div class="card-flags-wrapper" id="cardFlagsWrapper">
-                <button type="button" class="card-flag-btn flag-trophies" id="triggerTrophiesBtn" aria-label="Gaming" title="Gaming (Oyunlar)">
+                <button type="button" class="card-flag-btn flag-trophies" id="triggerTrophiesBtn" data-section="gaming" hidden aria-label="Gaming" title="Gaming (Oyunlar)">
                     <span class="flag-icon">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="6" y1="12" x2="10" y2="12"></line>
@@ -377,7 +387,7 @@
                         </svg>
                     </span>
                 </button>
-                <button type="button" class="card-flag-btn flag-widgets" id="triggerWidgetsBtn" aria-label="Widgets" title="Widgets (Yetenek & Alışkanlık)">
+                <button type="button" class="card-flag-btn flag-widgets" id="triggerWidgetsBtn" data-section="widgets" hidden aria-label="Widgets" title="Widgets (Yetenek & Alışkanlık)">
                     <span class="flag-icon">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
@@ -387,7 +397,7 @@
                         </svg>
                     </span>
                 </button>
-                <button type="button" class="card-flag-btn flag-achievements" id="triggerAchievementsBtn" aria-label="Trophies (Beta)" title="Trophies (Beta)">
+                <button type="button" class="card-flag-btn flag-achievements" id="triggerAchievementsBtn" data-section="achievements" hidden aria-label="Trophies (Beta)" title="Trophies (Beta)">
                     <span class="flag-icon">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
@@ -398,10 +408,19 @@
                         </svg>
                     </span>
                 </button>
-                <button type="button" class="card-flag-btn flag-showcase" id="triggerShowcaseBtn" aria-label="Showcase" title="Showcase (Vitrin)">
+                <button type="button" class="card-flag-btn flag-showcase" id="triggerShowcaseBtn" data-section="showcase" hidden aria-label="Showcase" title="Showcase (Vitrin)">
                     <span class="flag-icon">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </span>
+                </button>
+                <!-- Alan Ekle Flag'i (Yalnızca sahip için, 4 alanın tümü ekliyse gizlenir) -->
+                <button type="button" class="card-flag-btn flag-add" id="triggerAddSectionBtn" aria-label="Alan Ekle" title="Alan Ekle" hidden>
+                    <span class="flag-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
                     </span>
                 </button>
@@ -476,12 +495,21 @@
                             </div>
                             <h3 class="companion-title" id="trophiesMasterTitle">Gaming</h3>
                         </div>
-                        <button class="nook-icon-btn companion-close-btn" id="trophiesCloseBtn" title="Kapat" aria-label="Kapat">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
+                        <div class="companion-nav-right">
+                            <!-- Alanı Kaldır Butonu (Yalnızca sahip için) -->
+                            <button type="button" class="nook-icon-btn companion-action-btn section-delete-btn" id="trophiesSectionDeleteBtn" title="Alanı Kaldır" aria-label="Alanı Kaldır">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                            <button class="nook-icon-btn companion-close-btn" id="trophiesCloseBtn" title="Kapat" aria-label="Kapat">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="companion-body scrollable-fade" id="trophiesMasterList"></div>
@@ -545,12 +573,21 @@
                             </div>
                             <h3 class="companion-title">Showcase</h3>
                         </div>
-                        <button class="nook-icon-btn companion-close-btn" id="companionCloseBtn" title="Vitirini Kapat" aria-label="Vitirini Kapat">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
+                        <div class="companion-nav-right">
+                            <!-- Alanı Kaldır Butonu (Yalnızca sahip için) -->
+                            <button type="button" class="nook-icon-btn companion-action-btn section-delete-btn" id="showcaseSectionDeleteBtn" title="Alanı Kaldır" aria-label="Alanı Kaldır">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                            <button class="nook-icon-btn companion-close-btn" id="companionCloseBtn" title="Vitirini Kapat" aria-label="Vitirini Kapat">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="companion-body scrollable-fade" id="showcaseMasterList"></div>
@@ -870,6 +907,7 @@
     <script src="js/trophies.js"></script>
     <script src="js/data.js"></script>
     <script src="js/render.js"></script>
+    <script src="js/sections.js"></script>
     <script src="js/router.js"></script>
     <script src="js/tilt.js"></script>
     <script src="js/auth.js"></script>

@@ -168,6 +168,9 @@ async function tumVerileriCek() {
             }
         }
 
+        // İsteğe bağlı alan flag'lerini (Gaming / Widgets / Trophies / Showcase) güncelle
+        if (typeof SectionManager !== 'undefined') SectionManager.flaglariGuncelle(kartVerisi);
+
         // Canlı Widget / Trophies Skorlarını Asenkron Sorgula (Non-blocking)
         if (typeof TrophiesManager !== 'undefined' && typeof TrophiesManager.tumCanliVerileriYukle === 'function') {
             TrophiesManager.tumCanliVerileriYukle(kartVerisi);
@@ -395,6 +398,7 @@ function yerelOnbellekYukle() {
                 RenderEngine.trophiesCiz(kartVerisi);
             }
         }
+        if (typeof SectionManager !== 'undefined') SectionManager.flaglariGuncelle(kartVerisi);
 
         // Görselleri arka planda yüklemeye başla (non-blocking)
         tumGorselleriPreloadEt(kartVerisi);

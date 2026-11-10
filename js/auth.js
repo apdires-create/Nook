@@ -456,6 +456,11 @@ function authButonMetniniGuncelle() {
         if (loginTrigger) loginTrigger.style.display = 'inline-flex';
         if (userMenu) userMenu.style.display = 'none';
     }
+
+    // Sahiplik değişmiş olabilir: "+" alan flag'inin görünürlüğünü güncelle
+    if (typeof SectionManager !== 'undefined' && typeof kartVerisi !== 'undefined' && kartVerisi?.kullanici_adi) {
+        SectionManager.flaglariGuncelle(kartVerisi);
+    }
 }
 // #endregion
 

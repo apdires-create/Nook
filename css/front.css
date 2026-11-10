@@ -129,6 +129,47 @@
     filter: brightness(1.15);
 }
 
+/* ➕ Alan Ekle Flag'i (Yalnızca sahip, nötr cam görünüm + kesik çizgili kenar) */
+.card-flag-btn.flag-add {
+    background: rgba(20, 22, 30, 0.55);
+    border: 1.5px dashed rgba(255, 255, 255, 0.28);
+    border-right: none;
+    box-shadow: -4px 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.card-flag-btn.flag-add .flag-icon {
+    color: rgba(255, 255, 255, 0.6);
+    filter: none;
+}
+
+.card-flag-btn.flag-add:hover {
+    transform: translateX(-4px) scale(1.04);
+    background: rgba(40, 44, 58, 0.75);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: -6px 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+.card-flag-btn.flag-add:hover .flag-icon {
+    color: #ffffff;
+    transform: rotate(90deg);
+}
+
+.card-container.flags-inward .card-flag-btn.flag-add,
+.card-container.is-flipped:not(.flags-inward) .card-flag-btn.flag-add {
+    border-right: 1.5px dashed rgba(255, 255, 255, 0.28);
+}
+
+/* Pasif alan flag'leri ve sahibe özel kontroller */
+.card-flag-btn[hidden] {
+    display: none !important;
+}
+
+body:not(.is-owner) .card-flag-btn.flag-add,
+body:not(.is-owner) .section-delete-btn,
+body:not(.is-owner) #nav-item-sections {
+    display: none !important;
+}
+
 /* 🔄 FLIP DURUMU 1: Masaüstü (Taşma Yokken) -> Havada Asılı Dairesel Forma Dönüşüm */
 .card-container.is-flipped:not(.flags-inward) .card-flags-wrapper {
     transform: translateX(-12px) translateZ(40px);
