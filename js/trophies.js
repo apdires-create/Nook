@@ -40,8 +40,26 @@ const TrophiesManager = {
 
         if (!tierKey) return '';
 
-        // CommunityDragon güncel yüksek çözünürlüklü League Ranked amblemleri
+        // Doğrudan CDN bağlantısı (küçük harf PNG)
         return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblems/${tierKey}.png`;
+    },
+
+    /**
+     * Resim yüklenemediğinde veya genel geçer fallback olarak kullanılacak LoL Hextech kalkan ikonu SVG'si
+     */
+    getDefaultEloShieldSvg() {
+        return `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#d4af37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="trophy-fallback-shield"><path d="M12 2L3 7v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V7l-9-5z"></path><path d="M12 6v12"></path></svg>`;
+    },
+
+    /**
+     * Şampiyon ID'sini (örn: MissFortune) temiz ve boşluklu isme (Miss Fortune) dönüştürür
+     */
+    formatChampionName(champId) {
+        if (!champId) return 'Morgana';
+        const found = (this.LOL_CHAMPIONS || []).find(c => c.id.toLowerCase() === String(champId).toLowerCase());
+        if (found && found.name) return found.name;
+        // Fallback camelCase / PascalCase ayırıcı
+        return String(champId).replace(/([a-z])([A-Z])/g, '$1 $2').trim();
     },
 
     /**
@@ -936,7 +954,8 @@ const TrophiesManager = {
                 const flexText = flex?.tier ? `${flex.tier}${flex.lp ? ` (${flex.lp})` : ''}` : 'Derecesiz';
 
                 // Şampiyon, kostüm ve rol bilgisi (varsayılan Morgana - Destek)
-                const sampiyon = d?.sampiyon || 'Morgana';
+                const sampiyonId = d?.sampiyon || 'Morgana';
+                const sampiyonGosterim = TrophiesManager.formatChampionName(sampiyonId);
                 const kostumNo = Number(d?.kostumNo || 0);
                 const rol = d?.rol || 'support';
                 const rolEtiketMap = {
@@ -949,25 +968,34 @@ const TrophiesManager = {
                 const rolEtiket = rolEtiketMap[rol.toLowerCase()] || 'Support';
 
                 // DDragon dikey kart görseli (Loading Screen Art)
-                const champLoadingUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${encodeURIComponent(sampiyon)}_${kostumNo}.jpg`;
-                const champSplashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${encodeURIComponent(sampiyon)}_${kostumNo}.jpg`;
+                const champLoadingUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${encodeURIComponent(sampiyonId)}_${kostumNo}.jpg`;
+                const champSplashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${encodeURIComponent(sampiyonId)}_${kostumNo}.jpg`;
 
                 // Rank amblemi
                 const rankEmblemUrl = TrophiesManager.getRankEmblemUrl('lol', displayRank);
+
+                // Win rate temizleme (çift yüzdeyi önlemek için)
+                let cleanWr = '56';
+                if (wr && wr !== '—') {
+                    cleanWr = String(wr).replace(/%/g, '').trim();
+                } else if (activeQueue?.winrate && activeQueue.winrate !== '—') {
+                    cleanWr = String(activeQueue.winrate).replace(/%/g, '').trim();
+                }
 
                 return {
                     handle: parsed.full,
                     badge: `${region} • RIOT`,
                     heroLabel: isFlex ? 'ESNEK (FLEX) DERECELİ' : 'TEK / ÇİFT DERECELİ',
                     heroValue: displayRank,
-                    heroSub: lp ? `${lp}${wr && wr !== '—' ? ` • %${wr} WR` : ''}` : 'League of Legends',
+                    heroSub: lp ? `${lp}${cleanWr && cleanWr !== '—' ? ` • %${cleanWr} WR` : ''}` : 'League of Legends',
                     peakLabel: 'ZİRVE (PEAK)',
                     peakValue: peak,
                     summaryText: displayRank !== 'Derecesiz (Unranked)' ? `${displayRank}${lp ? ` (${lp})` : ''}` : parsed.full,
                     activeMode: secilen,
                     region,
-                    winrate: wr || '56',
-                    sampiyon,
+                    winrate: cleanWr,
+                    sampiyon: sampiyonGosterim,
+                    sampiyonId,
                     kostumNo,
                     champLoadingUrl,
                     champSplashUrl,
@@ -976,7 +1004,7 @@ const TrophiesManager = {
                     rolEtiket,
                     rolIconSvg: TrophiesManager.getRoleIconSvg(rol),
                     soloTier: solo?.tier || (secilen === 'solo' ? displayRank : 'Silver I'),
-                    flexTier: flex?.tier || (secilen === 'flex' ? displayRank : 'Silver I'),
+                    flexTier: flex?.tier || (secilen === 'flex' ? displayRank : 'Silver II'),
                     modes: [
                         { id: 'solo', label: 'Solo/Duo' },
                         { id: 'flex', label: 'Flex' }
