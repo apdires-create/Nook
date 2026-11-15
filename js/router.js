@@ -65,9 +65,14 @@ const Router = {
         // Alan Ekle (+) Flag'i: Sahip için alan yönetimi pop-up'ını açar (edit.js lazy-load edilir)
         const triggerAddSectionBtn = document.getElementById('triggerAddSectionBtn');
         if (triggerAddSectionBtn) {
-            triggerAddSectionBtn.addEventListener('click', (e) => {
+            triggerAddSectionBtn.addEventListener('click', async (e) => {
                 e.stopPropagation();
-                if (window.EditManager?.Sections) window.EditManager.Sections.ac();
+                if (typeof editModunuYukle === 'function') {
+                    await editModunuYukle();
+                }
+                if (typeof EditManager !== 'undefined' && EditManager.Sections) {
+                    EditManager.Sections.ac();
+                }
             });
         }
 
@@ -255,6 +260,9 @@ const Router = {
                     if (topModal.id === 'cropper-modal') {
                         const cancelBtn = document.getElementById('cropper-cancel-btn');
                         if (cancelBtn) cancelBtn.click();
+                        else topModal.classList.remove('is-open');
+                    } else if (topModal.id === 'section-manager-modal') {
+                        if (window.EditManager?.Sections) window.EditManager.Sections.kapat();
                         else topModal.classList.remove('is-open');
                     } else if (topModal.id === 'trophy-picker-modal') {
                         if (window.EditManager?.TrophyPicker) window.EditManager.TrophyPicker.kapat();

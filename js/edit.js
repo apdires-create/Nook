@@ -4631,4 +4631,5 @@ EditManager.CompanionViews = {
         }
     }
 };
+window.EditManager = EditManager;
 // #endregion
