@@ -531,31 +531,9 @@ const RenderEngine = {
 
         return `
             <div class="trophy-root-card trophy-lol-card" data-trophy-tur="lol" data-username="${this.escapeHtml(norm.kullanici)}">
-                <!-- 1. KATMAN: Şeffaf LoL Amblemi ve Kimlik Çubuğu (Font Metin) -->
-                <div class="trophy-identity-bar trophy-lol-identity-bar">
-                    <div class="trophy-id-left">
-                        <div class="trophy-id-favicon-box trophy-lol-logo-box">
-                            <img src="${this.escapeHtml(norm.faviconUrl)}" alt="LoL" class="trophy-id-favicon-img" loading="lazy"
-                                 onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
-                            <span class="trophy-id-fallback" style="display: none; color: #d4af37; font-weight: 800;">LOL</span>
-                        </div>
-                        <div class="trophy-id-texts">
-                            <div class="trophy-id-handle" title="${this.escapeHtml(norm.handle)}">
-                                <span class="trophy-lol-tag-label">LoL</span>
-                                <span class="trophy-lol-pipe">|</span>
-                                <span class="trophy-lol-user">${this.escapeHtml(norm.handle)}</span>
-                            </div>
-                            <div class="trophy-id-platform">Riot Games • ${this.escapeHtml(region)}</div>
-                        </div>
-                    </div>
-                    <span class="trophy-id-badge" style="background: rgba(212, 175, 55, 0.15); border-color: rgba(212, 175, 55, 0.35); color: #f59e0b;">
-                        RIOT
-                    </span>
-                </div>
-
-                <!-- 3. KATMAN: ANA İKİ SÜTUNLU GRİD -->
+                <!-- ANA İKİ SÜTUNLU GRİD -->
                 <div class="trophy-lol-main-grid">
-                    <!-- SOL PANEL: PEAK (LİDER) + YATAY SOLO & FLEX + MAIN ROLE & WIN RATE -->
+                    <!-- SOL PANEL: PEAK + YATAY SOLO & FLEX + SİHİRDAR & BÖLGE + MAIN ROLE & WIN RATE -->
                     <div class="trophy-lol-info-panel">
                         <!-- 1. En Üst: Vurgulu Geniş Peak Rozeti -->
                         <div class="trophy-lol-peak-card">
@@ -596,7 +574,24 @@ const RenderEngine = {
                             </div>
                         </div>
 
-                        <!-- 4. Alt Taban: Main Role Kutusu -->
+                        <!-- 4. Sihirdar & Sunucu Kapsülü -->
+                        <div class="trophy-lol-stat-box trophy-lol-user-box">
+                            <div class="trophy-lol-stat-left">
+                                <span class="trophy-lol-stat-icon">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                </span>
+                                <span>Sihirdar</span>
+                            </div>
+                            <div class="trophy-lol-user-val-wrap">
+                                <span class="trophy-lol-stat-val val-user" title="${this.escapeHtml(norm.handle)}">${this.escapeHtml(norm.handle)}</span>
+                                <span class="trophy-lol-region-pill">${this.escapeHtml(region)}</span>
+                            </div>
+                        </div>
+
+                        <!-- 5. Alt Taban: Main Role Kutusu -->
                         <div class="trophy-lol-stat-box">
                             <div class="trophy-lol-stat-left">
                                 <span class="trophy-lol-stat-icon">
@@ -613,7 +608,7 @@ const RenderEngine = {
                             <span class="trophy-lol-stat-val">${this.escapeHtml(norm.rolEtiket || 'Mid')}</span>
                         </div>
 
-                        <!-- 5. Alt Taban: Win Rate Kutusu -->
+                        <!-- 6. Alt Taban: Win Rate Kutusu -->
                         <div class="trophy-lol-stat-box">
                             <div class="trophy-lol-stat-left">
                                 <span class="trophy-lol-stat-icon">
