@@ -1626,4 +1626,262 @@ body.is-owner .top-item-unit:active {
     white-space: nowrap;
     flex-shrink: 0;
 }
+
+/* =========================================================
+   ⚔️ LEAGUE OF LEGENDS ÖZEL PROFİL KARTI (HEXTECH ATMOSFERİ)
+   ========================================================= */
+.trophy-lol-card {
+    gap: clamp(10px, 2.2cqh, 18px);
+}
+
+.trophy-lol-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: clamp(8px, 1.6cqh, 14px) clamp(12px, 3.2cqw, 18px);
+    background: rgba(18, 22, 34, 0.75);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.trophy-lol-id-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.trophy-lol-icon-box {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    flex-shrink: 0;
+}
+
+.trophy-lol-names {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    font-size: clamp(12px, 2.8cqw, 15px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.trophy-lol-brand {
+    font-weight: 800;
+    color: #e5c07b;
+    letter-spacing: 0.5px;
+}
+
+.trophy-lol-sep {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.trophy-lol-handle {
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.trophy-lol-queue-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 3px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+}
+
+.trophy-lol-queue-switch .trophy-mode-pill {
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.trophy-lol-queue-switch .trophy-mode-pill:hover {
+    color: var(--text-primary);
+}
+
+.trophy-lol-queue-switch .trophy-mode-pill.is-active {
+    background: #c88034;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(200, 128, 52, 0.45);
+}
+
+/* Ana İki Sütunlu Grid */
+.trophy-lol-main-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.95fr;
+    gap: clamp(10px, 2.5cqw, 16px);
+    align-items: stretch;
+    min-height: 240px;
+}
+
+/* Sol Info Paneli */
+.trophy-lol-info-panel {
+    background: rgba(14, 18, 28, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: clamp(10px, 2.2cqh, 16px) clamp(10px, 2.5cqw, 16px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+}
+
+.trophy-lol-info-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.trophy-lol-info-title {
+    font-size: clamp(13px, 3cqw, 16px);
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.trophy-lol-info-badge {
+    color: var(--text-tertiary);
+    display: inline-flex;
+    opacity: 0.6;
+}
+
+.trophy-lol-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3px 0;
+    font-size: clamp(11.5px, 2.6cqw, 14px);
+}
+
+.trophy-lol-row-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    min-width: 0;
+}
+
+.trophy-lol-row-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.trophy-lol-rank-emblem {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.trophy-lol-row-val {
+    color: var(--text-primary);
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.trophy-lol-row-val.val-bold {
+    font-weight: 750;
+    color: #f1f3f5;
+}
+
+.trophy-lol-row-val.val-wr {
+    font-family: var(--font-mono);
+    color: #38d9a9;
+    font-weight: 700;
+}
+
+/* Sağ Panel: Dikey Şampiyon Kartı (Loading Art) */
+.trophy-lol-art-box {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    background: #0a0d14;
+    min-height: 240px;
+    display: flex;
+}
+
+.trophy-lol-art-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.trophy-lol-art-box:hover .trophy-lol-art-img {
+    transform: scale(1.04);
+}
+
+.trophy-lol-art-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 13, 20, 0.1) 0%, rgba(10, 13, 20, 0.35) 75%, rgba(10, 13, 20, 0.7) 100%);
+    pointer-events: none;
+}
+
+/* Alt OP.GG Butonu */
+.trophy-lol-opgg-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: clamp(10px, 2cqh, 14px) 16px;
+    background: linear-gradient(135deg, #c87a2c 0%, #aa5f1d 100%);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: clamp(11.5px, 2.6cqw, 13.5px);
+    letter-spacing: 0.8px;
+    border-radius: 22px;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(200, 122, 44, 0.35);
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-sizing: border-box;
+}
+
+.trophy-lol-opgg-btn:hover {
+    background: linear-gradient(135deg, #d98835 0%, #ba6923 100%);
+    box-shadow: 0 6px 22px rgba(200, 122, 44, 0.55);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.trophy-lol-opgg-btn:active {
+    transform: translateY(0);
+}
 /* #endregion */

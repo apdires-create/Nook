@@ -2630,7 +2630,7 @@ EditManager.TrophiesView = {
         }
     },
 
-    async trophyKaydet(tur, temizKullanici, manualAktif = '', manualPeak = '', preFetchedLive = null, kuyruk = '', region = '') {
+    async trophyKaydet(tur, temizKullanici, manualAktif = '', manualPeak = '', preFetchedLive = null, kuyruk = '', region = '', extraSnap = {}) {
         if (!tur || !temizKullanici || typeof TrophiesManager === 'undefined') return;
         const meta = TrophiesManager.katalogOgesiBul(tur) || { baslik: tur };
         const isWidget = this._isWidgetTur(tur);
@@ -2649,6 +2649,10 @@ EditManager.TrophiesView = {
         const snap = TrophiesManager.buildSnapshot(tur, temizKullanici, canliVeri, effectiveManualAktif, effectiveManualPeak, kuyruk);
         if (region) snap.region = region.toUpperCase();
         else if (canliVeri?.region) snap.region = canliVeri.region.toUpperCase();
+
+        if (extraSnap && typeof extraSnap === 'object') {
+            Object.assign(snap, extraSnap);
+        }
 
         const mevcutListe = this._aktifModListesiniAl(tur);
         const idx = mevcutListe.findIndex(x => x.tur === tur);
@@ -2847,6 +2851,33 @@ EditManager.TrophiesView = {
 
             <div class="mt-status-box mt-lookup-status" style="display: none;"></div>
 
+            ${tur === 'lol' ? `
+                <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px;">
+                    <div class="mt-form-field">
+                        <label class="mt-field-label">Vitrin Şampiyonu</label>
+                        <select class="mt-form-input is-select mt-lol-champ-select">
+                            ${(TrophiesManager.LOL_CHAMPIONS || []).map(c => `
+                                <option value="${c.id}" ${(mevcutSnap.sampiyon || 'Morgana') === c.id ? 'selected' : ''}>${c.name}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-form-field">
+                        <label class="mt-field-label">Ana Rol / Pozisyon</label>
+                        <select class="mt-form-input is-select mt-lol-role-select">
+                            <option value="support" ${(mevcutSnap.rol || 'support') === 'support' ? 'selected' : ''}>Destek (Support)</option>
+                            <option value="mid" ${(mevcutSnap.rol || '') === 'mid' ? 'selected' : ''}>Orta Koridor (Mid)</option>
+                            <option value="adc" ${(mevcutSnap.rol || '') === 'adc' ? 'selected' : ''}>Alt Koridor (ADC)</option>
+                            <option value="top" ${(mevcutSnap.rol || '') === 'top' ? 'selected' : ''}>Üst Koridor (Top)</option>
+                            <option value="jungle" ${(mevcutSnap.rol || '') === 'jungle' ? 'selected' : ''}>Orman (Jungle)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-form-field" style="margin-top: 4px;">
+                    <label class="mt-field-label">Kostüm Numarası (0: Klasik Splash, 1-20: Kostüm)</label>
+                    <input type="number" min="0" max="40" class="mt-form-input mt-lol-skin-input" value="${Number(mevcutSnap.kostumNo || 0)}" placeholder="0">
+                </div>
+            ` : ''}
+
             ${(tiers.length > 0 && isManualAllowed) ? `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <div class="mt-form-field">
@@ -3022,7 +3053,17 @@ EditManager.TrophiesView = {
             const secilenPeak = peakSelect ? peakSelect.value : '';
             const mevcutKuyruk = mevcutSnap.kuyruk || '';
 
-            await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, canli, mevcutKuyruk, secilenBolge);
+            const extraSnap = {};
+            if (tur === 'lol') {
+                const champSelect = formWrap.querySelector('.mt-lol-champ-select');
+                const roleSelect = formWrap.querySelector('.mt-lol-role-select');
+                const skinInput = formWrap.querySelector('.mt-lol-skin-input');
+                if (champSelect) extraSnap.sampiyon = champSelect.value;
+                if (roleSelect) extraSnap.rol = roleSelect.value;
+                if (skinInput) extraSnap.kostumNo = parseInt(skinInput.value, 10) || 0;
+            }
+
+            await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, canli, mevcutKuyruk, secilenBolge, extraSnap);
             if (formWrap.isConnected) formWrap.remove();
         };
 

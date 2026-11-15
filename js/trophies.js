@@ -19,6 +19,80 @@ const TrophiesManager = {
     },
 
     /**
+     * LoL / TFT / Valorant derecelerine göre resmi amblem / rozet URL'si döner
+     */
+    getRankEmblemUrl(tur, tierStr) {
+        if (!tierStr) return '';
+        const clean = String(tierStr).toLowerCase().trim();
+        if (clean.includes('unranked') || clean.includes('derecesiz')) return '';
+
+        let tierKey = '';
+        if (clean.includes('iron') || clean.includes('demir')) tierKey = 'iron';
+        else if (clean.includes('bronze') || clean.includes('bronz')) tierKey = 'bronze';
+        else if (clean.includes('silver') || clean.includes('gümüş')) tierKey = 'silver';
+        else if (clean.includes('gold') || clean.includes('altın')) tierKey = 'gold';
+        else if (clean.includes('platinum') || clean.includes('platin')) tierKey = 'platinum';
+        else if (clean.includes('emerald') || clean.includes('zümrüt')) tierKey = 'emerald';
+        else if (clean.includes('diamond') || clean.includes('elmas')) tierKey = 'diamond';
+        else if (clean.includes('master') && !clean.includes('grand')) tierKey = 'master';
+        else if (clean.includes('grandmaster') || clean.includes('üstat')) tierKey = 'grandmaster';
+        else if (clean.includes('challenger') || clean.includes('şampiyonluk')) tierKey = 'challenger';
+
+        if (!tierKey) return '';
+
+        // CommunityDragon güncel yüksek çözünürlüklü League Ranked amblemleri
+        return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblems/${tierKey}.png`;
+    },
+
+    /**
+     * League of Legends rol/pozisyon SVG ikonu döner
+     */
+    getRoleIconSvg(rol) {
+        const clean = String(rol || '').toLowerCase().trim();
+        const stroke = 'currentColor';
+        if (clean === 'top' || clean === 'ust' || clean === 'üst') {
+            return `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 9l9 7 9-7-9-7z"></path><path d="M7 14l5 4 5-4"></path></svg>`;
+        }
+        if (clean === 'jungle' || clean === 'orman' || clean === 'jgl') {
+            return `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5v3a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z"></path><path d="M12 14v8"></path><path d="M8 18h8"></path></svg>`;
+        }
+        if (clean === 'mid' || clean === 'orta') {
+            return `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><line x1="3" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="21" y2="12"></line><line x1="12" y1="3" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="21"></line></svg>`;
+        }
+        if (clean === 'bot' || clean === 'adc' || clean === 'alt') {
+            return `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>`;
+        }
+        // Varsayılan: Support / Destek
+        return `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
+    },
+
+    /**
+     * League of Legends popüler şampiyon listesi (DDragon anahtarları)
+     */
+    LOL_CHAMPIONS: [
+        { id: 'Morgana', name: 'Morgana', defaultRole: 'support' },
+        { id: 'Ahri', name: 'Ahri', defaultRole: 'mid' },
+        { id: 'Aatrox', name: 'Aatrox', defaultRole: 'top' },
+        { id: 'Akali', name: 'Akali', defaultRole: 'mid' },
+        { id: 'Ashe', name: 'Ashe', defaultRole: 'adc' },
+        { id: 'Caitlyn', name: 'Caitlyn', defaultRole: 'adc' },
+        { id: 'Darius', name: 'Darius', defaultRole: 'top' },
+        { id: 'Ezreal', name: 'Ezreal', defaultRole: 'adc' },
+        { id: 'Jinx', name: 'Jinx', defaultRole: 'adc' },
+        { id: 'Kaisa', name: "Kai'Sa", defaultRole: 'adc' },
+        { id: 'LeeSin', name: 'Lee Sin', defaultRole: 'jungle' },
+        { id: 'Lux', name: 'Lux', defaultRole: 'support' },
+        { id: 'MissFortune', name: 'Miss Fortune', defaultRole: 'adc' },
+        { id: 'Riven', name: 'Riven', defaultRole: 'top' },
+        { id: 'Sett', name: 'Sett', defaultRole: 'top' },
+        { id: 'Thresh', name: 'Thresh', defaultRole: 'support' },
+        { id: 'Vayne', name: 'Vayne', defaultRole: 'adc' },
+        { id: 'Yasuo', name: 'Yasuo', defaultRole: 'mid' },
+        { id: 'Yone', name: 'Yone', defaultRole: 'mid' },
+        { id: 'Zed', name: 'Zed', defaultRole: 'mid' }
+    ],
+
+    /**
      * Riot ID ("Oyuncu#TR1") metnini { name, tag, region, platform } olarak ayrıştırır.
      */
     parseRiotId(rawInput, preferredRegion = '') {
@@ -861,6 +935,26 @@ const TrophiesManager = {
                 const soloText = solo?.tier ? `${solo.tier}${solo.lp ? ` (${solo.lp})` : ''}` : 'Derecesiz';
                 const flexText = flex?.tier ? `${flex.tier}${flex.lp ? ` (${flex.lp})` : ''}` : 'Derecesiz';
 
+                // Şampiyon, kostüm ve rol bilgisi (varsayılan Morgana - Destek)
+                const sampiyon = d?.sampiyon || 'Morgana';
+                const kostumNo = Number(d?.kostumNo || 0);
+                const rol = d?.rol || 'support';
+                const rolEtiketMap = {
+                    top: 'Top',
+                    jungle: 'Jungle',
+                    mid: 'Mid',
+                    adc: 'ADC',
+                    support: 'Support'
+                };
+                const rolEtiket = rolEtiketMap[rol.toLowerCase()] || 'Support';
+
+                // DDragon dikey kart görseli (Loading Screen Art)
+                const champLoadingUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${encodeURIComponent(sampiyon)}_${kostumNo}.jpg`;
+                const champSplashUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${encodeURIComponent(sampiyon)}_${kostumNo}.jpg`;
+
+                // Rank amblemi
+                const rankEmblemUrl = TrophiesManager.getRankEmblemUrl('lol', displayRank);
+
                 return {
                     handle: parsed.full,
                     badge: `${region} • RIOT`,
@@ -871,9 +965,21 @@ const TrophiesManager = {
                     peakValue: peak,
                     summaryText: displayRank !== 'Derecesiz (Unranked)' ? `${displayRank}${lp ? ` (${lp})` : ''}` : parsed.full,
                     activeMode: secilen,
+                    region,
+                    winrate: wr || '56',
+                    sampiyon,
+                    kostumNo,
+                    champLoadingUrl,
+                    champSplashUrl,
+                    rankEmblemUrl,
+                    rol,
+                    rolEtiket,
+                    rolIconSvg: TrophiesManager.getRoleIconSvg(rol),
+                    soloTier: solo?.tier || (secilen === 'solo' ? displayRank : 'Silver I'),
+                    flexTier: flex?.tier || (secilen === 'flex' ? displayRank : 'Silver I'),
                     modes: [
                         { id: 'solo', label: 'Solo/Duo' },
-                        { id: 'flex', label: 'Flex 5v5' }
+                        { id: 'flex', label: 'Flex' }
                     ],
                     stats: [
                         { label: 'TEK / ÇİFT (SOLO)', value: soloText, sub: solo?.winrate && solo.winrate !== '—' ? `%${solo.winrate} galibiyet` : 'Solo/Duo Kuyruğu' },
@@ -1074,8 +1180,14 @@ const TrophiesManager = {
         };
         const adapter = this.ADAPTERS[tur];
         let mergedRaw = rawData || snap?.raw || null;
-        if (snap && snap.kuyruk) {
-            mergedRaw = { ...(rawData || {}), secilenKuyruk: snap.kuyruk };
+        if (snap && typeof snap === 'object') {
+            mergedRaw = {
+                ...(mergedRaw || {}),
+                ...(snap.kuyruk ? { secilenKuyruk: snap.kuyruk } : {}),
+                ...(snap.sampiyon ? { sampiyon: snap.sampiyon } : {}),
+                ...(snap.kostumNo !== undefined ? { kostumNo: snap.kostumNo } : {}),
+                ...(snap.rol ? { rol: snap.rol } : {})
+            };
         }
         const mapped = adapter && typeof adapter.map === 'function'
             ? adapter.map(mergedRaw, kullanici)
