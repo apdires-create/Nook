@@ -407,6 +407,8 @@ const RenderEngine = {
 
                 if (detailFooter) {
                     const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
+                    const isLol = activeTur === 'lol';
+                    const footerLabel = isLol ? 'OP.GG Profilini İncele' : norm.handle;
                     detailFooter.innerHTML = `
                         <a href="${this.safeUrl(norm.profileUrl)}" target="_blank" rel="noopener noreferrer" class="companion-footer-link" title="${this.escapeHtml(norm.baslik)} Profilini Gör">
                             <span class="companion-link-favicon-wrap">
@@ -414,7 +416,7 @@ const RenderEngine = {
                                      onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
                                 <span class="mt-brand-icon" style="display:none;">${this.escapeHtml(fallbackHarf)}</span>
                             </span>
-                            <span class="companion-link-domain">${this.escapeHtml(norm.handle)}</span>
+                            <span class="companion-link-domain">${this.escapeHtml(footerLabel)}</span>
                             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" class="mt-link-icon">
                                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                 <polyline points="15 3 21 3 21 9"></polyline>
@@ -529,13 +531,26 @@ const RenderEngine = {
         const peakEmblem = TrophiesManager.getRankEmblemUrl('lol', peak);
         const fallbackShield = TrophiesManager.getDefaultEloShieldSvg();
 
+        const handleParts = String(norm.handle || '').split('#');
+        const summonerName = handleParts[0] || norm.handle || 'Sihirdar';
+        const summonerTag = handleParts[1] ? `#${handleParts[1]}` : '';
+
         return `
             <div class="trophy-root-card trophy-lol-card" data-trophy-tur="lol" data-username="${this.escapeHtml(norm.kullanici)}">
-                <!-- ANA İKİ SÜTUNLU GRİD -->
+                <!-- 1. OYUNCU KİMLİĞİ (HERO BANNER ETEĞİNDE) -->
+                <div class="trophy-lol-hero-header">
+                    <div class="trophy-lol-player-row">
+                        <span class="trophy-lol-player-name">${this.escapeHtml(summonerName)}</span>
+                        ${summonerTag ? `<span class="trophy-lol-player-tag">${this.escapeHtml(summonerTag)}</span>` : ''}
+                        <span class="trophy-lol-server-badge">${this.escapeHtml(region)}</span>
+                    </div>
+                </div>
+
+                <!-- 2. ANA İKİ SÜTUNLU GRİD -->
                 <div class="trophy-lol-main-grid">
-                    <!-- SOL PANEL: PEAK + YATAY SOLO & FLEX + SİHİRDAR & BÖLGE + MAIN ROLE & WIN RATE -->
+                    <!-- SOL PANEL: PEAK + SOLO + FLEX + 2'Lİ MİKRO STAT GRİD -->
                     <div class="trophy-lol-info-panel">
-                        <!-- 1. En Üst: Vurgulu Geniş Peak Rozeti -->
+                        <!-- Peak Lider Kartı -->
                         <div class="trophy-lol-peak-card">
                             <div class="trophy-lol-peak-badge-tag">
                                 ${peakEmblem ? `
@@ -548,7 +563,7 @@ const RenderEngine = {
                             <span class="trophy-lol-peak-val">${this.escapeHtml(peak)}</span>
                         </div>
 
-                        <!-- 2. Solo/Duo Yatay Satırı -->
+                        <!-- Solo/Duo Satırı -->
                         <div class="trophy-lol-queue-row-box">
                             <span class="trophy-lol-q-label">SOLO / DUO</span>
                             <div class="trophy-lol-q-tier-wrap">
@@ -561,7 +576,7 @@ const RenderEngine = {
                             </div>
                         </div>
 
-                        <!-- 3. Flex 5v5 Yatay Satırı -->
+                        <!-- Flex 5v5 Satırı -->
                         <div class="trophy-lol-queue-row-box">
                             <span class="trophy-lol-q-label">FLEX 5V5</span>
                             <div class="trophy-lol-q-tier-wrap">
@@ -574,63 +589,48 @@ const RenderEngine = {
                             </div>
                         </div>
 
-                        <!-- 4. Sihirdar & Sunucu Kapsülü -->
-                        <div class="trophy-lol-stat-box trophy-lol-user-box">
-                            <div class="trophy-lol-stat-left">
-                                <span class="trophy-lol-stat-icon">
-                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                        <circle cx="12" cy="7" r="4"></circle>
-                                    </svg>
-                                </span>
-                                <span>Sihirdar</span>
-                            </div>
-                            <div class="trophy-lol-user-val-wrap">
-                                <span class="trophy-lol-stat-val val-user" title="${this.escapeHtml(norm.handle)}">${this.escapeHtml(norm.handle)}</span>
-                                <span class="trophy-lol-region-pill">${this.escapeHtml(region)}</span>
-                            </div>
-                        </div>
-
-                        <!-- 5. Alt Taban: Main Role Kutusu -->
-                        <div class="trophy-lol-stat-box">
-                            <div class="trophy-lol-stat-left">
-                                <span class="trophy-lol-stat-icon">
+                        <!-- 2 Sütunlu Mikro İstatistikler: Rol & Win Rate -->
+                        <div class="trophy-lol-stats-subgrid">
+                            <div class="trophy-lol-stat-subcard">
+                                <span class="trophy-lol-subcard-icon">
                                     ${norm.rolIconSvg || `
-                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#20c997" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#20c997" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                             <line x1="18" y1="20" x2="18" y2="10"></line>
                                             <line x1="12" y1="20" x2="12" y2="4"></line>
                                             <line x1="6" y1="20" x2="6" y2="14"></line>
                                         </svg>
                                     `}
                                 </span>
-                                <span>Main Role</span>
+                                <div class="trophy-lol-subcard-texts">
+                                    <span class="trophy-lol-subcard-lbl">ROL</span>
+                                    <span class="trophy-lol-subcard-val">${this.escapeHtml(norm.rolEtiket || 'Support')}</span>
+                                </div>
                             </div>
-                            <span class="trophy-lol-stat-val">${this.escapeHtml(norm.rolEtiket || 'Mid')}</span>
-                        </div>
 
-                        <!-- 6. Alt Taban: Win Rate Kutusu -->
-                        <div class="trophy-lol-stat-box">
-                            <div class="trophy-lol-stat-left">
-                                <span class="trophy-lol-stat-icon">
-                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#38d9a9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <div class="trophy-lol-stat-subcard">
+                                <span class="trophy-lol-subcard-icon">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#38d9a9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                         <line x1="18" y1="20" x2="18" y2="10"></line>
                                         <line x1="12" y1="20" x2="12" y2="4"></line>
                                         <line x1="6" y1="20" x2="6" y2="14"></line>
                                     </svg>
                                 </span>
-                                <span>Win rate</span>
+                                <div class="trophy-lol-subcard-texts">
+                                    <span class="trophy-lol-subcard-lbl">KAZANMA</span>
+                                    <span class="trophy-lol-subcard-val val-wr">%${this.escapeHtml(winrate)}</span>
+                                </div>
                             </div>
-                            <span class="trophy-lol-stat-val val-wr">%${this.escapeHtml(winrate)}</span>
                         </div>
                     </div>
 
-                    <!-- SAĞ PANEL: DİKEY ŞAMPİYON KARTI (İÇİNDE ALTTAN İSİM + GRADYAN) -->
+                    <!-- SAĞ PANEL: DİKEY ŞAMPİYON KARTI (İÇİNDE ALTTAN İSİM + ROL + GRADYAN) -->
                     <div class="trophy-lol-art-box" title="${this.escapeHtml(sampiyon)}">
                         <img src="${this.escapeHtml(loadingUrl)}" alt="${this.escapeHtml(sampiyon)}" class="trophy-lol-art-img" loading="lazy"
                              onerror="this.src='https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Morgana_0.jpg';">
                         <div class="trophy-lol-art-bottom-fade"></div>
                         <div class="trophy-lol-champ-caption">
                             <span class="trophy-lol-champ-name">${this.escapeHtml(sampiyon)}</span>
+                            <span class="trophy-lol-champ-role">${this.escapeHtml(norm.rolEtiket || 'Vitrin')}</span>
                         </div>
                     </div>
                 </div>

@@ -1631,96 +1631,144 @@ body.is-owner .top-item-unit:active {
    ⚔️ LEAGUE OF LEGENDS ÖZEL PROFİL KARTI (HEXTECH ATMOSFERİ)
    ========================================================= */
 
-/* LoL Görünümünde Üst Başlık Banner Entegrasyonu (Full-bleed / Absolute) */
-#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-header {
+/* 1. Tüm Detay Sahnesine Yayılan Kesintisiz Atmosferik Banner */
+#trophiesCompanionCard.is-lol-view #trophiesDetailView {
     position: relative;
-    background: url('../assets/images/lol-banner.jpg') center 25% / cover no-repeat;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.35);
-    min-height: clamp(100px, 21cqh, 130px);
+    background-color: #090c14;
+    background-image: 
+        linear-gradient(180deg, rgba(9, 12, 20, 0.22) 0%, rgba(9, 12, 20, 0.6) 35%, rgba(9, 12, 20, 0.94) 68%, #090c14 100%),
+        url('../assets/images/lol-banner.jpg');
+    background-position: top center;
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     overflow: hidden;
-    padding-bottom: clamp(10px, 2cqh, 16px);
+}
+
+/* Üst Başlık Barı (Şeffaf & Çizgisiz - Atmosfere Akış) */
+#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-header {
+    background: transparent !important;
+    border-bottom: none !important;
+    min-height: auto;
+    padding-top: clamp(14px, 2.5cqh, 20px);
+    padding-bottom: clamp(4px, 0.8cqh, 8px);
+    flex-shrink: 0;
 }
 
 #trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-header::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(8, 11, 18, 0.2) 0%, rgba(8, 11, 18, 0.5) 55%, rgba(8, 11, 18, 0.95) 100%);
-    pointer-events: none;
-    z-index: 0;
-}
-
-#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-title-row {
-    position: relative;
-    z-index: 1;
+    display: none !important;
 }
 
 #trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-title {
     color: #f1f3f5;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
     font-weight: 800;
 }
 
-/* LoL Kart Gövdesi - Dikey Ortalama & Kompakt Boyutlandırma */
+/* Gövde - Dikey Esneme & Sıfır Boşluk */
 #trophiesCompanionCard.is-lol-view #trophiesDetailBody {
     overflow-y: hidden !important;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: clamp(6px, 1.2cqh, 10px) clamp(8px, 2cqw, 12px);
+    justify-content: flex-start;
+    padding: 0 clamp(10px, 2.5cqw, 16px) clamp(4px, 0.8cqh, 8px);
     flex: 1;
 }
 
-#trophiesCompanionCard.is-lol-view #trophiesDetailFooter {
-    padding-top: clamp(6px, 1.2cqh, 10px);
-    padding-bottom: clamp(10px, 2cqh, 16px);
-}
-
+/* Kart Kökü */
 .trophy-lol-card {
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: space-between;
+    gap: clamp(8px, 1.8cqh, 14px);
 }
 
-/* 2. Ana İki Sütunlu Grid (Daha Kompakt & Ortalanmış) */
+/* 2. Banner Eteğindeki Prestijli Oyuncu Kimlik Alanı (Hero) */
+.trophy-lol-hero-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: clamp(2px, 0.5cqh, 6px) 2px clamp(6px, 1.2cqh, 10px);
+    flex-shrink: 0;
+}
+
+.trophy-lol-player-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.trophy-lol-player-name {
+    font-size: clamp(16px, 3.8cqw, 21px);
+    font-weight: 850;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+    line-height: 1.1;
+}
+
+.trophy-lol-player-tag {
+    font-size: clamp(12px, 2.6cqw, 14px);
+    font-weight: 700;
+    color: rgba(229, 192, 123, 0.85);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+
+.trophy-lol-server-badge {
+    font-size: 10px;
+    font-weight: 800;
+    color: #f59e0b;
+    background: rgba(212, 175, 55, 0.16);
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    border-radius: 5px;
+    padding: 1.5px 6px;
+    line-height: 1.1;
+    letter-spacing: 0.5px;
+    margin-left: 2px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* 3. Ana İki Sütunlu Grid */
 .trophy-lol-main-grid {
     display: grid;
-    grid-template-columns: 1.15fr 0.95fr;
-    gap: clamp(8px, 1.8cqw, 11px);
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin: auto 0;
+    grid-template-columns: 1.18fr 0.92fr;
+    gap: clamp(8px, 2cqw, 12px);
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
 }
 
-/* Sol Info Paneli (Peak + Solo/Flex + Sihirdar + Role + Win Rate) */
+/* Sol Info Paneli */
 .trophy-lol-info-panel {
-    background: rgba(14, 18, 28, 0.75);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 11px;
-    padding: clamp(5px, 1.1cqh, 8px) clamp(7px, 1.6cqw, 10px);
+    background: rgba(14, 18, 28, 0.82);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 12px;
+    padding: clamp(7px, 1.4cqh, 11px) clamp(8px, 1.8cqw, 11px);
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: clamp(4px, 0.8cqh, 6px);
+    justify-content: space-between;
+    gap: clamp(6px, 1.2cqh, 8px);
     box-sizing: border-box;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    height: 100%;
 }
 
-/* 1. En Üst: Vurgulu Geniş Peak Rozeti */
+/* 1. Peak Lider Kartı */
 .trophy-lol-peak-card {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: clamp(5px, 1cqh, 7px) clamp(8px, 1.8cqw, 10px);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.18) 0%, rgba(180, 130, 30, 0.08) 100%);
-    border: 1px solid rgba(212, 175, 55, 0.42);
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(212, 175, 55, 0.15);
+    padding: clamp(6px, 1.3cqh, 8.5px) clamp(8px, 1.8cqw, 10px);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(180, 130, 30, 0.08) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.48);
+    border-radius: 9px;
+    box-shadow: 0 2px 10px rgba(212, 175, 55, 0.16);
 }
 
 .trophy-lol-peak-badge-tag {
@@ -1735,23 +1783,23 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-lol-peak-val {
-    font-size: clamp(11px, 2.4cqw, 12.5px);
-    font-weight: 800;
+    font-size: clamp(11.5px, 2.5cqw, 13px);
+    font-weight: 850;
     color: #ffffff;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
     white-space: nowrap;
 }
 
-/* 2. & 3. Yatay Solo/Duo ve Flex 5v5 Satırları */
+/* 2. & 3. Solo/Duo ve Flex 5v5 Satırları */
 .trophy-lol-queue-row-box {
     display: flex;
     align-items: center;
     justify-content: space-between;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(212, 175, 55, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 8px;
-    padding: clamp(5px, 1cqh, 7px) clamp(8px, 1.8cqw, 10px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    padding: clamp(6px, 1.2cqh, 8px) clamp(8px, 1.8cqw, 10px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .trophy-lol-q-label {
@@ -1766,7 +1814,7 @@ body.is-owner .top-item-unit:active {
 .trophy-lol-q-tier-wrap {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     min-width: 0;
 }
 
@@ -1793,87 +1841,70 @@ body.is-owner .top-item-unit:active {
     flex-shrink: 0;
 }
 
-/* 4, 5 & 6. Alt Taban: Sihirdar, Main Role ve Win Rate Yatay Kutuları */
-.trophy-lol-stat-box {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: clamp(4.5px, 0.9cqh, 6.5px) clamp(8px, 1.8cqw, 10px);
-    background: rgba(255, 255, 255, 0.035);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+/* 4. Yan Yana 2 Sütunlu İstatistikler (Rol & Win Rate) */
+.trophy-lol-stats-subgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
 }
 
-.trophy-lol-stat-left {
+.trophy-lol-stat-subcard {
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: clamp(5px, 1cqh, 7px) clamp(6px, 1.4cqw, 8px);
     display: flex;
     align-items: center;
     gap: 6px;
-    color: var(--text-secondary);
     min-width: 0;
-    font-size: clamp(10px, 2.3cqw, 11.5px);
-    font-weight: 600;
 }
 
-.trophy-lol-stat-icon {
-    width: 14px;
-    height: 14px;
+.trophy-lol-subcard-icon {
+    width: 15px;
+    height: 15px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 
-.trophy-lol-stat-val {
-    font-size: clamp(10.5px, 2.3cqw, 12px);
+.trophy-lol-subcard-texts {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.15;
+}
+
+.trophy-lol-subcard-lbl {
+    font-size: 8px;
     font-weight: 750;
+    color: var(--text-tertiary);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.trophy-lol-subcard-val {
+    font-size: clamp(10.5px, 2.3cqw, 12px);
+    font-weight: 800;
     color: #f1f3f5;
     white-space: nowrap;
-}
-
-.trophy-lol-stat-val.val-wr {
-    font-family: var(--font-mono);
-    color: #38d9a9;
-    font-weight: 800;
-}
-
-/* Sihirdar & Sunucu Kapsülü */
-.trophy-lol-user-val-wrap {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    min-width: 0;
-}
-
-.trophy-lol-stat-val.val-user {
-    max-width: 95px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
-.trophy-lol-region-pill {
-    font-size: 9px;
-    font-weight: 800;
-    color: #e5c07b;
-    background: rgba(212, 175, 55, 0.15);
-    border: 1px solid rgba(212, 175, 55, 0.3);
-    border-radius: 4px;
-    padding: 1px 4px;
-    line-height: 1;
-    flex-shrink: 0;
-    letter-spacing: 0.3px;
+.trophy-lol-subcard-val.val-wr {
+    font-family: var(--font-mono);
+    color: #38d9a9;
 }
 
-/* Sağ Panel: Dikey Şampiyon Kartı (Loading Art) - Küçültülmüş & Dengeli */
+/* 4. Sağ Panel: Dikey Şampiyon Kartı (Loading Art) - Heybetli & Orantılı */
 .trophy-lol-art-box {
     position: relative;
-    border-radius: 11px;
+    border-radius: 12px;
     overflow: hidden;
     border: 1px solid rgba(212, 175, 55, 0.35);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55);
     background: #0a0d14;
-    max-height: clamp(185px, 39cqh, 220px);
     height: 100%;
     display: flex;
     box-sizing: border-box;
@@ -1895,8 +1926,8 @@ body.is-owner .top-item-unit:active {
 .trophy-lol-art-bottom-fade {
     position: absolute;
     inset: auto 0 0 0;
-    height: 50%;
-    background: linear-gradient(to top, rgba(5, 7, 12, 0.95) 0%, rgba(5, 7, 12, 0.6) 45%, transparent 100%);
+    height: 52%;
+    background: linear-gradient(to top, rgba(5, 7, 12, 0.96) 0%, rgba(5, 7, 12, 0.65) 45%, transparent 100%);
     pointer-events: none;
 }
 
@@ -1905,16 +1936,36 @@ body.is-owner .top-item-unit:active {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: clamp(5px, 1.2cqh, 8px) clamp(5px, 1.6cqw, 8px);
+    padding: clamp(6px, 1.4cqh, 10px) clamp(6px, 1.6cqw, 8px);
     z-index: 2;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .trophy-lol-champ-name {
-    font-size: clamp(11.5px, 2.6cqw, 14px);
-    font-weight: 800;
-    color: #f8f9fa;
+    font-size: clamp(12.5px, 2.8cqw, 15px);
+    font-weight: 850;
+    color: #ffffff;
+    letter-spacing: 0.4px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
+    line-height: 1.15;
+}
+
+.trophy-lol-champ-role {
+    font-size: 9px;
+    font-weight: 750;
+    color: #d4af37;
     letter-spacing: 0.5px;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
+    text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* 5. Alt Footer / OP.GG Aksiyon Butonu */
+#trophiesCompanionCard.is-lol-view #trophiesDetailFooter {
+    padding-top: clamp(6px, 1.2cqh, 10px);
+    padding-bottom: clamp(12px, 2.4cqh, 18px);
+    flex-shrink: 0;
 }
 /* #endregion */
