@@ -322,6 +322,11 @@ const RenderEngine = {
             const trophiesCompanion = document.getElementById('trophiesCompanionCard');
             const isDetailEditing = trophiesCompanion && trophiesCompanion.classList.contains('is-detail-editing');
 
+            // LoL kartı açıkken özel banner temasını üst karta bağla
+            if (trophiesCompanion) {
+                trophiesCompanion.classList.toggle('is-lol-view', activeTur === 'lol');
+            }
+
             const seciliOge = aktifTrophyler.find(t => t.tur === activeTur) || null;
             const kullanici = seciliOge ? seciliOge.kullanici : '';
 
@@ -526,20 +531,13 @@ const RenderEngine = {
 
         return `
             <div class="trophy-root-card trophy-lol-card" data-trophy-tur="lol" data-username="${this.escapeHtml(norm.kullanici)}">
-                <!-- 1. EN ÜST KATMAN: Banner (Yazısız, saf sahne atmosferi) -->
-                <div class="trophy-lol-banner">
-                    <img src="assets/images/lol-banner.jpg" alt="League of Legends" class="trophy-lol-banner-bg" loading="lazy">
-                    <div class="trophy-lol-banner-overlay"></div>
-                </div>
-
-                <!-- 2. KATMAN: Şeffaf LoL Amblemi ve Kimlik Çubuğu (Font Metin) -->
+                <!-- 1. KATMAN: Şeffaf LoL Amblemi ve Kimlik Çubuğu (Font Metin) -->
                 <div class="trophy-identity-bar trophy-lol-identity-bar">
                     <div class="trophy-id-left">
                         <div class="trophy-id-favicon-box trophy-lol-logo-box">
-                            <svg viewBox="0 0 24 24" width="22" height="22" fill="#d4af37">
-                                <circle cx="12" cy="12" r="10" stroke="#d4af37" stroke-width="1.8" fill="none"></circle>
-                                <path d="M12 6v12M8 12h8" stroke="#d4af37" stroke-width="2" stroke-linecap="round"></path>
-                            </svg>
+                            <img src="${this.escapeHtml(norm.faviconUrl)}" alt="LoL" class="trophy-id-favicon-img" loading="lazy"
+                                 onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                            <span class="trophy-id-fallback" style="display: none; color: #d4af37; font-weight: 800;">LOL</span>
                         </div>
                         <div class="trophy-id-texts">
                             <div class="trophy-id-handle" title="${this.escapeHtml(norm.handle)}">
@@ -557,55 +555,68 @@ const RenderEngine = {
 
                 <!-- 3. KATMAN: ANA İKİ SÜTUNLU GRİD -->
                 <div class="trophy-lol-main-grid">
-                    <!-- SOL PANEL: 3 ELO + WIN RATE ODAKLI BİLGİ BLOĞU -->
+                    <!-- SOL PANEL: PEAK (LİDER) + YATAY SOLO & FLEX + MAIN ROLE & WIN RATE -->
                     <div class="trophy-lol-info-panel">
-                        <!-- Üst Sıra: Solo/Duo ve Flex İkili Elo Kutuları -->
-                        <div class="trophy-lol-queues-row">
-                            <div class="trophy-lol-queue-box">
-                                <span class="trophy-lol-q-title">Solo / Duo</span>
-                                <div class="trophy-lol-q-val-wrap">
-                                    ${soloEmblem ? `
-                                        <img src="${this.escapeHtml(soloEmblem)}" alt="${this.escapeHtml(soloTier)}" class="trophy-lol-rank-emblem" loading="lazy"
-                                             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
-                                        <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
-                                    ` : fallbackShield}
-                                    <span class="trophy-lol-q-val">${this.escapeHtml(soloTier)}</span>
-                                </div>
-                            </div>
-                            <div class="trophy-lol-queue-box">
-                                <span class="trophy-lol-q-title">Flex 5v5</span>
-                                <div class="trophy-lol-q-val-wrap">
-                                    ${flexEmblem ? `
-                                        <img src="${this.escapeHtml(flexEmblem)}" alt="${this.escapeHtml(flexTier)}" class="trophy-lol-rank-emblem" loading="lazy"
-                                             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
-                                        <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
-                                    ` : fallbackShield}
-                                    <span class="trophy-lol-q-val">${this.escapeHtml(flexTier)}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Orta Sıra: 3. Elo - Vurgulu Peak (Kariyer Zirvesi) Rozeti -->
-                        <div class="trophy-lol-peak-highlight">
-                            <div class="trophy-lol-peak-left">
+                        <!-- 1. En Üst: Vurgulu Geniş Peak Rozeti -->
+                        <div class="trophy-lol-peak-card">
+                            <div class="trophy-lol-peak-badge-tag">
                                 ${peakEmblem ? `
                                     <img src="${this.escapeHtml(peakEmblem)}" alt="${this.escapeHtml(peak)}" class="trophy-lol-rank-emblem" loading="lazy"
                                          onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
                                     <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
-                                ` : `
-                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="#fbbf24" stroke="#fbbf24" stroke-width="1.5">
-                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                    </svg>
-                                `}
-                                <span class="trophy-lol-peak-label">Peak</span>
+                                ` : fallbackShield}
+                                <span>PEAK</span>
                             </div>
-                            <span class="trophy-lol-peak-value">${this.escapeHtml(peak)}</span>
+                            <span class="trophy-lol-peak-val">${this.escapeHtml(peak)}</span>
                         </div>
 
-                        <!-- Alt Sıra: Tek ve Net Win Rate Performans Alanı -->
-                        <div class="trophy-lol-wr-box">
-                            <div class="trophy-lol-row-label">
-                                <span class="trophy-lol-row-icon">
+                        <!-- 2. Solo/Duo Yatay Satırı -->
+                        <div class="trophy-lol-queue-row-box">
+                            <span class="trophy-lol-q-label">SOLO / DUO</span>
+                            <div class="trophy-lol-q-tier-wrap">
+                                ${soloEmblem ? `
+                                    <img src="${this.escapeHtml(soloEmblem)}" alt="${this.escapeHtml(soloTier)}" class="trophy-lol-rank-emblem" loading="lazy"
+                                         onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                                    <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
+                                ` : fallbackShield}
+                                <span class="trophy-lol-q-tier-text">${this.escapeHtml(soloTier)}</span>
+                            </div>
+                        </div>
+
+                        <!-- 3. Flex 5v5 Yatay Satırı -->
+                        <div class="trophy-lol-queue-row-box">
+                            <span class="trophy-lol-q-label">FLEX 5V5</span>
+                            <div class="trophy-lol-q-tier-wrap">
+                                ${flexEmblem ? `
+                                    <img src="${this.escapeHtml(flexEmblem)}" alt="${this.escapeHtml(flexTier)}" class="trophy-lol-rank-emblem" loading="lazy"
+                                         onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                                    <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
+                                ` : fallbackShield}
+                                <span class="trophy-lol-q-tier-text">${this.escapeHtml(flexTier)}</span>
+                            </div>
+                        </div>
+
+                        <!-- 4. Alt Taban: Main Role Kutusu -->
+                        <div class="trophy-lol-stat-box">
+                            <div class="trophy-lol-stat-left">
+                                <span class="trophy-lol-stat-icon">
+                                    ${norm.rolIconSvg || `
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#20c997" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                                        </svg>
+                                    `}
+                                </span>
+                                <span>Main Role</span>
+                            </div>
+                            <span class="trophy-lol-stat-val">${this.escapeHtml(norm.rolEtiket || 'Mid')}</span>
+                        </div>
+
+                        <!-- 5. Alt Taban: Win Rate Kutusu -->
+                        <div class="trophy-lol-stat-box">
+                            <div class="trophy-lol-stat-left">
+                                <span class="trophy-lol-stat-icon">
                                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#38d9a9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                         <line x1="18" y1="20" x2="18" y2="10"></line>
                                         <line x1="12" y1="20" x2="12" y2="4"></line>
@@ -614,7 +625,7 @@ const RenderEngine = {
                                 </span>
                                 <span>Win rate</span>
                             </div>
-                            <span class="trophy-lol-row-val val-wr">%${this.escapeHtml(winrate)}</span>
+                            <span class="trophy-lol-stat-val val-wr">%${this.escapeHtml(winrate)}</span>
                         </div>
                     </div>
 
