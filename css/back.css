@@ -1920,6 +1920,8 @@ body.is-owner .top-item-unit:active {
     object-fit: cover;
     object-position: center 12%;
     display: block;
+    transform: scale(1.08);
+    transform-origin: center bottom;
 }
 
 .trophy-lol-art-bottom-fade {

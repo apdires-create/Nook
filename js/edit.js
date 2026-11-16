@@ -2786,15 +2786,15 @@ EditManager.TrophiesView = {
         const mevcutSnap = mevcutOge?.snap || {};
         const tiers = Array.isArray(meta.tiers) ? meta.tiers : [];
 
-        // Aktif bölge belirleme (mevcut kayıttan veya Riot ID etiketinden)
+        // Aktif bölge belirleme (önce Riot ID etiketinden, yoksa mevcut kayıttan)
         let aktifBolge = 'tr';
-        if (mevcutSnap.region) {
-            aktifBolge = String(mevcutSnap.region).toLowerCase().replace(/[0-9]/g, '');
-        } else if (mevcutKullanici && mevcutKullanici.includes('#')) {
+        if (mevcutKullanici && mevcutKullanici.includes('#')) {
             const parsed = TrophiesManager.parseRiotId(mevcutKullanici);
             if (parsed.displayRegion) {
                 aktifBolge = parsed.displayRegion.toLowerCase().replace(/[0-9]/g, '');
             }
+        } else if (mevcutSnap.region) {
+            aktifBolge = String(mevcutSnap.region).toLowerCase().replace(/[0-9]/g, '');
         }
 
         const buildTierOptions = (selectedVal, defaultLabel) => {
