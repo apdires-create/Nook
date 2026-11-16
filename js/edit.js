@@ -2888,19 +2888,19 @@ EditManager.TrophiesView = {
                     <div class="mt-form-field">
                         <label class="mt-field-label">1. Vitrin Ajanı</label>
                         <select class="mt-form-input is-select mt-val-agent-1">
-                            <option value="${RenderEngine.escapeHtml(mevcutSnap.ajan1 || 'Jett')}" selected>${RenderEngine.escapeHtml(mevcutSnap.ajan1 || 'Jett')}</option>
+                            <option value="${RenderEngine.escapeHtml(mevcutSnap.ajan1 || '')}" selected>${RenderEngine.escapeHtml(mevcutSnap.ajan1 || '— Ajan Seç —')}</option>
                         </select>
                     </div>
                     <div class="mt-form-field">
                         <label class="mt-field-label">2. Vitrin Ajanı</label>
                         <select class="mt-form-input is-select mt-val-agent-2">
-                            <option value="${RenderEngine.escapeHtml(mevcutSnap.ajan2 || 'Reyna')}" selected>${RenderEngine.escapeHtml(mevcutSnap.ajan2 || 'Reyna')}</option>
+                            <option value="${RenderEngine.escapeHtml(mevcutSnap.ajan2 || '')}" selected>${RenderEngine.escapeHtml(mevcutSnap.ajan2 || '— Ajan Seç —')}</option>
                         </select>
                     </div>
                     <div class="mt-form-field">
                         <label class="mt-field-label">3. Vitrin Ajanı</label>
                         <select class="mt-form-input is-select mt-val-agent-3">
-                            <option value="${RenderEngine.escapeHtml(mevcutSnap.ajan3 || 'Omen')}" selected>${RenderEngine.escapeHtml(mevcutSnap.ajan3 || 'Omen')}</option>
+                            <option value="${RenderEngine.escapeHtml(mevcutSnap.ajan3 || '')}" selected>${RenderEngine.escapeHtml(mevcutSnap.ajan3 || '— Ajan Seç —')}</option>
                         </select>
                     </div>
                 </div>
@@ -2994,21 +2994,6 @@ EditManager.TrophiesView = {
                     } else {
                         statusEl.textContent = `✓ Doğrulandı: Aktif ${norm.heroValue} • Zirve ${norm.peakValue}`;
                     }
-                }
-                if (tur === 'valorant') {
-                    const topPromise = Array.isArray(live.topAgents) && live.topAgents.length > 0
-                        ? Promise.resolve(live.topAgents)
-                        : TrophiesManager.fetchValorantTopAgents(check.clean, secilenBolge);
-                    topPromise.then(topAgents => {
-                        if (!formWrap.isConnected || !Array.isArray(topAgents) || !topAgents.length) return;
-                        ['.mt-val-agent-1', '.mt-val-agent-2', '.mt-val-agent-3'].forEach((sel, idx) => {
-                            const selectEl = formWrap.querySelector(sel);
-                            const agentName = topAgents[idx];
-                            if (!selectEl || !agentName) return;
-                            const opt = Array.from(selectEl.options).find(o => o.value.toLowerCase() === agentName.toLowerCase());
-                            if (opt) selectEl.value = opt.value;
-                        });
-                    }).catch(() => {});
                 }
                 return live;
             } else {
@@ -3196,18 +3181,20 @@ EditManager.TrophiesView = {
         // Valorant 3'lü Ajan Dinamik Seçici Entegrasyonu
         if (tur === 'valorant') {
             const agentSelects = [
-                { el: formWrap.querySelector('.mt-val-agent-1'), def: mevcutSnap.ajan1 || 'Jett' },
-                { el: formWrap.querySelector('.mt-val-agent-2'), def: mevcutSnap.ajan2 || 'Reyna' },
-                { el: formWrap.querySelector('.mt-val-agent-3'), def: mevcutSnap.ajan3 || 'Omen' }
+                { el: formWrap.querySelector('.mt-val-agent-1'), def: mevcutSnap.ajan1 || '' },
+                { el: formWrap.querySelector('.mt-val-agent-2'), def: mevcutSnap.ajan2 || '' },
+                { el: formWrap.querySelector('.mt-val-agent-3'), def: mevcutSnap.ajan3 || '' }
             ];
             TrophiesManager.getValorantAgents().then(allAgents => {
                 if (!formWrap.isConnected) return;
                 agentSelects.forEach(({ el, def }) => {
                     if (!el) return;
-                    el.innerHTML = allAgents.map(a => {
-                        const isSel = a.name.toLowerCase() === String(def).toLowerCase() || a.uuid === def;
+                    const emptyOpt = `<option value="" ${!def ? 'selected' : ''}>— Ajan Seç —</option>`;
+                    const listOpts = allAgents.map(a => {
+                        const isSel = def && (a.name.toLowerCase() === String(def).toLowerCase() || a.uuid === def);
                         return `<option value="${RenderEngine.escapeHtml(a.name)}" ${isSel ? 'selected' : ''}>${RenderEngine.escapeHtml(a.name)}</option>`;
                     }).join('');
+                    el.innerHTML = emptyOpt + listOpts;
                 });
             }).catch(() => {});
         }

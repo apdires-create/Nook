@@ -648,7 +648,7 @@ const RenderEngine = {
         const peakEmblem = TrophiesManager.getRankEmblemUrl('valorant', peakText);
         const agents = Array.isArray(norm.agents) && norm.agents.length === 3
             ? norm.agents
-            : ['Jett', 'Reyna', 'Omen'];
+            : ['', '', ''];
 
         const handleParts = String(norm.handle || '').split('#');
         const playerName = handleParts[0] || norm.handle || 'Ajan';
@@ -667,7 +667,23 @@ const RenderEngine = {
             });
         }
 
+        const emptySlotSvg = `<svg viewBox="0 0 120 80" class="trophy-val-empty-svg" fill="none" aria-hidden="true">
+            <circle cx="60" cy="40" r="24" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <path d="M60 10V24M60 56V70M30 40H44M76 40H90" stroke="#ff4655" stroke-width="1.8"/>
+            <polygon points="60,29 71,40 60,51 49,40" stroke="currentColor" stroke-width="1.5"/>
+        </svg>`;
+
         const agentCardsHtml = agents.map((agentName) => {
+            if (!agentName || !String(agentName).trim()) {
+                return `
+                    <div class="trophy-val-agent-card is-empty" title="Ajan Seçilmedi">
+                        <div class="trophy-val-agent-inner">
+                            ${emptySlotSvg}
+                            <span class="trophy-val-agent-name is-empty-label">Ajan Seçilmedi</span>
+                        </div>
+                    </div>
+                `;
+            }
             const art = TrophiesManager.getValorantAgentData(agentName);
             const c1 = art.colors?.[0] || '#ff4655';
             const c2 = art.colors?.[2] || '#1f2937';
