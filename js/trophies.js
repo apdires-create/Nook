@@ -26,6 +26,24 @@ const TrophiesManager = {
         const clean = String(tierStr).toLowerCase().trim();
         if (clean.includes('unranked') || clean.includes('derecesiz')) return '';
 
+        if (tur === 'valorant') {
+            const tierMatch = clean.match(/\b([1-3])\b/);
+            const div = tierMatch ? parseInt(tierMatch[1], 10) : 1;
+            let baseTier = 0;
+            if (clean.includes('iron') || clean.includes('demir')) baseTier = 2 + div;
+            else if (clean.includes('bronze') || clean.includes('bronz')) baseTier = 5 + div;
+            else if (clean.includes('silver') || clean.includes('gümüş')) baseTier = 8 + div;
+            else if (clean.includes('gold') || clean.includes('altın')) baseTier = 11 + div;
+            else if (clean.includes('platinum') || clean.includes('platin')) baseTier = 14 + div;
+            else if (clean.includes('diamond') || clean.includes('elmas')) baseTier = 17 + div;
+            else if (clean.includes('ascendant') || clean.includes('yücelik')) baseTier = 20 + div;
+            else if (clean.includes('immortal') || clean.includes('ölümsüz')) baseTier = 23 + div;
+            else if (clean.includes('radiant') || clean.includes('radyant')) baseTier = 27;
+
+            if (!baseTier) return '';
+            return `https://media.valorant-api.com/competitivetiers/03621f52-342b-cf4e-4f86-9350a49c6d04/${baseTier}/smallicon.png`;
+        }
+
         let tierKey = '';
         if (clean.includes('iron') || clean.includes('demir')) tierKey = 'iron';
         else if (clean.includes('bronze') || clean.includes('bronz')) tierKey = 'bronze';
@@ -252,6 +270,36 @@ const TrophiesManager = {
             background: found.background || `https://media.valorant-api.com/agents/${found.uuid}/background.png`,
             colors: found.colors || ['#ff4655', '#1f2937', '#111827', '#090c14']
         };
+    },
+
+    /**
+     * Sayfa açılışında Valorant vitrin ajanlarını ve rank simgesini arka planda önceden önbelleğe alır
+     */
+    preloadValorantAssets(gamingList) {
+        if (!Array.isArray(gamingList)) return;
+        const valItem = gamingList.find(t => t && t.tur === 'valorant');
+        if (!valItem) return;
+
+        if (!this._preloadedUrls) this._preloadedUrls = new Set();
+        const preloadUrl = (url) => {
+            if (!url || this._preloadedUrls.has(url)) return;
+            this._preloadedUrls.add(url);
+            const img = new Image();
+            img.decoding = 'async';
+            img.src = url;
+        };
+
+        const snap = valItem.snap || {};
+        const agents = [snap.ajan1 || 'Jett', snap.ajan2 || 'Reyna', snap.ajan3 || 'Omen'];
+        agents.forEach(a => {
+            const art = this.getValorantAgentData(a);
+            preloadUrl(art.bustPortrait);
+            preloadUrl(art.background);
+        });
+
+        if (snap.aktif) {
+            preloadUrl(this.getRankEmblemUrl('valorant', snap.aktif));
+        }
     },
 
     /**

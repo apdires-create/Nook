@@ -118,6 +118,11 @@ const RenderEngine = {
         const isWidgetsMode = (mode === 'widgets');
         const isAchievementsMode = (mode === 'achievements');
 
+        // Sayfa açılışında Valorant vitrin görsellerini arka planda önceden yükle
+        if (typeof TrophiesManager !== 'undefined' && Array.isArray(data?.gaming)) {
+            TrophiesManager.preloadValorantAssets(data.gaming);
+        }
+
         // Dinamik Üst Başlık ve İkon Güncellemesi (Gaming / Widgets / Trophies)
         if (masterTitle) {
             if (isAchievementsMode) {
@@ -636,10 +641,11 @@ const RenderEngine = {
         if (!norm) return '';
         const region = (norm.region || 'EU').toUpperCase();
         const eloText = norm.heroValue || 'Unranked';
+        const rankEmblem = TrophiesManager.getRankEmblemUrl('valorant', eloText);
         const rr = norm.rr;
         const rightStatText = norm.winrate
-            ? `Win rate - %${norm.winrate}`
-            : `RR - ${rr !== undefined && rr !== null ? rr : '—'}`;
+            ? `%${norm.winrate} WR`
+            : `${rr !== undefined && rr !== null ? rr : '—'} RR`;
         const agents = Array.isArray(norm.agents) && norm.agents.length === 3
             ? norm.agents
             : ['Jett', 'Reyna', 'Omen'];
@@ -669,8 +675,8 @@ const RenderEngine = {
             return `
                 <div class="trophy-val-agent-card" style="--val-c1: ${this.escapeHtml(c1)}; --val-c2: ${this.escapeHtml(c2)}; --val-c3: ${this.escapeHtml(c3)};" title="${this.escapeHtml(art.name)}">
                     <div class="trophy-val-agent-inner">
-                        <img src="${this.escapeHtml(art.background)}" alt="" class="trophy-val-agent-bg" loading="lazy" onerror="this.style.display='none';">
-                        <img src="${this.escapeHtml(art.bustPortrait)}" alt="${this.escapeHtml(art.name)}" class="trophy-val-agent-portrait" loading="lazy" onerror="this.style.display='none';">
+                        <img src="${this.escapeHtml(art.background)}" alt="" class="trophy-val-agent-bg" loading="eager" decoding="async" onerror="this.style.display='none';">
+                        <img src="${this.escapeHtml(art.bustPortrait)}" alt="${this.escapeHtml(art.name)}" class="trophy-val-agent-portrait" loading="eager" decoding="async" onerror="this.style.display='none';">
                         <div class="trophy-val-agent-fade"></div>
                         <span class="trophy-val-agent-name">${this.escapeHtml(art.name)}</span>
                     </div>
@@ -693,11 +699,16 @@ const RenderEngine = {
                 </div>
 
                 <div class="trophy-val-stats-row">
-                    <div class="trophy-val-stat-pill">
-                        <span class="trophy-val-stat-text">Elo - ${this.escapeHtml(eloText)}</span>
+                    <div class="trophy-val-stat-pill is-elo">
+                        <div class="trophy-val-stat-inner">
+                            ${rankEmblem ? `<img src="${this.escapeHtml(rankEmblem)}" alt="${this.escapeHtml(eloText)}" class="trophy-val-rank-emblem" loading="eager" decoding="async" onerror="this.style.display='none';">` : ''}
+                            <span class="trophy-val-stat-text">${this.escapeHtml(eloText)}</span>
+                        </div>
                     </div>
-                    <div class="trophy-val-stat-pill">
-                        <span class="trophy-val-stat-text">${this.escapeHtml(rightStatText)}</span>
+                    <div class="trophy-val-stat-pill is-rr">
+                        <div class="trophy-val-stat-inner">
+                            <span class="trophy-val-stat-text">${this.escapeHtml(rightStatText)}</span>
+                        </div>
                     </div>
                 </div>
             </div>
