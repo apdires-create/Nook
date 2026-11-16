@@ -179,7 +179,8 @@ const TrophiesManager = {
     },
 
     /**
-     * Seçilen şampiyonun kostümlerini çeker ({ num: 0, name: '...' })
+     * Seçilen şampiyonun gerçek vitrin kostümlerini çeker ({ num: 0, name: '...' })
+     * Not: DataDragon API'sinde ayrı splash/loading art'ı bulunmayan kostüm renkleri (chromas) elenir.
      */
     async getLoLSkins(champId) {
         if (!champId) return [{ num: 0, name: 'Klasik (Varsayılan)' }];
@@ -194,10 +195,31 @@ const TrophiesManager = {
                 const champData = d && d.data && (d.data[champId] || Object.values(d.data)[0]);
                 if (champData && Array.isArray(champData.skins)) {
                     const champName = champData.name || champId;
-                    const skins = champData.skins.map(s => ({
-                        num: s.num,
-                        name: (!s.name || s.name.toLowerCase() === 'default') ? `Klasik ${champName}` : s.name
-                    }));
+                    const allRawSkins = champData.skins;
+
+                    // Renk (chroma) tespiti: DataDragon'da renkler ayrı splash dosyasına sahip değildir
+                    const isChromaSkin = (skin) => {
+                        const sName = (skin.name || '').trim();
+                        if (!sName || sName.toLowerCase() === 'default') return false;
+                        const lower = sName.toLowerCase();
+                        if (lower.includes('renk paketi') || lower.includes('chroma')) return true;
+
+                        const match = sName.match(/\(([^)]+)\)$/);
+                        if (!match) return false;
+                        const inside = match[1].trim();
+                        if (/^\d{4}$/.test(inside)) return false; // Prestij ... (2022) gibi geçerli bağımsız kostümleri koru
+
+                        const baseName = sName.replace(/\s*\([^)]*\)$/, '').trim();
+                        return allRawSkins.some(other => other.num !== skin.num && other.name.trim() === baseName);
+                    };
+
+                    const skins = allRawSkins
+                        .filter(s => !isChromaSkin(s))
+                        .map(s => ({
+                            num: s.num,
+                            name: (!s.name || s.name.toLowerCase() === 'default') ? `Klasik ${champName}` : s.name
+                        }));
+
                     this._championSkinsCache[champId] = skins;
                     return skins;
                 }
