@@ -178,6 +178,82 @@ const TrophiesManager = {
         return this.LOL_CHAMPIONS;
     },
 
+    // Valorant varsayılan ajan listesi (API çevrimdışı fallback + hızlı eşleştirme)
+    VALORANT_AGENTS: [
+        { uuid: 'add6443a-41bd-e414-f6ad-e58d267f4e95', name: 'Jett', colors: ['#90e0ef', '#48cae4', '#023e8a', '#03045e'] },
+        { uuid: 'a3bfb853-43b2-7238-a4f1-ad90e9e46bcc', name: 'Reyna', colors: ['#e0aaff', '#9d4edd', '#5a189a', '#240046'] },
+        { uuid: '8e253930-4c05-31dd-1b6c-968525494517', name: 'Omen', colors: ['#6c757d', '#4361ee', '#3a0ca3', '#10002b'] },
+        { uuid: '569fdd95-4d10-43ab-ca70-79becc718b46', name: 'Sage', colors: ['#72efdd', '#48bfe3', '#0077b6', '#0b132b'] },
+        { uuid: '320b2a48-4d9b-a075-30f1-1f93a9b638fa', name: 'Sova', colors: ['#90e0ef', '#0096c7', '#023e8a', '#0d1b2a'] },
+        { uuid: '1e58de9c-4950-5125-93e9-a0aee9f98746', name: 'Killjoy', colors: ['#ffd166', '#f4a261', '#7209b7', '#2b2d42'] },
+        { uuid: '117ed9e3-49f3-6512-3ccf-0cada7e3823b', name: 'Cypher', colors: ['#dee2e6', '#adb5bd', '#343a40', '#161a1d'] },
+        { uuid: '707eab51-4836-f488-046a-cda6bf494859', name: 'Viper', colors: ['#80ed99', '#38b000', '#006400', '#081c15'] },
+        { uuid: 'f94c3b30-42be-e959-889c-5aa313dba261', name: 'Raze', colors: ['#ff9f1c', '#e76f51', '#9b2226', '#2b1216'] },
+        { uuid: 'eb93336a-449b-9c1b-0a54-a891f7921d69', name: 'Phoenix', colors: ['#ffba08', '#f48c06', '#dc2f02', '#370617'] },
+        { uuid: '1dbf2edd-4729-0984-3115-daa5eed44993', name: 'Clove', colors: ['#ff99c8', '#c77dff', '#7b2cbf', '#1f1135'] },
+        { uuid: '0e38b510-41a8-5780-5e8f-568b2a4f2d6c', name: 'Iso', colors: ['#a5b4fc', '#6366f1', '#312e81', '#0f172a'] }
+    ],
+
+    /**
+     * Valorant API üzerinden oynanabilir tüm ajanları çeker ve alfabetik sıralı döner
+     */
+    async getValorantAgents() {
+        if (this._valorantAgentsCache && this._valorantAgentsCache.length > 0) {
+            return this._valorantAgentsCache;
+        }
+        try {
+            const res = await fetch('https://valorant-api.com/v1/agents?isPlayableCharacter=true&language=tr-TR');
+            if (res.ok) {
+                const json = await res.json();
+                if (json && Array.isArray(json.data)) {
+                    const list = json.data
+                        .filter(a => a && a.uuid && a.displayName)
+                        .map(a => ({
+                            uuid: a.uuid,
+                            name: a.displayName,
+                            bustPortrait: a.bustPortrait || `https://media.valorant-api.com/agents/${a.uuid}/bustportrait.png`,
+                            background: a.background || `https://media.valorant-api.com/agents/${a.uuid}/background.png`,
+                            colors: Array.isArray(a.backgroundGradientColors) && a.backgroundGradientColors.length >= 2
+                                ? a.backgroundGradientColors.map(c => `#${String(c).replace(/^#/, '').slice(0, 6)}`)
+                                : ['#ff4655', '#1f2937', '#111827', '#090c14']
+                        }))
+                        .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+
+                    this._valorantAgentsCache = list;
+                    return list;
+                }
+            }
+        } catch (e) {
+            console.warn('[TrophiesManager] Valorant agents fetch failed, using fallback:', e);
+        }
+        return this.VALORANT_AGENTS.map(a => ({
+            ...a,
+            bustPortrait: `https://media.valorant-api.com/agents/${a.uuid}/bustportrait.png`,
+            background: `https://media.valorant-api.com/agents/${a.uuid}/background.png`
+        }));
+    },
+
+    /**
+     * Ajan ismi veya UUID'sinden kompozit kart görsellerini ve renk paletini döner
+     */
+    getValorantAgentData(agentNameOrUuid) {
+        const key = String(agentNameOrUuid || 'Jett').trim().toLowerCase();
+        const pool = (this._valorantAgentsCache && this._valorantAgentsCache.length > 0)
+            ? this._valorantAgentsCache
+            : this.VALORANT_AGENTS;
+        const found = pool.find(a =>
+            a.name.toLowerCase() === key || a.uuid.toLowerCase() === key
+        ) || pool[0];
+
+        return {
+            uuid: found.uuid,
+            name: found.name,
+            bustPortrait: found.bustPortrait || `https://media.valorant-api.com/agents/${found.uuid}/bustportrait.png`,
+            background: found.background || `https://media.valorant-api.com/agents/${found.uuid}/background.png`,
+            colors: found.colors || ['#ff4655', '#1f2937', '#111827', '#090c14']
+        };
+    },
+
     /**
      * Seçilen şampiyonun gerçek vitrin kostümlerini çeker ({ num: 0, name: '...' })
      * Not: DataDragon API'sinde ayrı splash/loading art'ı bulunmayan kostüm renkleri (chromas) elenir.
@@ -1030,6 +1106,14 @@ const TrophiesManager = {
                 return {
                     handle: parsed.full,
                     badge: `${(d?.region || parsed.valRegion).toUpperCase()} • RIOT`,
+                    region: (d?.region || parsed.displayRegion || parsed.valRegion || 'EU').toUpperCase(),
+                    rr: (rr !== undefined && rr !== null) ? rr : null,
+                    winrate: d?.winrate || null,
+                    agents: [
+                        d?.ajan1 || 'Jett',
+                        d?.ajan2 || 'Reyna',
+                        d?.ajan3 || 'Omen'
+                    ],
                     heroLabel: 'GÜNCEL KADEME (RANK)',
                     heroValue: curTier || 'Riot ID Bağlı',
                     heroSub: rr !== undefined && rr !== null ? `${rr} RR` : 'Valorant Rekabetçi',
@@ -1336,7 +1420,11 @@ const TrophiesManager = {
                 ...(snap.kuyruk ? { secilenKuyruk: snap.kuyruk } : {}),
                 ...(snap.sampiyon ? { sampiyon: snap.sampiyon } : {}),
                 ...(snap.kostumNo !== undefined ? { kostumNo: snap.kostumNo } : {}),
-                ...(snap.rol ? { rol: snap.rol } : {})
+                ...(snap.rol ? { rol: snap.rol } : {}),
+                ...(snap.ajan1 ? { ajan1: snap.ajan1 } : {}),
+                ...(snap.ajan2 ? { ajan2: snap.ajan2 } : {}),
+                ...(snap.ajan3 ? { ajan3: snap.ajan3 } : {}),
+                ...(snap.winrate ? { winrate: snap.winrate } : {})
             };
         }
         const mapped = adapter && typeof adapter.map === 'function'

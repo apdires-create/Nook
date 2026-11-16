@@ -322,9 +322,10 @@ const RenderEngine = {
             const trophiesCompanion = document.getElementById('trophiesCompanionCard');
             const isDetailEditing = trophiesCompanion && trophiesCompanion.classList.contains('is-detail-editing');
 
-            // LoL kartı açıkken özel banner temasını üst karta bağla
+            // LoL ve Valorant kartları açıkken özel banner temasını üst karta bağla
             if (trophiesCompanion) {
                 trophiesCompanion.classList.toggle('is-lol-view', activeTur === 'lol');
+                trophiesCompanion.classList.toggle('is-valorant-view', activeTur === 'valorant');
             }
 
             const seciliOge = aktifTrophyler.find(t => t.tur === activeTur) || null;
@@ -408,7 +409,8 @@ const RenderEngine = {
                 if (detailFooter) {
                     const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
                     const isLol = activeTur === 'lol';
-                    const footerLabel = isLol ? 'OP.GG' : norm.handle;
+                    const isVal = activeTur === 'valorant';
+                    const footerLabel = isLol ? 'OP.GG' : (isVal ? 'TRACKER.GG' : norm.handle);
                     detailFooter.innerHTML = `
                         <a href="${this.safeUrl(norm.profileUrl)}" target="_blank" rel="noopener noreferrer" class="companion-footer-link" title="${this.escapeHtml(norm.baslik)} Profilini Gör">
                             <span class="companion-link-favicon-wrap">
@@ -449,6 +451,9 @@ const RenderEngine = {
         if (!norm) return '';
         if (norm.tur === 'lol') {
             return this.renderLoLRootLayout(norm);
+        }
+        if (norm.tur === 'valorant') {
+            return this.renderValorantRootLayout(norm);
         }
         const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
         const stats = Array.isArray(norm.stats) ? norm.stats.slice(0, 4) : [];
@@ -615,6 +620,84 @@ const RenderEngine = {
                             <span class="trophy-lol-champ-name">${this.escapeHtml(sampiyon)}</span>
                             <span class="trophy-lol-champ-role">${this.escapeHtml(norm.rolEtiket || 'Vitrin')}</span>
                         </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    /**
+     * Valorant Özel Kart Tasarımı:
+     * - Üstte eğik Riot ID kapsülü (İsim #TAG + Bölge)
+     * - Ortada 3 adet istiflenmiş yatay eğik Ajan kartı (Kompozit arka plan + portre + sol altta Ajan Adı)
+     * - Altta 2 adet eğik istatistik kutusu (Elo - ... ve Win rate / RR)
+     */
+    renderValorantRootLayout(norm) {
+        if (!norm) return '';
+        const region = (norm.region || 'EU').toUpperCase();
+        const eloText = norm.heroValue || 'Unranked';
+        const rr = norm.rr;
+        const rightStatText = norm.winrate
+            ? `Win rate - %${norm.winrate}`
+            : `RR - ${rr !== undefined && rr !== null ? rr : '—'}`;
+        const agents = Array.isArray(norm.agents) && norm.agents.length === 3
+            ? norm.agents
+            : ['Jett', 'Reyna', 'Omen'];
+
+        const handleParts = String(norm.handle || '').split('#');
+        const playerName = handleParts[0] || norm.handle || 'Ajan';
+        const playerTag = handleParts[1] ? `#${handleParts[1]}` : '';
+
+        // Ajan listesi henüz API'den çekilmediyse arka planda yükle (fallback dışı ajanlar için)
+        if (!TrophiesManager._valorantAgentsCache && !window._fetchingValAgents) {
+            window._fetchingValAgents = true;
+            TrophiesManager.getValorantAgents().then(() => {
+                delete window._fetchingValAgents;
+                if (window._activeTrophyDetail === 'valorant' && window.aktifKartData) {
+                    this.trophiesCiz(window.aktifKartData);
+                }
+            }).catch(() => {
+                delete window._fetchingValAgents;
+            });
+        }
+
+        const agentCardsHtml = agents.map((agentName) => {
+            const art = TrophiesManager.getValorantAgentData(agentName);
+            const c1 = art.colors?.[0] || '#ff4655';
+            const c2 = art.colors?.[2] || '#1f2937';
+            const c3 = art.colors?.[3] || '#090c14';
+            return `
+                <div class="trophy-val-agent-card" style="--val-c1: ${this.escapeHtml(c1)}; --val-c2: ${this.escapeHtml(c2)}; --val-c3: ${this.escapeHtml(c3)};" title="${this.escapeHtml(art.name)}">
+                    <div class="trophy-val-agent-inner">
+                        <img src="${this.escapeHtml(art.background)}" alt="" class="trophy-val-agent-bg" loading="lazy" onerror="this.style.display='none';">
+                        <img src="${this.escapeHtml(art.bustPortrait)}" alt="${this.escapeHtml(art.name)}" class="trophy-val-agent-portrait" loading="lazy" onerror="this.style.display='none';">
+                        <div class="trophy-val-agent-fade"></div>
+                        <span class="trophy-val-agent-name">${this.escapeHtml(art.name)}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="trophy-root-card trophy-valorant-card" data-trophy-tur="valorant" data-username="${this.escapeHtml(norm.kullanici)}">
+                <div class="trophy-val-user-capsule">
+                    <div class="trophy-val-user-inner">
+                        <span class="trophy-val-player-name">${this.escapeHtml(playerName)}</span>
+                        ${playerTag ? `<span class="trophy-val-player-tag">${this.escapeHtml(playerTag)}</span>` : ''}
+                        <span class="trophy-val-server-badge">${this.escapeHtml(region)}</span>
+                    </div>
+                </div>
+
+                <div class="trophy-val-agents-stack">
+                    ${agentCardsHtml}
+                </div>
+
+                <div class="trophy-val-stats-row">
+                    <div class="trophy-val-stat-pill">
+                        <span class="trophy-val-stat-text">Elo - ${this.escapeHtml(eloText)}</span>
+                    </div>
+                    <div class="trophy-val-stat-pill">
+                        <span class="trophy-val-stat-text">${this.escapeHtml(rightStatText)}</span>
                     </div>
                 </div>
             </div>

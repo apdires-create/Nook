@@ -2883,6 +2883,29 @@ EditManager.TrophiesView = {
                 </div>
             ` : ''}
 
+            ${tur === 'valorant' ? `
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                    <div class="mt-form-field">
+                        <label class="mt-field-label">1. Vitrin Ajanı</label>
+                        <select class="mt-form-input is-select mt-val-agent-1">
+                            <option value="${RenderEngine.escapeHtml(mevcutSnap.ajan1 || 'Jett')}" selected>${RenderEngine.escapeHtml(mevcutSnap.ajan1 || 'Jett')}</option>
+                        </select>
+                    </div>
+                    <div class="mt-form-field">
+                        <label class="mt-field-label">2. Vitrin Ajanı</label>
+                        <select class="mt-form-input is-select mt-val-agent-2">
+                            <option value="${RenderEngine.escapeHtml(mevcutSnap.ajan2 || 'Reyna')}" selected>${RenderEngine.escapeHtml(mevcutSnap.ajan2 || 'Reyna')}</option>
+                        </select>
+                    </div>
+                    <div class="mt-form-field">
+                        <label class="mt-field-label">3. Vitrin Ajanı</label>
+                        <select class="mt-form-input is-select mt-val-agent-3">
+                            <option value="${RenderEngine.escapeHtml(mevcutSnap.ajan3 || 'Omen')}" selected>${RenderEngine.escapeHtml(mevcutSnap.ajan3 || 'Omen')}</option>
+                        </select>
+                    </div>
+                </div>
+            ` : ''}
+
             ${(tiers.length > 0 && isManualAllowed) ? `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <div class="mt-form-field">
@@ -3067,6 +3090,14 @@ EditManager.TrophiesView = {
                 if (roleSelect) extraSnap.rol = roleSelect.value;
                 if (skinSelect) extraSnap.kostumNo = parseInt(skinSelect.value, 10) || 0;
             }
+            if (tur === 'valorant') {
+                const a1 = formWrap.querySelector('.mt-val-agent-1');
+                const a2 = formWrap.querySelector('.mt-val-agent-2');
+                const a3 = formWrap.querySelector('.mt-val-agent-3');
+                if (a1) extraSnap.ajan1 = a1.value;
+                if (a2) extraSnap.ajan2 = a2.value;
+                if (a3) extraSnap.ajan3 = a3.value;
+            }
 
             await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, canli, mevcutKuyruk, secilenBolge, extraSnap);
             if (formWrap.isConnected) formWrap.remove();
@@ -3145,6 +3176,25 @@ EditManager.TrophiesView = {
                     updatePreview(currentChamp, skinSelect.value);
                 });
             }
+        }
+
+        // Valorant 3'lü Ajan Dinamik Seçici Entegrasyonu
+        if (tur === 'valorant') {
+            const agentSelects = [
+                { el: formWrap.querySelector('.mt-val-agent-1'), def: mevcutSnap.ajan1 || 'Jett' },
+                { el: formWrap.querySelector('.mt-val-agent-2'), def: mevcutSnap.ajan2 || 'Reyna' },
+                { el: formWrap.querySelector('.mt-val-agent-3'), def: mevcutSnap.ajan3 || 'Omen' }
+            ];
+            TrophiesManager.getValorantAgents().then(allAgents => {
+                if (!formWrap.isConnected) return;
+                agentSelects.forEach(({ el, def }) => {
+                    if (!el) return;
+                    el.innerHTML = allAgents.map(a => {
+                        const isSel = a.name.toLowerCase() === String(def).toLowerCase() || a.uuid === def;
+                        return `<option value="${RenderEngine.escapeHtml(a.name)}" ${isSel ? 'selected' : ''}>${RenderEngine.escapeHtml(a.name)}</option>`;
+                    }).join('');
+                });
+            }).catch(() => {});
         }
 
         const inp = formWrap.querySelector('.mt-user-input');
