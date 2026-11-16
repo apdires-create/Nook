@@ -2873,8 +2873,15 @@ EditManager.TrophiesView = {
                     </div>
                 </div>
                 <div class="mt-form-field" style="margin-top: 4px;">
-                    <label class="mt-field-label">Kostüm Numarası (0: Klasik Splash, 1-20: Kostüm)</label>
-                    <input type="number" min="0" max="40" class="mt-form-input mt-lol-skin-input" value="${Number(mevcutSnap.kostumNo || 0)}" placeholder="0">
+                    <label class="mt-field-label">Vitrin Kostümü</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <select class="mt-form-input is-select mt-lol-skin-select" style="flex: 1; min-width: 0;">
+                            <option value="${Number(mevcutSnap.kostumNo || 0)}">Kostümler yükleniyor...</option>
+                        </select>
+                        <div class="mt-lol-skin-preview-thumb" style="width: 32px; height: 38px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.4); flex-shrink: 0; background: #0a0d14; display: flex; align-items: center; justify-content: center;" title="Kostüm Önizleme">
+                            <img class="mt-lol-skin-preview-img" src="https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${encodeURIComponent(mevcutSnap.sampiyon || 'Morgana')}_${Number(mevcutSnap.kostumNo || 0)}.jpg" alt="Kostüm Önizleme" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.opacity='0.2';">
+                        </div>
+                    </div>
                 </div>
             ` : ''}
 
@@ -3057,10 +3064,10 @@ EditManager.TrophiesView = {
             if (tur === 'lol') {
                 const champSelect = formWrap.querySelector('.mt-lol-champ-select');
                 const roleSelect = formWrap.querySelector('.mt-lol-role-select');
-                const skinInput = formWrap.querySelector('.mt-lol-skin-input');
+                const skinSelect = formWrap.querySelector('.mt-lol-skin-select');
                 if (champSelect) extraSnap.sampiyon = champSelect.value;
                 if (roleSelect) extraSnap.rol = roleSelect.value;
-                if (skinInput) extraSnap.kostumNo = parseInt(skinInput.value, 10) || 0;
+                if (skinSelect) extraSnap.kostumNo = parseInt(skinSelect.value, 10) || 0;
             }
 
             await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, canli, mevcutKuyruk, secilenBolge, extraSnap);
@@ -3070,6 +3077,79 @@ EditManager.TrophiesView = {
         formWrap.querySelector('.mt-form-save').onclick = kaydetAction;
 
         body.prepend(formWrap);
+
+        // LoL Şampiyon & Kostüm Dinamik Seçici Entegrasyonu
+        if (tur === 'lol') {
+            const champSelect = formWrap.querySelector('.mt-lol-champ-select');
+            const roleSelect = formWrap.querySelector('.mt-lol-role-select');
+            const skinSelect = formWrap.querySelector('.mt-lol-skin-select');
+            const previewImg = formWrap.querySelector('.mt-lol-skin-preview-img');
+
+            const updatePreview = (champId, num) => {
+                if (!previewImg) return;
+                previewImg.style.opacity = '1';
+                previewImg.src = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${encodeURIComponent(champId)}_${num}.jpg`;
+            };
+
+            const loadSkinsForChampion = async (champId, targetNum = 0) => {
+                if (!skinSelect) return;
+                skinSelect.disabled = true;
+                skinSelect.innerHTML = `<option value="${targetNum}">Kostümler yükleniyor...</option>`;
+                try {
+                    const skins = await TrophiesManager.getLoLSkins(champId);
+                    if (!skinSelect.isConnected) return;
+                    skinSelect.innerHTML = skins.map(s => {
+                        const isSel = Number(s.num) === Number(targetNum);
+                        const safeName = typeof RenderEngine !== 'undefined' ? RenderEngine.escapeHtml(s.name) : s.name;
+                        return `<option value="${s.num}" ${isSel ? 'selected' : ''}>${safeName}</option>`;
+                    }).join('');
+                    skinSelect.disabled = false;
+                    updatePreview(champId, skinSelect.value);
+                } catch (err) {
+                    if (skinSelect.isConnected) {
+                        skinSelect.disabled = false;
+                        skinSelect.innerHTML = `<option value="0">Klasik Kostüm</option>`;
+                        updatePreview(champId, 0);
+                    }
+                }
+            };
+
+            const initialChamp = champSelect ? champSelect.value : (mevcutSnap.sampiyon || 'Morgana');
+            const initialKostum = Number(mevcutSnap.kostumNo || 0);
+
+            // 1. DataDragon'dan tüm şampiyonları çekip dropdown'ı zenginleştir
+            TrophiesManager.getLoLChampions().then(allChamps => {
+                if (!champSelect || !formWrap.isConnected) return;
+                const currentVal = champSelect.value;
+                champSelect.innerHTML = allChamps.map(c => `
+                    <option value="${c.id}" ${c.id === currentVal ? 'selected' : ''}>${c.name}</option>
+                `).join('');
+            }).catch(() => {});
+
+            // 2. Seçili şampiyonun kostümlerini çek
+            loadSkinsForChampion(initialChamp, initialKostum);
+
+            // 3. Şampiyon değiştiğinde kostümleri ve varsayılan rolü güncelle
+            if (champSelect) {
+                champSelect.addEventListener('change', () => {
+                    const selectedId = champSelect.value;
+                    loadSkinsForChampion(selectedId, 0);
+                    const foundChamp = (TrophiesManager._championListCache || TrophiesManager.LOL_CHAMPIONS || []).find(c => c.id === selectedId);
+                    if (foundChamp && foundChamp.defaultRole && roleSelect) {
+                        roleSelect.value = foundChamp.defaultRole;
+                    }
+                });
+            }
+
+            // 4. Kostüm değiştiğinde görseli güncelle
+            if (skinSelect) {
+                skinSelect.addEventListener('change', () => {
+                    const currentChamp = champSelect ? champSelect.value : initialChamp;
+                    updatePreview(currentChamp, skinSelect.value);
+                });
+            }
+        }
+
         const inp = formWrap.querySelector('.mt-user-input');
         if (inp) {
             inp.focus();

@@ -84,6 +84,10 @@ const TrophiesManager = {
         return `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
     },
 
+    _ddragonVersion: null,
+    _championListCache: null,
+    _championSkinsCache: {},
+
     /**
      * League of Legends popüler şampiyon listesi (DDragon anahtarları)
      */
@@ -109,6 +113,102 @@ const TrophiesManager = {
         { id: 'Yone', name: 'Yone', defaultRole: 'mid' },
         { id: 'Zed', name: 'Zed', defaultRole: 'mid' }
     ],
+
+    /**
+     * DataDragon en güncel sürüm numarasını döner
+     */
+    async getDDragonVersion() {
+        if (this._ddragonVersion) return this._ddragonVersion;
+        try {
+            const res = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
+            if (res.ok) {
+                const versions = await res.json();
+                if (Array.isArray(versions) && versions[0]) {
+                    this._ddragonVersion = versions[0];
+                    return this._ddragonVersion;
+                }
+            }
+        } catch (e) {
+            console.warn('[TrophiesManager] DDragon version fetch failed, using fallback:', e);
+        }
+        this._ddragonVersion = '14.23.1';
+        return this._ddragonVersion;
+    },
+
+    /**
+     * DataDragon üzerinden tüm şampiyonları çeker ve Türkçe alfabetik sıralı döner
+     */
+    async getLoLChampions() {
+        if (this._championListCache && this._championListCache.length > 0) {
+            return this._championListCache;
+        }
+        try {
+            const version = await this.getDDragonVersion();
+            const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/${version}/data/tr_TR/champion.json`);
+            if (res.ok) {
+                const d = await res.json();
+                if (d && d.data) {
+                    const list = Object.values(d.data).map(c => {
+                        const tags = c.tags || [];
+                        let defaultRole = 'mid';
+                        if (tags.includes('Support')) defaultRole = 'support';
+                        else if (tags.includes('Marksman')) defaultRole = 'adc';
+                        else if (tags.includes('Tank') || tags.includes('Fighter')) defaultRole = 'top';
+                        else if (tags.includes('Assassin')) defaultRole = 'mid';
+                        return {
+                            id: c.id,
+                            name: c.name || c.id,
+                            defaultRole
+                        };
+                    }).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+
+                    this._championListCache = list;
+                    // formatChampionName hızlı erişimi için LOL_CHAMPIONS'a ekle
+                    list.forEach(c => {
+                        if (!this.LOL_CHAMPIONS.some(x => x.id === c.id)) {
+                            this.LOL_CHAMPIONS.push(c);
+                        }
+                    });
+                    return list;
+                }
+            }
+        } catch (e) {
+            console.warn('[TrophiesManager] LoL champions fetch failed, using fallback:', e);
+        }
+        return this.LOL_CHAMPIONS;
+    },
+
+    /**
+     * Seçilen şampiyonun kostümlerini çeker ({ num: 0, name: '...' })
+     */
+    async getLoLSkins(champId) {
+        if (!champId) return [{ num: 0, name: 'Klasik (Varsayılan)' }];
+        if (this._championSkinsCache[champId]) {
+            return this._championSkinsCache[champId];
+        }
+        try {
+            const version = await this.getDDragonVersion();
+            const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/${version}/data/tr_TR/champion/${encodeURIComponent(champId)}.json`);
+            if (res.ok) {
+                const d = await res.json();
+                const champData = d && d.data && (d.data[champId] || Object.values(d.data)[0]);
+                if (champData && Array.isArray(champData.skins)) {
+                    const champName = champData.name || champId;
+                    const skins = champData.skins.map(s => ({
+                        num: s.num,
+                        name: (!s.name || s.name.toLowerCase() === 'default') ? `Klasik ${champName}` : s.name
+                    }));
+                    this._championSkinsCache[champId] = skins;
+                    return skins;
+                }
+            }
+        } catch (e) {
+            console.warn(`[TrophiesManager] Skin fetch failed for ${champId}:`, e);
+        }
+        const fallback = [{ num: 0, name: `Klasik ${champId}` }];
+        this._championSkinsCache[champId] = fallback;
+        return fallback;
+    },
 
     /**
      * Riot ID ("Oyuncu#TR1") metnini { name, tag, region, platform } olarak ayrıştırır.
