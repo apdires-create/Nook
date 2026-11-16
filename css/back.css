@@ -1920,7 +1920,7 @@ body.is-owner .top-item-unit:active {
     object-fit: cover;
     object-position: center 12%;
     display: block;
-    transform: scale(1.08);
+    transform: scale(1.02);
     transform-origin: center bottom;
 }
 
