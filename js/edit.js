@@ -2856,9 +2856,7 @@ EditManager.TrophiesView = {
                     <div class="mt-form-field">
                         <label class="mt-field-label">Vitrin Şampiyonu</label>
                         <select class="mt-form-input is-select mt-lol-champ-select">
-                            ${(TrophiesManager.LOL_CHAMPIONS || []).map(c => `
-                                <option value="${c.id}" ${(mevcutSnap.sampiyon || 'Morgana') === c.id ? 'selected' : ''}>${c.name}</option>
-                            `).join('')}
+                            <option value="${RenderEngine.escapeHtml(mevcutSnap.sampiyon || 'Morgana')}" selected>${RenderEngine.escapeHtml(TrophiesManager.formatChampionName(mevcutSnap.sampiyon || 'Morgana'))}</option>
                         </select>
                     </div>
                     <div class="mt-form-field">
@@ -3114,15 +3112,14 @@ EditManager.TrophiesView = {
                 }
             };
 
-            const initialChamp = champSelect ? champSelect.value : (mevcutSnap.sampiyon || 'Morgana');
+            const initialChamp = mevcutSnap.sampiyon || 'Morgana';
             const initialKostum = Number(mevcutSnap.kostumNo || 0);
 
-            // 1. DataDragon'dan tüm şampiyonları çekip dropdown'ı zenginleştir
+            // 1. DataDragon'dan tüm şampiyonları çekip dropdown'ı doldur
             TrophiesManager.getLoLChampions().then(allChamps => {
                 if (!champSelect || !formWrap.isConnected) return;
-                const currentVal = champSelect.value;
                 champSelect.innerHTML = allChamps.map(c => `
-                    <option value="${c.id}" ${c.id === currentVal ? 'selected' : ''}>${c.name}</option>
+                    <option value="${c.id}" ${c.id === initialChamp ? 'selected' : ''}>${c.name}</option>
                 `).join('');
             }).catch(() => {});
 
