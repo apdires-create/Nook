@@ -261,7 +261,17 @@ const TrophiesManager = {
             : this.VALORANT_AGENTS;
         const found = pool.find(a =>
             a.name.toLowerCase() === key || a.uuid.toLowerCase() === key
-        ) || pool[0];
+        );
+
+        if (!found) {
+            return {
+                uuid: '',
+                name: String(agentNameOrUuid || ''),
+                bustPortrait: '',
+                background: '',
+                colors: ['#ff4655', '#1f2937', '#111827', '#090c14']
+            };
+        }
 
         return {
             uuid: found.uuid,
@@ -290,11 +300,22 @@ const TrophiesManager = {
         };
 
         const snap = valItem.snap || {};
-        [snap.ajan1, snap.ajan2, snap.ajan3].filter(Boolean).forEach(a => {
-            const art = this.getValorantAgentData(a);
-            preloadUrl(art.bustPortrait);
-            preloadUrl(art.background);
-        });
+        const selectedAgents = [snap.ajan1, snap.ajan2, snap.ajan3].filter(Boolean);
+
+        const doPreload = () => {
+            selectedAgents.forEach(a => {
+                const art = this.getValorantAgentData(a);
+                preloadUrl(art.bustPortrait);
+                preloadUrl(art.background);
+            });
+        };
+
+        if (this._valorantAgentsCache && this._valorantAgentsCache.length > 0) {
+            doPreload();
+        } else if (selectedAgents.length > 0) {
+            doPreload();
+            this.getValorantAgents().then(doPreload).catch(() => {});
+        }
 
         if (snap.aktif) {
             preloadUrl(this.getRankEmblemUrl('valorant', snap.aktif));

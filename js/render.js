@@ -654,13 +654,13 @@ const RenderEngine = {
         const playerName = handleParts[0] || norm.handle || 'Ajan';
         const playerTag = handleParts[1] ? `#${handleParts[1]}` : '';
 
-        // Ajan listesi henüz API'den çekilmediyse arka planda yükle (fallback dışı ajanlar için)
+        // Ajan listesi henüz API'den çekilmediyse arka planda yükle ve görünümü tazele
         if (!TrophiesManager._valorantAgentsCache && !window._fetchingValAgents) {
             window._fetchingValAgents = true;
             TrophiesManager.getValorantAgents().then(() => {
                 delete window._fetchingValAgents;
-                if (window._activeTrophyDetail === 'valorant' && window.aktifKartData) {
-                    this.trophiesCiz(window.aktifKartData);
+                if (window._activeTrophyDetail === 'valorant' && typeof kartVerisi !== 'undefined' && kartVerisi) {
+                    this.trophiesCiz(kartVerisi);
                 }
             }).catch(() => {
                 delete window._fetchingValAgents;
@@ -691,8 +691,8 @@ const RenderEngine = {
             return `
                 <div class="trophy-val-agent-card" style="--val-c1: ${this.escapeHtml(c1)}; --val-c2: ${this.escapeHtml(c2)}; --val-c3: ${this.escapeHtml(c3)};" title="${this.escapeHtml(art.name)}">
                     <div class="trophy-val-agent-inner">
-                        <img src="${this.escapeHtml(art.background)}" alt="" class="trophy-val-agent-bg" loading="eager" decoding="async" onerror="this.style.display='none';">
-                        <img src="${this.escapeHtml(art.bustPortrait)}" alt="${this.escapeHtml(art.name)}" class="trophy-val-agent-portrait" loading="eager" decoding="async" onerror="this.style.display='none';">
+                        ${art.background ? `<img src="${this.escapeHtml(art.background)}" alt="" class="trophy-val-agent-bg" loading="eager" decoding="async" onerror="this.style.display='none';">` : ''}
+                        ${art.bustPortrait ? `<img src="${this.escapeHtml(art.bustPortrait)}" alt="${this.escapeHtml(art.name)}" class="trophy-val-agent-portrait" loading="eager" decoding="async" onerror="this.style.display='none';">` : ''}
                         <div class="trophy-val-agent-fade"></div>
                         <span class="trophy-val-agent-name">${this.escapeHtml(art.name)}</span>
                     </div>
