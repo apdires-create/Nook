@@ -541,13 +541,11 @@ const RenderEngine = {
                 <div class="trophy-lol-main-grid">
                     <!-- SOL KOLON: OYUNCU KİMLİĞİ + 3 ELO DÖRTGENİ + KAZANMA ORANI -->
                     <div class="trophy-lol-left-col">
-                        <!-- 1. Oyuncu Kimliği (Sol Panel Üzeri) -->
-                        <div class="trophy-lol-hero-header">
-                            <div class="trophy-lol-player-row">
-                                <span class="trophy-lol-player-name">${this.escapeHtml(summonerName)}</span>
-                                ${summonerTag ? `<span class="trophy-lol-player-tag">${this.escapeHtml(summonerTag)}</span>` : ''}
-                                <span class="trophy-lol-server-badge">${this.escapeHtml(region)}</span>
-                            </div>
+                        <!-- 1. Oyuncu Kapsülü (Sol Panel Üzeri, Bağımsız Cam Kart) -->
+                        <div class="trophy-lol-user-capsule">
+                            <span class="trophy-lol-player-name">${this.escapeHtml(summonerName)}</span>
+                            ${summonerTag ? `<span class="trophy-lol-player-tag">${this.escapeHtml(summonerTag)}</span>` : ''}
+                            <span class="trophy-lol-server-badge">${this.escapeHtml(region)}</span>
                         </div>
 
                         <!-- 2. Info Paneli (3 Büyük Dörtgen + Kazanma Oranı) -->
