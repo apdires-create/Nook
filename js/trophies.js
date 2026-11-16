@@ -869,15 +869,32 @@ const TrophiesManager = {
                 if (!res.ok) return null;
                 const json = await res.json();
                 if (!json?.data) return null;
+                const pb = json.data.personalBests || {};
+                const pickBest = (mode, amount) => {
+                    const item = Array.isArray(pb?.[mode]?.[amount]) ? pb[mode][amount][0] : null;
+                    if (!item || !item.wpm) return undefined;
+                    return [{ wpm: Math.round(item.wpm), acc: Math.round(item.acc || 0) }];
+                };
+                const time = {};
+                for (const k of ['15', '30', '60']) {
+                    const v = pickBest('time', k);
+                    if (v) time[k] = v;
+                }
+                const words = {};
+                for (const k of ['10', '25', '50']) {
+                    const v = pickBest('words', k);
+                    if (v) words[k] = v;
+                }
                 return {
-                    personalBests: json.data.personalBests || {},
-                    typingStats: json.data.typingStats || null,
+                    personalBests: {
+                        ...(Object.keys(time).length ? { time } : {}),
+                        ...(Object.keys(words).length ? { words } : {})
+                    },
+                    typingStats: json.data.typingStats?.completedTests !== undefined
+                        ? { completedTests: json.data.typingStats.completedTests }
+                        : null,
                     streak: json.data.streak || 0,
-                    maxStreak: json.data.maxStreak || 0,
-                    xp: json.data.xp || 0,
-                    name: json.data.name || kullanici,
-                    addedAt: json.data.addedAt || null,
-                    ...(json.data.personalBests || {})
+                    maxStreak: json.data.maxStreak || 0
                 };
             },
             map(d, kullanici) {
