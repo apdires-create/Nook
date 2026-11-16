@@ -408,7 +408,7 @@ const RenderEngine = {
                 if (detailFooter) {
                     const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
                     const isLol = activeTur === 'lol';
-                    const footerLabel = isLol ? 'OP.GG Profilini İncele' : norm.handle;
+                    const footerLabel = isLol ? 'OP.GG' : norm.handle;
                     detailFooter.innerHTML = `
                         <a href="${this.safeUrl(norm.profileUrl)}" target="_blank" rel="noopener noreferrer" class="companion-footer-link" title="${this.escapeHtml(norm.baslik)} Profilini Gör">
                             <span class="companion-link-favicon-wrap">
@@ -537,7 +537,7 @@ const RenderEngine = {
 
         return `
             <div class="trophy-root-card trophy-lol-card" data-trophy-tur="lol" data-username="${this.escapeHtml(norm.kullanici)}">
-                <!-- 1. OYUNCU KİMLİĞİ (HERO BANNER ETEĞİNDE) -->
+                <!-- 1. OYUNCU KİMLİĞİ (HERO BANNER ETEĞİNDE, FERAH MESAFELİ) -->
                 <div class="trophy-lol-hero-header">
                     <div class="trophy-lol-player-row">
                         <span class="trophy-lol-player-name">${this.escapeHtml(summonerName)}</span>
@@ -548,78 +548,66 @@ const RenderEngine = {
 
                 <!-- 2. ANA İKİ SÜTUNLU GRİD -->
                 <div class="trophy-lol-main-grid">
-                    <!-- SOL PANEL: PEAK + SOLO + FLEX + 2'Lİ MİKRO STAT GRİD -->
+                    <!-- SOL PANEL: 3 BÜYÜK DÖRTGEN ELO KARTI + FERAH KAZANMA ORANI KARTI -->
                     <div class="trophy-lol-info-panel">
-                        <!-- Peak Lider Kartı -->
-                        <div class="trophy-lol-peak-card">
-                            <div class="trophy-lol-peak-badge-tag">
+                        <!-- 1. Dörtgen: Peak Lider Kartı -->
+                        <div class="trophy-lol-elo-card is-peak">
+                            <div class="trophy-lol-elo-card-header">
+                                <span class="trophy-lol-elo-badge">PEAK</span>
+                            </div>
+                            <div class="trophy-lol-elo-card-body">
                                 ${peakEmblem ? `
                                     <img src="${this.escapeHtml(peakEmblem)}" alt="${this.escapeHtml(peak)}" class="trophy-lol-rank-emblem" loading="lazy"
                                          onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
                                     <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
                                 ` : fallbackShield}
-                                <span>PEAK</span>
+                                <span class="trophy-lol-elo-tier-text">${this.escapeHtml(peak)}</span>
                             </div>
-                            <span class="trophy-lol-peak-val">${this.escapeHtml(peak)}</span>
                         </div>
 
-                        <!-- Solo/Duo Satırı -->
-                        <div class="trophy-lol-queue-row-box">
-                            <span class="trophy-lol-q-label">SOLO / DUO</span>
-                            <div class="trophy-lol-q-tier-wrap">
+                        <!-- 2. Dörtgen: Solo/Duo Kartı -->
+                        <div class="trophy-lol-elo-card">
+                            <div class="trophy-lol-elo-card-header">
+                                <span class="trophy-lol-elo-badge">SOLO / DUO</span>
+                            </div>
+                            <div class="trophy-lol-elo-card-body">
                                 ${soloEmblem ? `
                                     <img src="${this.escapeHtml(soloEmblem)}" alt="${this.escapeHtml(soloTier)}" class="trophy-lol-rank-emblem" loading="lazy"
                                          onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
                                     <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
                                 ` : fallbackShield}
-                                <span class="trophy-lol-q-tier-text">${this.escapeHtml(soloTier)}</span>
+                                <span class="trophy-lol-elo-tier-text">${this.escapeHtml(soloTier)}</span>
                             </div>
                         </div>
 
-                        <!-- Flex 5v5 Satırı -->
-                        <div class="trophy-lol-queue-row-box">
-                            <span class="trophy-lol-q-label">FLEX 5V5</span>
-                            <div class="trophy-lol-q-tier-wrap">
+                        <!-- 3. Dörtgen: Flex 5v5 Kartı -->
+                        <div class="trophy-lol-elo-card">
+                            <div class="trophy-lol-elo-card-header">
+                                <span class="trophy-lol-elo-badge">FLEX 5V5</span>
+                            </div>
+                            <div class="trophy-lol-elo-card-body">
                                 ${flexEmblem ? `
                                     <img src="${this.escapeHtml(flexEmblem)}" alt="${this.escapeHtml(flexTier)}" class="trophy-lol-rank-emblem" loading="lazy"
                                          onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
                                     <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
                                 ` : fallbackShield}
-                                <span class="trophy-lol-q-tier-text">${this.escapeHtml(flexTier)}</span>
+                                <span class="trophy-lol-elo-tier-text">${this.escapeHtml(flexTier)}</span>
                             </div>
                         </div>
 
-                        <!-- 2 Sütunlu Mikro İstatistikler: Rol & Win Rate -->
-                        <div class="trophy-lol-stats-subgrid">
-                            <div class="trophy-lol-stat-subcard">
-                                <span class="trophy-lol-subcard-icon">
-                                    ${norm.rolIconSvg || `
-                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#20c997" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="18" y1="20" x2="18" y2="10"></line>
-                                            <line x1="12" y1="20" x2="12" y2="4"></line>
-                                            <line x1="6" y1="20" x2="6" y2="14"></line>
-                                        </svg>
-                                    `}
-                                </span>
-                                <div class="trophy-lol-subcard-texts">
-                                    <span class="trophy-lol-subcard-lbl">ROL</span>
-                                    <span class="trophy-lol-subcard-val">${this.escapeHtml(norm.rolEtiket || 'Support')}</span>
-                                </div>
-                            </div>
-
-                            <div class="trophy-lol-stat-subcard">
-                                <span class="trophy-lol-subcard-icon">
-                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#38d9a9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- 4. Alt Taban: Ferah Kazanma Oranı Kartı -->
+                        <div class="trophy-lol-wr-card">
+                            <div class="trophy-lol-wr-left">
+                                <span class="trophy-lol-wr-icon">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#38d9a9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                         <line x1="18" y1="20" x2="18" y2="10"></line>
                                         <line x1="12" y1="20" x2="12" y2="4"></line>
                                         <line x1="6" y1="20" x2="6" y2="14"></line>
                                     </svg>
                                 </span>
-                                <div class="trophy-lol-subcard-texts">
-                                    <span class="trophy-lol-subcard-lbl">KAZANMA</span>
-                                    <span class="trophy-lol-subcard-val val-wr">%${this.escapeHtml(winrate)}</span>
-                                </div>
+                                <span class="trophy-lol-wr-label">Kazanma Oranı</span>
                             </div>
+                            <span class="trophy-lol-wr-val val-wr">%${this.escapeHtml(winrate)}</span>
                         </div>
                     </div>
 

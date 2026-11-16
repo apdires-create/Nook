@@ -1663,8 +1663,15 @@ body.is-owner .top-item-unit:active {
 
 #trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-title {
     color: #f1f3f5;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95), 0 0 24px rgba(0, 0, 0, 0.85);
     font-weight: 800;
+}
+
+#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-back-btn,
+#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-action-btn,
+#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-edit-toggle-btn,
+#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-close-btn {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
 }
 
 /* Gövde - Dikey Esneme & Sıfır Boşluk */
@@ -1686,19 +1693,20 @@ body.is-owner .top-item-unit:active {
     gap: clamp(8px, 1.8cqh, 14px);
 }
 
-/* 2. Banner Eteğindeki Prestijli Oyuncu Kimlik Alanı (Hero) */
+/* 2. Banner Eteğindeki Prestijli Oyuncu Kimlik Alanı (Hero - Ferah Mesafeli & Güçlü Gölgeli) */
 .trophy-lol-hero-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: clamp(2px, 0.5cqh, 6px) 2px clamp(6px, 1.2cqh, 10px);
+    padding: clamp(6px, 1.4cqh, 12px) 2px clamp(8px, 1.8cqh, 14px);
+    margin-top: clamp(2px, 0.8cqh, 6px);
     flex-shrink: 0;
 }
 
 .trophy-lol-player-row {
     display: flex;
     align-items: baseline;
-    gap: 6px;
+    gap: 7px;
     flex-wrap: wrap;
 }
 
@@ -1707,29 +1715,30 @@ body.is-owner .top-item-unit:active {
     font-weight: 850;
     color: #ffffff;
     letter-spacing: 0.3px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.98), 0 0 25px rgba(0, 0, 0, 0.9);
     line-height: 1.1;
 }
 
 .trophy-lol-player-tag {
     font-size: clamp(12px, 2.6cqw, 14px);
-    font-weight: 700;
-    color: rgba(229, 192, 123, 0.85);
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+    font-weight: 750;
+    color: rgba(229, 192, 123, 0.9);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
 }
 
 .trophy-lol-server-badge {
     font-size: 10px;
     font-weight: 800;
     color: #f59e0b;
-    background: rgba(212, 175, 55, 0.16);
-    border: 1px solid rgba(212, 175, 55, 0.4);
+    background: rgba(10, 13, 20, 0.65);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(212, 175, 55, 0.45);
     border-radius: 5px;
-    padding: 1.5px 6px;
+    padding: 2px 6px;
     line-height: 1.1;
     letter-spacing: 0.5px;
     margin-left: 2px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
 /* 3. Ana İki Sütunlu Grid */
@@ -1759,78 +1768,65 @@ body.is-owner .top-item-unit:active {
     height: 100%;
 }
 
-/* 1. Peak Lider Kartı */
-.trophy-lol-peak-card {
+/* 3 Büyük Dörtgen Elo Kartı (Peak, Solo/Duo, Flex 5v5) */
+.trophy-lol-elo-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    padding: clamp(7px, 1.4cqh, 11px) clamp(10px, 2.2cqw, 14px);
+    gap: clamp(4px, 0.8cqh, 6px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.trophy-lol-elo-card.is-peak {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.18) 0%, rgba(180, 130, 30, 0.06) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.45);
+    box-shadow: 0 3px 12px rgba(212, 175, 55, 0.15), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.trophy-lol-elo-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: clamp(6px, 1.3cqh, 8.5px) clamp(8px, 1.8cqw, 10px);
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(180, 130, 30, 0.08) 100%);
-    border: 1px solid rgba(212, 175, 55, 0.48);
-    border-radius: 9px;
-    box-shadow: 0 2px 10px rgba(212, 175, 55, 0.16);
 }
 
-.trophy-lol-peak-badge-tag {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: clamp(10px, 2.2cqw, 11.5px);
+.trophy-lol-elo-badge {
+    font-size: clamp(8.5px, 2cqw, 10px);
     font-weight: 800;
-    color: #fbbf24;
+    color: #d4af37;
     letter-spacing: 0.6px;
     text-transform: uppercase;
 }
 
-.trophy-lol-peak-val {
-    font-size: clamp(11.5px, 2.5cqw, 13px);
-    font-weight: 850;
-    color: #ffffff;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-    white-space: nowrap;
+.trophy-lol-elo-card.is-peak .trophy-lol-elo-badge {
+    color: #fbbf24;
 }
 
-/* 2. & 3. Solo/Duo ve Flex 5v5 Satırları */
-.trophy-lol-queue-row-box {
+.trophy-lol-elo-card-body {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 8px;
-    padding: clamp(6px, 1.2cqh, 8px) clamp(8px, 1.8cqw, 10px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    gap: 8px;
 }
 
-.trophy-lol-q-label {
-    font-size: clamp(8.5px, 2cqw, 10.5px);
-    font-weight: 750;
-    color: #d4af37;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-
-.trophy-lol-q-tier-wrap {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-}
-
-.trophy-lol-q-tier-text {
-    font-size: clamp(10.5px, 2.3cqw, 12px);
-    font-weight: 750;
-    color: var(--text-primary);
-    white-space: nowrap;
-}
-
-.trophy-lol-rank-emblem {
-    width: 17px;
-    height: 17px;
+.trophy-lol-elo-card .trophy-lol-rank-emblem {
+    width: clamp(20px, 4.4cqw, 24px);
+    height: clamp(20px, 4.4cqw, 24px);
     object-fit: contain;
     flex-shrink: 0;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+}
+
+.trophy-lol-elo-tier-text {
+    font-size: clamp(12px, 2.6cqw, 14px);
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 .trophy-fallback-box,
@@ -1841,25 +1837,25 @@ body.is-owner .top-item-unit:active {
     flex-shrink: 0;
 }
 
-/* 4. Yan Yana 2 Sütunlu İstatistikler (Rol & Win Rate) */
-.trophy-lol-stats-subgrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-}
-
-.trophy-lol-stat-subcard {
-    background: rgba(255, 255, 255, 0.035);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    padding: clamp(5px, 1cqh, 7px) clamp(6px, 1.4cqw, 8px);
+/* 4. Alt Taban: Ferah Kazanma Oranı Kartı */
+.trophy-lol-wr-card {
     display: flex;
     align-items: center;
-    gap: 6px;
-    min-width: 0;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 9px;
+    padding: clamp(6px, 1.2cqh, 9px) clamp(10px, 2.2cqw, 14px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.trophy-lol-subcard-icon {
+.trophy-lol-wr-left {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.trophy-lol-wr-icon {
     width: 15px;
     height: 15px;
     display: inline-flex;
@@ -1868,33 +1864,20 @@ body.is-owner .top-item-unit:active {
     flex-shrink: 0;
 }
 
-.trophy-lol-subcard-texts {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    line-height: 1.15;
-}
-
-.trophy-lol-subcard-lbl {
-    font-size: 8px;
-    font-weight: 750;
-    color: var(--text-tertiary);
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-}
-
-.trophy-lol-subcard-val {
-    font-size: clamp(10.5px, 2.3cqw, 12px);
-    font-weight: 800;
-    color: #f1f3f5;
+.trophy-lol-wr-label {
+    font-size: clamp(10px, 2.2cqw, 11.5px);
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.3px;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
-.trophy-lol-subcard-val.val-wr {
-    font-family: var(--font-mono);
+.trophy-lol-wr-val {
+    font-size: clamp(11.5px, 2.5cqw, 13px);
+    font-weight: 850;
     color: #38d9a9;
+    font-family: var(--font-mono);
+    white-space: nowrap;
 }
 
 /* 4. Sağ Panel: Dikey Şampiyon Kartı (Loading Art) - Heybetli & Orantılı */
