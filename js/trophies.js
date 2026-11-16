@@ -40,8 +40,8 @@ const TrophiesManager = {
 
         if (!tierKey) return '';
 
-        // Doğrudan CDN bağlantısı (küçük harf PNG)
-        return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/emblem-${tierKey}.png`;
+        // Doğrudan CDN bağlantısı (boşluksuz vektörel mini crest SVG)
+        return `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/${tierKey}.svg`;
     },
 
     /**

@@ -1826,8 +1826,8 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-lol-elo-center .trophy-lol-rank-emblem {
-    width: clamp(28px, 6cqw, 36px);
-    height: clamp(28px, 6cqw, 36px);
+    width: clamp(36px, 8cqh, 64px);
+    height: clamp(36px, 8cqh, 64px);
     object-fit: contain;
     filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.75));
     transition: transform 0.2s ease;
