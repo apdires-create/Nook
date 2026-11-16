@@ -300,6 +300,45 @@ const TrophiesManager = {
         if (snap.aktif) {
             preloadUrl(this.getRankEmblemUrl('valorant', snap.aktif));
         }
+        if (snap.peak) {
+            preloadUrl(this.getRankEmblemUrl('valorant', snap.peak));
+        }
+    },
+
+    /**
+     * HenrikDev v3 matches üzerinden oyuncunun son maçlardaki en çok oynadığı 3 ajanı çeker
+     */
+    async fetchValorantTopAgents(kullanici, bolge = '') {
+        const parsed = this.parseRiotId(kullanici, bolge);
+        if (!parsed.name || !parsed.tag) return [];
+        try {
+            const url = `https://api.henrikdev.xyz/valorant/v3/matches/${parsed.valRegion}/${encodeURIComponent(parsed.name)}/${encodeURIComponent(parsed.tag)}?size=10`;
+            const json = await this.fetchJsonWithCorsFallback(url, 6000);
+            const matches = Array.isArray(json?.data) ? json.data : [];
+            if (!matches.length) return [];
+
+            const counts = {};
+            const targetName = parsed.name.toLowerCase();
+            const targetTag = parsed.tag.toLowerCase();
+
+            matches.forEach(m => {
+                const players = m?.players?.all_players || [];
+                const me = players.find(p =>
+                    String(p?.name || '').toLowerCase() === targetName &&
+                    String(p?.tag || '').toLowerCase() === targetTag
+                );
+                if (me?.character) {
+                    counts[me.character] = (counts[me.character] || 0) + 1;
+                }
+            });
+
+            return Object.entries(counts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(([name]) => name);
+        } catch {
+            return [];
+        }
     },
 
     /**
@@ -1135,8 +1174,15 @@ const TrophiesManager = {
                 const parsed = TrophiesManager.parseRiotId(kullanici);
                 if (!parsed.name || !parsed.tag) return null;
                 const url = `https://api.henrikdev.xyz/valorant/v2/mmr/${parsed.valRegion}/${encodeURIComponent(parsed.name)}/${encodeURIComponent(parsed.tag)}`;
-                const json = await TrophiesManager.fetchJsonWithCorsFallback(url);
-                return json?.data || null;
+                const [mmrRes, topAgentsRes] = await Promise.allSettled([
+                    TrophiesManager.fetchJsonWithCorsFallback(url),
+                    TrophiesManager.fetchValorantTopAgents(kullanici)
+                ]);
+                const data = mmrRes.status === 'fulfilled' ? (mmrRes.value?.data || null) : null;
+                if (!data) return null;
+                const topAgents = topAgentsRes.status === 'fulfilled' ? topAgentsRes.value : [];
+                if (topAgents.length > 0) data.topAgents = topAgents;
+                return data;
             },
             map(d, kullanici) {
                 const parsed = TrophiesManager.parseRiotId(kullanici);
@@ -1148,6 +1194,7 @@ const TrophiesManager = {
                 const lastChange = d?.current_data?.mmr_change_to_last_game;
                 const peakTier = d?.peakRank || d?.highest_rank?.patched_tier || curTier || null;
                 const peakSeason = d?.peakSeason || (d?.highest_rank?.season ? d.highest_rank.season.toUpperCase() : null);
+                const topAgents = Array.isArray(d?.topAgents) ? d.topAgents : [];
 
                 const tierWithRr = curTier ? (rr !== undefined && rr !== null ? `${curTier} (${rr} RR)` : curTier) : 'Riot ID Bağlı';
 
@@ -1158,9 +1205,9 @@ const TrophiesManager = {
                     rr: (rr !== undefined && rr !== null) ? rr : null,
                     winrate: d?.winrate || null,
                     agents: [
-                        d?.ajan1 || 'Jett',
-                        d?.ajan2 || 'Reyna',
-                        d?.ajan3 || 'Omen'
+                        d?.ajan1 || topAgents[0] || 'Jett',
+                        d?.ajan2 || topAgents[1] || 'Reyna',
+                        d?.ajan3 || topAgents[2] || 'Omen'
                     ],
                     heroLabel: 'GÜNCEL KADEME (RANK)',
                     heroValue: curTier || 'Riot ID Bağlı',

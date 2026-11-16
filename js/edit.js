@@ -2995,6 +2995,21 @@ EditManager.TrophiesView = {
                         statusEl.textContent = `✓ Doğrulandı: Aktif ${norm.heroValue} • Zirve ${norm.peakValue}`;
                     }
                 }
+                if (tur === 'valorant') {
+                    const topPromise = Array.isArray(live.topAgents) && live.topAgents.length > 0
+                        ? Promise.resolve(live.topAgents)
+                        : TrophiesManager.fetchValorantTopAgents(check.clean, secilenBolge);
+                    topPromise.then(topAgents => {
+                        if (!formWrap.isConnected || !Array.isArray(topAgents) || !topAgents.length) return;
+                        ['.mt-val-agent-1', '.mt-val-agent-2', '.mt-val-agent-3'].forEach((sel, idx) => {
+                            const selectEl = formWrap.querySelector(sel);
+                            const agentName = topAgents[idx];
+                            if (!selectEl || !agentName) return;
+                            const opt = Array.from(selectEl.options).find(o => o.value.toLowerCase() === agentName.toLowerCase());
+                            if (opt) selectEl.value = opt.value;
+                        });
+                    }).catch(() => {});
+                }
                 return live;
             } else {
                 if (statusEl) {

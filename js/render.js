@@ -643,9 +643,9 @@ const RenderEngine = {
         const eloText = norm.heroValue || 'Unranked';
         const rankEmblem = TrophiesManager.getRankEmblemUrl('valorant', eloText);
         const rr = norm.rr;
-        const rightStatText = norm.winrate
-            ? `%${norm.winrate} WR`
-            : `${rr !== undefined && rr !== null ? rr : '—'} RR`;
+        const curStatText = (rr !== undefined && rr !== null) ? `${eloText} · ${rr} RR` : eloText;
+        const peakText = (norm.peakValue && !String(norm.peakValue).startsWith('#')) ? norm.peakValue : eloText;
+        const peakEmblem = TrophiesManager.getRankEmblemUrl('valorant', peakText);
         const agents = Array.isArray(norm.agents) && norm.agents.length === 3
             ? norm.agents
             : ['Jett', 'Reyna', 'Omen'];
@@ -702,12 +702,14 @@ const RenderEngine = {
                     <div class="trophy-val-stat-pill is-elo">
                         <div class="trophy-val-stat-inner">
                             ${rankEmblem ? `<img src="${this.escapeHtml(rankEmblem)}" alt="${this.escapeHtml(eloText)}" class="trophy-val-rank-emblem" loading="eager" decoding="async" onerror="this.style.display='none';">` : ''}
-                            <span class="trophy-val-stat-text">${this.escapeHtml(eloText)}</span>
+                            <span class="trophy-val-stat-text">${this.escapeHtml(curStatText)}</span>
                         </div>
                     </div>
-                    <div class="trophy-val-stat-pill is-rr">
+                    <div class="trophy-val-stat-pill is-peak">
                         <div class="trophy-val-stat-inner">
-                            <span class="trophy-val-stat-text">${this.escapeHtml(rightStatText)}</span>
+                            <span class="trophy-val-peak-tag">PEAK</span>
+                            ${peakEmblem ? `<img src="${this.escapeHtml(peakEmblem)}" alt="${this.escapeHtml(peakText)}" class="trophy-val-rank-emblem" loading="eager" decoding="async" onerror="this.style.display='none';">` : ''}
+                            <span class="trophy-val-stat-text">${this.escapeHtml(peakText)}</span>
                         </div>
                     </div>
                 </div>
