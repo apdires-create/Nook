@@ -1693,25 +1693,32 @@ body.is-owner .top-item-unit:active {
     gap: clamp(8px, 1.8cqh, 14px);
 }
 
-/* 2. Banner Eteğindeki Prestijli Oyuncu Kimlik Alanı (Hero - Ferah Mesafeli & Güçlü Gölgeli) */
+/* 2. Sol Kolon & Oyuncu Kimlik Alanı (Panelle Hizalı) */
+.trophy-lol-left-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    min-height: 0;
+    gap: clamp(6px, 1.2cqh, 9px);
+}
+
 .trophy-lol-hero-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: clamp(6px, 1.4cqh, 12px) 2px clamp(8px, 1.8cqh, 14px);
-    margin-top: clamp(2px, 0.8cqh, 6px);
+    padding: 0 2px clamp(2px, 0.4cqh, 4px) 2px;
     flex-shrink: 0;
 }
 
 .trophy-lol-player-row {
     display: flex;
     align-items: baseline;
-    gap: 7px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
 .trophy-lol-player-name {
-    font-size: clamp(16px, 3.8cqw, 21px);
+    font-size: clamp(15px, 3.5cqw, 19px);
     font-weight: 850;
     color: #ffffff;
     letter-spacing: 0.3px;
@@ -1720,21 +1727,21 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-lol-player-tag {
-    font-size: clamp(12px, 2.6cqw, 14px);
+    font-size: clamp(11.5px, 2.4cqw, 13px);
     font-weight: 750;
     color: rgba(229, 192, 123, 0.9);
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
 }
 
 .trophy-lol-server-badge {
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 800;
     color: #f59e0b;
-    background: rgba(10, 13, 20, 0.65);
+    background: rgba(10, 13, 20, 0.7);
     backdrop-filter: blur(4px);
     border: 1px solid rgba(212, 175, 55, 0.45);
     border-radius: 5px;
-    padding: 2px 6px;
+    padding: 1.5px 5.5px;
     line-height: 1.1;
     letter-spacing: 0.5px;
     margin-left: 2px;
@@ -1751,82 +1758,90 @@ body.is-owner .top-item-unit:active {
     min-height: 0;
 }
 
-/* Sol Info Paneli */
+/* Sol Info Paneli (Dikeyde Daha Kompakt / Daraltılmış) */
 .trophy-lol-info-panel {
     background: rgba(14, 18, 28, 0.82);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(212, 175, 55, 0.22);
     border-radius: 12px;
-    padding: clamp(7px, 1.4cqh, 11px) clamp(8px, 1.8cqw, 11px);
+    padding: clamp(6px, 1.2cqh, 8px) clamp(7px, 1.6cqw, 9px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: clamp(6px, 1.2cqh, 8px);
+    gap: clamp(5px, 1cqh, 7px);
     box-sizing: border-box;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
-    height: 100%;
+    flex: 1;
+    min-height: 0;
 }
 
-/* 3 Büyük Dörtgen Elo Kartı (Peak, Solo/Duo, Flex 5v5) */
+/* 3 Büyük Dörtgen Elo Kartı (Üstte Başlık, Ortada Büyük Amblem, Altta Kademe) */
 .trophy-lol-elo-card {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    align-items: center;
+    justify-content: space-between;
     background: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 10px;
-    padding: clamp(7px, 1.4cqh, 11px) clamp(10px, 2.2cqw, 14px);
-    gap: clamp(4px, 0.8cqh, 6px);
+    border-radius: 9px;
+    padding: clamp(5px, 1cqh, 7px) clamp(8px, 1.8cqw, 12px);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    text-align: center;
+    position: relative;
+    flex: 1;
+    min-height: 0;
 }
 
 .trophy-lol-elo-card.is-peak {
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.18) 0%, rgba(180, 130, 30, 0.06) 100%);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.16) 0%, rgba(180, 130, 30, 0.05) 100%);
     border: 1px solid rgba(212, 175, 55, 0.45);
     box-shadow: 0 3px 12px rgba(212, 175, 55, 0.15), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.trophy-lol-elo-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
 .trophy-lol-elo-badge {
-    font-size: clamp(8.5px, 2cqw, 10px);
+    align-self: flex-start;
+    font-size: clamp(8px, 1.8cqw, 9.5px);
     font-weight: 800;
     color: #d4af37;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
+    line-height: 1;
 }
 
 .trophy-lol-elo-card.is-peak .trophy-lol-elo-badge {
     color: #fbbf24;
 }
 
-.trophy-lol-elo-card-body {
+.trophy-lol-elo-center {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    flex: 1;
+    padding: clamp(2px, 0.4cqh, 4px) 0;
 }
 
-.trophy-lol-elo-card .trophy-lol-rank-emblem {
-    width: clamp(20px, 4.4cqw, 24px);
-    height: clamp(20px, 4.4cqw, 24px);
+.trophy-lol-elo-center .trophy-lol-rank-emblem {
+    width: clamp(28px, 6cqw, 36px);
+    height: clamp(28px, 6cqw, 36px);
     object-fit: contain;
-    flex-shrink: 0;
-    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+    filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.75));
+    transition: transform 0.2s ease;
+}
+
+.trophy-lol-elo-card:hover .trophy-lol-rank-emblem {
+    transform: scale(1.08);
 }
 
 .trophy-lol-elo-tier-text {
-    font-size: clamp(12px, 2.6cqw, 14px);
-    font-weight: 800;
+    font-size: clamp(11px, 2.3cqw, 12.5px);
+    font-weight: 850;
     color: #ffffff;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.3px;
+    text-align: center;
     white-space: nowrap;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    line-height: 1.1;
 }
 
 .trophy-fallback-box,
@@ -1844,20 +1859,21 @@ body.is-owner .top-item-unit:active {
     justify-content: space-between;
     background: rgba(255, 255, 255, 0.035);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 9px;
-    padding: clamp(6px, 1.2cqh, 9px) clamp(10px, 2.2cqw, 14px);
+    border-radius: 8px;
+    padding: clamp(5px, 0.9cqh, 7px) clamp(8px, 1.8cqw, 11px);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
 }
 
 .trophy-lol-wr-left {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 6px;
 }
 
 .trophy-lol-wr-icon {
-    width: 15px;
-    height: 15px;
+    width: 14px;
+    height: 14px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1865,7 +1881,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-lol-wr-label {
-    font-size: clamp(10px, 2.2cqw, 11.5px);
+    font-size: clamp(9.5px, 2.1cqw, 11px);
     font-weight: 700;
     color: var(--text-secondary);
     letter-spacing: 0.3px;
@@ -1873,7 +1889,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-lol-wr-val {
-    font-size: clamp(11.5px, 2.5cqw, 13px);
+    font-size: clamp(11px, 2.4cqw, 12.5px);
     font-weight: 850;
     color: #38d9a9;
     font-family: var(--font-mono);

@@ -537,77 +537,74 @@ const RenderEngine = {
 
         return `
             <div class="trophy-root-card trophy-lol-card" data-trophy-tur="lol" data-username="${this.escapeHtml(norm.kullanici)}">
-                <!-- 1. OYUNCU KİMLİĞİ (HERO BANNER ETEĞİNDE, FERAH MESAFELİ) -->
-                <div class="trophy-lol-hero-header">
-                    <div class="trophy-lol-player-row">
-                        <span class="trophy-lol-player-name">${this.escapeHtml(summonerName)}</span>
-                        ${summonerTag ? `<span class="trophy-lol-player-tag">${this.escapeHtml(summonerTag)}</span>` : ''}
-                        <span class="trophy-lol-server-badge">${this.escapeHtml(region)}</span>
-                    </div>
-                </div>
-
-                <!-- 2. ANA İKİ SÜTUNLU GRİD -->
+                <!-- ANA İKİ SÜTUNLU GRİD -->
                 <div class="trophy-lol-main-grid">
-                    <!-- SOL PANEL: 3 BÜYÜK DÖRTGEN ELO KARTI + FERAH KAZANMA ORANI KARTI -->
-                    <div class="trophy-lol-info-panel">
-                        <!-- 1. Dörtgen: Peak Lider Kartı -->
-                        <div class="trophy-lol-elo-card is-peak">
-                            <div class="trophy-lol-elo-card-header">
-                                <span class="trophy-lol-elo-badge">PEAK</span>
+                    <!-- SOL KOLON: OYUNCU KİMLİĞİ + 3 ELO DÖRTGENİ + KAZANMA ORANI -->
+                    <div class="trophy-lol-left-col">
+                        <!-- 1. Oyuncu Kimliği (Sol Panel Üzeri) -->
+                        <div class="trophy-lol-hero-header">
+                            <div class="trophy-lol-player-row">
+                                <span class="trophy-lol-player-name">${this.escapeHtml(summonerName)}</span>
+                                ${summonerTag ? `<span class="trophy-lol-player-tag">${this.escapeHtml(summonerTag)}</span>` : ''}
+                                <span class="trophy-lol-server-badge">${this.escapeHtml(region)}</span>
                             </div>
-                            <div class="trophy-lol-elo-card-body">
-                                ${peakEmblem ? `
-                                    <img src="${this.escapeHtml(peakEmblem)}" alt="${this.escapeHtml(peak)}" class="trophy-lol-rank-emblem" loading="lazy"
-                                         onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
-                                    <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
-                                ` : fallbackShield}
+                        </div>
+
+                        <!-- 2. Info Paneli (3 Büyük Dörtgen + Kazanma Oranı) -->
+                        <div class="trophy-lol-info-panel">
+                            <!-- 1. Dörtgen: Peak Lider Kartı -->
+                            <div class="trophy-lol-elo-card is-peak">
+                                <div class="trophy-lol-elo-badge">PEAK</div>
+                                <div class="trophy-lol-elo-center">
+                                    ${peakEmblem ? `
+                                        <img src="${this.escapeHtml(peakEmblem)}" alt="${this.escapeHtml(peak)}" class="trophy-lol-rank-emblem" loading="lazy"
+                                             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                                        <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
+                                    ` : fallbackShield}
+                                </div>
                                 <span class="trophy-lol-elo-tier-text">${this.escapeHtml(peak)}</span>
                             </div>
-                        </div>
 
-                        <!-- 2. Dörtgen: Solo/Duo Kartı -->
-                        <div class="trophy-lol-elo-card">
-                            <div class="trophy-lol-elo-card-header">
-                                <span class="trophy-lol-elo-badge">SOLO / DUO</span>
-                            </div>
-                            <div class="trophy-lol-elo-card-body">
-                                ${soloEmblem ? `
-                                    <img src="${this.escapeHtml(soloEmblem)}" alt="${this.escapeHtml(soloTier)}" class="trophy-lol-rank-emblem" loading="lazy"
-                                         onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
-                                    <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
-                                ` : fallbackShield}
+                            <!-- 2. Dörtgen: Solo/Duo Kartı -->
+                            <div class="trophy-lol-elo-card">
+                                <div class="trophy-lol-elo-badge">SOLO / DUO</div>
+                                <div class="trophy-lol-elo-center">
+                                    ${soloEmblem ? `
+                                        <img src="${this.escapeHtml(soloEmblem)}" alt="${this.escapeHtml(soloTier)}" class="trophy-lol-rank-emblem" loading="lazy"
+                                             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                                        <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
+                                    ` : fallbackShield}
+                                </div>
                                 <span class="trophy-lol-elo-tier-text">${this.escapeHtml(soloTier)}</span>
                             </div>
-                        </div>
 
-                        <!-- 3. Dörtgen: Flex 5v5 Kartı -->
-                        <div class="trophy-lol-elo-card">
-                            <div class="trophy-lol-elo-card-header">
-                                <span class="trophy-lol-elo-badge">FLEX 5V5</span>
-                            </div>
-                            <div class="trophy-lol-elo-card-body">
-                                ${flexEmblem ? `
-                                    <img src="${this.escapeHtml(flexEmblem)}" alt="${this.escapeHtml(flexTier)}" class="trophy-lol-rank-emblem" loading="lazy"
-                                         onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
-                                    <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
-                                ` : fallbackShield}
+                            <!-- 3. Dörtgen: Flex 5v5 Kartı -->
+                            <div class="trophy-lol-elo-card">
+                                <div class="trophy-lol-elo-badge">FLEX 5V5</div>
+                                <div class="trophy-lol-elo-center">
+                                    ${flexEmblem ? `
+                                        <img src="${this.escapeHtml(flexEmblem)}" alt="${this.escapeHtml(flexTier)}" class="trophy-lol-rank-emblem" loading="lazy"
+                                             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline-flex';">
+                                        <span class="trophy-fallback-box" style="display:none;">${fallbackShield}</span>
+                                    ` : fallbackShield}
+                                </div>
                                 <span class="trophy-lol-elo-tier-text">${this.escapeHtml(flexTier)}</span>
                             </div>
-                        </div>
 
-                        <!-- 4. Alt Taban: Ferah Kazanma Oranı Kartı -->
-                        <div class="trophy-lol-wr-card">
-                            <div class="trophy-lol-wr-left">
-                                <span class="trophy-lol-wr-icon">
-                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#38d9a9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="20" x2="18" y2="10"></line>
-                                        <line x1="12" y1="20" x2="12" y2="4"></line>
-                                        <line x1="6" y1="20" x2="6" y2="14"></line>
-                                    </svg>
-                                </span>
-                                <span class="trophy-lol-wr-label">Kazanma Oranı</span>
+                            <!-- 4. Alt Taban: Ferah Kazanma Oranı Kartı -->
+                            <div class="trophy-lol-wr-card">
+                                <div class="trophy-lol-wr-left">
+                                    <span class="trophy-lol-wr-icon">
+                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#38d9a9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                                        </svg>
+                                    </span>
+                                    <span class="trophy-lol-wr-label">Kazanma Oranı</span>
+                                </div>
+                                <span class="trophy-lol-wr-val val-wr">%${this.escapeHtml(winrate)}</span>
                             </div>
-                            <span class="trophy-lol-wr-val val-wr">%${this.escapeHtml(winrate)}</span>
                         </div>
                     </div>
 
