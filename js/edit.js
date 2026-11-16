@@ -2793,7 +2793,7 @@ EditManager.TrophiesView = {
         } else if (mevcutKullanici && mevcutKullanici.includes('#')) {
             const parsed = TrophiesManager.parseRiotId(mevcutKullanici);
             if (parsed.displayRegion) {
-                aktifBolge = parsed.displayRegion.toLowerCase();
+                aktifBolge = parsed.displayRegion.toLowerCase().replace(/[0-9]/g, '');
             }
         }
 

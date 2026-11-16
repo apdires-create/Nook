@@ -1680,7 +1680,7 @@ body.is-owner .top-item-unit:active {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding: 0 clamp(10px, 2.5cqw, 16px) clamp(4px, 0.8cqh, 8px);
+    padding: clamp(8px, 1.8cqh, 16px) clamp(10px, 2.5cqw, 16px) clamp(4px, 0.8cqh, 8px);
     flex: 1;
 }
 
@@ -1920,11 +1920,6 @@ body.is-owner .top-item-unit:active {
     object-fit: cover;
     object-position: center 12%;
     display: block;
-    transition: transform 0.4s ease;
-}
-
-.trophy-lol-art-box:hover .trophy-lol-art-img {
-    transform: scale(1.04);
 }
 
 .trophy-lol-art-bottom-fade {
