@@ -4206,7 +4206,10 @@ EditManager.Sections = {
         if (!basarili) return;
 
         this.kapat();
-        EditManager.Global.toastGoster(`${this.META[id].baslik} alanı profiline eklendi.`, 'success');
+        const mesaj = aktifler.length === 0
+            ? `${this.META[id].baslik} eklendi! Daha sonra Hesabım > Alanları Yönet'ten yeni kartlar ekleyebilirsin.`
+            : `${this.META[id].baslik} alanı profiline eklendi.`;
+        EditManager.Global.toastGoster(mesaj, 'success');
 
         // Yeni eklenen alanı hemen aç
         if (typeof Router !== 'undefined') {

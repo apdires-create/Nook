@@ -568,6 +568,9 @@ html.is-profile-loading #landing-screen {
     .stage.has-companion-open.is-trophies-active #topsCompanionCard {
         display: none !important;
     }
+    .stage #addSectionCompanionCard {
+        display: none !important;
+    }
 }
 
 /* 2. DAR VE MOBİL EKRANLAR: YATAY DECK / SWIPE SAHNESİ */
@@ -651,6 +654,13 @@ html.is-profile-loading #landing-screen {
         pointer-events: none !important;
     }
 
+    /* Kart Ekle açıkken profil sola kayar */
+    .stage.has-companion-open.is-add-card-active .card-container {
+        transform: translate3d(calc(-100vw - 40px), 0, 0) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
     /* Showcase Kartı: Normalde sağda ekran dışında */
     .stage #topsCompanionCard {
         position: absolute;
@@ -680,6 +690,27 @@ html.is-profile-loading #landing-screen {
     }
 
     .stage.has-companion-open.is-trophies-active #trophiesCompanionCard {
+        transform: translate3d(0, 0, 0) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
+    /* Kart Ekle Kartı (Yalnızca sahip ve hiç kart yokken mobilde görünür) */
+    .stage #addSectionCompanionCard {
+        position: absolute;
+        z-index: 6;
+        transform: translate3d(calc(100vw + 40px), 0, 0);
+        opacity: 0;
+        pointer-events: none;
+        display: flex !important;
+        animation: none !important;
+    }
+
+    body:not(.is-owner) .stage #addSectionCompanionCard {
+        display: none !important;
+    }
+
+    .stage.has-companion-open.is-add-card-active #addSectionCompanionCard {
         transform: translate3d(0, 0, 0) !important;
         opacity: 1 !important;
         pointer-events: auto !important;

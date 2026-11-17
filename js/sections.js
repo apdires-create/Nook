@@ -56,10 +56,16 @@ const SectionManager = {
         return this.aktifAlanlariAl(kart).includes(normal);
     },
 
-    // Mobil swipe destesi: pasif alanlar çıkarılır, 'main' her zaman kalır
+    // Mobil swipe destesi: pasif alanlar çıkarılır, 'main' her zaman kalır.
+    // Sahibin hiç ek kartı yoksa mobilde geçici 'add-card' kartı eklenir.
     desteSirasi(kart) {
         const aktif = new Set(this.aktifAlanlariAl(kart));
-        return ['achievements', 'widgets', 'gaming', 'main', 'showcase'].filter(p => p === 'main' || aktif.has(p));
+        const sira = ['achievements', 'widgets', 'gaming', 'main', 'showcase'].filter(p => p === 'main' || aktif.has(p));
+        const isUserOwner = (typeof isOwner !== 'undefined' && isOwner);
+        if (isUserOwner && aktif.size === 0 && window.innerWidth < 900) {
+            sira.push('add-card');
+        }
+        return sira;
     },
 
     // 4 flag'in görünürlüğünü ve sahip için "+" flag'ini günceller
@@ -74,14 +80,20 @@ const SectionManager = {
         const addBtn = document.getElementById('triggerAddSectionBtn');
         if (addBtn) addBtn.hidden = !isUserOwner || aktif.length >= this.TUM_ALANLAR.length;
 
-        // Açık olan bir kanat artık pasifse kapat
+        // Açık olan bir kanat artık pasifse (veya ilk kart eklendikten sonra 'add-card' açık kaldıysa) kapat
         const stage = document.getElementById('profileStage');
         if (stage && stage.classList.contains('has-companion-open') && typeof Router !== 'undefined') {
-            const acikAlan = stage.classList.contains('is-showcase-active')
-                ? 'showcase'
-                : (window._activeLeftWingMode || 'gaming');
-            if (!aktif.includes(acikAlan)) {
-                Router.toggleCompanion(false);
+            if (stage.classList.contains('is-add-card-active')) {
+                if (!isUserOwner || aktif.length > 0) {
+                    Router.toggleCompanion(false);
+                }
+            } else {
+                const acikAlan = stage.classList.contains('is-showcase-active')
+                    ? 'showcase'
+                    : (window._activeLeftWingMode || 'gaming');
+                if (!aktif.includes(acikAlan)) {
+                    Router.toggleCompanion(false);
+                }
             }
         }
 

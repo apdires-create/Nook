@@ -62,19 +62,20 @@ const Router = {
             });
         }
 
-        // Alan Ekle (+) Flag'i: Sahip için alan yönetimi pop-up'ını açar (edit.js lazy-load edilir)
+        // Alan Ekle (+) Flag'i ve Mobil "Kart Ekle" Kartı Butonu: Sahip için alan yönetimi pop-up'ını açar
         const triggerAddSectionBtn = document.getElementById('triggerAddSectionBtn');
-        if (triggerAddSectionBtn) {
-            triggerAddSectionBtn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                if (typeof editModunuYukle === 'function') {
-                    await editModunuYukle();
-                }
-                if (typeof EditManager !== 'undefined' && EditManager.Sections) {
-                    EditManager.Sections.ac();
-                }
-            });
-        }
+        const mobileAddSectionCardBtn = document.getElementById('mobileAddSectionCardBtn');
+        const openSectionManager = async (e) => {
+            e.stopPropagation();
+            if (typeof editModunuYukle === 'function') {
+                await editModunuYukle();
+            }
+            if (typeof EditManager !== 'undefined' && EditManager.Sections) {
+                EditManager.Sections.ac();
+            }
+        };
+        if (triggerAddSectionBtn) triggerAddSectionBtn.addEventListener('click', openSectionManager);
+        if (mobileAddSectionCardBtn) mobileAddSectionCardBtn.addEventListener('click', openSectionManager);
 
         // Eşlikçi Kart Kapat Butonları
         if (companionCloseBtn) {
@@ -361,6 +362,7 @@ const Router = {
     getCurrentDeckPosition() {
         const stage = document.getElementById('profileStage');
         if (!stage || !stage.classList.contains('has-companion-open')) return 'main';
+        if (stage.classList.contains('is-add-card-active')) return 'add-card';
         if (stage.classList.contains('is-showcase-active')) return 'showcase';
         if (stage.classList.contains('is-trophies-active')) {
             return window._activeLeftWingMode || 'gaming';
@@ -371,6 +373,7 @@ const Router = {
     getActiveDeckElement() {
         const pos = this.getCurrentDeckPosition();
         if (pos === 'main') return this.cardContainer || document.getElementById('cardContainer');
+        if (pos === 'add-card') return document.getElementById('addSectionCompanionCard');
         if (pos === 'showcase') return document.getElementById('topsCompanionCard');
         return document.getElementById('trophiesCompanionCard');
     },
@@ -387,7 +390,7 @@ const Router = {
         if (stage) {
             stage.querySelectorAll('.deck-swipe-ghost-card').forEach(el => el.remove());
         }
-        ['cardContainer', 'topsCompanionCard', 'trophiesCompanionCard'].forEach((id) => {
+        ['cardContainer', 'topsCompanionCard', 'trophiesCompanionCard', 'addSectionCompanionCard'].forEach((id) => {
             const el = document.getElementById(id);
             if (el) {
                 if (id !== 'cardContainer' || window.innerWidth < 900) {
@@ -453,6 +456,7 @@ const Router = {
         const stage = document.getElementById('profileStage');
         const topsCard = document.getElementById('topsCompanionCard');
         const trophiesCard = document.getElementById('trophiesCompanionCard');
+        const addSectionCard = document.getElementById('addSectionCompanionCard');
         const cardContainer = this.cardContainer || document.getElementById('cardContainer');
         if (!stage) return;
 
@@ -471,6 +475,7 @@ const Router = {
 
         const isShowcaseOpen = stage.classList.contains('is-showcase-active');
         const isTrophiesOpen = stage.classList.contains('is-trophies-active');
+        const isAddCardOpen = stage.classList.contains('is-add-card-active');
         const normalizedType = (type === 'trophies') ? 'gaming' : type;
         const currentLeftMode = window._activeLeftWingMode || 'gaming';
 
@@ -478,7 +483,9 @@ const Router = {
         if (typeof forceState === 'boolean') {
             nextState = forceState;
         } else {
-            if (normalizedType === 'showcase' && isShowcaseOpen) {
+            if (normalizedType === 'add-card' && isAddCardOpen) {
+                nextState = false;
+            } else if (normalizedType === 'showcase' && isShowcaseOpen) {
                 nextState = false;
             } else if (['gaming', 'widgets', 'achievements'].includes(normalizedType) && isTrophiesOpen && currentLeftMode === normalizedType) {
                 nextState = false;
@@ -492,13 +499,24 @@ const Router = {
             return;
         }
 
-        // Profilde ekli olmayan (pasif) bir alan açılamaz
-        if (nextState && typeof SectionManager !== 'undefined' && !SectionManager.alanAktifMi(normalizedType)) {
+        // 'add-card' yalnızca mobilde, sahip için ve hiç ek alan yokken açılabilir
+        if (nextState && normalizedType === 'add-card') {
+            const isUserOwner = (typeof isOwner !== 'undefined' && isOwner);
+            const hasNoSections = typeof SectionManager === 'undefined' || SectionManager.aktifAlanlariAl().length === 0;
+            if (isDesktop || !isUserOwner || !hasNoSections || !addSectionCard) {
+                return;
+            }
+        } else if (nextState && typeof SectionManager !== 'undefined' && !SectionManager.alanAktifMi(normalizedType)) {
+            // Profilde ekli olmayan (pasif) bir alan açılamaz
             return;
         }
 
-        const activeCompanion = (normalizedType === 'showcase') ? topsCard : trophiesCard;
-        const otherCompanion = (normalizedType === 'showcase') ? trophiesCard : topsCard;
+        const activeCompanion = (normalizedType === 'add-card')
+            ? addSectionCard
+            : ((normalizedType === 'showcase') ? topsCard : trophiesCard);
+        const otherCompanion = isAddCardOpen
+            ? addSectionCard
+            : (isShowcaseOpen ? topsCard : (isTrophiesOpen ? trophiesCard : null));
 
         if (nextState) {
             // ==========================================
@@ -510,11 +528,11 @@ const Router = {
             const wasAnyOpen = stage.classList.contains('has-companion-open');
             const isLeftModeSwitch = wasAnyOpen && isTrophiesOpen && ['gaming', 'widgets', 'achievements'].includes(normalizedType) && currentLeftMode !== normalizedType;
             const deckOrder = this.getDeckOrder();
-            const fullDeckOrder = ['achievements', 'widgets', 'gaming', 'main', 'showcase'];
+            const fullDeckOrder = ['achievements', 'widgets', 'gaming', 'main', 'showcase', 'add-card'];
 
             let oldDeckPos = 'main';
             if (wasAnyOpen) {
-                oldDeckPos = isShowcaseOpen ? 'showcase' : currentLeftMode;
+                oldDeckPos = isAddCardOpen ? 'add-card' : (isShowcaseOpen ? 'showcase' : currentLeftMode);
             }
             const oldIdx = deckOrder.includes(oldDeckPos) ? deckOrder.indexOf(oldDeckPos) : fullDeckOrder.indexOf(oldDeckPos);
             const newIdx = deckOrder.includes(normalizedType) ? deckOrder.indexOf(normalizedType) : fullDeckOrder.indexOf(normalizedType);
@@ -533,7 +551,7 @@ const Router = {
                 mobileOutgoingClone.inert = true;
             }
 
-            if (otherCompanion) {
+            if (otherCompanion && otherCompanion !== activeCompanion) {
                 if (isDesktop) otherCompanion.style.display = 'none';
                 otherCompanion.classList.remove('is-closing');
             }
@@ -568,8 +586,11 @@ const Router = {
             }
 
             // 2. AKTİF KANAT SINIFLARINI VE İÇERİĞİNİ ÇİZ (RenderEngine kendi içinde EditManager.init() çağırır)
-            if (normalizedType === 'showcase') {
-                stage.classList.remove('is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
+            if (normalizedType === 'add-card') {
+                stage.classList.remove('is-showcase-active', 'is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
+                stage.classList.add('is-add-card-active');
+            } else if (normalizedType === 'showcase') {
+                stage.classList.remove('is-add-card-active', 'is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
                 stage.classList.add('is-showcase-active');
                 if (kartVerisi?.tops) {
                     delete kartVerisi.tops._manualMaster;
@@ -583,7 +604,7 @@ const Router = {
                 }
             } else {
                 window._activeLeftWingMode = normalizedType;
-                stage.classList.remove('is-showcase-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
+                stage.classList.remove('is-add-card-active', 'is-showcase-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
                 stage.classList.add('is-trophies-active', `is-${normalizedType}-mode`);
                 delete window._manualTrophyMaster;
                 const trophiesCompanion = document.getElementById('trophiesCompanionCard');
@@ -685,7 +706,7 @@ const Router = {
             // ==========================================
             this._companionTransitioning = true;
 
-            const currentCard = isShowcaseOpen ? topsCard : trophiesCard;
+            const currentCard = isAddCardOpen ? addSectionCard : (isShowcaseOpen ? topsCard : trophiesCard);
             if (currentCard && isDesktop) {
                 if (cardContainer) {
                     const rect = cardContainer.getBoundingClientRect();
@@ -718,13 +739,13 @@ const Router = {
                 // Mobilde ana profil kartına geri dönüş
                 stage.classList.remove('has-companion-open');
                 if (cardContainer && currentCard) {
-                    const dir = swipeDir !== 0 ? swipeDir : (isShowcaseOpen ? 1 : -1);
+                    const dir = swipeDir !== 0 ? swipeDir : ((isShowcaseOpen || isAddCardOpen) ? 1 : -1);
                     animDuration = this._animateMobileDeckTransition(currentCard, cardContainer, dir, dragOffsetX);
                 }
             }
 
             this._companionTimer = setTimeout(() => {
-                stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-showcase-active', 'is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
+                stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-add-card-active', 'is-showcase-active', 'is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
                 if (topsCard) {
                     topsCard.classList.remove('is-closing');
                     if (isDesktop) topsCard.style.display = 'none';

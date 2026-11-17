@@ -2113,5 +2113,95 @@ body:not(.is-owner) .top-add-form {
 }
 /* #endregion */
 
+/* #region 18: MOBİL "İLK KARTINI EKLE" EŞLİKÇİ KARTI */
+.add-section-companion-card {
+    justify-content: center;
+    align-items: center;
+    padding: clamp(20px, 5cqw, 32px);
+    text-align: center;
+    background: var(--card-bg);
+}
+
+.add-section-card-inner {
+    width: 100%;
+    height: 100%;
+    border: 1.5px dashed rgba(255, 255, 255, 0.16);
+    border-radius: calc(var(--card-radius) - 8px);
+    background: rgba(255, 255, 255, 0.02);
+    padding: clamp(20px, 6cqw, 34px) clamp(16px, 5cqw, 26px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 2.6cqh, 20px);
+    box-sizing: border-box;
+}
+
+.add-section-card-badge {
+    width: clamp(54px, 16cqw, 72px);
+    height: clamp(54px, 16cqw, 72px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px dashed var(--accent-color, rgba(255, 255, 255, 0.35));
+    color: var(--accent-color, #ffffff);
+    box-shadow: 0 0 24px var(--accent-glow, rgba(99, 102, 241, 0.25));
+}
+
+.add-section-card-title {
+    margin: 0;
+    font-size: clamp(17px, 5.2cqw, 22px);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.add-section-card-desc {
+    margin: 0;
+    font-size: clamp(12px, 3.5cqw, 14px);
+    line-height: 1.5;
+    color: var(--text-secondary);
+    max-width: 28ch;
+}
+
+.add-section-card-btn {
+    margin-top: clamp(2px, 0.8cqh, 6px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: clamp(10px, 2.4cqh, 13px) clamp(20px, 6cqw, 28px);
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: var(--accent-color, #4c6ef5);
+    color: #ffffff;
+    font-size: clamp(13px, 3.7cqw, 15px);
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 22px var(--accent-glow, rgba(76, 110, 245, 0.4));
+    transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+.add-section-card-btn:active {
+    transform: scale(0.96);
+    filter: brightness(1.08);
+}
+
+.add-section-card-hint {
+    margin: clamp(4px, 1.4cqh, 10px) 0 0;
+    font-size: clamp(11px, 3cqw, 12px);
+    line-height: 1.45;
+    color: var(--text-muted, rgba(255, 255, 255, 0.5));
+    max-width: 30ch;
+}
+
+.add-section-card-hint strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+/* #endregion */
+
 
 
