@@ -1632,7 +1632,7 @@ body.is-owner .top-item-unit:active {
    ========================================================= */
 
 /* 1. Tüm Detay Sahnesine Yayılan Kesintisiz Atmosferik Banner */
-#trophiesCompanionCard.is-lol-view #trophiesDetailView {
+.trophies-companion-card.is-lol-view .companion-view-detail {
     position: relative;
     background-color: #090c14;
     background-image: 
@@ -1648,7 +1648,7 @@ body.is-owner .top-item-unit:active {
 }
 
 /* Üst Başlık Barı (Şeffaf & Çizgisiz - Atmosfere Akış) */
-#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-header {
+.trophies-companion-card.is-lol-view .companion-view-detail .companion-header {
     background: transparent !important;
     border-bottom: none !important;
     min-height: auto;
@@ -1657,25 +1657,25 @@ body.is-owner .top-item-unit:active {
     flex-shrink: 0;
 }
 
-#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-header::before {
+.trophies-companion-card.is-lol-view .companion-view-detail .companion-header::before {
     display: none !important;
 }
 
-#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-title {
+.trophies-companion-card.is-lol-view .companion-view-detail .companion-title {
     color: #f1f3f5;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
     font-weight: 800;
 }
 
-#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-back-btn,
-#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-action-btn,
-#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-edit-toggle-btn,
-#trophiesCompanionCard.is-lol-view #trophiesDetailView .companion-close-btn {
+.trophies-companion-card.is-lol-view .companion-view-detail .companion-back-btn,
+.trophies-companion-card.is-lol-view .companion-view-detail .companion-action-btn,
+.trophies-companion-card.is-lol-view .companion-view-detail .companion-edit-toggle-btn,
+.trophies-companion-card.is-lol-view .companion-view-detail .companion-close-btn {
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
 }
 
 /* Gövde - Dikey Esneme & Sıfır Boşluk */
-#trophiesCompanionCard.is-lol-view #trophiesDetailBody {
+.trophies-companion-card.is-lol-view .companion-view-detail .companion-body {
     overflow-y: hidden !important;
     display: flex;
     flex-direction: column;
@@ -1964,7 +1964,7 @@ body.is-owner .top-item-unit:active {
 }
 
 /* 5. Alt Footer / OP.GG Aksiyon Butonu */
-#trophiesCompanionCard.is-lol-view #trophiesDetailFooter {
+.trophies-companion-card.is-lol-view .companion-view-detail .companion-footer {
     padding-top: clamp(6px, 1.2cqh, 10px);
     padding-bottom: clamp(12px, 2.4cqh, 18px);
     flex-shrink: 0;
@@ -1973,7 +1973,7 @@ body.is-owner .top-item-unit:active {
 /* =========================================================
  * VALORANT ÖZEL KART TASARIMI (Eğik Ajan Kartları + Elo/RR)
  * ========================================================= */
-#trophiesCompanionCard.is-valorant-view #trophiesDetailView {
+.trophies-companion-card.is-valorant-view .companion-view-detail {
     position: relative;
     background-color: #090c14;
     background-image:
@@ -1988,7 +1988,7 @@ body.is-owner .top-item-unit:active {
     overflow: hidden;
 }
 
-#trophiesCompanionCard.is-valorant-view #trophiesDetailView .companion-header {
+.trophies-companion-card.is-valorant-view .companion-view-detail .companion-header {
     background: transparent !important;
     border-bottom: none !important;
     min-height: auto;
@@ -1997,24 +1997,24 @@ body.is-owner .top-item-unit:active {
     flex-shrink: 0;
 }
 
-#trophiesCompanionCard.is-valorant-view #trophiesDetailView .companion-header::before {
+.trophies-companion-card.is-valorant-view .companion-view-detail .companion-header::before {
     display: none !important;
 }
 
-#trophiesCompanionCard.is-valorant-view #trophiesDetailView .companion-title {
+.trophies-companion-card.is-valorant-view .companion-view-detail .companion-title {
     color: #f1f3f5;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
     font-weight: 800;
 }
 
-#trophiesCompanionCard.is-valorant-view #trophiesDetailView .companion-back-btn,
-#trophiesCompanionCard.is-valorant-view #trophiesDetailView .companion-action-btn,
-#trophiesCompanionCard.is-valorant-view #trophiesDetailView .companion-edit-toggle-btn,
-#trophiesCompanionCard.is-valorant-view #trophiesDetailView .companion-close-btn {
+.trophies-companion-card.is-valorant-view .companion-view-detail .companion-back-btn,
+.trophies-companion-card.is-valorant-view .companion-view-detail .companion-action-btn,
+.trophies-companion-card.is-valorant-view .companion-view-detail .companion-edit-toggle-btn,
+.trophies-companion-card.is-valorant-view .companion-view-detail .companion-close-btn {
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
 }
 
-#trophiesCompanionCard.is-valorant-view #trophiesDetailBody {
+.trophies-companion-card.is-valorant-view .companion-view-detail .companion-body {
     overflow-y: hidden !important;
     display: flex;
     flex-direction: column;
@@ -2265,7 +2265,7 @@ body.is-owner .top-item-unit:active {
 }
 
 /* 4. Alt Footer / Tracker.gg Butonu */
-#trophiesCompanionCard.is-valorant-view #trophiesDetailFooter {
+.trophies-companion-card.is-valorant-view .companion-view-detail .companion-footer {
     padding-top: clamp(6px, 1.2cqh, 10px);
     padding-bottom: clamp(12px, 2.4cqh, 18px);
     flex-shrink: 0;

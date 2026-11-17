@@ -689,9 +689,11 @@ html.is-profile-loading #landing-screen {
     .stage .deck-swipe-ghost-card {
         position: absolute !important;
         z-index: 5 !important;
+        opacity: 1;
         pointer-events: none !important;
         margin: 0 auto !important;
         animation: none !important;
+        display: flex !important;
     }
 
     .stage.is-companion-closing .companion-card {

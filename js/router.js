@@ -352,7 +352,104 @@ const Router = {
         };
     },
 
-    toggleCompanion(forceState, type = 'showcase', swipeDir = 0) {
+    getDeckOrder() {
+        return (typeof SectionManager !== 'undefined' && typeof SectionManager.desteSirasi === 'function')
+            ? SectionManager.desteSirasi()
+            : ['achievements', 'widgets', 'gaming', 'main', 'showcase'];
+    },
+
+    getCurrentDeckPosition() {
+        const stage = document.getElementById('profileStage');
+        if (!stage || !stage.classList.contains('has-companion-open')) return 'main';
+        if (stage.classList.contains('is-showcase-active')) return 'showcase';
+        if (stage.classList.contains('is-trophies-active')) {
+            return window._activeLeftWingMode || 'gaming';
+        }
+        return 'main';
+    },
+
+    getActiveDeckElement() {
+        const pos = this.getCurrentDeckPosition();
+        if (pos === 'main') return this.cardContainer || document.getElementById('cardContainer');
+        if (pos === 'showcase') return document.getElementById('topsCompanionCard');
+        return document.getElementById('trophiesCompanionCard');
+    },
+
+    _cancelMobileAnimations() {
+        const stage = document.getElementById('profileStage');
+        const animProps = ['_activeCompanionAnim', '_activeCompanionCardAnim', '_activeGhostAnim', '_activeDragResetAnim'];
+        animProps.forEach((prop) => {
+            if (this[prop]) {
+                try { this[prop].cancel(); } catch (err) {}
+                this[prop] = null;
+            }
+        });
+        if (stage) {
+            stage.querySelectorAll('.deck-swipe-ghost-card').forEach(el => el.remove());
+        }
+        ['cardContainer', 'topsCompanionCard', 'trophiesCompanionCard'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (id !== 'cardContainer' || window.innerWidth < 900) {
+                    el.style.transform = '';
+                }
+                el.style.opacity = '';
+            }
+        });
+    },
+
+    _animateMobileDeckTransition(outgoingEl, incomingEl, dir, dragOffsetX = 0) {
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const duration = reducedMotion ? 160 : 380;
+        const easing = 'cubic-bezier(0.16, 1, 0.3, 1)';
+        const travelPx = window.innerWidth + 40;
+        const outEndX = dir < 0 ? -travelPx : travelPx;
+        const inStartX = dir < 0 ? travelPx : -travelPx;
+        const startX = dragOffsetX || 0;
+        const startOpacity = dragOffsetX
+            ? Math.max(0.5, 1 - Math.abs(dragOffsetX) / (window.innerWidth * 1.35))
+            : 1;
+
+        if (outgoingEl) {
+            outgoingEl.style.transform = '';
+            outgoingEl.style.opacity = '';
+            const outFrames = reducedMotion
+                ? [{ opacity: startOpacity }, { opacity: 0 }]
+                : [
+                    { transform: `translate3d(${startX}px, 0, 0)`, opacity: startOpacity },
+                    { transform: `translate3d(${outEndX}px, 0, 0)`, opacity: 0 }
+                ];
+            const anim = outgoingEl.animate(outFrames, { duration, easing, fill: 'forwards' });
+            if (outgoingEl.classList.contains('deck-swipe-ghost-card')) {
+                this._activeGhostAnim = anim;
+            } else if (outgoingEl.id === 'cardContainer') {
+                this._activeCompanionAnim = anim;
+            } else {
+                this._activeCompanionCardAnim = anim;
+            }
+        }
+
+        if (incomingEl) {
+            incomingEl.style.transform = '';
+            incomingEl.style.opacity = '';
+            const inFrames = reducedMotion
+                ? [{ opacity: 0 }, { opacity: 1 }]
+                : [
+                    { transform: `translate3d(${inStartX}px, 0, 0)`, opacity: 0 },
+                    { transform: 'translate3d(0, 0, 0)', opacity: 1 }
+                ];
+            const anim = incomingEl.animate(inFrames, { duration, easing, fill: 'forwards' });
+            if (incomingEl.id === 'cardContainer') {
+                this._activeCompanionAnim = anim;
+            } else {
+                this._activeCompanionCardAnim = anim;
+            }
+        }
+
+        return duration;
+    },
+
+    toggleCompanion(forceState, type = 'showcase', swipeDir = 0, dragOffsetX = 0) {
         const stage = document.getElementById('profileStage');
         const topsCard = document.getElementById('topsCompanionCard');
         const trophiesCard = document.getElementById('trophiesCompanionCard');
@@ -370,19 +467,7 @@ const Router = {
             clearTimeout(this._companionTimer);
             this._companionTimer = null;
         }
-        if (this._activeCompanionAnim) {
-            try {
-                this._activeCompanionAnim.cancel();
-            } catch (err) {}
-            this._activeCompanionAnim = null;
-        }
-        if (this._activeCompanionCardAnim) {
-            try {
-                this._activeCompanionCardAnim.cancel();
-            } catch (err) {}
-            this._activeCompanionCardAnim = null;
-        }
-        stage.querySelectorAll('.deck-swipe-ghost-card').forEach(el => el.remove());
+        this._cancelMobileAnimations();
 
         const isShowcaseOpen = stage.classList.contains('is-showcase-active');
         const isTrophiesOpen = stage.classList.contains('is-trophies-active');
@@ -402,6 +487,11 @@ const Router = {
             }
         }
 
+        // Açık bir eşlikçi kart yoksa kapatma sekansını çalıştırma
+        if (!nextState && !stage.classList.contains('has-companion-open')) {
+            return;
+        }
+
         // Profilde ekli olmayan (pasif) bir alan açılamaz
         if (nextState && typeof SectionManager !== 'undefined' && !SectionManager.alanAktifMi(normalizedType)) {
             return;
@@ -419,28 +509,28 @@ const Router = {
 
             const wasAnyOpen = stage.classList.contains('has-companion-open');
             const isLeftModeSwitch = wasAnyOpen && isTrophiesOpen && ['gaming', 'widgets', 'achievements'].includes(normalizedType) && currentLeftMode !== normalizedType;
-            const leftDeckOrder = ['achievements', 'widgets', 'gaming'];
+            const deckOrder = this.getDeckOrder();
             const fullDeckOrder = ['achievements', 'widgets', 'gaming', 'main', 'showcase'];
 
             let oldDeckPos = 'main';
             if (wasAnyOpen) {
                 oldDeckPos = isShowcaseOpen ? 'showcase' : currentLeftMode;
             }
-            const oldDeckIdx = fullDeckOrder.indexOf(oldDeckPos);
-            const newDeckIdx = fullDeckOrder.indexOf(normalizedType);
+            const oldIdx = deckOrder.includes(oldDeckPos) ? deckOrder.indexOf(oldDeckPos) : fullDeckOrder.indexOf(oldDeckPos);
+            const newIdx = deckOrder.includes(normalizedType) ? deckOrder.indexOf(normalizedType) : fullDeckOrder.indexOf(normalizedType);
 
             // Mobilde sol kanat içi (Gaming <-> Widgets <-> Trophies) kaydırmalarda, içerik değişmeden önce
-            // mevcut kartın görsel kopyasını (ghost) al ki ilk kaydırmadaki gibi gerçek deste (deck) geçişi oluşsun
+            // mevcut kartın görsel kopyasını (ghost) ve scroll konumlarını al
             let mobileOutgoingClone = null;
-            let mobileSwipeDir = 0; // -1: sola kaydırma (kart sola çıkar, yeni sağdan gelir), +1: sağa kaydırma (kart sağa çıkar, yeni soldan gelir)
+            let mobileScrollTops = [];
             if (!isDesktop && isLeftModeSwitch && activeCompanion) {
-                const oldIdx = leftDeckOrder.indexOf(currentLeftMode);
-                const newIdx = leftDeckOrder.indexOf(normalizedType);
-                mobileSwipeDir = (newIdx > oldIdx) ? -1 : 1;
+                mobileScrollTops = Array.from(activeCompanion.querySelectorAll('.scrollable-fade, .companion-body')).map(el => el.scrollTop);
                 mobileOutgoingClone = activeCompanion.cloneNode(true);
                 mobileOutgoingClone.removeAttribute('id');
                 mobileOutgoingClone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
                 mobileOutgoingClone.classList.add('deck-swipe-ghost-card');
+                mobileOutgoingClone.setAttribute('aria-hidden', 'true');
+                mobileOutgoingClone.inert = true;
             }
 
             if (otherCompanion) {
@@ -513,7 +603,8 @@ const Router = {
                 }
             }
 
-            // 3. ANİMASYONLARI BAŞLAT (Masaüstü FLIP + WAAPI / Mobil Çift Kartlı Deck Swipe)
+            // 3. ANİMASYONLARI BAŞLAT (Masaüstü FLIP + WAAPI / Mobil Birleşik Deck Swipe)
+            let animDuration = 420;
             if (isDesktop && cardContainer) {
                 const lastRect = cardContainer.getBoundingClientRect();
                 const slideDist = Math.round(Math.max(48, lastRect.width * 0.14));
@@ -553,52 +644,23 @@ const Router = {
                         easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
                     });
                 }
-            } else if (!isDesktop && isLeftModeSwitch && activeCompanion && mobileOutgoingClone) {
-                // Mobilde sol kanat içi kaydırmada: eski kart kaydırma yönüne çıkar, yeni kart karşı yönden merkeze kayar
-                stage.appendChild(mobileOutgoingClone);
-                const travelPx = window.innerWidth + 40;
-                const outEndX = mobileSwipeDir < 0 ? -travelPx : travelPx;
-                const inStartX = mobileSwipeDir < 0 ? travelPx : -travelPx;
+            } else if (!isDesktop && activeCompanion) {
+                const dir = swipeDir !== 0 ? swipeDir : (newIdx > oldIdx ? -1 : 1);
+                let outgoingEl = null;
 
-                mobileOutgoingClone.animate([
-                    { transform: 'translate3d(0, 0, 0)', opacity: 1 },
-                    { transform: `translate3d(${outEndX}px, 0, 0)`, opacity: 0 }
-                ], {
-                    duration: 400,
-                    easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                    fill: 'forwards'
-                });
+                if (isLeftModeSwitch && mobileOutgoingClone) {
+                    stage.appendChild(mobileOutgoingClone);
+                    mobileOutgoingClone.querySelectorAll('.scrollable-fade, .companion-body').forEach((el, idx) => {
+                        if (mobileScrollTops[idx]) el.scrollTop = mobileScrollTops[idx];
+                    });
+                    outgoingEl = mobileOutgoingClone;
+                } else if (wasAnyOpen && otherCompanion) {
+                    outgoingEl = otherCompanion;
+                } else if (cardContainer) {
+                    outgoingEl = cardContainer;
+                }
 
-                this._activeCompanionCardAnim = activeCompanion.animate([
-                    { transform: `translate3d(${inStartX}px, 0, 0)`, opacity: 0 },
-                    { transform: 'translate3d(0, 0, 0)', opacity: 1 }
-                ], {
-                    duration: 400,
-                    easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
-                });
-            } else if (!isDesktop && !wasAnyOpen && cardContainer && activeCompanion) {
-                // Mobilde ilk kaydırma (main <-> gaming veya main <-> showcase):
-                // Her iki kart da WAAPI ile aynı anda senkronize kayar
-                const travelPx = window.innerWidth + 40;
-                const dir = (newDeckIdx > oldDeckIdx) ? -1 : 1; // -1: sola swipe (main->showcase), +1: sağa swipe (main->gaming)
-                const outEndX = dir < 0 ? -travelPx : travelPx;
-                const inStartX = dir < 0 ? travelPx : -travelPx;
-
-                this._activeCompanionAnim = cardContainer.animate([
-                    { transform: 'translate3d(0, 0, 0)', opacity: 1 },
-                    { transform: `translate3d(${outEndX}px, 0, 0)`, opacity: 0 }
-                ], {
-                    duration: 400,
-                    easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
-                });
-
-                this._activeCompanionCardAnim = activeCompanion.animate([
-                    { transform: `translate3d(${inStartX}px, 0, 0)`, opacity: 0 },
-                    { transform: 'translate3d(0, 0, 0)', opacity: 1 }
-                ], {
-                    duration: 400,
-                    easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
-                });
+                animDuration = this._animateMobileDeckTransition(outgoingEl, activeCompanion, dir, dragOffsetX);
             }
 
             if (typeof checkRibbonOverflow === 'function') {
@@ -606,18 +668,16 @@ const Router = {
             }
 
             this._companionTimer = setTimeout(() => {
-                stage.querySelectorAll('.deck-swipe-ghost-card').forEach(el => el.remove());
+                this._cancelMobileAnimations();
                 this._companionTransitioning = false;
                 this._companionTimer = null;
-                this._activeCompanionAnim = null;
-                this._activeCompanionCardAnim = null;
                 if (typeof checkRibbonOverflow === 'function') {
                     checkRibbonOverflow();
                 }
                 if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
                     TiltEngine.wake();
                 }
-            }, isDesktop ? 430 : 410);
+            }, isDesktop ? 430 : animDuration + 20);
 
         } else {
             // ==========================================
@@ -636,6 +696,7 @@ const Router = {
             }
             stage.classList.add('is-companion-closing');
 
+            let animDuration = 380;
             if (isDesktop && cardContainer) {
                 cardContainer.style.transform = '';
                 cardContainer.classList.remove('is-tilting');
@@ -654,39 +715,16 @@ const Router = {
                     fill: 'forwards'
                 });
             } else {
-                // Mobilde ana profil kartına geri dönüş (gaming -> main, showcase -> main veya uçtan sarmal dönüş)
+                // Mobilde ana profil kartına geri dönüş
                 stage.classList.remove('has-companion-open');
                 if (cardContainer && currentCard) {
-                    const travelPx = window.innerWidth + 40;
-                    // swipeDir verilmişse doğrudan o yönü kullan (-1: sola kaydırma, +1: sağa kaydırma);
-                    // verilmemişse showcase için sağa (+1), sol kanat için sola (-1) varsay
                     const dir = swipeDir !== 0 ? swipeDir : (isShowcaseOpen ? 1 : -1);
-                    const outEndX = dir < 0 ? -travelPx : travelPx;
-                    const inStartX = dir < 0 ? travelPx : -travelPx;
-
-                    this._activeCompanionCardAnim = currentCard.animate([
-                        { transform: 'translate3d(0, 0, 0)', opacity: 1 },
-                        { transform: `translate3d(${outEndX}px, 0, 0)`, opacity: 0 }
-                    ], {
-                        duration: 400,
-                        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                        fill: 'forwards'
-                    });
-
-                    this._activeCompanionAnim = cardContainer.animate([
-                        { transform: `translate3d(${inStartX}px, 0, 0)`, opacity: 0 },
-                        { transform: 'translate3d(0, 0, 0)', opacity: 1 }
-                    ], {
-                        duration: 400,
-                        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                        fill: 'forwards'
-                    });
+                    animDuration = this._animateMobileDeckTransition(currentCard, cardContainer, dir, dragOffsetX);
                 }
             }
 
             this._companionTimer = setTimeout(() => {
                 stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-showcase-active', 'is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
-                stage.querySelectorAll('.deck-swipe-ghost-card').forEach(el => el.remove());
                 if (topsCard) {
                     topsCard.classList.remove('is-closing');
                     if (isDesktop) topsCard.style.display = 'none';
@@ -705,14 +743,7 @@ const Router = {
                 const topsComp = document.getElementById('topsCompanionCard');
                 if (topsComp) topsComp.classList.remove('is-detail-editing');
 
-                if (this._activeCompanionAnim) {
-                    try { this._activeCompanionAnim.cancel(); } catch (err) {}
-                    this._activeCompanionAnim = null;
-                }
-                if (this._activeCompanionCardAnim) {
-                    try { this._activeCompanionCardAnim.cancel(); } catch (err) {}
-                    this._activeCompanionCardAnim = null;
-                }
+                this._cancelMobileAnimations();
                 if (cardContainer && isDesktop) cardContainer.style.transform = '';
                 this._companionTransitioning = false;
                 this._companionTimer = null;
@@ -722,7 +753,7 @@ const Router = {
                 if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
                     TiltEngine.wake();
                 }
-            }, isDesktop ? 380 : 410);
+            }, isDesktop ? 380 : animDuration + 20);
         }
     }
 };
@@ -737,7 +768,10 @@ const TouchGestureManager = {
     lastY: 0,
     isTracking: false,
     hasSwiped: false,
-    startedInScroller: false,
+    dragActive: false,
+    dragEl: null,
+    scrollerEl: null,
+    isScrollableEl: false,
     lockedAxis: null, // 'x' | 'y' | null (İlk ~10px harekette kilitlenir)
     threshold: 50, // Yanlışlıkla tetiklenmeyen sağlam yatay kaydırma eşiği (px)
     maxVerticalTolerance: 90, // Doğal başparmak açısı üst toleransı (px)
@@ -756,6 +790,49 @@ const TouchGestureManager = {
     isTouchDevice() {
         // matchMedia pointer: coarse ile yatay telefonlar ve tabletleri de kapsar
         return window.innerWidth < 900 || window.matchMedia('(pointer: coarse)').matches;
+    },
+
+    canScrollVertically(deltaY) {
+        if (!this.isScrollableEl || !this.scrollerEl) return false;
+        const el = this.scrollerEl;
+        if (deltaY < 0) {
+            // Parmak yukarı gidiyor -> liste aşağı kaydırılmak isteniyor
+            return (el.scrollTop + el.clientHeight) < (el.scrollHeight - 2);
+        }
+        if (deltaY > 0) {
+            // Parmak aşağı gidiyor -> liste yukarı kaydırılmak isteniyor
+            return el.scrollTop > 2;
+        }
+        return false;
+    },
+
+    _snapBackDrag(el, fromX) {
+        if (!el) return;
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion) {
+            el.style.transform = '';
+            el.style.opacity = '';
+            return;
+        }
+        const fromOpacity = Math.max(0.5, 1 - Math.abs(fromX) / (window.innerWidth * 1.35));
+        el.style.transform = '';
+        el.style.opacity = '';
+        if (Router._activeDragResetAnim) {
+            try { Router._activeDragResetAnim.cancel(); } catch (err) {}
+        }
+        const anim = el.animate([
+            { transform: `translate3d(${fromX}px, 0, 0)`, opacity: fromOpacity },
+            { transform: 'translate3d(0, 0, 0)', opacity: 1 }
+        ], {
+            duration: 240,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+        });
+        Router._activeDragResetAnim = anim;
+        anim.onfinish = () => {
+            if (Router._activeDragResetAnim === anim) {
+                Router._activeDragResetAnim = null;
+            }
+        };
     },
 
     handleTouchStart(e) {
@@ -789,9 +866,10 @@ const TouchGestureManager = {
             return;
         }
 
-        // 1. Dokunuş kaydırılabilir bir iç scroll alanı içinde ve aşağı kaymış durumda mı başladı?
+        // 1. Dokunuş kaydırılabilir bir iç scroll alanı içinde mi başladı?
         const scroller = touchTarget.closest('.scrollable-fade, .companion-body');
-        this.startedInScroller = !!scroller && scroller.scrollHeight > scroller.clientHeight && scroller.scrollTop > 8;
+        this.scrollerEl = scroller || null;
+        this.isScrollableEl = !!(scroller && scroller.scrollHeight > scroller.clientHeight + 2);
 
         const touch = e.touches[0];
         this.startX = touch.clientX;
@@ -801,6 +879,8 @@ const TouchGestureManager = {
         this.startTime = Date.now();
         this.isTracking = true;
         this.hasSwiped = false;
+        this.dragActive = false;
+        this.dragEl = null;
         this.lockedAxis = null;
     },
 
@@ -824,22 +904,37 @@ const TouchGestureManager = {
             }
         }
 
-        // Yalnızca X ekseni kilitlendiyse ve belirgin yatay hareket varsa tarayıcı yerel geçmişini engelle
-        if (this.lockedAxis === 'x' && absX > 12) {
-            if (e.cancelable) {
-                e.preventDefault();
+        // X ekseni kilitlendiyse: deste >= 2 kart içeriyorsa parmağı canlı takip et ve tarayıcı geçmiş kaydırmasını engelle
+        if (this.lockedAxis === 'x') {
+            const deckOrder = Router.getDeckOrder();
+            if (deckOrder.length > 1 && absX > 8) {
+                if (e.cancelable) {
+                    e.preventDefault();
+                }
+                const activeEl = Router.getActiveDeckElement();
+                if (activeEl) {
+                    if (Router._activeDragResetAnim) {
+                        try { Router._activeDragResetAnim.cancel(); } catch (err) {}
+                        Router._activeDragResetAnim = null;
+                    }
+                    this.dragActive = true;
+                    this.dragEl = activeEl;
+                    activeEl.style.transform = `translate3d(${deltaX}px, 0, 0)`;
+                    activeEl.style.opacity = String(Math.max(0.5, 1 - absX / (window.innerWidth * 1.35)));
+                }
             }
+            return;
         }
 
-        // Dikey eksen kilitlendiyse ve liste detayı içinden yukarı kaydırma (geri dönüş) jesti yapılıyorsa
-        // yerel kaydırma momentumunu engelle (böylece liste döndüğünde tarayıcı ilk dokunuşu momentum durdurma sanıp yutmaz)
+        // Dikey eksen kilitlendiyse ve iç liste gerçekten kaydırılamıyorsa (veya sınırda ise),
+        // geri dönüş / flip jesti için yerel kaydırma momentumunu engelle
         const stage = document.getElementById('profileStage');
         const isShowcaseOpen = stage && stage.classList.contains('is-showcase-active');
         const isTrophiesOpen = stage && stage.classList.contains('is-trophies-active');
         const isDetailActive = (isShowcaseOpen && typeof kartVerisi !== 'undefined' && kartVerisi?.tops?.aktifListeId) ||
                                (isTrophiesOpen && typeof window !== 'undefined' && window._activeTrophyDetail);
 
-        if (this.lockedAxis === 'y' && !this.startedInScroller && deltaY < -10 && absY > absX * 1.2) {
+        if (this.lockedAxis === 'y' && !this.canScrollVertically(deltaY) && deltaY < -10 && absY > absX * 1.2) {
             if (isDetailActive || (!stage?.classList.contains('has-companion-open') && !Router.isFlipped)) {
                 if (e.cancelable) {
                     e.preventDefault();
@@ -850,8 +945,15 @@ const TouchGestureManager = {
 
     handleTouchCancel(e) {
         if (!this.isTracking) return;
-        this.evaluateSwipe(this.lastX - this.startX, this.lastY - this.startY);
+        const deltaX = this.lastX - this.startX;
+        const deltaY = this.lastY - this.startY;
+        this.evaluateSwipe(deltaX, deltaY);
+        if (this.dragActive && !this.hasSwiped) {
+            this._snapBackDrag(this.dragEl, deltaX);
+        }
         this.isTracking = false;
+        this.dragActive = false;
+        this.dragEl = null;
         this.lockedAxis = null;
     },
 
@@ -869,6 +971,11 @@ const TouchGestureManager = {
         const deltaX = endX - this.startX;
         const deltaY = endY - this.startY;
         this.evaluateSwipe(deltaX, deltaY);
+        if (this.dragActive && !this.hasSwiped) {
+            this._snapBackDrag(this.dragEl, deltaX);
+        }
+        this.dragActive = false;
+        this.dragEl = null;
         this.lockedAxis = null;
     },
 
@@ -887,7 +994,7 @@ const TouchGestureManager = {
         const isAnyOpen = stage && stage.classList.contains('has-companion-open');
 
         // [0. Liste İçeriğinin / Detayın İçindeyken Yukarı Kaydırma -> Master Listeye Geri Dön]
-        if (isAnyOpen && !this.startedInScroller && absY >= 50 && absY > absX * 1.3 && deltaY < 0) {
+        if (isAnyOpen && !this.canScrollVertically(deltaY) && absY >= 50 && absY > absX * 1.3 && deltaY < 0) {
             if (isShowcaseOpen && typeof kartVerisi !== 'undefined' && kartVerisi.tops && kartVerisi.tops.aktifListeId) {
                 this.hasSwiped = true;
                 kartVerisi.tops.aktifListeId = null;
@@ -904,17 +1011,20 @@ const TouchGestureManager = {
         }
 
         // [1. Profil Bloğunun Üstündeyken Dikey Kaydırma (Yukarı -> Arkaya / Aşağı -> Ön Yüze)]
-        if (!isAnyOpen) {
+        if (!isAnyOpen && this.lockedAxis !== 'x') {
             if (!Router.isFlipped) {
                 // Ön yüzdeyken Yukarı Kaydırma (Swipe-Up, deltaY < -50) -> Kartı arkaya çevir
-                if (!this.startedInScroller && absY > 50 && absY > absX * 1.5 && deltaY < 0) {
+                if (!this.canScrollVertically(deltaY) && absY > 50 && absY > absX * 1.5 && deltaY < 0) {
                     this.hasSwiped = true;
                     Router.setFlipped(true);
                     return;
                 }
             } else {
-                // Arka yüzdeyken Dikey Kaydırma -> Ön yüze dön
-                if (!this.startedInScroller && absY > 50 && absY > absX * 1.5) {
+                // Arka yüzdeyken: kaydırılabilir liste varsa sadece en üstteyken aşağı çekince ön yüze dön
+                const canFlipBack = this.isScrollableEl
+                    ? (deltaY > 50 && absY > absX * 1.5 && !this.canScrollVertically(deltaY))
+                    : (absY > 50 && absY > absX * 1.5);
+                if (canFlipBack) {
                     this.hasSwiped = true;
                     Router.setFlipped(false);
                     return;
@@ -922,60 +1032,33 @@ const TouchGestureManager = {
             }
         }
 
-        // Eğer eksen Y olarak kilitlendiyse veya yatay eşik aşılmadıysa yatay swipe çalıştırma
+        // Eğer eksen Y olarak kilitlendiyse yatay swipe çalıştırma
         if (this.lockedAxis === 'y') return;
 
-        // 2. Yatay swipe eşiği: threshold (50px) ve absX > absY * 1.5 sıkı oran kontrolü
-        if (absX < this.threshold) return;
-        if (absY > this.maxVerticalTolerance || absX < absY * 1.5) return;
+        // 2. Yatay swipe eşiği (mesafe veya hızlı flick ivmesi)
+        const vx = deltaX / Math.max(1, elapsed);
+        const passedThreshold = absX >= this.threshold || (absX >= 24 && Math.abs(vx) >= 0.35);
+        if (!passedThreshold) return;
+        if (absY > this.maxVerticalTolerance || absX < absY * 1.35) return;
 
-        const deckOrder = (typeof SectionManager !== 'undefined')
-            ? SectionManager.desteSirasi()
-            : ['achievements', 'widgets', 'gaming', 'main', 'showcase'];
-        // Profilde hiç alan yoksa yatay kaydırma yapılacak bir deste yok
+        const deckOrder = Router.getDeckOrder();
+        // Profilde hiç ek alan yoksa yatay kaydırma yapılacak bir deste yok
         if (deckOrder.length <= 1) return;
 
         this.hasSwiped = true;
 
-        let currentPos = 'main';
-        if (isAnyOpen) {
-            if (isShowcaseOpen) {
-                currentPos = 'showcase';
-            } else if (isTrophiesOpen) {
-                currentPos = window._activeLeftWingMode || 'gaming';
-            }
-        }
-        const currentIdx = deckOrder.indexOf(currentPos);
+        const currentPos = Router.getCurrentDeckPosition();
+        const currentIdx = Math.max(0, deckOrder.indexOf(currentPos));
+        const dir = deltaX < 0 ? -1 : 1;
+        const targetIdx = dir < 0
+            ? (currentIdx + 1) % deckOrder.length
+            : (currentIdx - 1 + deckOrder.length) % deckOrder.length;
+        const target = deckOrder[targetIdx];
 
-        // Sola kaydırma (Swipe Left, deltaX < -threshold) -> Deste dizisinde sağa doğru ilerle
-        if (deltaX < -this.threshold) {
-            const nextIdx = currentIdx + 1;
-            if (nextIdx < deckOrder.length) {
-                const target = deckOrder[nextIdx];
-                if (target === 'main') {
-                    Router.toggleCompanion(false, 'showcase', -1);
-                } else {
-                    Router.toggleCompanion(true, target, -1);
-                }
-            } else {
-                // Showcase'deyken tekrar sola kaydırılırsa ana karta dön
-                Router.toggleCompanion(false, 'showcase', -1);
-            }
-        }
-        // Sağa kaydırma (Swipe Right, deltaX > threshold) -> Deste dizisinde sola doğru ilerle
-        else if (deltaX > this.threshold) {
-            const prevIdx = currentIdx - 1;
-            if (prevIdx >= 0) {
-                const target = deckOrder[prevIdx];
-                if (target === 'main') {
-                    Router.toggleCompanion(false, 'showcase', 1);
-                } else {
-                    Router.toggleCompanion(true, target, 1);
-                }
-            } else {
-                // En soldaki karttayken (Trophies) tekrar sağa kaydırılırsa ana karta dön
-                Router.toggleCompanion(false, 'showcase', 1);
-            }
+        if (target === 'main') {
+            Router.toggleCompanion(false, 'showcase', dir, deltaX);
+        } else {
+            Router.toggleCompanion(true, target, dir, deltaX);
         }
     }
 };
