@@ -741,24 +741,41 @@ const Router = {
                 }
 
                 if (activeCompanion) {
-                    activeCompanion.style.setProperty('--companion-enter-x', `-${slideDist}px`);
-                    this._activeCompanionCardAnim = activeCompanion.animate([
-                        {
-                            opacity: 0,
-                            transform: `translate3d(-${slideDist}px, 0, -20px) scale(0.96)`
-                        },
-                        {
-                            opacity: 1,
-                            offset: 0.35
-                        },
-                        {
-                            opacity: 1,
-                            transform: 'translate3d(0, 0, 0) scale(1)'
-                        }
-                    ], {
-                        duration: 420,
-                        easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
-                    });
+                    const activeLastRect = activeCompanion.getBoundingClientRect();
+                    if (!wasAnyOpen && firstRect && activeLastRect.width > 0) {
+                        const companionStartX = firstRect.left - activeLastRect.left;
+                        this._activeCompanionCardAnim = activeCompanion.animate([
+                            {
+                                opacity: 0.85,
+                                transform: `translate3d(${companionStartX}px, 0, 0)`
+                            },
+                            {
+                                opacity: 1,
+                                offset: 0.25
+                            },
+                            {
+                                opacity: 1,
+                                transform: 'translate3d(0, 0, 0)'
+                            }
+                        ], {
+                            duration: 420,
+                            easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                        });
+                    } else {
+                        this._activeCompanionCardAnim = activeCompanion.animate([
+                            {
+                                opacity: 0,
+                                transform: `translate3d(-${slideDist}px, 0, 0) scale(0.98)`
+                            },
+                            {
+                                opacity: 1,
+                                transform: 'translate3d(0, 0, 0) scale(1)'
+                            }
+                        ], {
+                            duration: 340,
+                            easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                        });
+                    }
                 }
             } else if (!isDesktop && activeCompanion) {
                 const dir = swipeDir !== 0 ? swipeDir : (newIdx > oldIdx ? -1 : 1);
@@ -795,14 +812,6 @@ const Router = {
             this._companionTransitioning = true;
 
             const currentCard = isAddCardOpen ? addSectionCard : (isShowcaseOpen ? topsCard : trophiesCard);
-            if (currentCard && isDesktop) {
-                if (cardContainer) {
-                    const rect = cardContainer.getBoundingClientRect();
-                    const slideDist = Math.round(Math.max(42, rect.width * 0.12));
-                    currentCard.style.setProperty('--companion-enter-x', `-${slideDist}px`);
-                }
-                currentCard.classList.add('is-closing');
-            }
             stage.classList.add('is-companion-closing');
 
             let animDuration = 380;
@@ -823,6 +832,30 @@ const Router = {
                     easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
                     fill: 'forwards'
                 });
+
+                if (currentCard) {
+                    const currentCardRect = currentCard.getBoundingClientRect();
+                    const cardCenterLeft = cardRect.left + returnDeltaX;
+                    const companionEndX = cardCenterLeft - currentCardRect.left;
+                    this._activeCompanionCardAnim = currentCard.animate([
+                        {
+                            opacity: 1,
+                            transform: 'translate3d(0, 0, 0)'
+                        },
+                        {
+                            opacity: 1,
+                            offset: 0.72
+                        },
+                        {
+                            opacity: 0,
+                            transform: `translate3d(${companionEndX}px, 0, 0)`
+                        }
+                    ], {
+                        duration: 380,
+                        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                        fill: 'forwards'
+                    });
+                }
 
                 const flagsWrapper = document.getElementById('cardFlagsWrapper');
                 if (flagsWrapper) {
