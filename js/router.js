@@ -167,8 +167,14 @@ const Router = {
             const activeEdit = document.querySelector('.editable-hover.is-input-active');
             if (activeEdit && !e.target.closest('.editable-hover.is-input-active')) {
                 window._frontEditJustClosed = Date.now();
+                if (!e.target.closest('input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]')) {
+                    activeEdit.blur();
+                }
             }
         }, true);
+
+        // Mobilde sanal klavye kapandığında (geri tuşu / klavye gizle) açık kalan input/contenteditable odağını kapat
+        this._initMobileKeyboardGuard();
 
         // Kartın boş alanlarına tıklandığında çevirme ve hiyerarşik geri dönme sistemi
         if (this.cardContainer) {
@@ -302,6 +308,78 @@ const Router = {
                 } else if (this.isFlipped) {
                     this.setFlipped(false);
                 }
+            }
+        });
+    },
+
+    _initMobileKeyboardGuard() {
+        if (this._keyboardGuardInit) return;
+        this._keyboardGuardInit = true;
+
+        const isEditableEl = (el) => {
+            if (!el || el === document.body || el === document.documentElement) return false;
+            if (el.isContentEditable) return true;
+            if (el.tagName === 'TEXTAREA') return true;
+            if (el.tagName === 'INPUT') {
+                const ignored = new Set(['checkbox', 'radio', 'file', 'range', 'color', 'button', 'submit', 'reset']);
+                return !ignored.has((el.type || 'text').toLowerCase());
+            }
+            return false;
+        };
+
+        const isTouchLike = () => window.innerWidth < 900 || window.matchMedia('(pointer: coarse)').matches;
+
+        let baselineHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        let keyboardOpen = false;
+        let orientationCooldownUntil = 0;
+
+        window.addEventListener('orientationchange', () => {
+            orientationCooldownUntil = Date.now() + 500;
+            keyboardOpen = false;
+            setTimeout(() => {
+                baselineHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            }, 400);
+        }, { passive: true });
+
+        document.addEventListener('focusin', (e) => {
+            if (!isTouchLike() || !isEditableEl(e.target)) return;
+            if (!keyboardOpen) {
+                baselineHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+            }
+        }, true);
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                if (!isTouchLike()) return;
+                if (Date.now() < orientationCooldownUntil) return;
+
+                const vvHeight = window.visualViewport.height;
+                const active = document.activeElement;
+
+                if (!isEditableEl(active)) {
+                    keyboardOpen = false;
+                    baselineHeight = Math.max(baselineHeight, vvHeight);
+                    return;
+                }
+
+                // Adres çubuğu açılıp kapandıysa baz yüksekliği yukarı yönlü güncelle
+                if (!keyboardOpen && vvHeight > baselineHeight) {
+                    baselineHeight = vvHeight;
+                }
+
+                const drop = baselineHeight - vvHeight;
+                if (drop >= 120) {
+                    keyboardOpen = true;
+                } else if (keyboardOpen && drop <= 50) {
+                    keyboardOpen = false;
+                    active.blur();
+                }
+            }, { passive: true });
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isTouchLike() && isEditableEl(document.activeElement)) {
+                document.activeElement.blur();
             }
         });
     },
