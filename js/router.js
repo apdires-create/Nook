@@ -812,12 +812,18 @@ const Router = {
             stage.classList.add('is-companion-closing');
 
             let animDuration = 380;
+            const desktopAnims = [];
             if (isDesktop && cardContainer) {
                 cardContainer.style.transform = '';
                 cardContainer.classList.remove('is-tilting');
 
+                // Tüm başlangıç ölçümlerini herhangi bir WAAPI animasyonu başlatmadan ÖNCE al
                 const stageRect = stage.getBoundingClientRect();
                 const cardRect = cardContainer.getBoundingClientRect();
+                const currentCardRect = currentCard ? currentCard.getBoundingClientRect() : null;
+                const flagsWrapper = document.getElementById('cardFlagsWrapper');
+                const flagsStartRect = flagsWrapper ? flagsWrapper.getBoundingClientRect() : null;
+
                 const returnDeltaX = (stageRect.left + stageRect.width / 2) - (cardRect.left + cardRect.width / 2);
                 const returnDeltaY = (stageRect.top + stageRect.height / 2) - (cardRect.top + cardRect.height / 2);
 
@@ -829,9 +835,9 @@ const Router = {
                     easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
                     fill: 'forwards'
                 });
+                desktopAnims.push(this._activeCompanionAnim);
 
-                if (currentCard) {
-                    const currentCardRect = currentCard.getBoundingClientRect();
+                if (currentCard && currentCardRect) {
                     const cardCenterLeft = cardRect.left + returnDeltaX;
                     const companionEndX = cardCenterLeft - currentCardRect.left;
                     this._activeCompanionCardAnim = currentCard.animate([
@@ -852,11 +858,10 @@ const Router = {
                         easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
                         fill: 'forwards'
                     });
+                    desktopAnims.push(this._activeCompanionCardAnim);
                 }
 
-                const flagsWrapper = document.getElementById('cardFlagsWrapper');
-                if (flagsWrapper) {
-                    const flagsStartRect = flagsWrapper.getBoundingClientRect();
+                if (flagsWrapper && flagsStartRect) {
                     const flagsEndLocalX = (cardRect.right - 2) - flagsStartRect.left;
                     if (Math.abs(flagsEndLocalX) > 1) {
                         this._activeFlagsAnim = flagsWrapper.animate([
@@ -867,6 +872,7 @@ const Router = {
                             easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
                             fill: 'forwards'
                         });
+                        desktopAnims.push(this._activeFlagsAnim);
                     }
                 }
             } else {
@@ -878,7 +884,15 @@ const Router = {
                 }
             }
 
-            this._companionTimer = setTimeout(() => {
+            let closeFinished = false;
+            const finalizeClose = () => {
+                if (closeFinished) return;
+                closeFinished = true;
+                if (this._companionTimer) {
+                    clearTimeout(this._companionTimer);
+                    this._companionTimer = null;
+                }
+
                 stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-add-card-active', 'is-showcase-active', 'is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
                 if (topsCard) {
                     topsCard.classList.remove('is-closing');
@@ -901,11 +915,17 @@ const Router = {
                 this._cancelMobileAnimations();
                 if (cardContainer && isDesktop) cardContainer.style.transform = '';
                 this._companionTransitioning = false;
-                this._companionTimer = null;
                 if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
                     TiltEngine.wake();
                 }
-            }, isDesktop ? 380 : animDuration + 20);
+            };
+
+            if (isDesktop && desktopAnims.length > 0) {
+                Promise.all(desktopAnims.map(a => a.finished.catch(() => {}))).then(finalizeClose);
+                this._companionTimer = setTimeout(finalizeClose, 450);
+            } else {
+                this._companionTimer = setTimeout(finalizeClose, isDesktop ? 380 : animDuration + 20);
+            }
         }
     }
 };
