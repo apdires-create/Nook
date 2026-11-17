@@ -17,8 +17,7 @@
     z-index: 35;
     pointer-events: auto;
     transform: translate3d(0, 0, 0);
-    transition: left 0.42s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 0.45s var(--ease-spring),
+    transition: transform 0.45s var(--ease-spring),
                 opacity 0.25s ease;
 }
 

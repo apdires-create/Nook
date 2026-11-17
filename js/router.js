@@ -458,7 +458,7 @@ const Router = {
 
     _cancelMobileAnimations() {
         const stage = document.getElementById('profileStage');
-        const animProps = ['_activeCompanionAnim', '_activeCompanionCardAnim', '_activeGhostAnim', '_activeDragResetAnim'];
+        const animProps = ['_activeCompanionAnim', '_activeCompanionCardAnim', '_activeGhostAnim', '_activeDragResetAnim', '_activeFlagsAnim'];
         animProps.forEach((prop) => {
             if (this[prop]) {
                 try { this[prop].cancel(); } catch (err) {}
@@ -646,11 +646,14 @@ const Router = {
             // 1. MASAÜSTÜ İLK AÇILIŞ İSE: İçeriği çizmeden önce FLIP ölçümünü yap ve kartı görünür kıl
             // Böylece cqw/cqh container query birimleri (0x0 yerine gerçek boyutta) tek seferde doğru hesaplanır!
             let firstRect = null;
+            let flagsFirstRect = null;
+            const flagsWrapper = document.getElementById('cardFlagsWrapper');
             if (isDesktop && cardContainer) {
                 cardContainer.style.transform = '';
                 cardContainer.classList.remove('is-tilting');
                 if (!wasAnyOpen) {
                     firstRect = cardContainer.getBoundingClientRect();
+                    if (flagsWrapper) flagsFirstRect = flagsWrapper.getBoundingClientRect();
                 }
                 if (activeCompanion) {
                     activeCompanion.style.display = 'flex';
@@ -720,6 +723,20 @@ const Router = {
                             duration: 420,
                             easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
                         });
+                    }
+
+                    if (flagsWrapper && flagsFirstRect) {
+                        const flagsLastRect = flagsWrapper.getBoundingClientRect();
+                        const localFlagsDeltaX = (flagsFirstRect.left - flagsLastRect.left) - deltaX;
+                        if (Math.abs(localFlagsDeltaX) > 1) {
+                            this._activeFlagsAnim = flagsWrapper.animate([
+                                { transform: `translate3d(${localFlagsDeltaX}px, 0, 0)` },
+                                { transform: 'translate3d(0, 0, 0)' }
+                            ], {
+                                duration: 420,
+                                easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                            });
+                        }
                     }
                 }
 
@@ -806,6 +823,22 @@ const Router = {
                     easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
                     fill: 'forwards'
                 });
+
+                const flagsWrapper = document.getElementById('cardFlagsWrapper');
+                if (flagsWrapper) {
+                    const flagsStartRect = flagsWrapper.getBoundingClientRect();
+                    const flagsEndLocalX = (cardRect.right - 2) - flagsStartRect.left;
+                    if (Math.abs(flagsEndLocalX) > 1) {
+                        this._activeFlagsAnim = flagsWrapper.animate([
+                            { transform: 'translate3d(0, 0, 0)' },
+                            { transform: `translate3d(${flagsEndLocalX}px, 0, 0)` }
+                        ], {
+                            duration: 380,
+                            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                            fill: 'forwards'
+                        });
+                    }
+                }
             } else {
                 // Mobilde ana profil kartına geri dönüş
                 stage.classList.remove('has-companion-open');
