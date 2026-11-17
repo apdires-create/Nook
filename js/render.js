@@ -978,7 +978,8 @@ const RenderEngine = {
                     : '';
 
                 const savedNote = (kartVerisi?.kullanici_notlari && kartVerisi.kullanici_notlari[itemId]) || item.yorum || item.kullanici_notu || item.not || '';
-                const commentBadgeHtml = savedNote.trim()
+                const hasNote = Boolean(savedNote.trim());
+                const commentBadgeHtml = hasNote
                     ? `<span class="has-comment-badge" title="Kullanıcı yorumu mevcut">💬</span>`
                     : '';
 
@@ -998,6 +999,10 @@ const RenderEngine = {
                     </div>
                 `;
 
+                const reviewDrawerHtml = (isUserOwner || hasNote)
+                    ? `<div class="top-item-review-drawer" data-for-id="${this.escapeHtml(itemId)}">${userReviewHtml}</div>`
+                    : '';
+
                 return `
                     <div class="top-item-unit tier-${tierName} ${isHero ? 'is-hero' : ''}" data-index="${idx}" data-original-index="${idx}" data-id="${this.escapeHtml(itemId)}">
                         <div class="top-item-card tier-${tierName} ${isHero ? 'is-hero' : ''}" role="button" tabindex="0">
@@ -1014,9 +1019,7 @@ const RenderEngine = {
                                 ${footerMetaHtml}
                             </div>
                         </div>
-                        <div class="top-item-review-drawer" data-for-id="${this.escapeHtml(itemId)}">
-                            ${userReviewHtml}
-                        </div>
+                        ${reviewDrawerHtml}
                     </div>
                 `;
             }).join('');
