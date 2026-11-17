@@ -762,17 +762,10 @@ const Router = {
                 animDuration = this._animateMobileDeckTransition(outgoingEl, activeCompanion, dir, dragOffsetX);
             }
 
-            if (typeof checkRibbonOverflow === 'function') {
-                checkRibbonOverflow();
-            }
-
             this._companionTimer = setTimeout(() => {
                 this._cancelMobileAnimations();
                 this._companionTransitioning = false;
                 this._companionTimer = null;
-                if (typeof checkRibbonOverflow === 'function') {
-                    checkRibbonOverflow();
-                }
                 if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
                     TiltEngine.wake();
                 }
@@ -846,9 +839,6 @@ const Router = {
                 if (cardContainer && isDesktop) cardContainer.style.transform = '';
                 this._companionTransitioning = false;
                 this._companionTimer = null;
-                if (typeof checkRibbonOverflow === 'function') {
-                    checkRibbonOverflow();
-                }
                 if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
                     TiltEngine.wake();
                 }

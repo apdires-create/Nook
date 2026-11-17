@@ -96,8 +96,6 @@ const SectionManager = {
                 }
             }
         }
-
-        if (typeof checkRibbonOverflow === 'function') checkRibbonOverflow();
     }
 };
 window.SectionManager = SectionManager;

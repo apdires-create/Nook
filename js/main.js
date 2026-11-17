@@ -118,24 +118,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 appLoadingEl.classList.remove('is-revealed');
             }, 450);
         }
-
-        // 4. Ribbon Taşma İzleyicisi (Madde 1)
-        checkRibbonOverflow();
-        window.addEventListener('resize', checkRibbonOverflow, { passive: true });
     }
 });
-
-/**
- * Ribbon Butonları Taşma Kontrolü (PLAN.md Madde 1)
- * Ekran daraldığında veya kart kenarı pencere sınırına yaklaştığında butonları kartın içine katlar.
- */
-function checkRibbonOverflow() {
-    const cardContainer = document.getElementById('cardContainer');
-    if (!cardContainer) return;
-    const rect = cardContainer.getBoundingClientRect();
-    const needsInward = (rect.left - 46 < 0) || (window.innerWidth <= 899);
-    cardContainer.classList.toggle('flags-inward', needsInward);
-}
 // #endregion
 
 // #region 2: DÜZENLEME MODU LAZY-LOAD YÖNETİCİSİ (OWNER LAZY LOADER)
