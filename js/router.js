@@ -708,7 +708,10 @@ const Router = {
             // 3. ANİMASYONLARI BAŞLAT (Masaüstü FLIP + WAAPI / Mobil Birleşik Deck Swipe)
             let animDuration = 420;
             if (isDesktop && cardContainer) {
+                // Tüm son konum ölçümlerini herhangi bir WAAPI animasyonu başlatmadan ÖNCE al
                 const lastRect = cardContainer.getBoundingClientRect();
+                const flagsLastRect = (flagsWrapper && flagsFirstRect) ? flagsWrapper.getBoundingClientRect() : null;
+                const activeLastRect = activeCompanion ? activeCompanion.getBoundingClientRect() : null;
                 const slideDist = Math.round(Math.max(48, lastRect.width * 0.14));
 
                 if (!wasAnyOpen && firstRect) {
@@ -725,8 +728,7 @@ const Router = {
                         });
                     }
 
-                    if (flagsWrapper && flagsFirstRect) {
-                        const flagsLastRect = flagsWrapper.getBoundingClientRect();
+                    if (flagsWrapper && flagsFirstRect && flagsLastRect) {
                         const localFlagsDeltaX = (flagsFirstRect.left - flagsLastRect.left) - deltaX;
                         if (Math.abs(localFlagsDeltaX) > 1) {
                             this._activeFlagsAnim = flagsWrapper.animate([
@@ -740,18 +742,13 @@ const Router = {
                     }
                 }
 
-                if (activeCompanion) {
-                    const activeLastRect = activeCompanion.getBoundingClientRect();
+                if (activeCompanion && activeLastRect) {
                     if (!wasAnyOpen && firstRect && activeLastRect.width > 0) {
                         const companionStartX = firstRect.left - activeLastRect.left;
                         this._activeCompanionCardAnim = activeCompanion.animate([
                             {
-                                opacity: 0.85,
+                                opacity: 0.9,
                                 transform: `translate3d(${companionStartX}px, 0, 0)`
-                            },
-                            {
-                                opacity: 1,
-                                offset: 0.25
                             },
                             {
                                 opacity: 1,
