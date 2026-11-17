@@ -98,10 +98,12 @@ html:not(.is-profile-loading) body.is-owner .editable-hover {
                 box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-body.is-owner .editable-hover:not(.is-input-active):hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+@media (hover: hover) and (pointer: fine) {
+    body.is-owner .editable-hover:not(.is-input-active):hover {
+        background-color: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
 }
 
 /* 🎯 YENİ CONTENTEDITABLE ODAK ÇERÇEVESİ (Metnin etrafını saran akıllı odak kapsülü) */
