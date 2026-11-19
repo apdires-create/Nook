@@ -327,10 +327,11 @@ const RenderEngine = {
             const trophiesCompanion = document.getElementById('trophiesCompanionCard');
             const isDetailEditing = trophiesCompanion && trophiesCompanion.classList.contains('is-detail-editing');
 
-            // LoL ve Valorant kartları açıkken özel banner temasını üst karta bağla
+            // LoL, Valorant ve CS2 kartları açıkken özel banner temasını üst karta bağla
             if (trophiesCompanion) {
                 trophiesCompanion.classList.toggle('is-lol-view', activeTur === 'lol');
                 trophiesCompanion.classList.toggle('is-valorant-view', activeTur === 'valorant');
+                trophiesCompanion.classList.toggle('is-cs2-view', activeTur === 'cs2' || activeTur === 'faceit');
             }
 
             const seciliOge = aktifTrophyler.find(t => t.tur === activeTur) || null;
@@ -459,6 +460,9 @@ const RenderEngine = {
         }
         if (norm.tur === 'valorant') {
             return this.renderValorantRootLayout(norm);
+        }
+        if (norm.tur === 'cs2' || norm.tur === 'faceit') {
+            return this.renderCS2RootLayout(norm);
         }
         const fallbackHarf = (norm.baslik || 'NK').substring(0, 2).toUpperCase();
         const stats = Array.isArray(norm.stats) ? norm.stats.slice(0, 4) : [];
@@ -726,6 +730,113 @@ const RenderEngine = {
                             <span class="trophy-val-peak-tag">PEAK</span>
                             ${peakEmblem ? `<img src="${this.escapeHtml(peakEmblem)}" alt="${this.escapeHtml(peakText)}" class="trophy-val-rank-emblem" loading="eager" decoding="async" onerror="this.style.display='none';">` : ''}
                             <span class="trophy-val-stat-text">${this.escapeHtml(peakText)}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    /**
+     * Counter-Strike 2 Özel Kart Tasarımı (Nook x CS2 Taktiksel HUD):
+     * - Üstte oyuncu kapsülü (Nickname + Bölge/Ülke + CS2 etiketi)
+     * - Ortada FACEIT Level 1-10 + ELO (ve girildiyse Premier CS Rating) derece vitrini
+     * - Altında 3 anlamlı performans metriği (K/D, Headshot %, Kazanma %)
+     * - En altta Favori Harita atmosferli Kişisel İmza (Harita • Rol • İmza Silah)
+     */
+    renderCS2RootLayout(norm) {
+        if (!norm) return '';
+        const nick = norm.handle || norm.kullanici || 'Oyuncu';
+        const region = (norm.region || 'EU').toUpperCase();
+        const lvl = norm.level ? Number(norm.level) : null;
+        const elo = norm.elo ? Number(norm.elo) : null;
+        const lvlColor = TrophiesManager.getFaceitLevelColor(lvl || 1);
+        const premierRating = norm.premierRating || null;
+        const premierColor = premierRating ? TrophiesManager.getPremierColor(premierRating) : '#de9b35';
+
+        const kdText = norm.kd ? String(norm.kd) : '—';
+        const hsText = norm.hs ? `%${norm.hs}` : '—';
+        const wrText = norm.winrate ? `%${norm.winrate}` : '—';
+
+        const rol = norm.rol || 'Rifler';
+        const silah = norm.silah || 'AK-47';
+        const mapData = TrophiesManager.getCS2MapData(norm.harita || 'Mirage');
+
+        const lvlPct = lvl ? Math.max(10, Math.min(100, lvl * 10)) : 0;
+        const faceitBadgeSvg = `
+            <svg viewBox="0 0 36 36" class="trophy-cs2-lvl-ring" aria-hidden="true">
+                <circle cx="18" cy="18" r="15" fill="rgba(0,0,0,0.55)" stroke="rgba(255,255,255,0.12)" stroke-width="3"></circle>
+                ${lvl ? `<circle cx="18" cy="18" r="15" fill="none" stroke="${this.escapeHtml(lvlColor)}" stroke-width="3" stroke-dasharray="${(lvlPct * 0.942).toFixed(1)} 100" stroke-linecap="round" transform="rotate(-90 18 18)"></circle>` : ''}
+            </svg>
+        `;
+
+        return `
+            <div class="trophy-root-card trophy-cs2-card" data-trophy-tur="cs2" data-username="${this.escapeHtml(norm.kullanici)}">
+                <!-- 1. Taktiksel Oyuncu Kapsülü -->
+                <div class="trophy-cs2-user-capsule">
+                    <div class="trophy-cs2-user-left">
+                        <span class="trophy-cs2-player-name">${this.escapeHtml(nick)}</span>
+                        <span class="trophy-cs2-server-badge">${this.escapeHtml(region)}</span>
+                    </div>
+                    <span class="trophy-cs2-tag-chip">CS2</span>
+                </div>
+
+                <!-- 2. Rekabetçi Derece Vitrini (FACEIT + Opsiyonel Premier) -->
+                <div class="trophy-cs2-ranks-row ${premierRating ? 'is-dual' : 'is-single'}">
+                    <div class="trophy-cs2-rank-card is-faceit" style="--cs2-lvl-color: ${this.escapeHtml(lvlColor)};">
+                        <div class="trophy-cs2-lvl-badge">
+                            ${faceitBadgeSvg}
+                            <span class="trophy-cs2-lvl-num">${lvl ?? '—'}</span>
+                        </div>
+                        <div class="trophy-cs2-rank-meta">
+                            <span class="trophy-cs2-rank-label">FACEIT</span>
+                            <span class="trophy-cs2-rank-val">${elo ? `${elo.toLocaleString('en-US')} ELO` : (lvl ? `Level ${lvl}` : 'Bağlı')}</span>
+                        </div>
+                    </div>
+
+                    ${premierRating ? `
+                        <div class="trophy-cs2-rank-card is-premier" style="--cs2-premier-color: ${this.escapeHtml(premierColor)};">
+                            <div class="trophy-cs2-premier-bars" aria-hidden="true">
+                                <span></span><span></span>
+                            </div>
+                            <div class="trophy-cs2-rank-meta">
+                                <span class="trophy-cs2-rank-label">PREMIER</span>
+                                <span class="trophy-cs2-rank-val is-premier-val">${this.escapeHtml(premierRating)}</span>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- 3. Performans İmzası (3 Anlamlı Metrik) -->
+                <div class="trophy-cs2-stats-row">
+                    <div class="trophy-cs2-stat-box">
+                        <span class="trophy-cs2-stat-label">K/D ORANI</span>
+                        <span class="trophy-cs2-stat-val">${this.escapeHtml(kdText)}</span>
+                    </div>
+                    <div class="trophy-cs2-stat-box">
+                        <span class="trophy-cs2-stat-label">HEADSHOT</span>
+                        <span class="trophy-cs2-stat-val">${this.escapeHtml(hsText)}</span>
+                    </div>
+                    <div class="trophy-cs2-stat-box">
+                        <span class="trophy-cs2-stat-label">KAZANMA</span>
+                        <span class="trophy-cs2-stat-val is-wr">${this.escapeHtml(wrText)}</span>
+                    </div>
+                </div>
+
+                <!-- 4. Kişisel İmza & Loadout (Favori Harita + Rol + İmza Silah) -->
+                <div class="trophy-cs2-loadout-card" style="--cs2-map-c1: ${this.escapeHtml(mapData.c1)}; --cs2-map-c2: ${this.escapeHtml(mapData.c2)};">
+                    <div class="trophy-cs2-loadout-map">
+                        <span class="trophy-cs2-loadout-kicker">FAVORİ HARİTA</span>
+                        <span class="trophy-cs2-loadout-map-name">${this.escapeHtml(mapData.name)}</span>
+                    </div>
+                    <div class="trophy-cs2-loadout-pills">
+                        <div class="trophy-cs2-loadout-pill">
+                            <span class="trophy-cs2-pill-k">ROL</span>
+                            <span class="trophy-cs2-pill-v">${this.escapeHtml(rol)}</span>
+                        </div>
+                        <div class="trophy-cs2-loadout-pill is-weapon">
+                            <span class="trophy-cs2-pill-k">İMZA</span>
+                            <span class="trophy-cs2-pill-v">${this.escapeHtml(silah)}</span>
                         </div>
                     </div>
                 </div>

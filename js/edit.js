@@ -2885,6 +2885,41 @@ EditManager.TrophiesView = {
                 </div>
             ` : ''}
 
+            ${(tur === 'cs2' || tur === 'faceit') ? `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div class="mt-form-field">
+                        <label class="mt-field-label">Oyun İçi Rol</label>
+                        <select class="mt-form-input is-select mt-cs2-role-select">
+                            ${(TrophiesManager.CS2_ROLES || ['Rifler', 'AWPer', 'Entry Fragger', 'Lurker', 'IGL', 'Support']).map(r => `
+                                <option value="${RenderEngine.escapeHtml(r)}" ${(mevcutSnap.rol || 'Rifler') === r ? 'selected' : ''}>${RenderEngine.escapeHtml(r)}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-form-field">
+                        <label class="mt-field-label">İmza Silah</label>
+                        <select class="mt-form-input is-select mt-cs2-weapon-select">
+                            ${(TrophiesManager.CS2_WEAPONS || ['AK-47', 'AWP', 'M4A1-S', 'M4A4', 'Desert Eagle', 'USP-S']).map(w => `
+                                <option value="${RenderEngine.escapeHtml(w)}" ${(mevcutSnap.silah || 'AK-47') === w ? 'selected' : ''}>${RenderEngine.escapeHtml(w)}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
+                    <div class="mt-form-field">
+                        <label class="mt-field-label">Favori Harita</label>
+                        <select class="mt-form-input is-select mt-cs2-map-select">
+                            ${(TrophiesManager.CS2_MAPS || []).map(m => `
+                                <option value="${RenderEngine.escapeHtml(m.id)}" ${(mevcutSnap.harita || 'Mirage') === m.id ? 'selected' : ''}>${RenderEngine.escapeHtml(m.name)}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-form-field">
+                        <label class="mt-field-label">Premier Rating <span style="opacity:0.6;font-weight:500;">(Opsiyonel)</span></label>
+                        <input type="text" class="mt-form-input mt-cs2-premier-input" placeholder="Örn: 21450" maxlength="10" value="${RenderEngine.escapeHtml(mevcutSnap.premierRating || '')}">
+                    </div>
+                </div>
+            ` : ''}
+
             ${(tiers.length > 0 && isManualAllowed) ? `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <div class="mt-form-field">
@@ -3076,6 +3111,19 @@ EditManager.TrophiesView = {
                 if (a1) extraSnap.ajan1 = a1.value;
                 if (a2) extraSnap.ajan2 = a2.value;
                 if (a3) extraSnap.ajan3 = a3.value;
+            }
+            if (tur === 'cs2' || tur === 'faceit') {
+                const roleSel = formWrap.querySelector('.mt-cs2-role-select');
+                const weaponSel = formWrap.querySelector('.mt-cs2-weapon-select');
+                const mapSel = formWrap.querySelector('.mt-cs2-map-select');
+                const premierInp = formWrap.querySelector('.mt-cs2-premier-input');
+                if (roleSel) extraSnap.rol = roleSel.value;
+                if (weaponSel) extraSnap.silah = weaponSel.value;
+                if (mapSel) extraSnap.harita = mapSel.value;
+                if (premierInp) {
+                    const cleanRating = premierInp.value.replace(/[^\d]/g, '').slice(0, 6);
+                    extraSnap.premierRating = cleanRating;
+                }
             }
 
             await this.trophyKaydet(tur, check.clean, secilenAktif, secilenPeak, canli, mevcutKuyruk, secilenBolge, extraSnap);

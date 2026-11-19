@@ -458,6 +458,48 @@ const TrophiesManager = {
     },
     // #endregion
 
+    // CS2 Vitrin Seçenekleri (Harita, Rol, İmza Silah)
+    CS2_MAPS: [
+        { id: 'Mirage', name: 'Mirage', callout: 'de_mirage', c1: '#c87e3a', c2: '#5c3416' },
+        { id: 'Inferno', name: 'Inferno', callout: 'de_inferno', c1: '#b84a39', c2: '#4e1d16' },
+        { id: 'Dust 2', name: 'Dust 2', callout: 'de_dust2', c1: '#d4a359', c2: '#5f4520' },
+        { id: 'Nuke', name: 'Nuke', callout: 'de_nuke', c1: '#4a7c9b', c2: '#1b3547' },
+        { id: 'Ancient', name: 'Ancient', callout: 'de_ancient', c1: '#4d7c5b', c2: '#1e3827' },
+        { id: 'Anubis', name: 'Anubis', callout: 'de_anubis', c1: '#c49347', c2: '#4d3716' },
+        { id: 'Train', name: 'Train', callout: 'de_train', c1: '#6e7f91', c2: '#27313b' },
+        { id: 'Overpass', name: 'Overpass', callout: 'de_overpass', c1: '#5d7a6e', c2: '#23322c' }
+    ],
+
+    CS2_ROLES: ['Rifler', 'AWPer', 'Entry Fragger', 'Lurker', 'IGL', 'Support'],
+
+    CS2_WEAPONS: ['AK-47', 'AWP', 'M4A1-S', 'M4A4', 'Desert Eagle', 'USP-S'],
+
+    getFaceitLevelColor(level) {
+        const lvl = Number(level) || 1;
+        if (lvl >= 10) return '#fe1f00';
+        if (lvl >= 8) return '#ff6309';
+        if (lvl >= 4) return '#ffc800';
+        if (lvl >= 2) return '#1ce400';
+        return '#d1d5db';
+    },
+
+    getPremierColor(ratingStr) {
+        const num = parseInt(String(ratingStr || '').replace(/[^\d]/g, ''), 10);
+        if (!num) return '#de9b35';
+        if (num >= 30000) return '#ffd700';
+        if (num >= 25000) return '#eb4b4b';
+        if (num >= 20000) return '#d32ce6';
+        if (num >= 15000) return '#8847ff';
+        if (num >= 10000) return '#4b69ff';
+        if (num >= 5000) return '#5e98d9';
+        return '#b0c3d9';
+    },
+
+    getCS2MapData(mapName) {
+        const clean = String(mapName || 'Mirage').trim().toLowerCase();
+        return this.CS2_MAPS.find(m => m.id.toLowerCase() === clean || m.name.toLowerCase() === clean) || this.CS2_MAPS[0];
+    },
+
     // #region 2: GAMING (REKABETÇİ OYUNLAR) & WIDGET KATALOĞU
     catalog: [
         {
@@ -1117,42 +1159,73 @@ const TrophiesManager = {
                 const nick = String(kullanici).trim();
                 const url = `https://www.faceit.com/api/users/v1/nicknames/${encodeURIComponent(nick)}`;
                 const json = await TrophiesManager.fetchJsonWithCorsFallback(url);
-                return json?.payload || null;
+                const payload = json?.payload || null;
+                if (payload?.id) {
+                    try {
+                        const sUrl = `https://www.faceit.com/api/stats/v1/stats/users/${encodeURIComponent(payload.id)}/games/cs2`;
+                        const sJson = await TrophiesManager.fetchJsonWithCorsFallback(sUrl);
+                        const lt = sJson?.lifetime || {};
+                        payload.kd = lt.k6 || lt['Average K/D Ratio'] || null;
+                        payload.hs = lt.k8 || lt['Average Headshots %'] || null;
+                        payload.winrate = lt.k5 || lt['Win Rate %'] || null;
+                        payload.matches = lt.m1 || lt['Matches'] || null;
+                    } catch {}
+                }
+                return payload;
             },
             map(d, kullanici) {
                 const secilenMod = d?.secilenKuyruk || d?.kuyruk || 'faceit';
                 const cs2 = d?.games?.cs2 || d?.games?.csgo || null;
                 const elo = d?.elo ?? cs2?.faceit_elo ?? null;
                 const lvl = d?.level ?? cs2?.skill_level ?? null;
-                const region = d?.region || cs2?.region || d?.country?.toUpperCase() || 'EU';
+                const region = (d?.country || d?.region || cs2?.region || 'EU').toUpperCase();
                 const nick = d?.nickname || d?.name || kullanici;
 
-                const isPremier = secilenMod === 'premier';
+                const premierRaw = d?.premierRating ? String(d.premierRating).trim() : '';
+                const premierNum = premierRaw ? parseInt(premierRaw.replace(/[^\d]/g, ''), 10) : 0;
+                const premierFormatted = premierNum ? premierNum.toLocaleString('en-US') : premierRaw;
+
+                const kd = d?.kd ? String(d.kd).trim() : null;
+                const hsRaw = d?.hs ? String(d.hs).replace(/%/g, '').trim() : null;
+                const wrRaw = d?.winrate ? String(d.winrate).replace(/%/g, '').trim() : null;
+                const matches = d?.matches ? String(d.matches).trim() : null;
+
+                const rol = d?.rol || 'Rifler';
+                const silah = d?.silah || 'AK-47';
+                const harita = d?.harita || 'Mirage';
+
+                const isPremier = secilenMod === 'premier' && Boolean(premierFormatted);
                 const heroLabel = isPremier ? 'PREMIER CS RATING' : 'FACEIT ELO';
-                const heroValue = isPremier ? (d?.premierRating || (elo ? `${elo} Rating` : 'Premier')) : (elo ? `${elo} ELO` : (lvl ? `SEVİYE ${lvl}` : 'Profilli Oyuncu'));
-                const heroSub = isPremier ? 'Valve Resmi Mod' : (lvl ? `Seviye ${lvl} • Rekabetçi` : 'FACEIT Matchmaking');
-                const peakLabel = isPremier ? 'ZİRVE RATING' : 'FACEIT SEVİYESİ';
-                const peakValue = isPremier ? (d?.peakPremier || heroValue) : (lvl ? `Level ${lvl}` : (elo ? `${elo} ELO` : 'CS2'));
+                const heroValue = isPremier ? premierFormatted : (elo ? `${elo} ELO` : (lvl ? `Level ${lvl}` : 'FACEIT Aktif'));
+                const heroSub = isPremier ? 'Valve Premier' : (lvl ? `Level ${lvl} • FACEIT` : 'FACEIT Matchmaking');
+                const peakLabel = isPremier ? 'FACEIT ELO' : 'PREMIER RATING';
+                const peakValue = isPremier ? (elo ? `${elo} ELO` : '—') : (premierFormatted || (lvl ? `Level ${lvl}` : '—'));
 
                 return {
                     handle: nick,
-                    badge: isPremier ? `VALVE • ${region}` : `FACEIT • ${region}`,
+                    badge: `FACEIT • ${region}`,
+                    region,
+                    level: lvl,
+                    elo,
+                    premierRating: premierFormatted || null,
+                    kd,
+                    hs: hsRaw,
+                    winrate: wrRaw,
+                    matches,
+                    rol,
+                    silah,
+                    harita,
                     heroLabel,
                     heroValue,
                     heroSub,
                     peakLabel,
                     peakValue,
-                    summaryText: elo ? `Lvl ${lvl || '?'} • ${elo} ELO` : nick,
+                    summaryText: elo ? `Lvl ${lvl || '?'} • ${elo} ELO` : (premierFormatted ? `${premierFormatted} CS Rating` : nick),
                     activeMode: secilenMod,
-                    modes: [
-                        { id: 'faceit', label: 'FACEIT' },
-                        { id: 'premier', label: 'Premier' }
-                    ],
                     stats: [
-                        { label: 'FACEIT ELO', value: elo ? `${elo} ELO` : '—', sub: lvl ? `Level ${lvl} / 10` : 'Rekabetçi' },
-                        { label: 'PREMIER MODU', value: isPremier ? heroValue : (lvl ? `Lvl ${lvl}` : '—'), sub: 'Valve Eşleştirme' },
-                        { label: 'BÖLGE / ÜLKE', value: region, sub: d?.country ? d.country.toUpperCase() : 'Uluslararası' },
-                        { label: 'PLATFORM DURUMU', value: d?.verified ? 'Doğrulanmış' : 'Aktif', sub: 'CS2 Oyuncusu' }
+                        { label: 'FACEIT', value: elo ? `${elo} ELO` : '—', sub: lvl ? `Level ${lvl} / 10` : 'Rekabetçi' },
+                        { label: 'K/D ORANI', value: kd || '—', sub: matches ? `${matches} Maç` : 'Ortalama' },
+                        { label: 'HEADSHOT', value: hsRaw ? `%${hsRaw}` : '—', sub: 'İsabet Oranı' }
                     ],
                     profileUrl: `https://www.faceit.com/en/players/${encodeURIComponent(nick)}`
                 };
@@ -1509,6 +1582,9 @@ const TrophiesManager = {
                 ...(snap.sampiyon ? { sampiyon: snap.sampiyon } : {}),
                 ...(snap.kostumNo !== undefined ? { kostumNo: snap.kostumNo } : {}),
                 ...(snap.rol ? { rol: snap.rol } : {}),
+                ...(snap.silah ? { silah: snap.silah } : {}),
+                ...(snap.harita ? { harita: snap.harita } : {}),
+                ...(snap.premierRating ? { premierRating: snap.premierRating } : {}),
                 ...(snap.ajan1 ? { ajan1: snap.ajan1 } : {}),
                 ...(snap.ajan2 ? { ajan2: snap.ajan2 } : {}),
                 ...(snap.ajan3 ? { ajan3: snap.ajan3 } : {}),
