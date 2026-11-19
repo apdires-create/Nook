@@ -2273,14 +2273,17 @@ body.is-owner .top-item-unit:active {
 /* #endregion */
 
 /* =========================================================
- * COUNTER-STRIKE 2 ÖZEL KART TASARIMI (NOOK x CS2 HUD)
+ * COUNTER-STRIKE 2 ÖZEL KART TASARIMI (LoL MİMARİSİ + CS2 HUD)
  * ========================================================= */
 .trophies-companion-card.is-cs2-view .companion-view-detail {
     position: relative;
-    background-color: #090c12;
+    background-color: #090c14;
     background-image:
-        radial-gradient(ellipse 90% 50% at 50% 0%, rgba(222, 155, 53, 0.16) 0%, transparent 65%),
-        linear-gradient(180deg, rgba(14, 18, 28, 0.65) 0%, rgba(9, 12, 18, 0.96) 55%, #090c12 100%);
+        linear-gradient(180deg, rgba(9, 12, 20, 0.25) 0%, rgba(9, 12, 20, 0.72) 38%, rgba(9, 12, 20, 0.96) 72%, #090c14 100%),
+        url('../assets/images/cs-banner.jpg');
+    background-position: top center;
+    background-size: 100% auto;
+    background-repeat: no-repeat;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -2301,16 +2304,23 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophies-companion-card.is-cs2-view .companion-view-detail .companion-title {
-    color: #f8f9fa;
+    color: #f1f3f5;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
     font-weight: 800;
+}
+
+.trophies-companion-card.is-cs2-view .companion-view-detail .companion-back-btn,
+.trophies-companion-card.is-cs2-view .companion-view-detail .companion-action-btn,
+.trophies-companion-card.is-cs2-view .companion-view-detail .companion-edit-toggle-btn,
+.trophies-companion-card.is-cs2-view .companion-view-detail .companion-close-btn {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
 }
 
 .trophies-companion-card.is-cs2-view .companion-view-detail .companion-body {
     overflow-y: hidden !important;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: center;
     padding: clamp(6px, 1.4cqh, 12px) clamp(10px, 2.4cqw, 16px) clamp(4px, 0.8cqh, 8px);
     flex: 1;
     min-height: 0;
@@ -2320,41 +2330,51 @@ body.is-owner .top-item-unit:active {
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: clamp(8px, 1.6cqh, 12px);
+    justify-content: center;
+    gap: clamp(8px, 1.8cqh, 14px);
+}
+
+.trophy-cs2-main-grid {
+    display: grid;
+    grid-template-columns: 1.18fr 0.92fr;
+    gap: clamp(8px, 2cqw, 12px);
+    align-items: center;
+    flex: 1;
     min-height: 0;
 }
 
-/* 1. Oyuncu Kimlik Kapsülü */
+/* Sol Kolon */
+.trophy-cs2-left-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: auto;
+    min-height: 0;
+    gap: clamp(6px, 1.2cqh, 9px);
+}
+
 .trophy-cs2-user-capsule {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: clamp(8px, 2cqw, 12px);
-    background: rgba(16, 20, 30, 0.88);
+    gap: clamp(6px, 1.5cqw, 8px);
+    background: rgba(14, 18, 28, 0.84);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(222, 155, 53, 0.32);
-    border-left: 3px solid #de9b35;
-    border-radius: 8px;
-    padding: clamp(8px, 1.5cqh, 11px) clamp(11px, 2.4cqw, 15px);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.38);
+    border: 1px solid rgba(222, 155, 53, 0.28);
+    border-radius: 9px;
+    padding: clamp(6px, 1.2cqh, 8px) clamp(9px, 2cqw, 12px);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+    box-sizing: border-box;
     flex-shrink: 0;
-}
-
-.trophy-cs2-user-left {
-    display: flex;
-    align-items: center;
-    gap: clamp(6px, 1.6cqw, 10px);
-    min-width: 0;
+    width: 100%;
 }
 
 .trophy-cs2-player-name {
-    font-size: clamp(14px, 3.3cqw, 17px);
+    font-size: clamp(13.5px, 3.1cqw, 16.5px);
     font-weight: 850;
     color: #ffffff;
-    letter-spacing: 0.25px;
-    line-height: 1.15;
+    letter-spacing: 0.2px;
+    line-height: 1.1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2363,64 +2383,129 @@ body.is-owner .top-item-unit:active {
 .trophy-cs2-server-badge {
     font-size: 9.5px;
     font-weight: 800;
-    color: #ffd8a8;
+    color: #f59e0b;
     background: rgba(222, 155, 53, 0.16);
     border: 1px solid rgba(222, 155, 53, 0.4);
     border-radius: 4px;
-    padding: 2px 6px;
+    padding: 1.5px 5.5px;
     line-height: 1.1;
     letter-spacing: 0.5px;
+    margin-left: auto;
     flex-shrink: 0;
 }
 
-.trophy-cs2-tag-chip {
-    font-size: 10px;
-    font-weight: 850;
-    color: #de9b35;
-    letter-spacing: 0.12em;
-    opacity: 0.85;
-    flex-shrink: 0;
+/* Info Paneli */
+.trophy-cs2-info-panel {
+    background: rgba(14, 18, 28, 0.82);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(222, 155, 53, 0.22);
+    border-radius: 12px;
+    padding: clamp(6px, 1.2cqh, 8px) clamp(7px, 1.6cqw, 9px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: clamp(5px, 1cqh, 7px);
+    box-sizing: border-box;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    min-height: 0;
 }
 
-/* 2. Derece Vitrini (FACEIT + Opsiyonel Premier) */
-.trophy-cs2-ranks-row {
-    display: grid;
-    gap: clamp(8px, 1.8cqw, 12px);
-    flex-shrink: 0;
+/* Elo Kartları (Peak + Aktif FACEIT) */
+.trophy-cs2-elo-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 9px;
+    padding: clamp(5px, 0.8cqh, 7px) clamp(8px, 1.8cqw, 12px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    position: relative;
+    height: clamp(82px, 18.5cqh, 150px);
+    box-sizing: border-box;
+    min-height: 0;
 }
 
-.trophy-cs2-ranks-row.is-single {
-    grid-template-columns: 1fr;
+.trophy-cs2-elo-card.is-peak {
+    background: linear-gradient(135deg, rgba(222, 155, 53, 0.16) 0%, rgba(180, 120, 30, 0.05) 100%);
+    border: 1px solid rgba(222, 155, 53, 0.45);
+    box-shadow: 0 3px 12px rgba(222, 155, 53, 0.15), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.trophy-cs2-ranks-row.is-dual {
-    grid-template-columns: 1.15fr 0.95fr;
-}
-
-.trophy-cs2-rank-card {
+.trophy-cs2-elo-top-row {
+    width: 100%;
     display: flex;
     align-items: center;
-    gap: clamp(10px, 2.2cqw, 14px);
-    background: rgba(16, 20, 30, 0.82);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    padding: clamp(10px, 1.8cqh, 14px) clamp(11px, 2.4cqw, 15px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 12px rgba(0, 0, 0, 0.3);
-    min-width: 0;
+    justify-content: space-between;
+    gap: 4px;
+    flex-shrink: 0;
 }
 
-.trophy-cs2-rank-card.is-faceit {
-    border-color: color-mix(in srgb, var(--cs2-lvl-color, #de9b35) 35%, rgba(255, 255, 255, 0.08));
+.trophy-cs2-elo-badge {
+    font-size: clamp(8px, 1.8cqw, 9.5px);
+    font-weight: 800;
+    color: #de9b35;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    line-height: 1;
 }
 
-.trophy-cs2-rank-card.is-premier {
-    border-color: color-mix(in srgb, var(--cs2-premier-color, #de9b35) 38%, rgba(255, 255, 255, 0.08));
+.trophy-cs2-elo-card.is-peak .trophy-cs2-elo-badge {
+    color: #fbbf24;
+}
+
+/* Peak Kutusu Sağ Üst Switch */
+.trophy-cs2-peak-switch {
+    background: rgba(9, 12, 20, 0.72);
+    border: 1px solid rgba(222, 155, 53, 0.45);
+    color: #ffd8a8;
+    font-size: clamp(7.5px, 1.5cqw, 8.5px);
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    cursor: pointer;
+    line-height: 1.1;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.15s ease;
+}
+
+.trophy-cs2-peak-switch:hover {
+    background: rgba(222, 155, 53, 0.25);
+    border-color: #fbbf24;
+    color: #ffffff;
+}
+
+.trophy-cs2-peak-switch.is-premier-active {
+    background: rgba(136, 71, 255, 0.28);
+    border-color: rgba(167, 139, 250, 0.65);
+    color: #e9d5ff;
+}
+
+.trophy-cs2-peak-view {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 0;
+}
+
+.trophy-cs2-elo-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-height: 0;
 }
 
 .trophy-cs2-lvl-badge {
     position: relative;
-    width: clamp(34px, 7.5cqw, 42px);
-    height: clamp(34px, 7.5cqw, 42px);
+    width: clamp(32px, 6.8cqh, 48px);
+    height: clamp(32px, 6.8cqh, 48px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2437,7 +2522,7 @@ body.is-owner .top-item-unit:active {
 .trophy-cs2-lvl-num {
     position: relative;
     z-index: 1;
-    font-size: clamp(13px, 2.9cqw, 16px);
+    font-size: clamp(12.5px, 2.8cqw, 16px);
     font-weight: 900;
     color: #ffffff;
     line-height: 1;
@@ -2445,168 +2530,180 @@ body.is-owner .top-item-unit:active {
 
 .trophy-cs2-premier-bars {
     display: flex;
-    gap: 2.5px;
-    height: clamp(24px, 5.2cqh, 30px);
+    gap: 3px;
+    height: clamp(24px, 5cqh, 34px);
     flex-shrink: 0;
     transform: skewX(-12deg);
 }
 
 .trophy-cs2-premier-bars span {
-    width: 4px;
+    width: 5px;
     height: 100%;
     border-radius: 1.5px;
     background: var(--cs2-premier-color, #de9b35);
-    box-shadow: 0 0 8px color-mix(in srgb, var(--cs2-premier-color, #de9b35) 55%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--cs2-premier-color, #de9b35) 55%, transparent);
 }
 
 .trophy-cs2-premier-bars span:last-child {
     opacity: 0.6;
 }
 
-.trophy-cs2-rank-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-}
-
-.trophy-cs2-rank-label {
-    font-size: clamp(9px, 1.8cqw, 10.5px);
-    font-weight: 800;
-    letter-spacing: 0.09em;
-    color: rgba(255, 255, 255, 0.55);
-}
-
-.trophy-cs2-rank-val {
-    font-size: clamp(14px, 3.2cqw, 17px);
+.trophy-cs2-elo-tier-text {
+    font-size: clamp(11px, 2.3cqw, 12.5px);
     font-weight: 850;
     color: #ffffff;
+    letter-spacing: 0.3px;
+    text-align: center;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    line-height: 1.1;
 }
 
-.trophy-cs2-rank-val.is-premier-val {
+.trophy-cs2-elo-tier-text.is-premier-val {
     color: var(--cs2-premier-color, #de9b35);
     font-variant-numeric: tabular-nums;
 }
 
-/* 3. Performans İmzası (3 Metrik) */
-.trophy-cs2-stats-row {
+/* 3. Kompakt Performans Kapsülleri (K/D & HS%) */
+.trophy-cs2-metrics-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: clamp(6px, 1.6cqw, 10px);
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(5px, 1.2cqw, 7px);
     flex-shrink: 0;
 }
 
-.trophy-cs2-stat-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    background: rgba(16, 20, 30, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 9px;
-    padding: clamp(9px, 1.8cqh, 13px) clamp(6px, 1.4cqw, 10px);
-}
-
-.trophy-cs2-stat-label {
-    font-size: clamp(8.5px, 1.7cqw, 10px);
-    font-weight: 750;
-    letter-spacing: 0.08em;
-    color: rgba(255, 255, 255, 0.5);
-    text-align: center;
-}
-
-.trophy-cs2-stat-val {
-    font-size: clamp(14px, 3.2cqw, 17px);
-    font-weight: 850;
-    color: #f8f9fa;
-    font-variant-numeric: tabular-nums;
-}
-
-.trophy-cs2-stat-val.is-wr {
-    color: #38d9a9;
-}
-
-/* 4. Kişisel İmza & Loadout Kartı */
-.trophy-cs2-loadout-card {
-    position: relative;
-    overflow: hidden;
+.trophy-cs2-metric-pill {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: clamp(8px, 2cqw, 14px);
-    background: linear-gradient(125deg, color-mix(in srgb, var(--cs2-map-c1, #c87e3a) 32%, #0e121c) 0%, color-mix(in srgb, var(--cs2-map-c2, #5c3416) 28%, #0a0d14) 100%);
-    border: 1px solid color-mix(in srgb, var(--cs2-map-c1, #de9b35) 40%, rgba(255, 255, 255, 0.08));
-    border-radius: 10px;
-    padding: clamp(10px, 2cqh, 14px) clamp(12px, 2.6cqw, 16px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 4px 14px rgba(0, 0, 0, 0.35);
-    flex: 1;
-    min-height: 0;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: clamp(5px, 0.9cqh, 7px) clamp(7px, 1.5cqw, 10px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.trophy-cs2-loadout-map {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
+.trophy-cs2-metric-label {
+    font-size: clamp(9px, 1.9cqw, 10.5px);
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.3px;
 }
 
-.trophy-cs2-loadout-kicker {
-    font-size: clamp(8.5px, 1.6cqw, 9.5px);
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.58);
+.trophy-cs2-metric-val {
+    font-size: clamp(11px, 2.3cqw, 12.5px);
+    font-weight: 850;
+    color: #f8f9fa;
+    font-family: var(--font-mono);
 }
 
-.trophy-cs2-loadout-map-name {
-    font-size: clamp(15px, 3.5cqw, 19px);
-    font-weight: 900;
-    color: #ffffff;
-    letter-spacing: 0.02em;
-    line-height: 1.1;
-}
-
-.trophy-cs2-loadout-pills {
+/* 4. Alt Taban: Kazanma Oranı Kartı */
+.trophy-cs2-wr-card {
     display: flex;
     align-items: center;
-    gap: clamp(6px, 1.4cqw, 8px);
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: clamp(5px, 0.9cqh, 7px) clamp(8px, 1.8cqw, 11px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     flex-shrink: 0;
 }
 
-.trophy-cs2-loadout-pill {
+.trophy-cs2-wr-left {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 1px;
-    background: rgba(9, 12, 18, 0.62);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 7px;
-    padding: clamp(5px, 1cqh, 7px) clamp(8px, 1.8cqw, 11px);
+    align-items: center;
+    gap: 6px;
 }
 
-.trophy-cs2-loadout-pill.is-weapon {
-    border-color: rgba(222, 155, 53, 0.42);
+.trophy-cs2-wr-icon {
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-.trophy-cs2-pill-k {
-    font-size: 8px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.trophy-cs2-pill-v {
-    font-size: clamp(11px, 2.3cqw, 12.5px);
-    font-weight: 800;
-    color: #ffffff;
+.trophy-cs2-wr-label {
+    font-size: clamp(9.5px, 2.1cqw, 11px);
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.3px;
     white-space: nowrap;
 }
 
-.trophy-cs2-loadout-pill.is-weapon .trophy-cs2-pill-v {
-    color: #ffd8a8;
+.trophy-cs2-wr-val {
+    font-size: clamp(11px, 2.4cqw, 12.5px);
+    font-weight: 850;
+    color: #38d9a9;
+    font-family: var(--font-mono);
+    white-space: nowrap;
+}
+
+/* Sağ Panel: Statik cs-render.jpg + Karartma Fade + Silah + Oyun Tarzı Tag */
+.trophy-cs2-art-box {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(222, 155, 53, 0.35);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55);
+    background: #0a0d14;
+    height: clamp(320px, 73cqh, 620px);
+    align-self: center;
+    display: flex;
+    box-sizing: border-box;
+}
+
+.trophy-cs2-art-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 15%;
+    display: block;
+    transform: scale(1.02);
+    transform-origin: center bottom;
+}
+
+.trophy-cs2-art-bottom-fade {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 58%;
+    background: linear-gradient(to top, rgba(5, 7, 12, 0.98) 0%, rgba(5, 7, 12, 0.82) 45%, rgba(5, 7, 12, 0.35) 78%, transparent 100%);
+    pointer-events: none;
+}
+
+.trophy-cs2-art-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: clamp(8px, 1.6cqh, 12px) clamp(8px, 1.8cqw, 12px);
+    z-index: 2;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(4px, 0.8cqh, 6px);
+}
+
+.trophy-cs2-weapon-img {
+    width: 82%;
+    max-width: 150px;
+    height: clamp(32px, 6.5cqh, 52px);
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95));
+    pointer-events: none;
+}
+
+.trophy-cs2-playstyle-tag {
+    font-size: clamp(10px, 2.2cqw, 11.5px);
+    font-weight: 850;
+    color: #de9b35;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+    line-height: 1.15;
 }
 
 .trophies-companion-card.is-cs2-view .companion-view-detail .companion-footer {

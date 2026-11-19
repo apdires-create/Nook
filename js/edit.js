@@ -2886,36 +2886,35 @@ EditManager.TrophiesView = {
             ` : ''}
 
             ${(tur === 'cs2' || tur === 'faceit') ? `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div style="display: grid; grid-template-columns: 1fr 1.25fr; gap: 8px;">
                     <div class="mt-form-field">
-                        <label class="mt-field-label">Oyun İçi Rol</label>
-                        <select class="mt-form-input is-select mt-cs2-role-select">
-                            ${(TrophiesManager.CS2_ROLES || ['Rifler', 'AWPer', 'Entry Fragger', 'Lurker', 'IGL', 'Support']).map(r => `
-                                <option value="${RenderEngine.escapeHtml(r)}" ${(mevcutSnap.rol || 'Rifler') === r ? 'selected' : ''}>${RenderEngine.escapeHtml(r)}</option>
+                        <label class="mt-field-label">Oyun Tarzı (Tag)</label>
+                        <select class="mt-form-input is-select mt-cs2-playstyle-select">
+                            ${(TrophiesManager.CS2_PLAYSTYLES || ['Agresif', 'Taktisyen', 'AWP Player', 'Clutch', 'MVP']).map(r => `
+                                <option value="${RenderEngine.escapeHtml(r)}" ${(mevcutSnap.playstyle || mevcutSnap.rol || 'Agresif') === r ? 'selected' : ''}>${RenderEngine.escapeHtml(r)}</option>
                             `).join('')}
                         </select>
                     </div>
                     <div class="mt-form-field">
-                        <label class="mt-field-label">İmza Silah</label>
-                        <select class="mt-form-input is-select mt-cs2-weapon-select">
-                            ${(TrophiesManager.CS2_WEAPONS || ['AK-47', 'AWP', 'M4A1-S', 'M4A4', 'Desert Eagle', 'USP-S']).map(w => `
-                                <option value="${RenderEngine.escapeHtml(w)}" ${(mevcutSnap.silah || 'AK-47') === w ? 'selected' : ''}>${RenderEngine.escapeHtml(w)}</option>
-                            `).join('')}
-                        </select>
+                        <label class="mt-field-label">Favori Silah</label>
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <select class="mt-form-input is-select mt-cs2-weapon-select" style="flex: 1; min-width: 0;">
+                                <option value="${RenderEngine.escapeHtml(mevcutSnap.silah || 'AK-47')}" selected>${RenderEngine.escapeHtml(mevcutSnap.silah || 'AK-47')}</option>
+                            </select>
+                            <div style="width: 44px; height: 32px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(222, 155, 53, 0.4); flex-shrink: 0; background: #0a0d14; display: flex; align-items: center; justify-content: center; padding: 2px;" title="Silah Önizleme">
+                                <img class="mt-cs2-weapon-preview-img" src="${RenderEngine.escapeHtml(TrophiesManager.getCS2WeaponImage(mevcutSnap.silah || 'AK-47'))}" alt="Silah" style="width: 100%; height: 100%; object-fit: contain;">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
                     <div class="mt-form-field">
-                        <label class="mt-field-label">Favori Harita</label>
-                        <select class="mt-form-input is-select mt-cs2-map-select">
-                            ${(TrophiesManager.CS2_MAPS || []).map(m => `
-                                <option value="${RenderEngine.escapeHtml(m.id)}" ${(mevcutSnap.harita || 'Mirage') === m.id ? 'selected' : ''}>${RenderEngine.escapeHtml(m.name)}</option>
-                            `).join('')}
-                        </select>
+                        <label class="mt-field-label">FACEIT Peak ELO <span style="opacity:0.6;font-weight:500;">(Opsiyonel)</span></label>
+                        <input type="text" class="mt-form-input mt-cs2-faceit-peak-input" placeholder="Örn: 2650" maxlength="6" value="${RenderEngine.escapeHtml(mevcutSnap.faceitPeak || '')}">
                     </div>
                     <div class="mt-form-field">
-                        <label class="mt-field-label">Premier Rating <span style="opacity:0.6;font-weight:500;">(Opsiyonel)</span></label>
-                        <input type="text" class="mt-form-input mt-cs2-premier-input" placeholder="Örn: 21450" maxlength="10" value="${RenderEngine.escapeHtml(mevcutSnap.premierRating || '')}">
+                        <label class="mt-field-label">Premier Peak <span style="opacity:0.6;font-weight:500;">(Opsiyonel)</span></label>
+                        <input type="text" class="mt-form-input mt-cs2-premier-input" placeholder="Örn: 21450" maxlength="10" value="${RenderEngine.escapeHtml(mevcutSnap.premierPeak || mevcutSnap.premierRating || '')}">
                     </div>
                 </div>
             ` : ''}
@@ -3113,15 +3112,18 @@ EditManager.TrophiesView = {
                 if (a3) extraSnap.ajan3 = a3.value;
             }
             if (tur === 'cs2' || tur === 'faceit') {
-                const roleSel = formWrap.querySelector('.mt-cs2-role-select');
+                const styleSel = formWrap.querySelector('.mt-cs2-playstyle-select');
                 const weaponSel = formWrap.querySelector('.mt-cs2-weapon-select');
-                const mapSel = formWrap.querySelector('.mt-cs2-map-select');
+                const faceitPeakInp = formWrap.querySelector('.mt-cs2-faceit-peak-input');
                 const premierInp = formWrap.querySelector('.mt-cs2-premier-input');
-                if (roleSel) extraSnap.rol = roleSel.value;
+                if (styleSel) extraSnap.playstyle = styleSel.value;
                 if (weaponSel) extraSnap.silah = weaponSel.value;
-                if (mapSel) extraSnap.harita = mapSel.value;
+                if (faceitPeakInp) {
+                    extraSnap.faceitPeak = faceitPeakInp.value.replace(/[^\d]/g, '').slice(0, 5);
+                }
                 if (premierInp) {
                     const cleanRating = premierInp.value.replace(/[^\d]/g, '').slice(0, 6);
+                    extraSnap.premierPeak = cleanRating;
                     extraSnap.premierRating = cleanRating;
                 }
             }
@@ -3224,6 +3226,30 @@ EditManager.TrophiesView = {
                     el.innerHTML = emptyOpt + listOpts;
                 });
             }).catch(() => {});
+        }
+
+        // CS2 Base Weapons Dinamik Seçici Entegrasyonu (ByMykel/CSGO-API)
+        if (tur === 'cs2' || tur === 'faceit') {
+            const weaponSel = formWrap.querySelector('.mt-cs2-weapon-select');
+            const previewImg = formWrap.querySelector('.mt-cs2-weapon-preview-img');
+            const initialWeapon = mevcutSnap.silah || 'AK-47';
+
+            TrophiesManager.getCS2Weapons().then(allWeapons => {
+                if (!weaponSel || !formWrap.isConnected) return;
+                weaponSel.innerHTML = allWeapons.map(w => {
+                    const isSel = w.name.toLowerCase() === initialWeapon.toLowerCase();
+                    return `<option value="${RenderEngine.escapeHtml(w.name)}" ${isSel ? 'selected' : ''}>${RenderEngine.escapeHtml(w.name)}</option>`;
+                }).join('');
+                if (previewImg) {
+                    previewImg.src = TrophiesManager.getCS2WeaponImage(weaponSel.value);
+                }
+            }).catch(() => {});
+
+            if (weaponSel && previewImg) {
+                weaponSel.addEventListener('change', () => {
+                    previewImg.src = TrophiesManager.getCS2WeaponImage(weaponSel.value);
+                });
+            }
         }
 
         const inp = formWrap.querySelector('.mt-user-input');

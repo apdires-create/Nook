@@ -458,21 +458,81 @@ const TrophiesManager = {
     },
     // #endregion
 
-    // CS2 Vitrin Seçenekleri (Harita, Rol, İmza Silah)
-    CS2_MAPS: [
-        { id: 'Mirage', name: 'Mirage', callout: 'de_mirage', c1: '#c87e3a', c2: '#5c3416' },
-        { id: 'Inferno', name: 'Inferno', callout: 'de_inferno', c1: '#b84a39', c2: '#4e1d16' },
-        { id: 'Dust 2', name: 'Dust 2', callout: 'de_dust2', c1: '#d4a359', c2: '#5f4520' },
-        { id: 'Nuke', name: 'Nuke', callout: 'de_nuke', c1: '#4a7c9b', c2: '#1b3547' },
-        { id: 'Ancient', name: 'Ancient', callout: 'de_ancient', c1: '#4d7c5b', c2: '#1e3827' },
-        { id: 'Anubis', name: 'Anubis', callout: 'de_anubis', c1: '#c49347', c2: '#4d3716' },
-        { id: 'Train', name: 'Train', callout: 'de_train', c1: '#6e7f91', c2: '#27313b' },
-        { id: 'Overpass', name: 'Overpass', callout: 'de_overpass', c1: '#5d7a6e', c2: '#23322c' }
+    // CS2 Vitrin Seçenekleri (Oyun Tarzı Tagleri & Silah API)
+    CS2_PLAYSTYLES: ['Agresif', 'Taktisyen', 'AWP Player', 'Clutch', 'MVP', 'Entry', 'Lurker', 'Support'],
+
+    CS2_WEAPONS: [
+        { name: 'AK-47', image: 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/econ/weapons/base_weapons/weapon_ak47.png' },
+        { name: 'AWP', image: 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/econ/weapons/base_weapons/weapon_awp.png' },
+        { name: 'M4A1-S', image: 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/econ/weapons/base_weapons/weapon_m4a1_silencer.png' },
+        { name: 'M4A4', image: 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/econ/weapons/base_weapons/weapon_m4a1.png' },
+        { name: 'Desert Eagle', image: 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/econ/weapons/base_weapons/weapon_deagle.png' },
+        { name: 'USP-S', image: 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/econ/weapons/base_weapons/weapon_usp_silencer.png' },
+        { name: 'Glock-18', image: 'https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/images/econ/weapons/base_weapons/weapon_glock.png' }
     ],
 
-    CS2_ROLES: ['Rifler', 'AWPer', 'Entry Fragger', 'Lurker', 'IGL', 'Support'],
+    _cs2WeaponsCache: null,
 
-    CS2_WEAPONS: ['AK-47', 'AWP', 'M4A1-S', 'M4A4', 'Desert Eagle', 'USP-S'],
+    async getCS2Weapons() {
+        if (this._cs2WeaponsCache && this._cs2WeaponsCache.length > 0) {
+            return this._cs2WeaponsCache;
+        }
+        try {
+            const cached = sessionStorage.getItem('nook_cs2_base_weapons');
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    this._cs2WeaponsCache = parsed;
+                    return parsed;
+                }
+            }
+        } catch {}
+
+        try {
+            const res = await fetch('https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/api/en/base_weapons.json');
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    const filtered = data
+                        .filter(w => w && w.name && w.image && !/knife|bayonet|karambit|dagger|gloves|wraps|zeus|c4/i.test(w.name))
+                        .map(w => ({ name: w.name, image: w.image }))
+                        .sort((a, b) => a.name.localeCompare(b.name, 'en'));
+                    if (filtered.length > 0) {
+                        this._cs2WeaponsCache = filtered;
+                        try { sessionStorage.setItem('nook_cs2_base_weapons', JSON.stringify(filtered)); } catch {}
+                        return filtered;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('[TrophiesManager] CS2 base_weapons fetch failed, using fallback:', e);
+        }
+        return this.CS2_WEAPONS;
+    },
+
+    getCS2WeaponImage(weaponName) {
+        const clean = String(weaponName || 'AK-47').trim().toLowerCase();
+        const pool = (this._cs2WeaponsCache && this._cs2WeaponsCache.length > 0)
+            ? this._cs2WeaponsCache
+            : this.CS2_WEAPONS;
+        const found = pool.find(w => w.name.toLowerCase() === clean);
+        return found ? found.image : this.CS2_WEAPONS[0].image;
+    },
+
+    getFaceitLevelFromElo(elo) {
+        const val = Number(elo);
+        if (!val || isNaN(val)) return null;
+        if (val >= 2001) return 10;
+        if (val >= 1751) return 9;
+        if (val >= 1531) return 8;
+        if (val >= 1351) return 7;
+        if (val >= 1201) return 6;
+        if (val >= 1051) return 5;
+        if (val >= 901) return 4;
+        if (val >= 751) return 3;
+        if (val >= 501) return 2;
+        return 1;
+    },
 
     getFaceitLevelColor(level) {
         const lvl = Number(level) || 1;
@@ -493,11 +553,6 @@ const TrophiesManager = {
         if (num >= 10000) return '#4b69ff';
         if (num >= 5000) return '#5e98d9';
         return '#b0c3d9';
-    },
-
-    getCS2MapData(mapName) {
-        const clean = String(mapName || 'Mirage').trim().toLowerCase();
-        return this.CS2_MAPS.find(m => m.id.toLowerCase() === clean || m.name.toLowerCase() === clean) || this.CS2_MAPS[0];
     },
 
     // #region 2: GAMING (REKABETÇİ OYUNLAR) & WIDGET KATALOĞU
@@ -1181,25 +1236,29 @@ const TrophiesManager = {
                 const region = (d?.country || d?.region || cs2?.region || 'EU').toUpperCase();
                 const nick = d?.nickname || d?.name || kullanici;
 
-                const premierRaw = d?.premierRating ? String(d.premierRating).trim() : '';
+                const premierRaw = (d?.premierPeak || d?.premierRating) ? String(d.premierPeak || d.premierRating).trim() : '';
                 const premierNum = premierRaw ? parseInt(premierRaw.replace(/[^\d]/g, ''), 10) : 0;
                 const premierFormatted = premierNum ? premierNum.toLocaleString('en-US') : premierRaw;
+
+                const faceitPeakRaw = d?.faceitPeak ? parseInt(String(d.faceitPeak).replace(/[^\d]/g, ''), 10) : null;
+                const faceitPeak = faceitPeakRaw || elo || null;
+                const faceitPeakLevel = faceitPeak ? (TrophiesManager.getFaceitLevelFromElo(faceitPeak) || lvl) : lvl;
 
                 const kd = d?.kd ? String(d.kd).trim() : null;
                 const hsRaw = d?.hs ? String(d.hs).replace(/%/g, '').trim() : null;
                 const wrRaw = d?.winrate ? String(d.winrate).replace(/%/g, '').trim() : null;
                 const matches = d?.matches ? String(d.matches).trim() : null;
 
-                const rol = d?.rol || 'Rifler';
+                const playstyle = d?.playstyle || d?.rol || 'Agresif';
                 const silah = d?.silah || 'AK-47';
-                const harita = d?.harita || 'Mirage';
+                const silahGorsel = TrophiesManager.getCS2WeaponImage(silah);
 
                 const isPremier = secilenMod === 'premier' && Boolean(premierFormatted);
                 const heroLabel = isPremier ? 'PREMIER CS RATING' : 'FACEIT ELO';
                 const heroValue = isPremier ? premierFormatted : (elo ? `${elo} ELO` : (lvl ? `Level ${lvl}` : 'FACEIT Aktif'));
                 const heroSub = isPremier ? 'Valve Premier' : (lvl ? `Level ${lvl} • FACEIT` : 'FACEIT Matchmaking');
-                const peakLabel = isPremier ? 'FACEIT ELO' : 'PREMIER RATING';
-                const peakValue = isPremier ? (elo ? `${elo} ELO` : '—') : (premierFormatted || (lvl ? `Level ${lvl}` : '—'));
+                const peakLabel = isPremier ? 'PREMIER PEAK' : 'FACEIT PEAK';
+                const peakValue = isPremier ? premierFormatted : (faceitPeak ? `${faceitPeak} ELO` : (lvl ? `Level ${lvl}` : '—'));
 
                 return {
                     handle: nick,
@@ -1207,14 +1266,17 @@ const TrophiesManager = {
                     region,
                     level: lvl,
                     elo,
+                    faceitPeak,
+                    faceitPeakLevel,
+                    premierPeak: premierFormatted || null,
                     premierRating: premierFormatted || null,
                     kd,
                     hs: hsRaw,
                     winrate: wrRaw,
                     matches,
-                    rol,
+                    playstyle,
                     silah,
-                    harita,
+                    silahGorsel,
                     heroLabel,
                     heroValue,
                     heroSub,
@@ -1582,8 +1644,10 @@ const TrophiesManager = {
                 ...(snap.sampiyon ? { sampiyon: snap.sampiyon } : {}),
                 ...(snap.kostumNo !== undefined ? { kostumNo: snap.kostumNo } : {}),
                 ...(snap.rol ? { rol: snap.rol } : {}),
+                ...(snap.playstyle ? { playstyle: snap.playstyle } : {}),
                 ...(snap.silah ? { silah: snap.silah } : {}),
-                ...(snap.harita ? { harita: snap.harita } : {}),
+                ...(snap.faceitPeak ? { faceitPeak: snap.faceitPeak } : {}),
+                ...(snap.premierPeak ? { premierPeak: snap.premierPeak } : {}),
                 ...(snap.premierRating ? { premierRating: snap.premierRating } : {}),
                 ...(snap.ajan1 ? { ajan1: snap.ajan1 } : {}),
                 ...(snap.ajan2 ? { ajan2: snap.ajan2 } : {}),
