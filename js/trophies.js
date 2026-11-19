@@ -472,6 +472,72 @@ const TrophiesManager = {
     ],
 
     _cs2WeaponsCache: null,
+    _cs2SkinsByWeaponCache: null,
+    _cs2SkinsFetchPromise: null,
+
+    async getCS2WeaponSkins(weaponName) {
+        const targetWeapon = String(weaponName || 'AK-47').trim();
+        const baseImg = this.getCS2WeaponImage(targetWeapon);
+        const defaultOpt = { name: '', label: 'Varsayılan (Base)', image: baseImg, color: '' };
+
+        if (this._cs2SkinsByWeaponCache) {
+            const list = this._cs2SkinsByWeaponCache[targetWeapon.toLowerCase()] || [];
+            return [defaultOpt, ...list];
+        }
+
+        if (!this._cs2SkinsFetchPromise) {
+            this._cs2SkinsFetchPromise = fetch('https://raw.githubusercontent.com/ByMykel/CSGO-API/main/public/api/en/skins.json')
+                .then(res => (res.ok ? res.json() : []))
+                .then(data => {
+                    const grouped = {};
+                    const seenByWeapon = {};
+                    if (Array.isArray(data)) {
+                        for (const item of data) {
+                            const wName = item?.weapon?.name;
+                            const img = item?.image;
+                            if (!wName || !img) continue;
+
+                            const rawPattern = item?.pattern?.name || (item?.name?.includes('|') ? item.name.split('|')[1] : '') || '';
+                            const cleanPattern = rawPattern.replace(/^(StatTrak™|Souvenir|★)\s+/i, '').trim();
+                            if (!cleanPattern) continue;
+
+                            const wKey = wName.toLowerCase();
+                            const pKey = cleanPattern.toLowerCase();
+                            if (!grouped[wKey]) {
+                                grouped[wKey] = [];
+                                seenByWeapon[wKey] = new Set();
+                            }
+                            if (seenByWeapon[wKey].has(pKey)) continue;
+                            seenByWeapon[wKey].add(pKey);
+
+                            grouped[wKey].push({
+                                name: cleanPattern,
+                                label: cleanPattern,
+                                image: img,
+                                color: item?.rarity?.color || ''
+                            });
+                        }
+                        for (const k of Object.keys(grouped)) {
+                            grouped[k].sort((a, b) => a.name.localeCompare(b.name, 'en'));
+                        }
+                    }
+                    this._cs2SkinsByWeaponCache = grouped;
+                    return grouped;
+                })
+                .catch(e => {
+                    console.warn('[TrophiesManager] CS2 skins fetch failed:', e);
+                    this._cs2SkinsByWeaponCache = {};
+                    return {};
+                })
+                .finally(() => {
+                    this._cs2SkinsFetchPromise = null;
+                });
+        }
+
+        const grouped = await this._cs2SkinsFetchPromise;
+        const list = (grouped && grouped[targetWeapon.toLowerCase()]) || [];
+        return [defaultOpt, ...list];
+    },
 
     async getCS2Weapons() {
         if (this._cs2WeaponsCache && this._cs2WeaponsCache.length > 0) {
@@ -1251,6 +1317,8 @@ const TrophiesManager = {
 
                 const playstyle = d?.playstyle || d?.rol || 'Agresif';
                 const silah = d?.silah || 'AK-47';
+                const skin = d?.skin || '';
+                const skinRarityColor = d?.skinRarityColor || '';
                 const silahGorsel = d?.silahGorsel || TrophiesManager.getCS2WeaponImage(silah);
 
                 const isPremier = secilenMod === 'premier' && Boolean(premierFormatted);
@@ -1276,6 +1344,8 @@ const TrophiesManager = {
                     matches,
                     playstyle,
                     silah,
+                    skin,
+                    skinRarityColor,
                     silahGorsel,
                     heroLabel,
                     heroValue,
@@ -1646,6 +1716,8 @@ const TrophiesManager = {
                 ...(snap.rol ? { rol: snap.rol } : {}),
                 ...(snap.playstyle ? { playstyle: snap.playstyle } : {}),
                 ...(snap.silah ? { silah: snap.silah } : {}),
+                ...(snap.skin ? { skin: snap.skin } : {}),
+                ...(snap.skinRarityColor ? { skinRarityColor: snap.skinRarityColor } : {}),
                 ...(snap.silahGorsel ? { silahGorsel: snap.silahGorsel } : {}),
                 ...(snap.faceitPeak ? { faceitPeak: snap.faceitPeak } : {}),
                 ...(snap.premierPeak ? { premierPeak: snap.premierPeak } : {}),

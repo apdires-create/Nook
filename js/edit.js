@@ -2897,13 +2897,20 @@ EditManager.TrophiesView = {
                     </div>
                     <div class="mt-form-field">
                         <label class="mt-field-label">Favori Silah</label>
-                        <div style="display: flex; gap: 6px; align-items: center;">
-                            <select class="mt-form-input is-select mt-cs2-weapon-select" style="flex: 1; min-width: 0;">
-                                <option value="${RenderEngine.escapeHtml(mevcutSnap.silah || 'AK-47')}" selected>${RenderEngine.escapeHtml(mevcutSnap.silah || 'AK-47')}</option>
-                            </select>
-                            <div style="width: 44px; height: 32px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(222, 155, 53, 0.4); flex-shrink: 0; background: #0a0d14; display: flex; align-items: center; justify-content: center; padding: 2px;" title="Silah Önizleme">
-                                <img class="mt-cs2-weapon-preview-img" src="${RenderEngine.escapeHtml(TrophiesManager.getCS2WeaponImage(mevcutSnap.silah || 'AK-47'))}" alt="Silah" style="width: 100%; height: 100%; object-fit: contain;">
-                            </div>
+                        <select class="mt-form-input is-select mt-cs2-weapon-select">
+                            <option value="${RenderEngine.escapeHtml(mevcutSnap.silah || 'AK-47')}" selected>${RenderEngine.escapeHtml(mevcutSnap.silah || 'AK-47')}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-form-field" style="margin-top: 4px;">
+                    <label class="mt-field-label">Silah Skini <span style="opacity:0.6;font-weight:500;">(Seçmek için tıkla)</span></label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <select class="mt-form-input is-select mt-cs2-skin-select" style="flex: 1; min-width: 0;">
+                            <option value="" ${!mevcutSnap.skin ? 'selected' : ''}>Varsayılan (Base)</option>
+                            ${mevcutSnap.skin ? `<option value="${RenderEngine.escapeHtml(mevcutSnap.skin)}" data-image="${RenderEngine.escapeHtml(mevcutSnap.silahGorsel || '')}" data-color="${RenderEngine.escapeHtml(mevcutSnap.skinRarityColor || '')}" selected>${RenderEngine.escapeHtml(mevcutSnap.skin)}</option>` : ''}
+                        </select>
+                        <div style="width: 48px; height: 34px; border-radius: 6px; overflow: hidden; border: 1px solid rgba(222, 155, 53, 0.4); flex-shrink: 0; background: #0a0d14; display: flex; align-items: center; justify-content: center; padding: 2px;" title="Silah / Skin Önizleme">
+                            <img class="mt-cs2-weapon-preview-img" src="${RenderEngine.escapeHtml(mevcutSnap.silahGorsel || TrophiesManager.getCS2WeaponImage(mevcutSnap.silah || 'AK-47'))}" alt="Silah" style="width: 100%; height: 100%; object-fit: contain;">
                         </div>
                     </div>
                 </div>
@@ -3114,12 +3121,25 @@ EditManager.TrophiesView = {
             if (tur === 'cs2' || tur === 'faceit') {
                 const styleSel = formWrap.querySelector('.mt-cs2-playstyle-select');
                 const weaponSel = formWrap.querySelector('.mt-cs2-weapon-select');
+                const skinSel = formWrap.querySelector('.mt-cs2-skin-select');
                 const faceitPeakInp = formWrap.querySelector('.mt-cs2-faceit-peak-input');
                 const premierInp = formWrap.querySelector('.mt-cs2-premier-input');
                 if (styleSel) extraSnap.playstyle = styleSel.value;
                 if (weaponSel) {
                     extraSnap.silah = weaponSel.value;
-                    extraSnap.silahGorsel = TrophiesManager.getCS2WeaponImage(weaponSel.value);
+                    const selectedSkinVal = skinSel ? skinSel.value : '';
+                    const selectedOpt = skinSel ? skinSel.selectedOptions?.[0] : null;
+                    extraSnap.skin = selectedSkinVal;
+                    if (selectedSkinVal && selectedOpt?.dataset?.image) {
+                        extraSnap.silahGorsel = selectedOpt.dataset.image;
+                        extraSnap.skinRarityColor = selectedOpt.dataset.color || '';
+                    } else if (selectedSkinVal && selectedSkinVal === mevcutSnap.skin && mevcutSnap.silahGorsel) {
+                        extraSnap.silahGorsel = mevcutSnap.silahGorsel;
+                        extraSnap.skinRarityColor = mevcutSnap.skinRarityColor || '';
+                    } else {
+                        extraSnap.silahGorsel = TrophiesManager.getCS2WeaponImage(weaponSel.value);
+                        extraSnap.skinRarityColor = '';
+                    }
                 }
                 if (faceitPeakInp) {
                     extraSnap.faceitPeak = faceitPeakInp.value.replace(/[^\d]/g, '').slice(0, 5);
@@ -3231,9 +3251,10 @@ EditManager.TrophiesView = {
             }).catch(() => {});
         }
 
-        // CS2 Base Weapons Dinamik Seçici Entegrasyonu (ByMykel/CSGO-API)
+        // CS2 Base Weapons & Tıklamalı Lazy Skin Seçici Entegrasyonu (ByMykel/CSGO-API)
         if (tur === 'cs2' || tur === 'faceit') {
             const weaponSel = formWrap.querySelector('.mt-cs2-weapon-select');
+            const skinSel = formWrap.querySelector('.mt-cs2-skin-select');
             const previewImg = formWrap.querySelector('.mt-cs2-weapon-preview-img');
             const initialWeapon = mevcutSnap.silah || 'AK-47';
 
@@ -3243,14 +3264,57 @@ EditManager.TrophiesView = {
                     const isSel = w.name.toLowerCase() === initialWeapon.toLowerCase();
                     return `<option value="${RenderEngine.escapeHtml(w.name)}" ${isSel ? 'selected' : ''}>${RenderEngine.escapeHtml(w.name)}</option>`;
                 }).join('');
-                if (previewImg) {
-                    previewImg.src = TrophiesManager.getCS2WeaponImage(weaponSel.value);
-                }
             }).catch(() => {});
 
-            if (weaponSel && previewImg) {
+            const loadSkinsOnDemand = async () => {
+                if (!skinSel || !weaponSel) return;
+                const curWeapon = weaponSel.value || initialWeapon;
+                if (skinSel.dataset.loadedFor === curWeapon || skinSel.dataset.loading === '1') return;
+
+                skinSel.dataset.loading = '1';
+                const prevSkin = skinSel.value;
+                skinSel.innerHTML = `<option value="${RenderEngine.escapeHtml(prevSkin)}" selected>Skinler yükleniyor...</option>`;
+
+                try {
+                    const skins = await TrophiesManager.getCS2WeaponSkins(curWeapon);
+                    if (!skinSel.isConnected) return;
+                    skinSel.innerHTML = skins.map(s => {
+                        const isSel = prevSkin && s.name.toLowerCase() === prevSkin.toLowerCase();
+                        return `<option value="${RenderEngine.escapeHtml(s.name)}" data-image="${RenderEngine.escapeHtml(s.image)}" data-color="${RenderEngine.escapeHtml(s.color || '')}" ${isSel ? 'selected' : ''}>${RenderEngine.escapeHtml(s.label)}</option>`;
+                    }).join('');
+                    skinSel.dataset.loadedFor = curWeapon;
+                } catch {
+                    if (skinSel.isConnected) {
+                        skinSel.innerHTML = `<option value="" selected>Varsayılan (Base)</option>`;
+                    }
+                } finally {
+                    delete skinSel.dataset.loading;
+                }
+            };
+
+            if (skinSel) {
+                skinSel.addEventListener('pointerdown', loadSkinsOnDemand);
+                skinSel.addEventListener('focus', loadSkinsOnDemand);
+                skinSel.addEventListener('change', () => {
+                    if (!previewImg) return;
+                    const opt = skinSel.selectedOptions?.[0];
+                    if (skinSel.value && opt?.dataset?.image) {
+                        previewImg.src = opt.dataset.image;
+                    } else if (weaponSel) {
+                        previewImg.src = TrophiesManager.getCS2WeaponImage(weaponSel.value);
+                    }
+                });
+            }
+
+            if (weaponSel) {
                 weaponSel.addEventListener('change', () => {
-                    previewImg.src = TrophiesManager.getCS2WeaponImage(weaponSel.value);
+                    if (skinSel) {
+                        skinSel.innerHTML = `<option value="" selected>Varsayılan (Base)</option>`;
+                        skinSel.dataset.loadedFor = '';
+                    }
+                    if (previewImg) {
+                        previewImg.src = TrophiesManager.getCS2WeaponImage(weaponSel.value);
+                    }
                 });
             }
         }

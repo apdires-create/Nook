@@ -2474,11 +2474,31 @@ body.is-owner .top-item-unit:active {
     transform: scale(1.28);
 }
 
+.trophy-cs2-weapon-labels {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    max-width: 100%;
+}
+
 .trophy-cs2-weapon-name {
     font-size: clamp(11px, 2.3cqw, 12.5px);
     font-weight: 850;
     color: #ffffff;
     letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    line-height: 1.1;
+}
+
+.trophy-cs2-weapon-skin {
+    font-size: clamp(9px, 1.9cqw, 10.5px);
+    font-weight: 750;
+    color: #de9b35;
+    letter-spacing: 0.25px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -783,6 +783,8 @@ const RenderEngine = {
 
         const playstyle = norm.playstyle || norm.rol || 'Agresif';
         const silah = norm.silah || 'AK-47';
+        const skin = norm.skin || '';
+        const skinColor = norm.skinRarityColor || '';
         const silahGorsel = norm.silahGorsel || TrophiesManager.getCS2WeaponImage(silah);
 
         if (!TrophiesManager._cs2WeaponsCache && !window._fetchingCs2Weapons) {
@@ -857,7 +859,10 @@ const RenderEngine = {
                                 <div class="trophy-cs2-weapon-center">
                                     ${silahGorsel ? `<img src="${this.escapeHtml(silahGorsel)}" alt="${this.escapeHtml(silah)}" class="trophy-cs2-weapon-showcase-img" loading="lazy" onerror="this.style.display='none';">` : ''}
                                 </div>
-                                <span class="trophy-cs2-weapon-name">${this.escapeHtml(silah)}</span>
+                                <div class="trophy-cs2-weapon-labels">
+                                    <span class="trophy-cs2-weapon-name">${this.escapeHtml(silah)}</span>
+                                    ${skin ? `<span class="trophy-cs2-weapon-skin" ${skinColor ? `style="color: ${this.escapeHtml(skinColor)};"` : ''}>${this.escapeHtml(skin)}</span>` : ''}
+                                </div>
                             </div>
 
                             <!-- 3. AKTİF FACEIT KAPSÜLÜ -->
