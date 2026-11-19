@@ -3069,13 +3069,26 @@ EditManager.TrophiesView = {
             }
 
             const saveBtn = formWrap.querySelector('.mt-form-save');
-            if (saveBtn) {
-                saveBtn.disabled = true;
-                saveBtn.textContent = 'Doğrulanıyor...';
+            const normExistingUser = String(mevcutKullanici || '').trim().toLowerCase();
+            const normNewUser = String(check.clean || '').trim().toLowerCase();
+            const isSameUser = Boolean(normExistingUser && normExistingUser === normNewUser);
+            const isSameRegion = !regionSelect || (String(secilenBolge || '').toLowerCase() === String(aktifBolge || '').toLowerCase());
+            const existingLive = mevcutSnap.raw
+                || kartVerisi?._canli_trophies?.[tur]
+                || TrophiesManager._getCache(tur, check.clean, secilenBolge);
+
+            // Kullanıcı adı ve bölge değişmediyse ve elde mevcut/önbellek canlı verisi varsa API sorgusunu atla
+            let canli = sonSorgulananCanliVeri;
+            if (!canli && isSameUser && isSameRegion && existingLive) {
+                canli = existingLive;
             }
 
-            // Brawlhalla dışındaki tüm içeriklerde API doğrulaması şart
-            let canli = sonSorgulananCanliVeri;
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.textContent = (!isManualAllowed && !canli) ? 'Doğrulanıyor...' : 'Kaydediliyor...';
+            }
+
+            // Yalnızca yeni hesap eklenirken veya kullanıcı adı/bölge değiştiğinde API doğrula
             if (!isManualAllowed && !canli) {
                 canli = await runLookup();
                 if (!canli) {
