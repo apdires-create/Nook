@@ -2411,8 +2411,9 @@ body.is-owner .top-item-unit:active {
     min-height: 0;
 }
 
-/* Elo Kartları (Peak + Aktif FACEIT) */
-.trophy-cs2-elo-card {
+/* Elo & Silah Vitrin Kartları */
+.trophy-cs2-elo-card,
+.trophy-cs2-weapon-card {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2424,9 +2425,95 @@ body.is-owner .top-item-unit:active {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
     text-align: center;
     position: relative;
-    height: clamp(82px, 18.5cqh, 150px);
+    height: clamp(74px, 16.2cqh, 134px);
     box-sizing: border-box;
     min-height: 0;
+}
+
+.trophy-cs2-weapon-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    padding: 2px 0;
+}
+
+.trophy-cs2-weapon-showcase-img {
+    width: 88%;
+    max-width: 165px;
+    height: 100%;
+    max-height: clamp(36px, 8.2cqh, 68px);
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
+    transition: transform 0.2s ease;
+}
+
+.trophy-cs2-weapon-card:hover .trophy-cs2-weapon-showcase-img {
+    transform: scale(1.06);
+}
+
+.trophy-cs2-weapon-name {
+    font-size: clamp(11px, 2.3cqw, 12.5px);
+    font-weight: 850;
+    color: #ffffff;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    line-height: 1.1;
+}
+
+/* Aktif FACEIT Kapsülü */
+.trophy-cs2-active-faceit-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: clamp(5px, 0.9cqh, 7px) clamp(8px, 1.8cqw, 11px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.trophy-cs2-active-faceit-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.trophy-cs2-mini-lvl {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--cs2-lvl-color, #de9b35);
+    background: rgba(0, 0, 0, 0.5);
+    font-size: 9.5px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.trophy-cs2-active-faceit-label {
+    font-size: clamp(9.5px, 2.1cqw, 11px);
+    font-weight: 750;
+    color: var(--text-secondary);
+    letter-spacing: 0.4px;
+}
+
+.trophy-cs2-active-faceit-val {
+    font-size: clamp(11px, 2.4cqw, 12.5px);
+    font-weight: 850;
+    color: #ffffff;
+    font-family: var(--font-mono);
+    white-space: nowrap;
 }
 
 .trophy-cs2-elo-card.is-peak {
@@ -2687,22 +2774,13 @@ body.is-owner .top-item-unit:active {
     gap: clamp(4px, 0.8cqh, 6px);
 }
 
-.trophy-cs2-weapon-img {
-    width: 92%;
-    max-width: 195px;
-    height: clamp(46px, 9.5cqh, 74px);
-    object-fit: contain;
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95));
-    pointer-events: none;
-}
-
 .trophy-cs2-playstyle-tag {
-    font-size: clamp(10px, 2.2cqw, 11.5px);
+    font-size: clamp(12px, 2.7cqw, 14.5px);
     font-weight: 850;
     color: #de9b35;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.9px;
     text-transform: uppercase;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
     line-height: 1.15;
 }
 

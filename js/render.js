@@ -849,18 +849,27 @@ const RenderEngine = {
                                 ` : ''}
                             </div>
 
-                            <!-- 2. AKTİF FACEIT KUTUSU -->
-                            <div class="trophy-cs2-elo-card">
+                            <!-- 2. FAVORİ SİLAH VİTRİN BLOĞU -->
+                            <div class="trophy-cs2-weapon-card">
                                 <div class="trophy-cs2-elo-top-row">
-                                    <span class="trophy-cs2-elo-badge">FACEIT</span>
+                                    <span class="trophy-cs2-elo-badge">FAVORİ SİLAH</span>
                                 </div>
-                                <div class="trophy-cs2-elo-center">
-                                    ${makeLevelRing(lvl, lvlColor)}
+                                <div class="trophy-cs2-weapon-center">
+                                    ${silahGorsel ? `<img src="${this.escapeHtml(silahGorsel)}" alt="${this.escapeHtml(silah)}" class="trophy-cs2-weapon-showcase-img" loading="lazy" onerror="this.style.display='none';">` : ''}
                                 </div>
-                                <span class="trophy-cs2-elo-tier-text">${elo ? `${elo.toLocaleString('en-US')} ELO` : (lvl ? `Level ${lvl}` : 'Bağlı')}</span>
+                                <span class="trophy-cs2-weapon-name">${this.escapeHtml(silah)}</span>
                             </div>
 
-                            <!-- 3. KOMPAKT PERFORMANS KAPSÜLLERİ (K/D & HS%) -->
+                            <!-- 3. AKTİF FACEIT KAPSÜLÜ -->
+                            <div class="trophy-cs2-active-faceit-card" style="--cs2-lvl-color: ${this.escapeHtml(lvlColor)};">
+                                <div class="trophy-cs2-active-faceit-left">
+                                    <span class="trophy-cs2-mini-lvl">${lvl ?? '—'}</span>
+                                    <span class="trophy-cs2-active-faceit-label">FACEIT</span>
+                                </div>
+                                <span class="trophy-cs2-active-faceit-val">${elo ? `${elo.toLocaleString('en-US')} ELO` : (lvl ? `Level ${lvl}` : 'Bağlı')}</span>
+                            </div>
+
+                            <!-- 4. KOMPAKT PERFORMANS KAPSÜLLERİ (K/D & HS%) -->
                             <div class="trophy-cs2-metrics-row">
                                 <div class="trophy-cs2-metric-pill">
                                     <span class="trophy-cs2-metric-label">K/D</span>
@@ -872,7 +881,7 @@ const RenderEngine = {
                                 </div>
                             </div>
 
-                            <!-- 4. ALT TABAN: KAZANMA ORANI KARTI -->
+                            <!-- 5. ALT TABAN: KAZANMA ORANI KARTI -->
                             <div class="trophy-cs2-wr-card">
                                 <div class="trophy-cs2-wr-left">
                                     <span class="trophy-cs2-wr-icon">
@@ -889,12 +898,11 @@ const RenderEngine = {
                         </div>
                     </div>
 
-                    <!-- SAĞ KOLON: STATİK CS-RENDER + KARARTMA FADE + SİLAH GÖRSELİ + OYUN TARZI TAG -->
+                    <!-- SAĞ KOLON: STATİK CS-RENDER + KARARTMA FADE + OYUN TARZI TAG -->
                     <div class="trophy-cs2-art-box">
                         <img src="assets/images/cs-render.jpg" alt="Counter-Strike 2" class="trophy-cs2-art-img" loading="lazy">
                         <div class="trophy-cs2-art-bottom-fade"></div>
                         <div class="trophy-cs2-art-caption">
-                            ${silahGorsel ? `<img src="${this.escapeHtml(silahGorsel)}" alt="${this.escapeHtml(silah)}" class="trophy-cs2-weapon-img" loading="lazy" onerror="this.style.display='none';">` : ''}
                             <span class="trophy-cs2-playstyle-tag">${this.escapeHtml(playstyle)}</span>
                         </div>
                     </div>
