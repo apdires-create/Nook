@@ -861,11 +861,8 @@ const RenderEngine = {
                             </div>
 
                             <!-- 3. AKTİF FACEIT KAPSÜLÜ -->
-                            <div class="trophy-cs2-active-faceit-card" style="--cs2-lvl-color: ${this.escapeHtml(lvlColor)};">
-                                <div class="trophy-cs2-active-faceit-left">
-                                    <span class="trophy-cs2-mini-lvl">${lvl ?? '—'}</span>
-                                    <span class="trophy-cs2-active-faceit-label">FACEIT</span>
-                                </div>
+                            <div class="trophy-cs2-active-faceit-card">
+                                <span class="trophy-cs2-active-faceit-label">FACEIT</span>
                                 <span class="trophy-cs2-active-faceit-val">${elo ? `${elo.toLocaleString('en-US')} ELO` : (lvl ? `Level ${lvl}` : 'Bağlı')}</span>
                             </div>
 

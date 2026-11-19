@@ -2343,12 +2343,12 @@ body.is-owner .top-item-unit:active {
     min-height: 0;
 }
 
-/* Sol Kolon */
+/* Sol Kolon (Sağ Render Kutusuyla Birebir Aynı Yükseklikte) */
 .trophy-cs2-left-col {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    height: auto;
+    height: clamp(320px, 73cqh, 620px);
     min-height: 0;
     gap: clamp(6px, 1.2cqh, 9px);
 }
@@ -2408,12 +2408,12 @@ body.is-owner .top-item-unit:active {
     gap: clamp(5px, 1cqh, 7px);
     box-sizing: border-box;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    flex: 1;
     min-height: 0;
 }
 
 /* Elo & Silah Vitrin Kartları */
-.trophy-cs2-elo-card,
-.trophy-cs2-weapon-card {
+.trophy-cs2-elo-card {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2425,9 +2425,27 @@ body.is-owner .top-item-unit:active {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
     text-align: center;
     position: relative;
-    height: clamp(74px, 16.2cqh, 134px);
+    height: clamp(72px, 15.5cqh, 128px);
     box-sizing: border-box;
+    flex-shrink: 0;
     min-height: 0;
+}
+
+.trophy-cs2-weapon-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 9px;
+    padding: clamp(6px, 1cqh, 8px) clamp(8px, 1.8cqw, 12px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    position: relative;
+    flex: 1;
+    box-sizing: border-box;
+    min-height: clamp(90px, 18cqh, 170px);
 }
 
 .trophy-cs2-weapon-center {
@@ -2437,21 +2455,23 @@ body.is-owner .top-item-unit:active {
     flex: 1;
     width: 100%;
     min-height: 0;
+    overflow: hidden;
     padding: 2px 0;
 }
 
 .trophy-cs2-weapon-showcase-img {
-    width: 88%;
-    max-width: 165px;
+    width: 96%;
+    max-width: 210px;
     height: 100%;
-    max-height: clamp(36px, 8.2cqh, 68px);
+    max-height: clamp(58px, 13cqh, 110px);
     object-fit: contain;
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
+    transform: scale(1.22);
+    filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.9));
     transition: transform 0.2s ease;
 }
 
 .trophy-cs2-weapon-card:hover .trophy-cs2-weapon-showcase-img {
-    transform: scale(1.06);
+    transform: scale(1.28);
 }
 
 .trophy-cs2-weapon-name {
