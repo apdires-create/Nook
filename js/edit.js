@@ -3117,7 +3117,10 @@ EditManager.TrophiesView = {
                 const faceitPeakInp = formWrap.querySelector('.mt-cs2-faceit-peak-input');
                 const premierInp = formWrap.querySelector('.mt-cs2-premier-input');
                 if (styleSel) extraSnap.playstyle = styleSel.value;
-                if (weaponSel) extraSnap.silah = weaponSel.value;
+                if (weaponSel) {
+                    extraSnap.silah = weaponSel.value;
+                    extraSnap.silahGorsel = TrophiesManager.getCS2WeaponImage(weaponSel.value);
+                }
                 if (faceitPeakInp) {
                     extraSnap.faceitPeak = faceitPeakInp.value.replace(/[^\d]/g, '').slice(0, 5);
                 }

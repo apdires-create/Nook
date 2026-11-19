@@ -1220,9 +1220,9 @@ const TrophiesManager = {
                         const sUrl = `https://www.faceit.com/api/stats/v1/stats/users/${encodeURIComponent(payload.id)}/games/cs2`;
                         const sJson = await TrophiesManager.fetchJsonWithCorsFallback(sUrl);
                         const lt = sJson?.lifetime || {};
-                        payload.kd = lt.k6 || lt['Average K/D Ratio'] || null;
+                        payload.kd = lt.k5 || lt['Average K/D Ratio'] || null;
                         payload.hs = lt.k8 || lt['Average Headshots %'] || null;
-                        payload.winrate = lt.k5 || lt['Win Rate %'] || null;
+                        payload.winrate = lt.k6 || lt['Win Rate %'] || null;
                         payload.matches = lt.m1 || lt['Matches'] || null;
                     } catch {}
                 }
@@ -1251,7 +1251,7 @@ const TrophiesManager = {
 
                 const playstyle = d?.playstyle || d?.rol || 'Agresif';
                 const silah = d?.silah || 'AK-47';
-                const silahGorsel = TrophiesManager.getCS2WeaponImage(silah);
+                const silahGorsel = d?.silahGorsel || TrophiesManager.getCS2WeaponImage(silah);
 
                 const isPremier = secilenMod === 'premier' && Boolean(premierFormatted);
                 const heroLabel = isPremier ? 'PREMIER CS RATING' : 'FACEIT ELO';
@@ -1646,6 +1646,7 @@ const TrophiesManager = {
                 ...(snap.rol ? { rol: snap.rol } : {}),
                 ...(snap.playstyle ? { playstyle: snap.playstyle } : {}),
                 ...(snap.silah ? { silah: snap.silah } : {}),
+                ...(snap.silahGorsel ? { silahGorsel: snap.silahGorsel } : {}),
                 ...(snap.faceitPeak ? { faceitPeak: snap.faceitPeak } : {}),
                 ...(snap.premierPeak ? { premierPeak: snap.premierPeak } : {}),
                 ...(snap.premierRating ? { premierRating: snap.premierRating } : {}),

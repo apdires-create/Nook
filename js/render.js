@@ -785,6 +785,18 @@ const RenderEngine = {
         const silah = norm.silah || 'AK-47';
         const silahGorsel = norm.silahGorsel || TrophiesManager.getCS2WeaponImage(silah);
 
+        if (!TrophiesManager._cs2WeaponsCache && !window._fetchingCs2Weapons) {
+            window._fetchingCs2Weapons = true;
+            TrophiesManager.getCS2Weapons().then(() => {
+                delete window._fetchingCs2Weapons;
+                if ((window._activeTrophyDetail === 'cs2' || window._activeTrophyDetail === 'faceit') && typeof kartVerisi !== 'undefined' && kartVerisi) {
+                    this.trophiesCiz(kartVerisi);
+                }
+            }).catch(() => {
+                delete window._fetchingCs2Weapons;
+            });
+        }
+
         const makeLevelRing = (levelNum, color) => {
             const pct = levelNum ? Math.max(10, Math.min(100, levelNum * 10)) : 0;
             return `

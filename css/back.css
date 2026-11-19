@@ -2659,9 +2659,9 @@ body.is-owner .top-item-unit:active {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 15%;
+    object-position: 60% 15%;
     display: block;
-    transform: scale(1.02);
+    transform: scale(1.18);
     transform-origin: center bottom;
 }
 
@@ -2688,11 +2688,11 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-cs2-weapon-img {
-    width: 82%;
-    max-width: 150px;
-    height: clamp(32px, 6.5cqh, 52px);
+    width: 92%;
+    max-width: 195px;
+    height: clamp(46px, 9.5cqh, 74px);
     object-fit: contain;
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.95));
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.95));
     pointer-events: none;
 }
 
