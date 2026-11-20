@@ -1234,6 +1234,9 @@ EditManager.Global = {
         }
 
         document.body.classList.toggle('has-unsaved-changes', EditManager.state.hasUnsavedChanges);
+        if (!EditManager.state.hasUnsavedChanges) {
+            document.querySelectorAll('.is-reordered').forEach(el => el.classList.remove('is-reordered'));
+        }
 
         // Herhangi bir değişiklik olduğunda inline display: none kalmışsa temizle
         const actionBar = document.getElementById('edit-action-bar');
@@ -4887,7 +4890,7 @@ EditManager.CompanionViews = {
                             const found = kartVerisi.tops.listeler.find(l => l.id === lId);
                             if (found) newOrder.push(found);
                         });
-                        if (newOrder.length === kartVerisi.tops.listeler.length) {
+                        if (newOrder.length === kartVerisi.tops.listeler.length && JSON.stringify(newOrder) !== JSON.stringify(kartVerisi.tops.listeler)) {
                             kartVerisi.tops.listeler = newOrder;
                             EditManager.Global.degisiklikYapildi();
                         }
@@ -4917,9 +4920,7 @@ EditManager.CompanionViews = {
                             const tId = r.dataset.trophyId;
                             const found = mevcutListe.find(t => t && (t.id === tId || t.tur === tId));
                             if (found) {
-                                const kayit = { tur: found.tur, kullanici: found.kullanici };
-                                if (found.snap) kayit.snap = found.snap;
-                                newList.push(kayit);
+                                newList.push(found);
                             }
                         });
                         const currentList = isWidgetsMode ? (Array.isArray(kartVerisi.widgets) ? kartVerisi.widgets : []) : (Array.isArray(kartVerisi.gaming) ? kartVerisi.gaming : []);
