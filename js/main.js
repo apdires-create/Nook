@@ -59,8 +59,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         Router.init();
     }
 
-    if (typeof TiltEngine !== 'undefined') {
-        TiltEngine.init();
+    if (typeof SpotlightEngine !== 'undefined') {
+        SpotlightEngine.init();
     }
 
     // 3. Veri Çekimi ve Akıcı Bekleme Süresi (FOUC Önleyici)
@@ -117,6 +117,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 appLoadingEl.style.display = 'none';
                 appLoadingEl.classList.remove('is-revealed');
             }, 450);
+        }
+
+        if (typeof Onboarding !== 'undefined') {
+            Onboarding.init();
         }
     }
 });

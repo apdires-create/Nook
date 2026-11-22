@@ -392,8 +392,8 @@ const Router = {
         const card = this.cardElement;
         if (!container || !card) return;
 
-        if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
-            TiltEngine.wake();
+        if (typeof SpotlightEngine !== 'undefined' && typeof SpotlightEngine.wake === 'function') {
+            SpotlightEngine.wake();
         }
 
         const front = card.querySelector('.card-front');
@@ -538,8 +538,8 @@ const Router = {
         const cardContainer = this.cardContainer || document.getElementById('cardContainer');
         if (!stage) return;
 
-        if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
-            TiltEngine.wake();
+        if (typeof SpotlightEngine !== 'undefined' && typeof SpotlightEngine.wake === 'function') {
+            SpotlightEngine.wake();
         }
 
         const isDesktop = window.innerWidth >= 900;
@@ -650,7 +650,6 @@ const Router = {
             const flagsWrapper = document.getElementById('cardFlagsWrapper');
             if (isDesktop && cardContainer) {
                 cardContainer.style.transform = '';
-                cardContainer.classList.remove('is-tilting');
                 if (!wasAnyOpen) {
                     firstRect = cardContainer.getBoundingClientRect();
                     if (flagsWrapper) flagsFirstRect = flagsWrapper.getBoundingClientRect();
@@ -797,8 +796,8 @@ const Router = {
                 this._cancelMobileAnimations();
                 this._companionTransitioning = false;
                 this._companionTimer = null;
-                if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
-                    TiltEngine.wake();
+                if (typeof SpotlightEngine !== 'undefined' && typeof SpotlightEngine.wake === 'function') {
+                    SpotlightEngine.wake();
                 }
             }, isDesktop ? 430 : animDuration + 20);
 
@@ -815,7 +814,6 @@ const Router = {
             const desktopAnims = [];
             if (isDesktop && cardContainer) {
                 cardContainer.style.transform = '';
-                cardContainer.classList.remove('is-tilting');
 
                 // Tüm başlangıç ölçümlerini herhangi bir WAAPI animasyonu başlatmadan ÖNCE al
                 const stageRect = stage.getBoundingClientRect();
@@ -915,8 +913,8 @@ const Router = {
                 this._cancelMobileAnimations();
                 if (cardContainer && isDesktop) cardContainer.style.transform = '';
                 this._companionTransitioning = false;
-                if (typeof TiltEngine !== 'undefined' && typeof TiltEngine.wake === 'function') {
-                    TiltEngine.wake();
+                if (typeof SpotlightEngine !== 'undefined' && typeof SpotlightEngine.wake === 'function') {
+                    SpotlightEngine.wake();
                 }
             };
 
