@@ -1,43 +1,26 @@
 /* ==========================================================================
-   Nook Onboarding & Ziyaretçi İpucu Animasyonları (Saf Görsel UX)
+   Nook Onboarding & Ziyaretçi İpucu Animasyonları (Hover & Mobil Peek)
    ========================================================================== */
 
-@keyframes nook-card-peek {
-    0% {
-        transform: rotateX(0deg) rotateY(0deg);
+/* Masaüstü: Hover bazlı hafif 3D tilt (kart + yan butonlar birlikte hareket eder) */
+@media (min-width: 900px) and (hover: hover) {
+    #profileStage:not(.has-companion-open) #cardContainer:not(.is-flipped) {
+        transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    22% {
-        transform: rotateX(7deg) rotateY(20deg);
-    }
-    68% {
-        transform: rotateX(7deg) rotateY(20deg);
-    }
-    100% {
-        transform: rotateX(0deg) rotateY(0deg);
+
+    #profileStage:not(.has-companion-open) #cardContainer:not(.is-flipped):hover {
+        transform: rotateX(-2deg) rotateY(5deg);
     }
 }
 
-@keyframes nook-swipe-nudge {
-    0% {
-        transform: translateX(0);
+/* Mobil: Tıklanana kadar kalıcı hafif 3D peek */
+@media (max-width: 899px) {
+    #cardContainer.is-mobile-peeking:not(.is-flipped) {
+        transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        transform: rotateX(-2deg) rotateY(5deg);
     }
-    24% {
-        transform: translateX(-24px);
-    }
-    62% {
-        transform: translateX(-24px);
-    }
-    100% {
-        transform: translateX(0);
-    }
-}
 
-/* .card-container üzerinden döndürerek yan flag butonlarının da kartla birlikte hareket etmesini sağla */
-.card-container.is-peeking:not(.is-flipped) {
-    transform-style: preserve-3d;
-    animation: nook-card-peek 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.card-container.is-swipe-nudging:not(.is-flipped) {
-    animation: nook-swipe-nudge 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    #cardContainer.is-mobile-peek-returning:not(.is-flipped) {
+        transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
 }

@@ -1,13 +1,11 @@
-// #region 1: ONBOARDING & ZİYARETÇİ İPUCU MOTORU (SAF GÖRSEL UX)
+// #region 1: ONBOARDING & ZİYARETÇİ İPUCU MOTORU
 const Onboarding = {
     isMobile: false,
     _initialized: false,
-    _hasFlipped: false,
-    _hasSwiped: false,
+    _mobileTapped: false,
     _peekTimer: null,
-    _peekInterval: null,
-    _swipeTimer: null,
-    _swipeInterval: null,
+    _returnTimer: null,
+    _stageObserver: null,
     _flipObserver: null,
 
     init() {
@@ -17,112 +15,127 @@ const Onboarding = {
         // Cihaz modelini sayfa yüklenişinde tek seferlik sabitle
         this.isMobile = window.innerWidth < 900;
 
-        // Şimdilik geliştirme/test amacıyla yalnızca ziyaretçi akışını her yenilemede çalıştır
+        // Masaüstünde hover tilt CSS tarafından yönetilir; JS akışı yalnızca mobilde ziyaretçi için çalışır
         const owner = (typeof isOwner !== 'undefined' && isOwner);
-        if (!owner) {
-            this.runVisitorFlow();
+        if (!owner && this.isMobile) {
+            this.runMobileVisitorPeek();
         }
     },
 
-    _triggerCardAnimation(className, durationMs) {
+    _canMobilePeek() {
+        if (this._mobileTapped) return false;
+        const stage = document.getElementById('profileStage');
         const cardContainer = document.getElementById('cardContainer');
-        if (!cardContainer || cardContainer.classList.contains('is-flipped')) return;
-
-        cardContainer.classList.remove(className);
-        void cardContainer.offsetWidth; // Reflow ile animasyonu sıfırla
-        cardContainer.classList.add(className);
-
-        setTimeout(() => {
-            cardContainer.classList.remove(className);
-        }, durationMs);
+        if (!cardContainer || cardContainer.classList.contains('is-flipped')) return false;
+        if (stage && stage.classList.contains('has-companion-open')) return false;
+        return true;
     },
 
-    _hasMobileSwipeCards() {
-        if (typeof SectionManager !== 'undefined' && typeof SectionManager.desteSirasi === 'function') {
-            return SectionManager.desteSirasi().length > 1;
-        }
-        return false;
-    },
-
-    _stopPeekLoop() {
+    _clearPeek(smooth = false) {
         clearTimeout(this._peekTimer);
-        clearInterval(this._peekInterval);
         this._peekTimer = null;
-        this._peekInterval = null;
-        const cardContainer = document.getElementById('cardContainer');
-        if (cardContainer) cardContainer.classList.remove('is-peeking');
-    },
 
-    _stopSwipeLoop() {
-        clearTimeout(this._swipeTimer);
-        clearInterval(this._swipeInterval);
-        this._swipeTimer = null;
-        this._swipeInterval = null;
-        const cardContainer = document.getElementById('cardContainer');
-        if (cardContainer) cardContainer.classList.remove('is-swipe-nudging');
-    },
-
-    runVisitorFlow() {
         const cardContainer = document.getElementById('cardContainer');
         if (!cardContainer) return;
 
-        this._stopPeekLoop();
-        this._stopSwipeLoop();
+        if (smooth && cardContainer.classList.contains('is-mobile-peeking')) {
+            clearTimeout(this._returnTimer);
+            cardContainer.classList.add('is-mobile-peek-returning');
+            this._returnTimer = setTimeout(() => {
+                cardContainer.classList.remove('is-mobile-peek-returning');
+            }, 420);
+        } else {
+            cardContainer.classList.remove('is-mobile-peek-returning');
+        }
 
-        const playPeek = () => {
-            if (this._hasFlipped || cardContainer.classList.contains('is-flipped')) return;
-            this._triggerCardAnimation('is-peeking', 2850);
-        };
+        cardContainer.classList.remove('is-mobile-peeking');
+    },
 
-        // İlk peek: 1600ms sonra; kullanıcı kartı çevirene kadar her 9 saniyede bir tekrarla
+    _scheduleMobilePeek(delayMs = 900) {
+        clearTimeout(this._peekTimer);
+        if (this._mobileTapped) return;
+
         this._peekTimer = setTimeout(() => {
-            playPeek();
-            this._peekInterval = setInterval(playPeek, 9000);
-        }, 1600);
+            if (!this._canMobilePeek()) return;
+            const cardContainer = document.getElementById('cardContainer');
+            if (cardContainer) {
+                cardContainer.classList.remove('is-mobile-peek-returning');
+                cardContainer.classList.add('is-mobile-peeking');
+            }
+        }, delayMs);
+    },
 
-        // Kullanıcı kartı çevirdiğinde peek döngüsünü kalıcı olarak durdur
+    runMobileVisitorPeek() {
+        const cardContainer = document.getElementById('cardContainer');
+        const stage = document.getElementById('profileStage');
+        if (!cardContainer) return;
+
+        // 1. Açılıştan kısa süre sonra hafif eğik duruma geç
+        this._scheduleMobilePeek(900);
+
+        // 2. Karta bir kere bile tıklanması peek'i kalıcı olarak sonlandırır
+        cardContainer.addEventListener('click', () => {
+            if (this._mobileTapped) return;
+            this._mobileTapped = true;
+            this._clearPeek(true);
+        }, { capture: true });
+
+        // 3. Sağa/sola kaydırma başladığında sürükleme ile çakışmaması için anında sıfırla
+        let touchStartX = 0;
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => {
+            if (this._mobileTapped || !e.touches || e.touches.length !== 1) return;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (this._mobileTapped || !e.touches || e.touches.length !== 1) return;
+            const dx = Math.abs(e.touches[0].clientX - touchStartX);
+            const dy = Math.abs(e.touches[0].clientY - touchStartY);
+            if (dx > 6 && dx >= dy) {
+                this._clearPeek(false);
+            }
+        }, { passive: true });
+
+        // Kaydırma bittiğinde ana kart hâlâ ön yüzde ve düz ise yeniden tetikle
+        const onTouchFinish = () => {
+            if (!this._mobileTapped) {
+                this._scheduleMobilePeek(650);
+            }
+        };
+        window.addEventListener('touchend', onTouchFinish, { passive: true });
+        window.addEventListener('touchcancel', onTouchFinish, { passive: true });
+
+        // 4. Yan karttan ana karta dönüldüğünde (has-companion-open kalkınca) tekrar tetikle
+        if (stage) {
+            if (this._stageObserver) this._stageObserver.disconnect();
+            this._stageObserver = new MutationObserver(() => {
+                if (this._mobileTapped) {
+                    this._stageObserver.disconnect();
+                    this._stageObserver = null;
+                    return;
+                }
+                if (stage.classList.contains('has-companion-open')) {
+                    this._clearPeek(false);
+                } else {
+                    this._scheduleMobilePeek(650);
+                }
+            });
+            this._stageObserver.observe(stage, { attributes: true, attributeFilter: ['class'] });
+        }
+
+        // 5. Kart çevrilirse (is-flipped) peek'i durdur
         if (this._flipObserver) this._flipObserver.disconnect();
         this._flipObserver = new MutationObserver(() => {
-            const flippedNow = cardContainer.classList.contains('is-flipped');
-
-            if (flippedNow && !this._hasFlipped) {
-                this._hasFlipped = true;
-                this._stopPeekLoop();
-            }
-
-            // Mobilde: kart arkasına bakıp ön yüze döndüğünde (ek kart varsa) kaydırma imasını başlat
-            if (this.isMobile && this._hasFlipped && !flippedNow && !this._hasSwiped && this._hasMobileSwipeCards()) {
-                this._flipObserver.disconnect();
-                this._flipObserver = null;
-                this._startMobileSwipeLoop();
-            } else if (!this.isMobile && this._hasFlipped) {
+            if (cardContainer.classList.contains('is-flipped')) {
+                this._mobileTapped = true;
+                this._clearPeek(false);
                 this._flipObserver.disconnect();
                 this._flipObserver = null;
             }
         });
         this._flipObserver.observe(cardContainer, { attributes: true, attributeFilter: ['class'] });
-    },
-
-    _startMobileSwipeLoop() {
-        if (this._hasSwiped || this._swipeInterval) return;
-
-        const playNudge = () => {
-            const cardContainer = document.getElementById('cardContainer');
-            if (this._hasSwiped || !cardContainer || cardContainer.classList.contains('is-flipped')) return;
-            this._triggerCardAnimation('is-swipe-nudging', 1650);
-        };
-
-        this._swipeTimer = setTimeout(() => {
-            playNudge();
-            this._swipeInterval = setInterval(playNudge, 9000);
-        }, 1400);
-
-        const onSwipe = () => {
-            this._hasSwiped = true;
-            this._stopSwipeLoop();
-            window.removeEventListener('touchmove', onSwipe);
-        };
-        window.addEventListener('touchmove', onSwipe, { passive: true, once: true });
     }
 };
 // #endregion
