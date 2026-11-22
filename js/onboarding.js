@@ -71,14 +71,14 @@ const Onboarding = {
 
         const playPeek = () => {
             if (this._hasFlipped || cardContainer.classList.contains('is-flipped')) return;
-            this._triggerCardAnimation('is-peeking', 1700);
+            this._triggerCardAnimation('is-peeking', 2850);
         };
 
-        // İlk peek: 800ms sonra; kullanıcı kartı çevirene kadar her 4.5 saniyede bir tekrarla
+        // İlk peek: 1600ms sonra; kullanıcı kartı çevirene kadar her 9 saniyede bir tekrarla
         this._peekTimer = setTimeout(() => {
             playPeek();
-            this._peekInterval = setInterval(playPeek, 4500);
-        }, 800);
+            this._peekInterval = setInterval(playPeek, 9000);
+        }, 1600);
 
         // Kullanıcı kartı çevirdiğinde peek döngüsünü kalıcı olarak durdur
         if (this._flipObserver) this._flipObserver.disconnect();
@@ -109,13 +109,13 @@ const Onboarding = {
         const playNudge = () => {
             const cardContainer = document.getElementById('cardContainer');
             if (this._hasSwiped || !cardContainer || cardContainer.classList.contains('is-flipped')) return;
-            this._triggerCardAnimation('is-swipe-nudging', 1400);
+            this._triggerCardAnimation('is-swipe-nudging', 1650);
         };
 
         this._swipeTimer = setTimeout(() => {
             playNudge();
-            this._swipeInterval = setInterval(playNudge, 4500);
-        }, 700);
+            this._swipeInterval = setInterval(playNudge, 9000);
+        }, 1400);
 
         const onSwipe = () => {
             this._hasSwiped = true;
