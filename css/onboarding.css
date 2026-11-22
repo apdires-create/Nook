@@ -4,6 +4,10 @@
 
 /* Masaüstü: Hover bazlı hafif 3D tilt (kart + yan butonlar birlikte hareket eder) */
 @media (min-width: 900px) and (hover: hover) {
+    body:not(.is-owner) #profileStage:not(.has-companion-open) #cardContainer .nook-card {
+        cursor: pointer;
+    }
+
     #profileStage:not(.has-companion-open) #cardContainer:not(.is-flipped) {
         transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
