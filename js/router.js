@@ -175,6 +175,7 @@ const Router = {
 
         // Mobilde sanal klavye kapandığında (geri tuşu / klavye gizle) açık kalan input/contenteditable odağını kapat
         this._initMobileKeyboardGuard();
+        this.syncMobileDeckDots();
 
         // Kartın boş alanlarına tıklandığında çevirme ve hiyerarşik geri dönme sistemi
         if (this.cardContainer) {
@@ -201,10 +202,6 @@ const Router = {
                     '.view-add-btn',
                     '.nook-link-row',
                     '.top-item-card',
-                    '.banner-box',
-                    '.avatar-box',
-                    '.banner-img',
-                    '.avatar-img',
                     '.profile-edit-avatar-wrap',
                     '.profile-edit-banner-wrap'
                 ].join(', ');
@@ -454,6 +451,27 @@ const Router = {
         if (pos === 'add-card') return document.getElementById('addSectionCompanionCard');
         if (pos === 'showcase') return document.getElementById('topsCompanionCard');
         return document.getElementById('trophiesCompanionCard');
+    },
+
+    syncMobileDeckDots() {
+        const dotsEl = document.getElementById('mobileDeckDots');
+        if (!dotsEl) return;
+        const order = this.getDeckOrder();
+        const currentPos = this.getCurrentDeckPosition();
+        const activeIndex = Math.max(0, order.indexOf(currentPos));
+
+        if (dotsEl.children.length !== order.length) {
+            dotsEl.innerHTML = '';
+            order.forEach((_, idx) => {
+                const dot = document.createElement('span');
+                dot.className = 'mobile-deck-dot' + (idx === activeIndex ? ' is-active' : '');
+                dotsEl.appendChild(dot);
+            });
+        } else {
+            Array.from(dotsEl.children).forEach((dot, idx) => {
+                dot.classList.toggle('is-active', idx === activeIndex);
+            });
+        }
     },
 
     _cancelMobileAnimations() {
@@ -792,6 +810,8 @@ const Router = {
                 animDuration = this._animateMobileDeckTransition(outgoingEl, activeCompanion, dir, dragOffsetX);
             }
 
+            this.syncMobileDeckDots();
+
             this._companionTimer = setTimeout(() => {
                 this._cancelMobileAnimations();
                 this._companionTransitioning = false;
@@ -880,6 +900,7 @@ const Router = {
                     const dir = swipeDir !== 0 ? swipeDir : ((isShowcaseOpen || isAddCardOpen) ? 1 : -1);
                     animDuration = this._animateMobileDeckTransition(currentCard, cardContainer, dir, dragOffsetX);
                 }
+                this.syncMobileDeckDots();
             }
 
             let closeFinished = false;
@@ -892,6 +913,7 @@ const Router = {
                 }
 
                 stage.classList.remove('has-companion-open', 'is-companion-closing', 'is-add-card-active', 'is-showcase-active', 'is-trophies-active', 'is-gaming-mode', 'is-widgets-mode', 'is-achievements-mode');
+                this.syncMobileDeckDots();
                 if (topsCard) {
                     topsCard.classList.remove('is-closing');
                     if (isDesktop) topsCard.style.display = 'none';

@@ -594,6 +594,16 @@ html.is-profile-loading #landing-screen {
     }
 
     .stage {
+        --mobile-stage-pt: calc(52px + env(safe-area-inset-top, 0px));
+        --mobile-stage-pb: calc(14px + env(safe-area-inset-bottom, 0px));
+        --mobile-available-h: calc(100dvh - var(--mobile-stage-pt) - var(--mobile-stage-pb) - 18px);
+        --mobile-card-max-h: min(var(--card-height), var(--mobile-available-h));
+        --mobile-card-w: min(
+            var(--card-narrow-width),
+            calc(100vw - 22px),
+            calc(var(--mobile-card-max-h) * 5 / 7)
+        );
+        --mobile-card-h: calc(var(--mobile-card-w) * 7 / 5);
         position: relative;
         width: 100vw;
         height: 100vh;
@@ -603,8 +613,8 @@ html.is-profile-loading #landing-screen {
         justify-content: center;
         perspective: 1200px;
         overflow: hidden !important;
-        padding-top: calc(52px + env(safe-area-inset-top, 0px));
-        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+        padding-top: var(--mobile-stage-pt);
+        padding-bottom: var(--mobile-stage-pb);
         padding-left: 0;
         padding-right: 0;
         box-sizing: border-box;
@@ -614,15 +624,8 @@ html.is-profile-loading #landing-screen {
     /* Sabit 5:7 Geometrisi */
     .stage .card-container,
     .stage .companion-card {
-        --mobile-available-h: calc(100dvh - 52px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 18px);
-        --mobile-card-max-h: min(var(--card-height), var(--mobile-available-h));
-        --mobile-card-w: min(
-            var(--card-narrow-width),
-            calc(100vw - 22px),
-            calc(var(--mobile-card-max-h) * 5 / 7)
-        );
         width: var(--mobile-card-w);
-        height: calc(var(--mobile-card-w) * 7 / 5);
+        height: var(--mobile-card-h);
         aspect-ratio: var(--card-aspect-ratio);
         max-width: 100%;
         max-height: none;

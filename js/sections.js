@@ -96,6 +96,10 @@ const SectionManager = {
                 }
             }
         }
+
+        if (typeof Router !== 'undefined' && typeof Router.syncMobileDeckDots === 'function') {
+            Router.syncMobileDeckDots();
+        }
     }
 };
 window.SectionManager = SectionManager;
