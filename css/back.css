@@ -761,13 +761,41 @@ body.is-owner .top-item-unit:active {
     font-style: italic;
 }
 
-/* Yorum Rozeti (Başlık satırında minik emoji/ikon) */
+/* Yorum Rozeti (Sağ alt meta satırında tıklanabilir açılır-kapanır sinyal) */
 .has-comment-badge {
-    font-size: 0.82rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.78);
     line-height: 1;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
     flex-shrink: 0;
-    margin-left: 2px;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.has-comment-badge .comment-chevron {
+    opacity: 0.75;
+    transition: transform 0.24s var(--ease-smooth), opacity 0.2s ease;
+}
+
+.top-item-card:hover .has-comment-badge {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.28);
+    color: #fff;
+}
+
+.top-item-unit.is-expanded .has-comment-badge {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.top-item-unit.is-expanded .has-comment-badge .comment-chevron {
+    transform: rotate(180deg);
+    opacity: 1;
 }
 
 /* Yorum Düzenleme Formu */

@@ -1152,15 +1152,18 @@ const RenderEngine = {
                     bottomMetaBadges.push(`<span class="top-meta-badge is-series" title="Seri / Evren">${this.escapeHtml(item.seri)}</span>`);
                 }
 
-                const headerMetaHtml = scoreBadge ? `<div class="top-item-meta-header">${scoreBadge}</div>` : '';
-                const footerMetaHtml = bottomMetaBadges.length > 0
-                    ? `<div class="top-item-meta-footer">${bottomMetaBadges.join('')}</div>`
-                    : '';
-
                 const savedNote = (kartVerisi?.kullanici_notlari && kartVerisi.kullanici_notlari[itemId]) || item.yorum || item.kullanici_notu || item.not || '';
                 const hasNote = Boolean(savedNote.trim());
                 const commentBadgeHtml = hasNote
-                    ? `<span class="has-comment-badge" title="Kullanıcı yorumu mevcut">💬</span>`
+                    ? `<span class="has-comment-badge" title="Kullanıcı yorumunu görmek için tıkla" aria-label="Kullanıcı yorumu mevcut">
+                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <svg class="comment-chevron" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                       </span>`
+                    : '';
+
+                const headerMetaHtml = scoreBadge ? `<div class="top-item-meta-header">${scoreBadge}</div>` : '';
+                const footerMetaHtml = (bottomMetaBadges.length > 0 || hasNote)
+                    ? `<div class="top-item-meta-footer">${bottomMetaBadges.join('')}${commentBadgeHtml}</div>`
                     : '';
 
                 const userReviewHtml = `
@@ -1192,7 +1195,6 @@ const RenderEngine = {
                                     ${crownHtml}
                                     <span class="top-item-rank tier-${tierName}">#${idx + 1}</span>
                                     <h4 class="top-item-title">${this.escapeHtml(item.baslik)}</h4>
-                                    ${commentBadgeHtml}
                                     ${headerMetaHtml}
                                 </div>
                                 <p class="top-item-desc">${this.escapeHtml(item.aciklama || '')}</p>

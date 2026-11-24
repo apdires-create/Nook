@@ -4760,20 +4760,29 @@ EditManager.CompanionViews = {
                     textDisplay.textContent = val.trim() || 'Bu içerik için henüz bir kullanıcı yorumu girilmedi.';
                 }
 
-                // Başlıktaki 💬 rozetini anlık senkronize et
-                const headerRow = cardEl ? cardEl.querySelector('.top-item-header-row') : null;
-                let badge = headerRow ? headerRow.querySelector('.has-comment-badge') : null;
+                // Sağ alt satırdaki yorum rozetini anlık senkronize et
+                const contentEl = cardEl ? cardEl.querySelector('.top-item-content') : null;
+                let footerEl = contentEl ? contentEl.querySelector('.top-item-meta-footer') : null;
+                let badge = cardEl ? cardEl.querySelector('.has-comment-badge') : null;
                 if (val.trim()) {
-                    if (!badge && headerRow) {
+                    if (!badge && contentEl) {
+                        if (!footerEl) {
+                            footerEl = document.createElement('div');
+                            footerEl.className = 'top-item-meta-footer';
+                            contentEl.appendChild(footerEl);
+                        }
                         badge = document.createElement('span');
                         badge.className = 'has-comment-badge';
-                        badge.title = 'Kullanıcı yorumu mevcut';
-                        badge.textContent = '💬';
-                        const titleEl = headerRow.querySelector('.top-item-title');
-                        if (titleEl) titleEl.insertAdjacentElement('afterend', badge);
+                        badge.title = 'Kullanıcı yorumunu görmek için tıkla';
+                        badge.setAttribute('aria-label', 'Kullanıcı yorumu mevcut');
+                        badge.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg><svg class="comment-chevron" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+                        footerEl.appendChild(badge);
                     }
                 } else if (badge) {
                     badge.remove();
+                    if (footerEl && footerEl.children.length === 0) {
+                        footerEl.remove();
+                    }
                 }
 
                 EditManager.Global.degisiklikYapildiDebounced();
