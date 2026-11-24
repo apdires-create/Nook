@@ -4163,10 +4163,6 @@ EditManager.MediaSearchModal = {
         EditManager.CompanionViews?.init();
         EditManager.Global.degisiklikYapildi();
 
-        if (typeof Onboarding !== 'undefined' && typeof Onboarding.onShowcaseItemsUpdated === 'function') {
-            Onboarding.onShowcaseItemsUpdated(aktifListe.ogeler.length);
-        }
-
         if (typeof tumGorselleriPreloadEt === 'function') {
             tumGorselleriPreloadEt(kartVerisi);
         }

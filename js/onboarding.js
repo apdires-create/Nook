@@ -6,13 +6,13 @@ const Onboarding = {
     _activeFlow: null,
     _activeStepIndex: 0,
     _resizeHandler: null,
-    _menuObserver: null,
+    _stepObserver: null,
     _bannerTimer: null,
 
     TOKENS: {
         OWNER_CORE: 'owner_core',
-        WING_EDIT_BTN: 'wing_edit_btn',
-        WING_SHOWCASE_COMMENT: 'wing_showcase_comment',
+        WING_CORE_ONCE: 'wing_core_once',
+        WING_SHOWCASE_ONCE: 'wing_showcase_once',
         HINT_TAG_DRAG: 'hint_tag_drag',
         HINT_LINK_DRAG: 'hint_link_drag'
     },
@@ -45,7 +45,6 @@ const Onboarding = {
             overlay.innerHTML = `
                 <div class="nook-onboarding-backdrop" id="nookOnboardingBackdrop"></div>
                 <div class="nook-onboarding-spotlight" id="nookOnboardingSpotlight"></div>
-                <div class="nook-onboarding-callouts" id="nookOnboardingCallouts"></div>
                 <div class="nook-onboarding-tooltip" id="nookOnboardingTooltip" role="dialog" aria-modal="true">
                     <div class="nook-onboarding-tooltip-head">
                         <span class="nook-onboarding-step-badge" id="nookOnboardingStepBadge"></span>
@@ -67,15 +66,19 @@ const Onboarding = {
 
             document.getElementById('nookOnboardingNextBtn').addEventListener('click', (e) => {
                 e.stopPropagation();
-                this._advanceStep();
+                const step = this._currentStep();
+                if (step && typeof step.onNextClick === 'function') {
+                    step.onNextClick();
+                } else {
+                    this._advanceStep();
+                }
             });
 
             document.getElementById('nookOnboardingBackdrop').addEventListener('click', (e) => {
                 e.stopPropagation();
-                const mode = this._currentStep()?.mode;
-                if (mode === 'info' || mode === 'callout-group') {
-                    this._advanceStep();
-                }
+                const step = this._currentStep();
+                if (!step || step.allowClickThrough) return;
+                this._advanceStep();
             });
         }
 
@@ -108,25 +111,128 @@ const Onboarding = {
 
         const steps = [];
 
-        // Adım 1: Ön yüz düzenleme & arka yüz
+        // 1. İsim & Ünvan düzenleme (tıklanmış halini canlı göster)
         steps.push({
-            id: 'front-and-back',
-            target: () => document.getElementById('cardContainer'),
-            title: 'Kartını Düzenle & Çevir',
-            desc: 'Ön yüzdeki isim, bio ve görsellere tıklayarak doğrudan düzenleyebilirsin. Boş bir alana tıkladığında kartın arka yüzüne (Bağlantılar) geçersin.',
-            mode: 'info',
+            id: 'front-name-title',
+            target: () => document.getElementById('profileName'),
+            spotlightTargets: () => [
+                document.getElementById('profileName'),
+                document.getElementById('profileTitle')
+            ],
+            title: 'İsim & Ünvanını Düzenle',
+            desc: 'İsim, ünvan ve bio alanlarına tıklayarak metinleri doğrudan düzenleyebilirsin.',
             nextLabel: 'İleri',
-            padding: 6
+            padding: 8,
+            onEnter: () => {
+                const nameEl = document.getElementById('profileName');
+                if (nameEl && !nameEl.isContentEditable) {
+                    nameEl.click();
+                }
+            },
+            onExit: () => {
+                const nameEl = document.getElementById('profileName');
+                if (nameEl && nameEl.isContentEditable) {
+                    nameEl.blur();
+                }
+                window._frontEditingActive = false;
+            }
         });
 
-        // Adım 2: PC vs Mobil bölüm ekleme / kaydırma
+        // 2. Tag ekleme pop-up'ı (seç, oluştur, sırala; pop-up kapanınca ilerle)
+        steps.push({
+            id: 'tag-picker',
+            target: () => document.querySelector('#tag-picker-modal .tag-picker-box') || document.getElementById('tagsZone'),
+            title: 'Etiket Seç & Sırala',
+            desc: 'Buradan hazır etiket seçebilir, kendi etiketini oluşturabilir ve etiketleri tutup sürükleyerek sıralayabilirsin.',
+            nextLabel: 'İleri',
+            allowClickThrough: true,
+            padding: 8,
+            onEnter: () => {
+                if (typeof EditManager !== 'undefined' && EditManager.TagPicker && typeof EditManager.TagPicker.ac === 'function') {
+                    EditManager.TagPicker.ac();
+                }
+                setTimeout(() => this._positionCurrentStep(), 60);
+                this._watchCondition(() => {
+                    const modal = document.getElementById('tag-picker-modal');
+                    return modal && !modal.classList.contains('is-open');
+                }, document.getElementById('tag-picker-modal'));
+            },
+            onNextClick: () => {
+                if (typeof EditManager !== 'undefined' && EditManager.TagPicker && typeof EditManager.TagPicker.kapat === 'function') {
+                    EditManager.TagPicker.kapat();
+                } else {
+                    this._advanceStep();
+                }
+            },
+            onExit: () => {
+                const modal = document.getElementById('tag-picker-modal');
+                if (modal && modal.classList.contains('is-open') && typeof EditManager !== 'undefined' && EditManager.TagPicker) {
+                    EditManager.TagPicker.kapat();
+                }
+            }
+        });
+
+        // 3. Arka yüzü açmak için karta tıkla
+        steps.push({
+            id: 'flip-to-back',
+            target: () => document.getElementById('cardContainer'),
+            title: 'Kartın Arka Yüzünü Aç',
+            desc: 'Bağlantılarını görmek ve düzenlemek için kartın boş bir alanına tıkla.',
+            nextLabel: 'Çevir',
+            allowClickThrough: true,
+            padding: 6,
+            onEnter: () => {
+                const card = document.getElementById('cardContainer');
+                this._watchCondition(() => card && card.classList.contains('is-flipped'), card);
+            },
+            onNextClick: () => {
+                if (typeof Router !== 'undefined' && typeof Router.setFlipped === 'function') {
+                    Router.setFlipped(true);
+                } else {
+                    this._advanceStep();
+                }
+            }
+        });
+
+        // 4. Arka yüz: link ekleme ve sıralama
+        steps.push({
+            id: 'back-links',
+            target: () => document.querySelector('#cardBack .links-add-btn') || document.getElementById('cardBack'),
+            title: 'Bağlantı Ekle & Sırala',
+            desc: 'Buradan sosyal medya ve web bağlantılarını ekleyebilir, eklediğin bağlantıları sürükleyip bırakarak sıralayabilirsin.',
+            nextLabel: 'İleri',
+            padding: 8
+        });
+
+        // 5. Ön yüze dönüş
+        steps.push({
+            id: 'flip-to-front',
+            target: () => document.getElementById('cardContainer'),
+            title: 'Ön Yüze Dön',
+            desc: 'Tekrar kartın boş bir alanına (veya sol üst geri okuna) tıklayarak ön yüze dönebilirsin.',
+            nextLabel: 'Öne Dön',
+            allowClickThrough: true,
+            padding: 6,
+            onEnter: () => {
+                const card = document.getElementById('cardContainer');
+                this._watchCondition(() => card && !card.classList.contains('is-flipped'), card);
+            },
+            onNextClick: () => {
+                if (typeof Router !== 'undefined' && typeof Router.setFlipped === 'function') {
+                    Router.setFlipped(false);
+                } else {
+                    this._advanceStep();
+                }
+            }
+        });
+
+        // 6. PC: Sağ butonlar / Mobil: Yatay kaydırma
         if (this.isMobile) {
             steps.push({
                 id: 'mobile-deck',
                 target: () => document.getElementById('cardContainer'),
-                title: 'Kartlar Arası Geçiş',
-                desc: 'Ekranı sağa veya sola kaydırarak eklediğin kartlara (veya ilk kart ekleme alanına) geçebilirsin. Alttaki noktalar konumunu gösterir.',
-                mode: 'info',
+                title: 'Kartlar Arası Kaydırma',
+                desc: 'Ekranı sağa veya sola kaydırarak eklediğin kartlara (ve ilk kart ekleme ekranına) geçebilirsin.',
                 nextLabel: 'İleri',
                 padding: 6
             });
@@ -136,140 +242,98 @@ const Onboarding = {
             steps.push({
                 id: 'desktop-flags',
                 target: () => hasAddBtn ? document.getElementById('triggerAddSectionBtn') : document.getElementById('cardFlagsWrapper'),
-                title: hasAddBtn ? 'Yeni Kartlar Ekle' : 'Bölüm Kartların',
+                title: hasAddBtn ? 'Bölüm Kartları Ekle' : 'Bölüm Kartların',
                 desc: hasAddBtn
-                    ? 'Bu artı butonundan Gaming, Showcase, Widgets ve Trophies kartlarını profiline ekleyebilirsin.'
-                    : 'Sağdaki sekmelerden ekli bölüm kartlarını açıp düzenleyebilirsin.',
-                mode: 'info',
+                    ? 'Sağdaki bu butonlardan Gaming, Showcase, Widgets ve Trophies kartlarını ekleyip açabilirsin.'
+                    : 'Sağdaki bu sekmelerden ekli bölüm kartlarını açıp düzenleyebilirsin.',
                 nextLabel: 'İleri',
                 padding: 8
             });
         }
 
-        // Adım 3: Üst menüye zorunlu tıklama
+        // 7. Menü & Market (otomatik açık gösterim)
         steps.push({
-            id: 'menu-trigger',
-            target: () => document.getElementById('profile-user-trigger'),
-            title: 'Kontrol Menüsünü Aç',
-            desc: 'Sayfa linkini kopyalamak, alanları yönetmek ve tema ayarlarına ulaşmak için bu menüye tıkla.',
-            mode: 'action',
-            allowClickThrough: true,
-            padding: 6,
-            onEnter: () => this._watchMenuOpen()
-        });
-
-        // Adım 4: Menü açılınca tüm butonları oklarla açıkla
-        steps.push({
-            id: 'menu-callouts',
+            id: 'menu-open',
             target: () => document.getElementById('profile-user-dropdown'),
             spotlightTargets: () => [
                 document.getElementById('nav-market-trigger'),
                 document.getElementById('profile-user-dropdown')
             ],
-            title: 'Menü & Market',
-            desc: 'Tüm yönetim ve özelleştirme araçlarına buradan ulaşabilirsin.',
-            mode: 'callout-group',
+            title: 'Menü & Tema Marketi',
+            desc: 'Sayfa linkini kopyalama, alan yönetimi, tema özelleştirme ve Tema Marketi araçlarına buradan ulaşabilirsin.',
             nextLabel: 'Anladım',
             padding: 8,
-            callouts: [
-                { selector: '#nav-market-trigger', text: 'Temaları keşfet ve uygula' },
-                { selector: '#nav-item-account', text: 'Hesap ve şifre ayarları' },
-                { selector: '#nav-item-copy-link', text: 'Sayfa linkini tek tıkla kopyala' },
-                { selector: '#nav-item-sections', text: 'Kartları (Gaming, Vitrin) yönet' },
-                { selector: '#nav-item-appearance', text: 'Tema ve renkleri özelleştir' },
-                { selector: '#nav-item-logout', text: 'Hesabından güvenli çıkış yap' }
-            ]
+            onEnter: () => {
+                const dropdown = document.getElementById('profile-user-dropdown');
+                if (dropdown) dropdown.classList.add('is-open');
+                setTimeout(() => this._positionCurrentStep(), 40);
+            },
+            onExit: () => {
+                const dropdown = document.getElementById('profile-user-dropdown');
+                if (dropdown) dropdown.classList.remove('is-open');
+            }
         });
 
         this._startFlow(this.TOKENS.OWNER_CORE, steps);
     },
 
-    _watchMenuOpen() {
-        this._stopMenuObserver();
-        const dropdown = document.getElementById('profile-user-dropdown');
-        if (!dropdown) return;
+    _watchCondition(predicate, observeTarget) {
+        this._stopStepObserver();
+        if (!observeTarget) return;
 
-        if (dropdown.classList.contains('is-open')) {
-            this._advanceStep();
-            return;
-        }
-
-        this._menuObserver = new MutationObserver(() => {
-            if (dropdown.classList.contains('is-open')) {
-                this._stopMenuObserver();
-                setTimeout(() => {
-                    if (this._currentStep()?.id === 'menu-trigger') {
-                        this._advanceStep();
-                    }
-                }, 80);
+        this._stepObserver = new MutationObserver(() => {
+            if (predicate()) {
+                this._stopStepObserver();
+                setTimeout(() => this._advanceStep(), 240);
             }
         });
-        this._menuObserver.observe(dropdown, { attributes: true, attributeFilter: ['class'] });
+        this._stepObserver.observe(observeTarget, { attributes: true, attributeFilter: ['class'] });
     },
 
-    _stopMenuObserver() {
-        if (this._menuObserver) {
-            this._menuObserver.disconnect();
-            this._menuObserver = null;
+    _stopStepObserver() {
+        if (this._stepObserver) {
+            this._stepObserver.disconnect();
+            this._stepObserver = null;
         }
     },
     // #endregion
 
-    // #region 3: SAYFA İÇİ BAĞLAMSAL BOARDINGLER
+    // #region 3: ALAN İÇİ BAĞLAMSAL BOARDINGLER (TEK SEFERLİK)
     onWingOpened(wingType) {
         if (typeof isOwner === 'undefined' || !isOwner) return;
         if (this._activeFlow) return;
 
-        // Showcase ilk açılış: en az 2 içerik varsa tıklayıp yorum ekleme + sürükle-bırak sıralama ipucu
-        if (wingType === 'showcase' && this.hasToken(this.TOKENS.WING_SHOWCASE_COMMENT)) {
-            const items = document.querySelectorAll('#topsCompanionCard .top-item-card');
-            if (items.length >= 2 && items[0].offsetParent !== null) {
-                this._showShowcaseCommentAndDragHint();
-                return;
-            }
+        // Showcase özelinde: alan açılır açılmaz içerik ekleme + sıralama + tıklayıp yorum ekleme
+        if (wingType === 'showcase' && this.hasToken(this.TOKENS.WING_SHOWCASE_ONCE)) {
+            this.consumeToken(this.TOKENS.WING_CORE_ONCE);
+            this._startFlow(this.TOKENS.WING_SHOWCASE_ONCE, [{
+                id: 'showcase-once-hint',
+                target: () => document.querySelector('#topsCompanionCard .top-poster-add')
+                    || document.querySelector('#topsCompanionCard .view-add-btn')
+                    || document.getElementById('topsCompanionCard'),
+                title: 'Vitrin İçerikleri',
+                desc: 'Buradan vitrinine içerik ekleyebilirsin. Eklediğin içerikleri tutup sürükleyerek sıralayabilir, üzerine tıklayarak yorum/not ekleyebilirsin.',
+                nextLabel: 'Anladım',
+                padding: 8
+            }]);
+            return;
         }
 
-        // Diğer kanatlarda (veya boş Showcase'de) sağ üst düzenleme butonu
-        if (this.hasToken(this.TOKENS.WING_EDIT_BTN)) {
-            const editBtnId = wingType === 'showcase' ? 'showcaseEditToggleBtn' : 'trophiesEditToggleBtn';
-            const editBtn = document.getElementById(editBtnId);
-            if (editBtn && editBtn.style.display !== 'none' && editBtn.offsetParent !== null) {
-                this._startFlow(this.TOKENS.WING_EDIT_BTN, [{
-                    id: 'wing-edit-btn-hint',
-                    target: () => document.getElementById(editBtnId),
-                    title: 'Hızlı Düzenleme',
-                    desc: 'Sağ üstteki bu düzenleme tuşuyla bölümdeki içerikleri kolayca güncelleyebilirsin.',
-                    mode: 'info',
-                    nextLabel: 'Anladım',
-                    padding: 8
-                }]);
-            }
+        // Diğer kanatlardan herhangi biri ilk kez açıldığında genel alan ipucu (tüm alanlar için 1 kez)
+        if (this.hasToken(this.TOKENS.WING_CORE_ONCE)) {
+            const cardId = wingType === 'showcase' ? 'topsCompanionCard' : 'trophiesCompanionCard';
+            const addTarget = document.querySelector(`#${cardId} .view-add-btn, #${cardId} .top-poster-add`)
+                || document.getElementById(wingType === 'showcase' ? 'showcaseEditToggleBtn' : 'trophiesEditToggleBtn')
+                || document.getElementById(cardId);
+            this._startFlow(this.TOKENS.WING_CORE_ONCE, [{
+                id: 'wing-core-once-hint',
+                target: () => addTarget,
+                title: 'Alan İçi Kontrol',
+                desc: 'Buradan yeni içerik ekleyebilir, sağ üstteki butonlardan düzenleme veya kaldırma işlemlerini yapabilirsin.',
+                nextLabel: 'Anladım',
+                padding: 8
+            }]);
         }
-    },
-
-    onShowcaseItemsUpdated(itemCount) {
-        if (typeof isOwner === 'undefined' || !isOwner) return;
-        if (this._activeFlow) return;
-        if (itemCount < 2 || !this.hasToken(this.TOKENS.WING_SHOWCASE_COMMENT)) return;
-
-        setTimeout(() => {
-            const items = document.querySelectorAll('#topsCompanionCard .top-item-card');
-            if (items.length >= 2 && items[0].offsetParent !== null) {
-                this._showShowcaseCommentAndDragHint();
-            }
-        }, 120);
-    },
-
-    _showShowcaseCommentAndDragHint() {
-        this._startFlow(this.TOKENS.WING_SHOWCASE_COMMENT, [{
-            id: 'showcase-comment-hint',
-            target: () => document.querySelector('#topsCompanionCard .top-item-card'),
-            title: 'Yorum Ekle & Sırala',
-            desc: 'İçeriklere tıklayarak altına kişisel yorum/not ekleyebilir, tutup sürükleyerek sırasını değiştirebilirsin.',
-            mode: 'info',
-            nextLabel: 'Anladım',
-            padding: 6
-        }]);
     },
     // #endregion
 
@@ -307,7 +371,7 @@ const Onboarding = {
     },
     // #endregion
 
-    // #region 5: SPOTLIGHT & CALLOUT YERLEŞİM MOTORU
+    // #region 5: SPOTLIGHT & TOOLTIP YERLEŞİM MOTORU
     _startFlow(tokenKey, steps) {
         if (!steps || steps.length === 0) return;
         this._ensureDom();
@@ -331,9 +395,17 @@ const Onboarding = {
         return this._activeFlow.steps[this._activeStepIndex] || null;
     },
 
+    _runCurrentExit() {
+        this._stopStepObserver();
+        const step = this._currentStep();
+        if (step && typeof step.onExit === 'function') {
+            step.onExit();
+        }
+    },
+
     _advanceStep() {
         if (!this._activeFlow) return;
-        this._stopMenuObserver();
+        this._runCurrentExit();
 
         if (this._activeStepIndex + 1 < this._activeFlow.steps.length) {
             this._activeStepIndex += 1;
@@ -344,25 +416,17 @@ const Onboarding = {
     },
 
     closeOverlay(consume = true) {
-        this._stopMenuObserver();
+        this._runCurrentExit();
         if (this._activeFlow && consume) {
             this.consumeToken(this._activeFlow.tokenKey);
         }
-        const wasCalloutGroup = this._currentStep()?.mode === 'callout-group';
         this._activeFlow = null;
         this._activeStepIndex = 0;
 
         const overlay = document.getElementById('nookOnboardingOverlay');
         if (overlay) {
-            overlay.classList.remove('is-active', 'is-action-step', 'is-callout-mode');
+            overlay.classList.remove('is-active', 'is-action-step');
             overlay.setAttribute('aria-hidden', 'true');
-        }
-        const callouts = document.getElementById('nookOnboardingCallouts');
-        if (callouts) callouts.innerHTML = '';
-
-        if (wasCalloutGroup) {
-            const dropdown = document.getElementById('profile-user-dropdown');
-            if (dropdown) dropdown.classList.remove('is-open');
         }
 
         if (this._resizeHandler) {
@@ -380,36 +444,25 @@ const Onboarding = {
         const titleEl = document.getElementById('nookOnboardingTitle');
         const descEl = document.getElementById('nookOnboardingDesc');
         const nextBtn = document.getElementById('nookOnboardingNextBtn');
-        const actionsEl = document.getElementById('nookOnboardingActions');
-        const calloutsEl = document.getElementById('nookOnboardingCallouts');
+        const skipBtn = document.getElementById('nookOnboardingSkipBtn');
 
         const total = this._activeFlow.steps.length;
-        const skipBtn = document.getElementById('nookOnboardingSkipBtn');
         badgeEl.textContent = total > 1 ? `${this._activeStepIndex + 1} / ${total}` : 'İpucu';
         titleEl.textContent = step.title || '';
         descEl.textContent = step.desc || '';
         descEl.style.display = step.desc ? '' : 'none';
+        nextBtn.textContent = step.nextLabel || 'İleri';
         if (skipBtn) {
             skipBtn.style.display = (this._activeStepIndex + 1 >= total) ? 'none' : '';
         }
 
         overlay.classList.toggle('is-action-step', !!step.allowClickThrough);
-        overlay.classList.toggle('is-callout-mode', step.mode === 'callout-group');
-
-        if (step.mode === 'action') {
-            actionsEl.style.display = 'none';
-        } else {
-            actionsEl.style.display = 'flex';
-            nextBtn.textContent = step.nextLabel || 'İleri';
-        }
-
-        calloutsEl.innerHTML = '';
-
-        this._positionCurrentStep();
 
         if (typeof step.onEnter === 'function') {
             step.onEnter();
         }
+
+        this._positionCurrentStep();
     },
 
     _positionCurrentStep() {
@@ -418,7 +471,6 @@ const Onboarding = {
 
         const spotlight = document.getElementById('nookOnboardingSpotlight');
         const tooltip = document.getElementById('nookOnboardingTooltip');
-        const calloutsEl = document.getElementById('nookOnboardingCallouts');
         const targetEl = typeof step.target === 'function' ? step.target() : null;
 
         if (!targetEl) {
@@ -439,6 +491,7 @@ const Onboarding = {
                 rect = { left, top, right, bottom, width: right - left, height: bottom - top };
             }
         }
+
         const pad = step.padding ?? 8;
         const sLeft = Math.max(4, rect.left - pad);
         const sTop = Math.max(4, rect.top - pad);
@@ -450,14 +503,6 @@ const Onboarding = {
         spotlight.style.width = `${sWidth}px`;
         spotlight.style.height = `${sHeight}px`;
 
-        if (step.mode === 'callout-group' && Array.isArray(step.callouts)) {
-            this._renderCallouts(step.callouts, calloutsEl);
-            tooltip.style.left = `${Math.max(12, Math.min(window.innerWidth - tooltip.offsetWidth - 12, sLeft + sWidth - tooltip.offsetWidth))}px`;
-            tooltip.style.top = `${Math.min(window.innerHeight - tooltip.offsetHeight - 16, sTop + sHeight + 14)}px`;
-            return;
-        }
-
-        // Baloncuk konumlandırma (alt öncelikli, sığmazsa üst, sağ/sol sınır korumalı)
         tooltip.style.left = '0px';
         tooltip.style.top = '0px';
         const tRect = tooltip.getBoundingClientRect();
@@ -474,31 +519,6 @@ const Onboarding = {
 
         tooltip.style.left = `${tLeft}px`;
         tooltip.style.top = `${tTop}px`;
-    },
-
-    _renderCallouts(callouts, container) {
-        container.innerHTML = '';
-        let lastBottom = 6;
-        callouts.forEach((item) => {
-            const el = document.querySelector(item.selector);
-            if (!el || el.offsetParent === null) return;
-            const r = el.getBoundingClientRect();
-
-            const tag = document.createElement('div');
-            tag.className = 'nook-onboarding-callout';
-            tag.innerHTML = `<span>${item.text}</span><span class="nook-onboarding-callout-arrow" aria-hidden="true">→</span>`;
-            container.appendChild(tag);
-
-            const tagW = tag.offsetWidth || 210;
-            const tagH = tag.offsetHeight || 28;
-            const left = Math.max(10, r.left - tagW - 12);
-            const idealTop = r.top + (r.height - tagH) / 2;
-            const top = Math.min(window.innerHeight - tagH - 8, Math.max(lastBottom + 6, idealTop));
-
-            tag.style.left = `${left}px`;
-            tag.style.top = `${top}px`;
-            lastBottom = top + tagH;
-        });
     }
     // #endregion
 };
