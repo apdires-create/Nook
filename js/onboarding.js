@@ -72,8 +72,9 @@ const Onboarding = {
 
             document.getElementById('nookOnboardingBackdrop').addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (this._currentStep()?.mode === 'callout-group') {
-                    this.closeOverlay(true);
+                const mode = this._currentStep()?.mode;
+                if (mode === 'info' || mode === 'callout-group') {
+                    this._advanceStep();
                 }
             });
         }
