@@ -2933,20 +2933,10 @@ EditManager.TrophiesView = {
                 </div>
             ` : ''}
 
-            ${(tiers.length > 0 && isManualAllowed) ? `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                    <div class="mt-form-field">
-                        <label class="mt-field-label">Aktif Kademe</label>
-                        <select class="mt-form-input is-select mt-aktif-select">
-                            ${buildTierOptions(mevcutSnap.manualAktif ? mevcutSnap.aktif : '', 'Otomatik (API)')}
-                        </select>
-                    </div>
-                    <div class="mt-form-field">
-                        <label class="mt-field-label" style="color: #f59f00;">Kariyer Zirvesi (Peak)</label>
-                        <select class="mt-form-input is-select mt-peak-select">
-                            ${buildTierOptions(mevcutSnap.manualPeak ? mevcutSnap.peak : '', 'Otomatik / Aktif')}
-                        </select>
-                    </div>
+            ${isManualAllowed ? `
+                <div class="mt-form-field">
+                    <label class="mt-field-label" style="color: #f59f00;">Kariyer Zirvesi (Peak ELO / Kademe)</label>
+                    <input type="text" class="mt-form-input mt-peak-input" placeholder="Örn: 2150 veya Diamond" maxlength="24" value="${RenderEngine.escapeHtml(mevcutSnap.manualPeak ? (mevcutSnap.peak || '') : '')}">
                 </div>
             ` : ''}
 
@@ -3115,10 +3105,10 @@ EditManager.TrophiesView = {
                 }
             }
 
-            const aktifSelect = formWrap.querySelector('.mt-aktif-select');
-            const peakSelect = formWrap.querySelector('.mt-peak-select');
-            const secilenAktif = aktifSelect ? aktifSelect.value : '';
-            const secilenPeak = peakSelect ? peakSelect.value : '';
+            const peakInput = formWrap.querySelector('.mt-peak-input');
+            const rawPeakText = peakInput ? peakInput.value.trim() : '';
+            const secilenAktif = '';
+            const secilenPeak = /^\d+$/.test(rawPeakText) ? `${rawPeakText} ELO` : rawPeakText;
             const mevcutKuyruk = mevcutSnap.kuyruk || '';
 
             const extraSnap = {};

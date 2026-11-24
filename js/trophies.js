@@ -1585,16 +1585,21 @@ const TrophiesManager = {
                 const rawPeak = d?.peakRating ?? d?.peak_rating ?? d?.peak ?? null;
                 const rawTier = d?.tier ?? d?.tierName ?? null;
                 const rawName = d?.name ?? d?.username ?? null;
-                const bhId = d?.brawlhalla_id ?? (isNumericId ? clean : null);
+                const rawLevel = d?.level ?? null;
+                const rawWins = d?.wins ?? null;
+                const rawGames = d?.games ?? null;
+                const bhId = d?.brawlhalla_id ?? (isNumericId && !/^7656119\d{10}$/.test(clean) ? clean : null);
 
-                const ratingVal = rawRating ? `${rawRating} ELO` : (rawTier || clean);
-                const peakVal = rawPeak ? `${rawPeak} ELO` : (rawRating ? `${rawRating} ELO` : 'Ranked');
+                const ratingVal = rawRating
+                    ? `${rawRating} ELO`
+                    : (rawTier || (rawWins != null ? `${rawWins} Galibiyet` : (rawLevel ? `Seviye ${rawLevel}` : clean)));
+                const peakVal = 'Belirtilmedi';
 
                 const stats = [
-                    { label: 'AKTİF KADEME', value: rawTier || ratingVal, sub: '1v1 Solo Dereceli' },
-                    { label: 'ZİRVE ELO', value: peakVal, sub: 'Kariyer Rekoru' },
+                    { label: 'AKTİF KADEME', value: rawTier || ratingVal, sub: rawRating ? '1v1 Solo Dereceli' : 'Genel İstatistik' },
+                    { label: 'ZİRVE (PEAK)', value: peakVal, sub: 'Kariyer Rekoru' },
                     { label: 'OYUNCU KİMLİĞİ', value: rawName || clean, sub: bhId ? `ID #${bhId}` : 'Oyuncu Adı' },
-                    { label: 'SIRALAMA', value: d?.globalRank ? `#${d.globalRank}` : (d?.region ? `${d.region}` : 'Corehalla'), sub: 'Bölge / Küresel Sıralama' }
+                    { label: 'SIRALAMA', value: d?.globalRank ? `#${d.globalRank}` : (d?.region ? `${d.region}` : (rawWins != null && rawGames ? `%${Math.round((rawWins / rawGames) * 100)} WR` : 'Corehalla')), sub: rawWins != null && rawGames ? 'Kazanma Oranı' : 'Bölge / Küresel Sıralama' }
                 ];
 
                 return {
@@ -1801,7 +1806,9 @@ const TrophiesManager = {
         const cleanManualPeak = isManualAllowed ? String(manualPeak || '').trim() : '';
 
         const aktif = cleanManualAktif || (!isPlaceholderVal(norm.heroValue) ? norm.heroValue : '');
-        const peak = cleanManualPeak || (!isPlaceholderVal(norm.peakValue) ? norm.peakValue : aktif);
+        const peak = isManualAllowed
+            ? cleanManualPeak
+            : (!isPlaceholderVal(norm.peakValue) ? norm.peakValue : aktif);
 
         const snap = { ts: Date.now() };
         if (aktif) snap.aktif = aktif;
