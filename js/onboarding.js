@@ -161,16 +161,21 @@ const Onboarding = {
         steps.push({
             id: 'menu-callouts',
             target: () => document.getElementById('profile-user-dropdown'),
+            spotlightTargets: () => [
+                document.getElementById('nav-market-trigger'),
+                document.getElementById('profile-user-dropdown')
+            ],
             title: 'Menü & Market',
+            desc: 'Tüm yönetim ve özelleştirme araçlarına buradan ulaşabilirsin.',
             mode: 'callout-group',
             nextLabel: 'Anladım',
-            padding: 6,
+            padding: 8,
             callouts: [
-                { selector: '#nav-market-trigger', text: 'Temaları keşfet ve profiline uygula' },
-                { selector: '#nav-item-account', text: 'Hesap ve şifre ayarlarını yönet' },
+                { selector: '#nav-market-trigger', text: 'Temaları keşfet ve uygula' },
+                { selector: '#nav-item-account', text: 'Hesap ve şifre ayarları' },
                 { selector: '#nav-item-copy-link', text: 'Sayfa linkini tek tıkla kopyala' },
-                { selector: '#nav-item-sections', text: 'Gaming, Vitrin ve diğer kartları yönet' },
-                { selector: '#nav-item-appearance', text: 'Tema renklerini ve görünümü özelleştir' },
+                { selector: '#nav-item-sections', text: 'Kartları (Gaming, Vitrin) yönet' },
+                { selector: '#nav-item-appearance', text: 'Tema ve renkleri özelleştir' },
                 { selector: '#nav-item-logout', text: 'Hesabından güvenli çıkış yap' }
             ]
         });
@@ -378,10 +383,14 @@ const Onboarding = {
         const calloutsEl = document.getElementById('nookOnboardingCallouts');
 
         const total = this._activeFlow.steps.length;
+        const skipBtn = document.getElementById('nookOnboardingSkipBtn');
         badgeEl.textContent = total > 1 ? `${this._activeStepIndex + 1} / ${total}` : 'İpucu';
         titleEl.textContent = step.title || '';
         descEl.textContent = step.desc || '';
         descEl.style.display = step.desc ? '' : 'none';
+        if (skipBtn) {
+            skipBtn.style.display = (this._activeStepIndex + 1 >= total) ? 'none' : '';
+        }
 
         overlay.classList.toggle('is-action-step', !!step.allowClickThrough);
         overlay.classList.toggle('is-callout-mode', step.mode === 'callout-group');
@@ -416,7 +425,19 @@ const Onboarding = {
             return;
         }
 
-        const rect = targetEl.getBoundingClientRect();
+        let rect = targetEl.getBoundingClientRect();
+        if (typeof step.spotlightTargets === 'function') {
+            const extraRects = step.spotlightTargets()
+                .filter(el => el && el.offsetParent !== null)
+                .map(el => el.getBoundingClientRect());
+            if (extraRects.length > 0) {
+                const left = Math.min(...extraRects.map(r => r.left));
+                const top = Math.min(...extraRects.map(r => r.top));
+                const right = Math.max(...extraRects.map(r => r.right));
+                const bottom = Math.max(...extraRects.map(r => r.bottom));
+                rect = { left, top, right, bottom, width: right - left, height: bottom - top };
+            }
+        }
         const pad = step.padding ?? 8;
         const sLeft = Math.max(4, rect.left - pad);
         const sTop = Math.max(4, rect.top - pad);
@@ -456,6 +477,7 @@ const Onboarding = {
 
     _renderCallouts(callouts, container) {
         container.innerHTML = '';
+        let lastBottom = 6;
         callouts.forEach((item) => {
             const el = document.querySelector(item.selector);
             if (!el || el.offsetParent === null) return;
@@ -463,16 +485,18 @@ const Onboarding = {
 
             const tag = document.createElement('div');
             tag.className = 'nook-onboarding-callout';
-            tag.innerHTML = `<span class="nook-onboarding-callout-arrow" aria-hidden="true">→</span><span>${item.text}</span>`;
+            tag.innerHTML = `<span>${item.text}</span><span class="nook-onboarding-callout-arrow" aria-hidden="true">→</span>`;
             container.appendChild(tag);
 
             const tagW = tag.offsetWidth || 210;
             const tagH = tag.offsetHeight || 28;
             const left = Math.max(10, r.left - tagW - 12);
-            const top = Math.max(8, Math.min(window.innerHeight - tagH - 8, r.top + (r.height - tagH) / 2));
+            const idealTop = r.top + (r.height - tagH) / 2;
+            const top = Math.min(window.innerHeight - tagH - 8, Math.max(lastBottom + 6, idealTop));
 
             tag.style.left = `${left}px`;
             tag.style.top = `${top}px`;
+            lastBottom = top + tagH;
         });
     }
     // #endregion
