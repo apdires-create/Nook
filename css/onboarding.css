@@ -100,6 +100,10 @@
     visibility: visible;
 }
 
+.nook-onboarding-overlay.is-active.is-action-step {
+    pointer-events: none;
+}
+
 .nook-onboarding-backdrop {
     position: fixed;
     inset: 0;
@@ -244,7 +248,7 @@
     top: calc(14px + env(safe-area-inset-top, 0px));
     left: 50%;
     transform: translate3d(-50%, -130%, 0);
-    z-index: 9600;
+    z-index: calc(var(--z-modal, 10000) + 50);
     display: flex;
     align-items: center;
     gap: 10px;

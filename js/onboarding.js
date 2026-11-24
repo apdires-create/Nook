@@ -214,19 +214,11 @@ const Onboarding = {
         if (typeof isOwner === 'undefined' || !isOwner) return;
         if (this._activeFlow) return;
 
-        // Showcase ilk açılış: içeriklerin tıklanıp yorum eklendiğini göster
+        // Showcase ilk açılış: en az 2 içerik varsa tıklayıp yorum ekleme + sürükle-bırak sıralama ipucu
         if (wingType === 'showcase' && this.hasToken(this.TOKENS.WING_SHOWCASE_COMMENT)) {
-            const firstItem = document.querySelector('#topsCompanionCard .top-item-card');
-            if (firstItem && firstItem.offsetParent !== null) {
-                this._startFlow(this.TOKENS.WING_SHOWCASE_COMMENT, [{
-                    id: 'showcase-comment-hint',
-                    target: () => document.querySelector('#topsCompanionCard .top-item-card'),
-                    title: 'İçeriğe Tıkla & Yorum Ekle',
-                    desc: 'Herhangi bir vitrin içeriğine tıkladığında altında kişisel yorum veya not ekleyebileceğin alan açılır.',
-                    mode: 'info',
-                    nextLabel: 'Anladım',
-                    padding: 6
-                }]);
+            const items = document.querySelectorAll('#topsCompanionCard .top-item-card');
+            if (items.length >= 2 && items[0].offsetParent !== null) {
+                this._showShowcaseCommentAndDragHint();
                 return;
             }
         }
@@ -247,6 +239,31 @@ const Onboarding = {
                 }]);
             }
         }
+    },
+
+    onShowcaseItemsUpdated(itemCount) {
+        if (typeof isOwner === 'undefined' || !isOwner) return;
+        if (this._activeFlow) return;
+        if (itemCount < 2 || !this.hasToken(this.TOKENS.WING_SHOWCASE_COMMENT)) return;
+
+        setTimeout(() => {
+            const items = document.querySelectorAll('#topsCompanionCard .top-item-card');
+            if (items.length >= 2 && items[0].offsetParent !== null) {
+                this._showShowcaseCommentAndDragHint();
+            }
+        }, 120);
+    },
+
+    _showShowcaseCommentAndDragHint() {
+        this._startFlow(this.TOKENS.WING_SHOWCASE_COMMENT, [{
+            id: 'showcase-comment-hint',
+            target: () => document.querySelector('#topsCompanionCard .top-item-card'),
+            title: 'Yorum Ekle & Sırala',
+            desc: 'İçeriklere tıklayarak altına kişisel yorum/not ekleyebilir, tutup sürükleyerek sırasını değiştirebilirsin.',
+            mode: 'info',
+            nextLabel: 'Anladım',
+            padding: 6
+        }]);
     },
     // #endregion
 
