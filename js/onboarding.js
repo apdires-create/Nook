@@ -7,15 +7,11 @@ const Onboarding = {
     _activeStepIndex: 0,
     _resizeHandler: null,
     _stepObserver: null,
-    _bannerTimer: null,
 
     TOKENS: {
         OWNER_CORE: 'owner_core',
         TAG_PICKER_ONCE: 'tag_picker_once',
-        WING_CORE_ONCE: 'wing_core_once',
-        WING_SHOWCASE_ONCE: 'wing_showcase_once',
-        HINT_TAG_DRAG: 'hint_tag_drag',
-        HINT_LINK_DRAG: 'hint_link_drag'
+        WING_SHOWCASE_ONCE: 'wing_showcase_once'
     },
 
     init() {
@@ -80,27 +76,6 @@ const Onboarding = {
                 const step = this._currentStep();
                 if (!step || step.allowClickThrough) return;
                 this._advanceStep();
-            });
-        }
-
-        if (!document.getElementById('nookOnboardingBanner')) {
-            const banner = document.createElement('div');
-            banner.id = 'nookOnboardingBanner';
-            banner.className = 'nook-onboarding-banner';
-            banner.setAttribute('role', 'status');
-            banner.innerHTML = `
-                <span class="nook-onboarding-banner-dot" aria-hidden="true"></span>
-                <span class="nook-onboarding-banner-text" id="nookOnboardingBannerText"></span>
-                <button type="button" class="nook-onboarding-banner-close" id="nookOnboardingBannerClose" aria-label="Kapat">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            `;
-            document.body.appendChild(banner);
-            document.getElementById('nookOnboardingBannerClose').addEventListener('click', () => {
-                this._hideBanner();
             });
         }
     },
@@ -293,76 +268,39 @@ const Onboarding = {
     onWingOpened(wingType) {
         if (typeof isOwner === 'undefined' || !isOwner) return;
         if (this._activeFlow) return;
+        if (wingType !== 'showcase') return;
 
-        // Showcase özelinde: alan açılır açılmaz içerik ekleme + sıralama + tıklayıp yorum ekleme
-        if (wingType === 'showcase' && this.hasToken(this.TOKENS.WING_SHOWCASE_ONCE)) {
-            this.consumeToken(this.TOKENS.WING_CORE_ONCE);
+        this._tryShowcaseItemHint(60);
+    },
+
+    onShowcaseItemAdded() {
+        if (typeof isOwner === 'undefined' || !isOwner) return;
+        if (this._activeFlow) return;
+
+        this._tryShowcaseItemHint(180);
+    },
+
+    _tryShowcaseItemHint(delayMs = 120) {
+        if (!this.hasToken(this.TOKENS.WING_SHOWCASE_ONCE)) return;
+
+        setTimeout(() => {
+            if (this._activeFlow || !this.hasToken(this.TOKENS.WING_SHOWCASE_ONCE)) return;
+            const firstItem = document.querySelector('#topsCompanionCard .top-item-card');
+            if (!firstItem || firstItem.offsetParent === null) return;
+
             this._startFlow(this.TOKENS.WING_SHOWCASE_ONCE, [{
                 id: 'showcase-once-hint',
-                target: () => document.querySelector('#topsCompanionCard .top-poster-add')
-                    || document.querySelector('#topsCompanionCard .view-add-btn')
-                    || document.getElementById('topsCompanionCard'),
-                title: 'Vitrin İçerikleri',
-                desc: 'Buradan vitrinine içerik ekleyebilirsin. Eklediğin içerikleri tutup sürükleyerek sıralayabilir, üzerine tıklayarak yorum/not ekleyebilirsin.',
+                target: () => document.querySelector('#topsCompanionCard .top-item-card'),
+                title: 'Vitrin İçeriği',
+                desc: 'Eklediğin içeriğin üzerine tıklayarak kişisel yorum veya not ekleyebilir, tutup sürükleyerek sırasını değiştirebilirsin.',
                 nextLabel: 'Anladım',
                 padding: 8
             }]);
-            return;
-        }
-
-        // Diğer kanatlardan herhangi biri ilk kez açıldığında genel alan ipucu (tüm alanlar için 1 kez)
-        if (this.hasToken(this.TOKENS.WING_CORE_ONCE)) {
-            const cardId = wingType === 'showcase' ? 'topsCompanionCard' : 'trophiesCompanionCard';
-            const addTarget = document.querySelector(`#${cardId} .view-add-btn, #${cardId} .top-poster-add`)
-                || document.getElementById(wingType === 'showcase' ? 'showcaseEditToggleBtn' : 'trophiesEditToggleBtn')
-                || document.getElementById(cardId);
-            this._startFlow(this.TOKENS.WING_CORE_ONCE, [{
-                id: 'wing-core-once-hint',
-                target: () => addTarget,
-                title: 'Alan İçi Kontrol',
-                desc: 'Buradan yeni içerik ekleyebilir, sağ üstteki butonlardan düzenleme veya kaldırma işlemlerini yapabilirsin.',
-                nextLabel: 'Anladım',
-                padding: 8
-            }]);
-        }
+        }, delayMs);
     },
     // #endregion
 
-    // #region 4: ÜSTTEN GELEN MİKRO BİLDİRİMLER (TOKEN TABANLI)
-    triggerHint(key) {
-        if (!this.hasToken(key)) return;
-        const messages = {
-            [this.TOKENS.HINT_TAG_DRAG]: 'İpucu: Etiketleri tutup sürükleyerek sırasını ayarlayabilirsin.',
-            [this.TOKENS.HINT_LINK_DRAG]: 'İpucu: Bağlantıları tutup sürükleyerek sırasını değiştirebilirsin.'
-        };
-        const text = messages[key];
-        if (!text) return;
-
-        this.consumeToken(key);
-        this._showBanner(text);
-    },
-
-    _showBanner(text) {
-        this._ensureDom();
-        const banner = document.getElementById('nookOnboardingBanner');
-        const textEl = document.getElementById('nookOnboardingBannerText');
-        if (!banner || !textEl) return;
-
-        textEl.textContent = text;
-        banner.classList.add('is-visible');
-
-        clearTimeout(this._bannerTimer);
-        this._bannerTimer = setTimeout(() => this._hideBanner(), 4800);
-    },
-
-    _hideBanner() {
-        clearTimeout(this._bannerTimer);
-        const banner = document.getElementById('nookOnboardingBanner');
-        if (banner) banner.classList.remove('is-visible');
-    },
-    // #endregion
-
-    // #region 5: SPOTLIGHT & TOOLTIP YERLEŞİM MOTORU
+    // #region 4: SPOTLIGHT & TOOLTIP YERLEŞİM MOTORU
     _startFlow(tokenKey, steps) {
         if (!steps || steps.length === 0) return;
         this._ensureDom();
