@@ -2460,6 +2460,10 @@ EditManager.BackViews = {
             EditManager.Global.degisiklikYapildi();
             renderLinks();
 
+            if (kartVerisi.links.length >= 2 && typeof Onboarding !== 'undefined' && typeof Onboarding.triggerHint === 'function') {
+                Onboarding.triggerHint(Onboarding.TOKENS.HINT_LINK_DRAG);
+            }
+
             const lastItem = wrapper.lastElementChild;
             if (lastItem) {
                 const toggleBtn = lastItem.querySelector('.nook-link-toggle');
@@ -3722,6 +3726,9 @@ EditManager.TagPicker = {
                 return;
             }
             kartVerisi.front_data.tags.push(temizTag);
+            if (typeof Onboarding !== 'undefined' && typeof Onboarding.triggerHint === 'function') {
+                Onboarding.triggerHint(Onboarding.TOKENS.HINT_TAG_DRAG);
+            }
         }
 
         this.havuzuCiz(document.getElementById('tag-search-input')?.value || '');

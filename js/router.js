@@ -819,6 +819,9 @@ const Router = {
                 if (typeof SpotlightEngine !== 'undefined' && typeof SpotlightEngine.wake === 'function') {
                     SpotlightEngine.wake();
                 }
+                if (typeof Onboarding !== 'undefined' && typeof Onboarding.onWingOpened === 'function') {
+                    Onboarding.onWingOpened(normalizedType);
+                }
             }, isDesktop ? 430 : animDuration + 20);
 
         } else {

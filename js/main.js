@@ -121,6 +121,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (typeof Onboarding !== 'undefined') {
             Onboarding.init();
+            if (typeof isOwner !== 'undefined' && isOwner) {
+                setTimeout(() => {
+                    Onboarding.startOwnerTour();
+                }, 520);
+            }
         }
     }
 });

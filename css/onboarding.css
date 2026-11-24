@@ -80,3 +80,216 @@
         background: rgba(255, 255, 255, 0.92);
     }
 }
+
+/* ==========================================================================
+   Hesap Sahibi Onboarding: Glassmorphism Spotlight, Callouts & Üst Bildirim
+   ========================================================================== */
+.nook-onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9500;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.28s ease, visibility 0.28s ease;
+}
+
+.nook-onboarding-overlay.is-active {
+    pointer-events: auto;
+    opacity: 1;
+    visibility: visible;
+}
+
+.nook-onboarding-backdrop {
+    position: fixed;
+    inset: 0;
+    background: transparent;
+    pointer-events: auto;
+}
+
+.nook-onboarding-overlay.is-action-step .nook-onboarding-backdrop {
+    pointer-events: none;
+}
+
+.nook-onboarding-spotlight {
+    position: fixed;
+    border-radius: 14px;
+    box-shadow: 0 0 0 9999px rgba(8, 10, 14, 0.74),
+                0 0 0 1px rgba(255, 255, 255, 0.22),
+                0 0 28px rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+    transition: left 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                top 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                height 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nook-onboarding-tooltip {
+    position: fixed;
+    width: min(310px, calc(100vw - 24px));
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(18, 20, 26, 0.84);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.52);
+    color: rgba(255, 255, 255, 0.94);
+    pointer-events: auto;
+    z-index: 9520;
+    transition: left 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+                top 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nook-onboarding-tooltip-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.nook-onboarding-step-badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.nook-onboarding-skip-btn {
+    background: none;
+    border: none;
+    padding: 2px 6px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.nook-onboarding-skip-btn:hover {
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.nook-onboarding-title {
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.3;
+    color: #ffffff;
+}
+
+.nook-onboarding-desc {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.48;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.nook-onboarding-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.nook-onboarding-next-btn {
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.18s ease;
+}
+
+.nook-onboarding-next-btn:hover {
+    background: rgba(255, 255, 255, 0.24);
+}
+
+.nook-onboarding-callouts {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9515;
+}
+
+.nook-onboarding-callout {
+    position: fixed;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: min(260px, calc(100vw - 24px));
+    padding: 6px 11px;
+    border-radius: 10px;
+    background: rgba(18, 20, 26, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.nook-onboarding-callout-arrow {
+    color: rgba(255, 255, 255, 0.72);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Üstten Gelen Bağlamsal Mikro Bildirim (Token Tabanlı) */
+.nook-onboarding-banner {
+    position: fixed;
+    top: calc(14px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    transform: translate3d(-50%, -130%, 0);
+    z-index: 9600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: min(440px, calc(100vw - 24px));
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(18, 20, 26, 0.86);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.46);
+    color: rgba(255, 255, 255, 0.94);
+    font-size: 12.5px;
+    line-height: 1.35;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+}
+
+.nook-onboarding-banner.is-visible {
+    transform: translate3d(-50%, 0, 0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.nook-onboarding-banner-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.88);
+    flex-shrink: 0;
+}
+
+.nook-onboarding-banner-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 2px;
+    color: rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.nook-onboarding-banner-close:hover {
+    color: #ffffff;
+}
