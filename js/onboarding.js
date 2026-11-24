@@ -11,6 +11,7 @@ const Onboarding = {
 
     TOKENS: {
         OWNER_CORE: 'owner_core',
+        TAG_PICKER_ONCE: 'tag_picker_once',
         WING_CORE_ONCE: 'wing_core_once',
         WING_SHOWCASE_ONCE: 'wing_showcase_once',
         HINT_TAG_DRAG: 'hint_tag_drag',
@@ -138,41 +139,7 @@ const Onboarding = {
             }
         });
 
-        // 2. Tag ekleme pop-up'ı (seç, oluştur, sırala; pop-up kapanınca ilerle)
-        steps.push({
-            id: 'tag-picker',
-            target: () => document.querySelector('#tag-picker-modal .tag-picker-box') || document.getElementById('tagsZone'),
-            title: 'Etiket Seç & Sırala',
-            desc: 'Buradan hazır etiket seçebilir, kendi etiketini oluşturabilir ve etiketleri tutup sürükleyerek sıralayabilirsin.',
-            nextLabel: 'İleri',
-            allowClickThrough: true,
-            padding: 8,
-            onEnter: () => {
-                if (typeof EditManager !== 'undefined' && EditManager.TagPicker && typeof EditManager.TagPicker.ac === 'function') {
-                    EditManager.TagPicker.ac();
-                }
-                setTimeout(() => this._positionCurrentStep(), 60);
-                this._watchCondition(() => {
-                    const modal = document.getElementById('tag-picker-modal');
-                    return modal && !modal.classList.contains('is-open');
-                }, document.getElementById('tag-picker-modal'));
-            },
-            onNextClick: () => {
-                if (typeof EditManager !== 'undefined' && EditManager.TagPicker && typeof EditManager.TagPicker.kapat === 'function') {
-                    EditManager.TagPicker.kapat();
-                } else {
-                    this._advanceStep();
-                }
-            },
-            onExit: () => {
-                const modal = document.getElementById('tag-picker-modal');
-                if (modal && modal.classList.contains('is-open') && typeof EditManager !== 'undefined' && EditManager.TagPicker) {
-                    EditManager.TagPicker.kapat();
-                }
-            }
-        });
-
-        // 3. Arka yüzü açmak için karta tıkla
+        // 2. Arka yüzü açmak için karta tıkla
         steps.push({
             id: 'flip-to-back',
             target: () => document.getElementById('cardContainer'),
@@ -183,7 +150,7 @@ const Onboarding = {
             padding: 6,
             onEnter: () => {
                 const card = document.getElementById('cardContainer');
-                this._watchCondition(() => card && card.classList.contains('is-flipped'), card);
+                this._watchCondition(() => card && card.classList.contains('is-flipped'), card, 640);
             },
             onNextClick: () => {
                 if (typeof Router !== 'undefined' && typeof Router.setFlipped === 'function') {
@@ -197,11 +164,11 @@ const Onboarding = {
         // 4. Arka yüz: link ekleme ve sıralama
         steps.push({
             id: 'back-links',
-            target: () => document.querySelector('#cardBack .links-add-btn') || document.getElementById('cardBack'),
+            target: () => document.getElementById('cardBack'),
             title: 'Bağlantı Ekle & Sırala',
             desc: 'Buradan sosyal medya ve web bağlantılarını ekleyebilir, eklediğin bağlantıları sürükleyip bırakarak sıralayabilirsin.',
             nextLabel: 'İleri',
-            padding: 8
+            padding: 6
         });
 
         // 5. Ön yüze dönüş
@@ -215,7 +182,7 @@ const Onboarding = {
             padding: 6,
             onEnter: () => {
                 const card = document.getElementById('cardContainer');
-                this._watchCondition(() => card && !card.classList.contains('is-flipped'), card);
+                this._watchCondition(() => card && !card.classList.contains('is-flipped'), card, 640);
             },
             onNextClick: () => {
                 if (typeof Router !== 'undefined' && typeof Router.setFlipped === 'function') {
@@ -231,10 +198,14 @@ const Onboarding = {
             steps.push({
                 id: 'mobile-deck',
                 target: () => document.getElementById('cardContainer'),
+                spotlightTargets: () => [
+                    document.getElementById('cardContainer'),
+                    document.getElementById('mobileDeckDots')
+                ],
                 title: 'Kartlar Arası Kaydırma',
                 desc: 'Ekranı sağa veya sola kaydırarak eklediğin kartlara (ve ilk kart ekleme ekranına) geçebilirsin.',
                 nextLabel: 'İleri',
-                padding: 6
+                padding: 8
             });
         } else {
             const addBtn = document.getElementById('triggerAddSectionBtn');
@@ -277,14 +248,14 @@ const Onboarding = {
         this._startFlow(this.TOKENS.OWNER_CORE, steps);
     },
 
-    _watchCondition(predicate, observeTarget) {
+    _watchCondition(predicate, observeTarget, delayMs = 240) {
         this._stopStepObserver();
         if (!observeTarget) return;
 
         this._stepObserver = new MutationObserver(() => {
             if (predicate()) {
                 this._stopStepObserver();
-                setTimeout(() => this._advanceStep(), 240);
+                setTimeout(() => this._advanceStep(), delayMs);
             }
         });
         this._stepObserver.observe(observeTarget, { attributes: true, attributeFilter: ['class'] });
@@ -299,6 +270,26 @@ const Onboarding = {
     // #endregion
 
     // #region 3: ALAN İÇİ BAĞLAMSAL BOARDINGLER (TEK SEFERLİK)
+    onTagPickerOpened() {
+        if (typeof isOwner === 'undefined' || !isOwner) return;
+        if (this._activeFlow) return;
+        if (!this.hasToken(this.TOKENS.TAG_PICKER_ONCE)) return;
+
+        setTimeout(() => {
+            const panel = document.querySelector('#tag-picker-modal .tag-picker-panel');
+            if (!panel || panel.offsetParent === null) return;
+
+            this._startFlow(this.TOKENS.TAG_PICKER_ONCE, [{
+                id: 'tag-picker-once-hint',
+                target: () => document.querySelector('#tag-picker-modal .tag-picker-panel'),
+                title: 'Etiket Oluştur & Sırala',
+                desc: 'Listede olmayan bir etiketi yukarıdaki kutuya yazarak oluşturabilir, seçili etiketleri ise tutup sürükleyerek sırasını değiştirebilirsin.',
+                nextLabel: 'Anladım',
+                padding: 8
+            }]);
+        }, 230);
+    },
+
     onWingOpened(wingType) {
         if (typeof isOwner === 'undefined' || !isOwner) return;
         if (this._activeFlow) return;
@@ -463,6 +454,11 @@ const Onboarding = {
         }
 
         this._positionCurrentStep();
+        setTimeout(() => {
+            if (this._currentStep() === step) {
+                this._positionCurrentStep();
+            }
+        }, 180);
     },
 
     _positionCurrentStep() {

@@ -3575,6 +3575,10 @@ EditManager.TagPicker = {
         this.havuzuCiz('');
         modal.classList.add('is-open');
 
+        if (typeof Onboarding !== 'undefined' && typeof Onboarding.onTagPickerOpened === 'function') {
+            Onboarding.onTagPickerOpened();
+        }
+
         // Mobilde sanal klavyenin ekranı kapatıp aramayı tetiklememesi için focus'u yalnızca masaüstünde yap
         if (searchInput && window.innerWidth >= 900) {
             setTimeout(() => searchInput.focus(), 50);
