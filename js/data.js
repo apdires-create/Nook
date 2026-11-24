@@ -137,6 +137,7 @@ async function tumVerileriCek() {
         kartVerisi.widgets = rawWidgets;
         kartVerisi.theme_config = guvenliObje(profil.theme_config);
         kartVerisi.kullanici_notlari = guvenliObje(profil.kullanici_notlari);
+        kartVerisi.onboarding = guvenliObje(profil.onboarding);
 
         // Sahip kontrolü
         if (aktifKullaniciOturumu && profil.auth_id === aktifKullaniciOturumu.user.id) {

@@ -2,7 +2,7 @@
 const Onboarding = {
     isMobile: false,
     _initialized: false,
-    _sessionTokens: new Set(),
+    _seenTokens: {},
     _activeFlow: null,
     _activeStepIndex: 0,
     _resizeHandler: null,
@@ -14,7 +14,51 @@ const Onboarding = {
         WING_SHOWCASE_ONCE: 'wing_showcase_once'
     },
 
-    init() {
+    _getStorageKey() {
+        const id = (typeof aktifKullaniciOturumu !== 'undefined' && aktifKullaniciOturumu?.user?.id)
+            || (typeof kartVerisi !== 'undefined' && (kartVerisi?.auth_id || kartVerisi?.kullanici_adi))
+            || 'guest';
+        return 'nook_onboarding_' + String(id).toLowerCase();
+    },
+
+    _readLocalTokens() {
+        try {
+            const raw = localStorage.getItem(this._getStorageKey());
+            if (!raw) return {};
+            const parsed = JSON.parse(raw);
+            return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+        } catch {
+            return {};
+        }
+    },
+
+    _writeLocalTokens() {
+        try {
+            localStorage.setItem(this._getStorageKey(), JSON.stringify(this._seenTokens));
+        } catch {
+            // Storage dolu veya erişilemezse sessizce geç
+        }
+    },
+
+    syncFromProfile(onboardingData) {
+        const remote = (onboardingData && typeof onboardingData === 'object' && !Array.isArray(onboardingData))
+            ? onboardingData
+            : {};
+        const local = this._readLocalTokens();
+        const merged = { ...local, ...remote };
+        Object.keys(this._seenTokens).forEach((k) => {
+            if (this._seenTokens[k]) merged[k] = true;
+        });
+        this._seenTokens = merged;
+        if (typeof kartVerisi !== 'undefined' && kartVerisi) {
+            kartVerisi.onboarding = { ...merged };
+        }
+    },
+
+    init(onboardingData) {
+        const source = onboardingData || (typeof kartVerisi !== 'undefined' ? kartVerisi?.onboarding : null);
+        this.syncFromProfile(source);
+
         if (this._initialized) return;
         this._initialized = true;
 
@@ -23,14 +67,41 @@ const Onboarding = {
         this._ensureDom();
     },
 
-    // Geliştirme aşamasında bellek içi Set kullanır; son aşamada Supabase onboarding JSONB alanına bağlanacak
     hasToken(key) {
         if (typeof isOwner === 'undefined' || !isOwner) return false;
-        return !this._sessionTokens.has(key);
+        return !this._seenTokens[key];
     },
 
     consumeToken(key) {
-        this._sessionTokens.add(key);
+        if (!key || this._seenTokens[key]) return;
+        this._seenTokens[key] = true;
+        if (typeof kartVerisi !== 'undefined' && kartVerisi) {
+            kartVerisi.onboarding = { ...(kartVerisi.onboarding || {}), [key]: true };
+            if (typeof yerelOnbellekKaydet === 'function') {
+                yerelOnbellekKaydet(kartVerisi);
+            }
+        }
+        this._writeLocalTokens();
+        this._persistToSupabase();
+    },
+
+    async _persistToSupabase() {
+        if (typeof isOwner === 'undefined' || !isOwner) return;
+        const client = (typeof supabaseClient !== 'undefined' && supabaseClient) || null;
+        const userId = typeof aktifKullaniciOturumu !== 'undefined' && aktifKullaniciOturumu?.user?.id;
+        if (!client || !userId) return;
+
+        try {
+            const { error } = await client
+                .from('profiles')
+                .update({ onboarding: { ...this._seenTokens } })
+                .eq('auth_id', userId);
+            if (error) {
+                console.warn('Onboarding durumu kaydedilemedi:', error.message);
+            }
+        } catch (err) {
+            console.warn('Onboarding kayıt hatası:', err);
+        }
     },
 
     _ensureDom() {

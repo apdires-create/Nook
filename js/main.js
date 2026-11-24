@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (typeof Onboarding !== 'undefined') {
-            Onboarding.init();
+            Onboarding.init(typeof kartVerisi !== 'undefined' ? kartVerisi?.onboarding : null);
             if (typeof isOwner !== 'undefined' && isOwner) {
                 setTimeout(() => {
                     Onboarding.startOwnerTour();
