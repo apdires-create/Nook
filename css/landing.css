@@ -388,7 +388,7 @@
 }
 
 .tilted-visual-wrapper.is-flat {
-    transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg) translateZ(40px);
+    transform: none;
 }
 
 .flip-card-inner {
@@ -416,7 +416,7 @@
 }
 
 .flip-card-front {
-    transform: rotateY(0deg); 
+    transform: none; 
 }
 
 .flip-card-back {
