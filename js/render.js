@@ -380,11 +380,20 @@ const RenderEngine = {
                                 seciliOge.snap.aktif = updatedNorm.heroValue;
                                 if (updatedNorm.heroSub) seciliOge.snap.aktifAlt = updatedNorm.heroSub;
                             }
-                            // Kullanıcı profil sahibiyse otomatik kayda işaretle ve arka planda profiles tablosuna yaz
+                            // Kullanıcı profil sahibiyse arka planda profiles tablosuna yaz (Kaydet butonunu tetikleme)
                             if (isUserOwner && typeof EditManager !== 'undefined') {
+                                const isWidget = (typeof EditManager.Trophies?._isWidgetTur === 'function')
+                                    ? EditManager.Trophies._isWidgetTur(activeTur)
+                                    : (activeTur === 'monkeytype' || activeTur === 'chess' || activeTur === 'duolingo' || activeTur === 'osu' || activeTur === 'lichess');
+                                if (EditManager.state?.orijinalVeri) {
+                                    if (isWidget) {
+                                        EditManager.state.orijinalVeri.widgets = JSON.parse(JSON.stringify(kart.widgets || []));
+                                    } else {
+                                        EditManager.state.orijinalVeri.gaming = JSON.parse(JSON.stringify(kart.gaming || []));
+                                    }
+                                }
                                 EditManager.Global.degisiklikYapildi();
                                 if (typeof supabaseClient !== 'undefined' && supabaseClient && kart?.auth_id) {
-                                    const isWidget = activeTur === 'monkeytype' || activeTur === 'chess';
                                     const updatePayload = isWidget ? { widgets: kart.widgets } : { gaming: kart.gaming };
                                     supabaseClient.from('profiles').update(updatePayload).eq('auth_id', kart.auth_id).then(() => {}).catch(() => {});
                                 }

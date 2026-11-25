@@ -2661,10 +2661,21 @@ EditManager.TrophiesView = {
 
         window._activeTrophyDetail = tur;
         RenderEngine.trophiesCiz(kartVerisi);
-        EditManager.Global.degisiklikYapildi();
 
         // Otomatik arka plan kalıcı kaydı (sayfa yenilendiğinde veri kaybını önler)
         if (typeof supabaseClient !== 'undefined' && supabaseClient && kartVerisi?.auth_id) {
+            if (EditManager.state?.orijinalVeri) {
+                if (isWidget) {
+                    EditManager.state.orijinalVeri.widgets = JSON.parse(JSON.stringify(kartVerisi.widgets || []));
+                } else {
+                    EditManager.state.orijinalVeri.gaming = JSON.parse(JSON.stringify(kartVerisi.gaming || []));
+                }
+                if (Array.isArray(EditManager.state.orijinalVeri.trophies)) {
+                    EditManager.state.orijinalVeri.trophies = EditManager.state.orijinalVeri.trophies.filter(x => x && x.tur !== tur);
+                }
+            }
+            EditManager.Global.degisiklikYapildi();
+
             const updateField = isWidget ? { widgets: kartVerisi.widgets } : { gaming: kartVerisi.gaming };
             supabaseClient
                 .from('profiles')
@@ -2677,6 +2688,8 @@ EditManager.TrophiesView = {
                     }
                 })
                 .catch(() => {});
+        } else {
+            EditManager.Global.degisiklikYapildi();
         }
 
         EditManager.Global.toastGoster(meta.baslik + ' profili güncellendi.', 'success');
