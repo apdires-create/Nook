@@ -482,7 +482,7 @@ const Router = {
         }
     },
 
-    _cancelMobileAnimations() {
+    _cancelMobileAnimations(preserveDeckStyles = false) {
         const stage = document.getElementById('profileStage');
         const animProps = ['_activeCompanionAnim', '_activeCompanionCardAnim', '_activeGhostAnim', '_activeDragResetAnim', '_activeNeighborResetAnim', '_activeFlagsAnim'];
         animProps.forEach((prop) => {
@@ -494,15 +494,17 @@ const Router = {
         if (stage) {
             stage.querySelectorAll('.deck-swipe-ghost-card').forEach(el => el.remove());
         }
-        ['cardContainer', 'topsCompanionCard', 'trophiesCompanionCard', 'addSectionCompanionCard'].forEach((id) => {
-            const el = document.getElementById(id);
-            if (el) {
-                if (id !== 'cardContainer' || window.innerWidth < 900) {
-                    el.style.transform = '';
+        if (!preserveDeckStyles) {
+            ['cardContainer', 'topsCompanionCard', 'trophiesCompanionCard', 'addSectionCompanionCard'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id !== 'cardContainer' || window.innerWidth < 900) {
+                        el.style.transform = '';
+                    }
+                    el.style.opacity = '';
                 }
-                el.style.opacity = '';
-            }
-        });
+            });
+        }
     },
 
     _animateMobileDeckTransition(outgoingEl, incomingEl, dir, dragOffsetX = 0) {
@@ -575,7 +577,7 @@ const Router = {
             clearTimeout(this._companionTimer);
             this._companionTimer = null;
         }
-        this._cancelMobileAnimations();
+        this._cancelMobileAnimations(!isDesktop && swipeDir !== 0);
 
         const isShowcaseOpen = stage.classList.contains('is-showcase-active');
         const isTrophiesOpen = stage.classList.contains('is-trophies-active');

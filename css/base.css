@@ -645,23 +645,23 @@ html.is-profile-loading #landing-screen {
 
     /* Showcase açıkken profil sola kayar */
     .stage.has-companion-open.is-showcase-active .card-container {
-        transform: translate3d(calc(-100vw - 40px), 0, 0) !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
+        transform: translate3d(calc(-100vw - 40px), 0, 0);
+        opacity: 0;
+        pointer-events: none;
     }
 
     /* Trophies açıkken profil sağa kayar */
     .stage.has-companion-open.is-trophies-active .card-container {
-        transform: translate3d(calc(100vw + 40px), 0, 0) !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
+        transform: translate3d(calc(100vw + 40px), 0, 0);
+        opacity: 0;
+        pointer-events: none;
     }
 
     /* Kart Ekle açıkken profil sola kayar */
     .stage.has-companion-open.is-add-card-active .card-container {
-        transform: translate3d(calc(-100vw - 40px), 0, 0) !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
+        transform: translate3d(calc(-100vw - 40px), 0, 0);
+        opacity: 0;
+        pointer-events: none;
     }
 
     /* Showcase Kartı: Normalde sağda ekran dışında */
@@ -676,9 +676,9 @@ html.is-profile-loading #landing-screen {
     }
 
     .stage.has-companion-open.is-showcase-active #topsCompanionCard {
-        transform: translate3d(0, 0, 0) !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+        pointer-events: auto;
     }
 
     /* Trophies Kartı: Normalde solda ekran dışında */
@@ -693,9 +693,9 @@ html.is-profile-loading #landing-screen {
     }
 
     .stage.has-companion-open.is-trophies-active #trophiesCompanionCard {
-        transform: translate3d(0, 0, 0) !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+        pointer-events: auto;
     }
 
     /* Kart Ekle Kartı (Yalnızca sahip ve hiç kart yokken mobilde görünür) */
@@ -714,9 +714,9 @@ html.is-profile-loading #landing-screen {
     }
 
     .stage.has-companion-open.is-add-card-active #addSectionCompanionCard {
-        transform: translate3d(0, 0, 0) !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+        pointer-events: auto;
     }
 
     /* Mobil Deste (Deck) İçi Kaydırma Hayalet Kart Katmanı */
