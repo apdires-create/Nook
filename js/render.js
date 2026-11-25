@@ -50,6 +50,7 @@ const RenderEngine = {
                 .slice(0, 6)
                 .map(tag => `<span class="tag-pill" title="${this.escapeHtml(tag)}"><span class="tag-text">${this.escapeHtml(tag)}</span></span>`)
                 .join('');
+            this.tagSatirDuzenle(tagsGrid);
         }
 
         // Eğer sahip modundaysak ve EditManager yüklüyse düzenleme kontrollerini bağla
@@ -57,6 +58,25 @@ const RenderEngine = {
             EditManager.Vitrin?.init();
             EditManager.Media?.overlayleriYerlestir();
         }
+    },
+
+    tagSatirDuzenle(tagsGrid) {
+        if (!tagsGrid || tagsGrid.clientWidth === 0) return;
+        const pills = [...tagsGrid.querySelectorAll('.tag-pill:not(.is-drag-clone)')].filter(el => el.offsetParent !== null);
+        tagsGrid.classList.remove('is-2col', 'is-3col');
+        if (pills.length <= 1) return;
+
+        const satirSayisi = () => {
+            const tops = new Set();
+            pills.forEach(p => tops.add(Math.round(p.offsetTop / 6)));
+            return tops.size;
+        };
+
+        if (satirSayisi() <= 2) return;
+        tagsGrid.classList.add('is-2col');
+        if (satirSayisi() <= 2) return;
+        tagsGrid.classList.remove('is-2col');
+        tagsGrid.classList.add('is-3col');
     },
 
     formatLinkDisplayUrl(url) {

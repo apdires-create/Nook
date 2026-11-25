@@ -74,8 +74,10 @@ const EditManager = {
             itemSelector,
             axis = 'y',
             canDrag = null,
+            onDragStart = null,
             onMove = null,
             onDrop = null,
+            onDragEnd = null,
             excludedDragSelectors = 'input, textarea, select, button, a, .item-delete-btn, .tag-remove-btn, .nook-action-btn, .nook-link-toggle, .nook-link-test-btn, .tops-add-btn, .top-add-form'
         } = options;
 
@@ -94,6 +96,7 @@ const EditManager = {
         let pointerType = 'mouse';
 
         let activePointerId = null;
+        let lastSwapTime = 0;
 
         const startDraggingEngine = (clientX, clientY) => {
             if (!draggedItem || isDragging) return;
@@ -148,6 +151,7 @@ const EditManager = {
             draggedItem.classList.add('is-dragging', 'is-drag-placeholder');
             draggedItem.style.pointerEvents = 'none';
             document.body.classList.add('is-pointer-dragging');
+            if (typeof onDragStart === 'function') onDragStart(draggedItem);
         };
 
         const onPointerDown = (e) => {
@@ -227,30 +231,29 @@ const EditManager = {
             if (targetItem && targetItem !== draggedItem && container.contains(targetItem)) {
                 if (targetItem.closest('.tag-add-pill, .tops-add-btn, .top-add-form')) return;
 
+                const now = Date.now();
+                if (axis !== 'y' && now - lastSwapTime < 110) return;
+
                 const box = targetItem.getBoundingClientRect();
+                let insertAfter = false;
                 if (axis === 'x') {
-                    const offset = e.clientX - box.left;
-                    if (offset > box.width / 2) {
-                        targetItem.after(draggedItem);
-                    } else {
-                        targetItem.before(draggedItem);
-                    }
+                    insertAfter = (e.clientX - box.left) > (box.width / 2);
                 } else if (axis === 'y') {
-                    const offset = e.clientY - box.top;
-                    if (offset > box.height / 2) {
-                        targetItem.after(draggedItem);
-                    } else {
-                        targetItem.before(draggedItem);
-                    }
+                    insertAfter = (e.clientY - box.top) > (box.height / 2);
                 } else {
                     const midX = box.left + box.width / 2;
                     const midY = box.top + box.height / 2;
-                    if (e.clientY > midY || (Math.abs(e.clientY - midY) < box.height / 3 && e.clientX > midX)) {
-                        targetItem.after(draggedItem);
-                    } else {
-                        targetItem.before(draggedItem);
-                    }
+                    insertAfter = e.clientY > midY || (Math.abs(e.clientY - midY) < box.height / 3 && e.clientX > midX);
                 }
+
+                if (insertAfter) {
+                    if (targetItem.nextElementSibling === draggedItem) return;
+                    targetItem.after(draggedItem);
+                } else {
+                    if (targetItem.previousElementSibling === draggedItem) return;
+                    targetItem.before(draggedItem);
+                }
+                lastSwapTime = now;
                 hasMoved = true;
                 if (typeof onMove === 'function') onMove(draggedItem, targetItem);
             }
@@ -286,6 +289,9 @@ const EditManager = {
                 window._suruklemeBitti = Date.now();
                 if (hasMoved && typeof onDrop === 'function') {
                     onDrop();
+                }
+                if (typeof onDragEnd === 'function') {
+                    onDragEnd(hasMoved);
                 }
             }
 
@@ -1986,6 +1992,10 @@ EditManager.Vitrin = {
             tagsGrid.appendChild(addPill);
         }
 
+        if (typeof RenderEngine !== 'undefined' && typeof RenderEngine.tagSatirDuzenle === 'function') {
+            RenderEngine.tagSatirDuzenle(tagsGrid);
+        }
+
         // Mobilde etiket bölgesine tıklandığında pop-up aç
         const tagsZone = document.getElementById('tagsZone');
         if (tagsZone && !tagsZone._hasMobileListener) {
@@ -2004,7 +2014,7 @@ EditManager.Vitrin = {
         // Sürükle-Bırak Sistemi (Pointer Reorder: Hover, Grab, Drop)
         EditManager.initPointerSortable(tagsGrid, {
             itemSelector: '.tag-pill:not(.tag-add-pill)',
-            axis: 'x',
+            axis: 'both',
             excludedDragSelectors: '.tag-remove-btn, .tag-add-pill, input, button',
             canDrag: () => {
                 // Mobilde istemsiz tag sürüklenmesini önlemek için dokunmatik ekranda yalnızca düzenleme modu varsa veya masaüstündeyse izin ver
@@ -2012,6 +2022,15 @@ EditManager.Vitrin = {
                     return false;
                 }
                 return true;
+            },
+            onDragStart: () => {
+                tagsGrid.classList.remove('is-2col');
+                tagsGrid.classList.add('is-3col');
+            },
+            onDragEnd: () => {
+                if (typeof RenderEngine !== 'undefined' && typeof RenderEngine.tagSatirDuzenle === 'function') {
+                    RenderEngine.tagSatirDuzenle(tagsGrid);
+                }
             },
             onDrop: () => {
                 const yeniTagler = [...tagsGrid.querySelectorAll('.tag-pill:not(.tag-add-pill)')]

@@ -369,7 +369,7 @@ body.is-owner .profile-bio.is-empty:not(.is-input-active)::before {
     text-align: center;
     white-space: nowrap;
     width: auto;
-    max-width: calc((100% - 3.4cqw) / 3);
+    max-width: 100%;
     position: relative;
     overflow: visible;
     display: inline-flex;
@@ -386,6 +386,14 @@ body.is-owner .profile-bio.is-empty:not(.is-input-active)::before {
     text-overflow: ellipsis;
     white-space: nowrap;
     vertical-align: middle;
+}
+
+.tags-grid.is-2col .tag-pill {
+    max-width: calc((100% - 1.6cqw) / 2);
+}
+
+.tags-grid.is-3col .tag-pill {
+    max-width: calc((100% - 3.4cqw) / 3);
 }
 
 .tag-pill:hover {
