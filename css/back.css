@@ -479,8 +479,15 @@ body.is-owner .top-item-unit:active {
                 max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
                 padding 0.3s ease,
                 margin 0.3s ease,
+                background-color 0.22s ease,
                 border-color 0.25s ease,
                 box-shadow 0.25s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body:not(.is-pointer-dragging) .top-item-card:not(.is-expanded):hover {
+        transform: translateY(-2px);
+    }
 }
 
 /* Bir kart genişletildiğinde diğer birimlerin ve ekleme butonunun yok olması */
@@ -581,6 +588,7 @@ body.is-owner .top-item-unit:active {
     justify-content: center;
     color: var(--text-tertiary);
     flex-shrink: 0;
+    overflow: hidden;
     pointer-events: none;
     -webkit-user-drag: none;
     user-select: none;
@@ -596,6 +604,7 @@ body.is-owner .top-item-unit:active {
     pointer-events: none;
     -webkit-user-drag: none;
     user-select: none;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .top-item-content {
