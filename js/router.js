@@ -839,6 +839,9 @@ const Router = {
             // KAPANIŞ SEKANSI
             // ==========================================
             this._companionTransitioning = true;
+            if (this.isFlipped) {
+                this.setFlipped(false);
+            }
 
             const currentCard = isAddCardOpen ? addSectionCard : (isShowcaseOpen ? topsCard : trophiesCard);
             stage.classList.add('is-companion-closing');

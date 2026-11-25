@@ -405,7 +405,7 @@
     box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.6) !important;
 }
 
-[data-theme="obsidian-minimal"] .card-container.is-flipped .card-flag-btn {
+[data-theme="obsidian-minimal"] .stage:not(.has-companion-open) .card-container.is-flipped .card-flag-btn {
     border-radius: 50% !important;
     border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
 }

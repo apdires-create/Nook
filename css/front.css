@@ -157,7 +157,7 @@
     transform: rotate(90deg);
 }
 
-.card-container.is-flipped .card-flag-btn.flag-add {
+.stage:not(.has-companion-open) .card-container.is-flipped .card-flag-btn.flag-add {
     border-left: 1.5px dashed rgba(255, 255, 255, 0.28);
 }
 
@@ -172,26 +172,27 @@ body:not(.is-owner) #nav-item-sections {
     display: none !important;
 }
 
-/* 🔄 FLIP DURUMU: Masaüstü -> Havada Asılı Dairesel Forma Dönüşüm */
-.card-container.is-flipped .card-flags-wrapper {
+/* 🔄 FLIP DURUMU: Masaüstü -> Havada Asılı Dairesel Forma Dönüşüm (Kartlar kapalıyken) */
+.stage:not(.has-companion-open) .card-container.is-flipped .card-flags-wrapper {
     transform: translateX(12px) translateZ(40px);
 }
 
-.card-container.is-flipped .card-flag-btn {
+.stage:not(.has-companion-open) .card-container.is-flipped .card-flag-btn {
     width: clamp(40px, 8cqw, 50px);
     height: clamp(40px, 8cqw, 50px);
     border-radius: 50%;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.3);
 }
 
-.card-container.is-flipped .card-flag-btn:hover {
+.stage:not(.has-companion-open) .card-container.is-flipped .card-flag-btn:hover {
     transform: scale(1.12);
 }
 
-.card-container.is-flipped .card-flag-btn:active {
+.stage:not(.has-companion-open) .card-container.is-flipped .card-flag-btn:active {
     transform: scale(0.94);
 }
 
+.stage.has-companion-open .card-container.is-flipped .card-flag-btn:active,
 .card-container:not(.is-flipped) .card-flag-btn:active {
     transform: translateX(2px) scale(0.96);
 }
