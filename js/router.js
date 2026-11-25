@@ -445,12 +445,20 @@ const Router = {
         return 'main';
     },
 
-    getActiveDeckElement() {
-        const pos = this.getCurrentDeckPosition();
+    getDeckElementForPosition(pos) {
         if (pos === 'main') return this.cardContainer || document.getElementById('cardContainer');
         if (pos === 'add-card') return document.getElementById('addSectionCompanionCard');
         if (pos === 'showcase') return document.getElementById('topsCompanionCard');
         return document.getElementById('trophiesCompanionCard');
+    },
+
+    getActiveDeckElement() {
+        return this.getDeckElementForPosition(this.getCurrentDeckPosition());
+    },
+
+    _getMobileDeckStepPx(refEl) {
+        const cardW = refEl?.offsetWidth || Math.min(window.innerWidth - 22, 420);
+        return Math.min(window.innerWidth + 24, cardW + 20);
     },
 
     syncMobileDeckDots() {
@@ -476,7 +484,7 @@ const Router = {
 
     _cancelMobileAnimations() {
         const stage = document.getElementById('profileStage');
-        const animProps = ['_activeCompanionAnim', '_activeCompanionCardAnim', '_activeGhostAnim', '_activeDragResetAnim', '_activeFlagsAnim'];
+        const animProps = ['_activeCompanionAnim', '_activeCompanionCardAnim', '_activeGhostAnim', '_activeDragResetAnim', '_activeNeighborResetAnim', '_activeFlagsAnim'];
         animProps.forEach((prop) => {
             if (this[prop]) {
                 try { this[prop].cancel(); } catch (err) {}
@@ -499,14 +507,14 @@ const Router = {
 
     _animateMobileDeckTransition(outgoingEl, incomingEl, dir, dragOffsetX = 0) {
         const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const duration = reducedMotion ? 160 : 380;
+        const duration = reducedMotion ? 160 : 340;
         const easing = 'cubic-bezier(0.16, 1, 0.3, 1)';
-        const travelPx = window.innerWidth + 40;
-        const outEndX = dir < 0 ? -travelPx : travelPx;
-        const inStartX = dir < 0 ? travelPx : -travelPx;
+        const stepPx = this._getMobileDeckStepPx(incomingEl || outgoingEl);
+        const outEndX = dir < 0 ? -stepPx : stepPx;
         const startX = dragOffsetX || 0;
+        const inStartX = dragOffsetX ? (dir < 0 ? startX + stepPx : startX - stepPx) : (dir < 0 ? stepPx : -stepPx);
         const startOpacity = dragOffsetX
-            ? Math.max(0.5, 1 - Math.abs(dragOffsetX) / (window.innerWidth * 1.35))
+            ? Math.max(0.75, 1 - Math.abs(dragOffsetX) / (stepPx * 2))
             : 1;
 
         if (outgoingEl) {
@@ -534,7 +542,7 @@ const Router = {
             const inFrames = reducedMotion
                 ? [{ opacity: 0 }, { opacity: 1 }]
                 : [
-                    { transform: `translate3d(${inStartX}px, 0, 0)`, opacity: 0 },
+                    { transform: `translate3d(${inStartX}px, 0, 0)`, opacity: 1 },
                     { transform: 'translate3d(0, 0, 0)', opacity: 1 }
                 ];
             const anim = incomingEl.animate(inFrames, { duration, easing, fill: 'forwards' });
@@ -965,6 +973,8 @@ const TouchGestureManager = {
     hasSwiped: false,
     dragActive: false,
     dragEl: null,
+    neighborEl: null,
+    neighborDir: 0,
     scrollerEl: null,
     isScrollableEl: false,
     lockedAxis: null, // 'x' | 'y' | null (İlk ~10px harekette kilitlenir)
@@ -1001,15 +1011,20 @@ const TouchGestureManager = {
         return false;
     },
 
-    _snapBackDrag(el, fromX) {
+    _snapBackDrag(el, fromX, neighborEl = null, dir = 0) {
         if (!el) return;
         const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const stepPx = Router._getMobileDeckStepPx(el);
         if (reducedMotion) {
             el.style.transform = '';
             el.style.opacity = '';
+            if (neighborEl) {
+                neighborEl.style.transform = '';
+                neighborEl.style.opacity = '';
+            }
             return;
         }
-        const fromOpacity = Math.max(0.5, 1 - Math.abs(fromX) / (window.innerWidth * 1.35));
+        const fromOpacity = Math.max(0.75, 1 - Math.abs(fromX) / (stepPx * 2));
         el.style.transform = '';
         el.style.opacity = '';
         if (Router._activeDragResetAnim) {
@@ -1028,6 +1043,29 @@ const TouchGestureManager = {
                 Router._activeDragResetAnim = null;
             }
         };
+
+        if (neighborEl && neighborEl !== el && dir !== 0) {
+            const neighborFromX = fromX + (dir < 0 ? stepPx : -stepPx);
+            const neighborToX = dir < 0 ? stepPx : -stepPx;
+            neighborEl.style.transform = '';
+            neighborEl.style.opacity = '';
+            if (Router._activeNeighborResetAnim) {
+                try { Router._activeNeighborResetAnim.cancel(); } catch (err) {}
+            }
+            const nAnim = neighborEl.animate([
+                { transform: `translate3d(${neighborFromX}px, 0, 0)`, opacity: 1 },
+                { transform: `translate3d(${neighborToX}px, 0, 0)`, opacity: 0 }
+            ], {
+                duration: 240,
+                easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+            });
+            Router._activeNeighborResetAnim = nAnim;
+            nAnim.onfinish = () => {
+                if (Router._activeNeighborResetAnim === nAnim) {
+                    Router._activeNeighborResetAnim = null;
+                }
+            };
+        }
     },
 
     handleTouchStart(e) {
@@ -1076,6 +1114,8 @@ const TouchGestureManager = {
         this.hasSwiped = false;
         this.dragActive = false;
         this.dragEl = null;
+        this.neighborEl = null;
+        this.neighborDir = 0;
         this.lockedAxis = null;
     },
 
@@ -1112,10 +1152,39 @@ const TouchGestureManager = {
                         try { Router._activeDragResetAnim.cancel(); } catch (err) {}
                         Router._activeDragResetAnim = null;
                     }
+                    if (Router._activeNeighborResetAnim) {
+                        try { Router._activeNeighborResetAnim.cancel(); } catch (err) {}
+                        Router._activeNeighborResetAnim = null;
+                    }
                     this.dragActive = true;
                     this.dragEl = activeEl;
-                    activeEl.style.transform = `translate3d(${deltaX}px, 0, 0)`;
-                    activeEl.style.opacity = String(Math.max(0.5, 1 - absX / (window.innerWidth * 1.35)));
+
+                    const stepPx = Router._getMobileDeckStepPx(activeEl);
+                    const dir = deltaX < 0 ? -1 : 1;
+                    const currentPos = Router.getCurrentDeckPosition();
+                    const currentIdx = Math.max(0, deckOrder.indexOf(currentPos));
+                    const targetIdx = dir < 0
+                        ? (currentIdx + 1) % deckOrder.length
+                        : (currentIdx - 1 + deckOrder.length) % deckOrder.length;
+                    const candidateEl = Router.getDeckElementForPosition(deckOrder[targetIdx]);
+
+                    if (this.neighborEl && this.neighborEl !== candidateEl) {
+                        this.neighborEl.style.transform = '';
+                        this.neighborEl.style.opacity = '';
+                    }
+                    if (candidateEl && candidateEl !== activeEl) {
+                        this.neighborEl = candidateEl;
+                        this.neighborDir = dir;
+                        const neighborX = deltaX + (dir < 0 ? stepPx : -stepPx);
+                        candidateEl.style.setProperty('transform', `translate3d(${neighborX}px, 0, 0)`, 'important');
+                        candidateEl.style.setProperty('opacity', '1', 'important');
+                    } else {
+                        this.neighborEl = null;
+                        this.neighborDir = 0;
+                    }
+
+                    activeEl.style.setProperty('transform', `translate3d(${deltaX}px, 0, 0)`, 'important');
+                    activeEl.style.setProperty('opacity', String(Math.max(0.75, 1 - absX / (stepPx * 2))), 'important');
                 }
             }
             return;
@@ -1144,11 +1213,13 @@ const TouchGestureManager = {
         const deltaY = this.lastY - this.startY;
         this.evaluateSwipe(deltaX, deltaY);
         if (this.dragActive && !this.hasSwiped) {
-            this._snapBackDrag(this.dragEl, deltaX);
+            this._snapBackDrag(this.dragEl, deltaX, this.neighborEl, this.neighborDir);
         }
         this.isTracking = false;
         this.dragActive = false;
         this.dragEl = null;
+        this.neighborEl = null;
+        this.neighborDir = 0;
         this.lockedAxis = null;
     },
 
@@ -1167,10 +1238,12 @@ const TouchGestureManager = {
         const deltaY = endY - this.startY;
         this.evaluateSwipe(deltaX, deltaY);
         if (this.dragActive && !this.hasSwiped) {
-            this._snapBackDrag(this.dragEl, deltaX);
+            this._snapBackDrag(this.dragEl, deltaX, this.neighborEl, this.neighborDir);
         }
         this.dragActive = false;
         this.dragEl = null;
+        this.neighborEl = null;
+        this.neighborDir = 0;
         this.lockedAxis = null;
     },
 
