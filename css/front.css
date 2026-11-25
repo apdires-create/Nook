@@ -306,6 +306,16 @@ body:not(.is-owner) #nav-item-sections {
     box-sizing: border-box;
     overflow: hidden;
 }
+
+body:not(.is-owner) .profile-bio.is-empty {
+    display: none;
+}
+
+body.is-owner .profile-bio.is-empty:not(.is-input-active)::before {
+    content: "Açıklama ekle...";
+    opacity: 0.45;
+    font-style: italic;
+}
 /* #endregion */
 
 /* #region 4: 3. BÖLGE — TABAN (TAG IZGARASI - 3x2 SİSTEMİ) */
