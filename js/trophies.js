@@ -723,9 +723,9 @@ const TrophiesManager = {
             kategori: 'dovus',
             kategoriBaslik: 'Dövüş & Platform',
             girdiTipi: 'brawlhalla_id',
-            girdiEtiket: 'Brawlhalla ID veya Oyuncu Adı',
-            placeholder: 'Brawlhalla ID veya Nick',
-            ornek: 'Sandstorm',
+            girdiEtiket: 'Brawlhalla ID veya Steam64 ID',
+            placeholder: 'Brawlhalla ID veya Steam64 ID',
+            ornek: '76561198000000000',
             comingSoon: false,
             tiers: [
                 'Valhallan', 'Diamond (2000+ Elo)', 'Platinum (1680-1999)',
@@ -862,6 +862,19 @@ const TrophiesManager = {
         if (!val) {
             return { ok: false, error: `Lütfen ${item?.girdiEtiket || 'oyuncu kimliği'} girin.` };
         }
+
+        if (item?.girdiTipi === 'brawlhalla_id') {
+            const steamUrlMatch = val.match(/steamcommunity\.com\/profiles\/(7656119\d{10})/i);
+            const extracted = steamUrlMatch ? steamUrlMatch[1] : val;
+            if (!/^\d+$/.test(extracted)) {
+                return { ok: false, error: 'Lütfen yalnızca sayısal Brawlhalla ID veya 17 haneli Steam64 ID girin.' };
+            }
+            if (extracted.length > 24) {
+                return { ok: false, error: 'Geçersiz Brawlhalla / Steam64 ID uzunluğu.' };
+            }
+            return { ok: true, clean: extracted };
+        }
+
         if (val.length > 42) {
             return { ok: false, error: 'Girdi çok uzun (en fazla 42 karakter).' };
         }
