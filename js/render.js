@@ -62,7 +62,7 @@ const RenderEngine = {
 
     tagSatirDuzenle(tagsGrid) {
         if (!tagsGrid || tagsGrid.clientWidth === 0) return;
-        const pills = [...tagsGrid.querySelectorAll('.tag-pill:not(.is-drag-clone)')].filter(el => el.offsetParent !== null);
+        const pills = [...tagsGrid.querySelectorAll('.tag-pill:not(.is-drag-clone), .tag-add-pill')].filter(el => el.offsetParent !== null);
         tagsGrid.classList.remove('is-2col', 'is-3col');
         if (pills.length <= 1) return;
 
