@@ -1673,10 +1673,12 @@ body.is-owner .top-item-unit:active {
 
 /* 1. Tüm Detay Sahnesine Yayılan Kesintisiz Atmosferik Banner */
 .trophies-companion-card.is-lol-view .companion-view-detail {
+    --lol-banner-fade-mid: 13%;
+    --lol-banner-fade-end: 29%;
     position: relative;
     background-color: #090c14;
     background-image: 
-        linear-gradient(180deg, rgba(9, 12, 20, 0.22) 0%, rgba(9, 12, 20, 0.6) 35%, rgba(9, 12, 20, 0.94) 68%, #090c14 100%),
+        linear-gradient(180deg, rgba(9, 12, 20, 0.28) 0%, rgba(9, 12, 20, 0.68) var(--lol-banner-fade-mid), #090c14 var(--lol-banner-fade-end), #090c14 100%),
         url('../assets/images/lol-banner.jpg');
     background-position: top center;
     background-size: 100% auto;
@@ -2014,10 +2016,12 @@ body.is-owner .top-item-unit:active {
  * VALORANT ÖZEL KART TASARIMI (Eğik Ajan Kartları + Elo/RR)
  * ========================================================= */
 .trophies-companion-card.is-valorant-view .companion-view-detail {
+    --val-banner-fade-mid: 13%;
+    --val-banner-fade-end: 29%;
     position: relative;
     background-color: #090c14;
     background-image:
-        linear-gradient(180deg, rgba(9, 12, 20, 0.25) 0%, rgba(9, 12, 20, 0.68) 38%, rgba(9, 12, 20, 0.95) 72%, #090c14 100%),
+        linear-gradient(180deg, rgba(9, 12, 20, 0.28) 0%, rgba(9, 12, 20, 0.68) var(--val-banner-fade-mid), #090c14 var(--val-banner-fade-end), #090c14 100%),
         url('../assets/images/valo-banner.jpg');
     background-position: top center;
     background-size: 100% auto;
@@ -2316,10 +2320,12 @@ body.is-owner .top-item-unit:active {
  * COUNTER-STRIKE 2 ÖZEL KART TASARIMI (LoL MİMARİSİ + CS2 HUD)
  * ========================================================= */
 .trophies-companion-card.is-cs2-view .companion-view-detail {
+    --cs2-banner-fade-mid: 13%;
+    --cs2-banner-fade-end: 29%;
     position: relative;
     background-color: #090c14;
     background-image:
-        linear-gradient(180deg, rgba(9, 12, 20, 0.25) 0%, rgba(9, 12, 20, 0.72) 38%, rgba(9, 12, 20, 0.96) 72%, #090c14 100%),
+        linear-gradient(180deg, rgba(9, 12, 20, 0.28) 0%, rgba(9, 12, 20, 0.68) var(--cs2-banner-fade-mid), #090c14 var(--cs2-banner-fade-end), #090c14 100%),
         url('../assets/images/cs-banner.jpg');
     background-position: top center;
     background-size: 100% auto;
