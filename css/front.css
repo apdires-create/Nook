@@ -274,6 +274,15 @@ body:not(.is-owner) #nav-item-sections {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+body:not(.is-owner) .profile-title.is-empty {
+    display: none;
+}
+
+body.is-owner .profile-title.is-empty:not(.is-input-active)::before {
+    content: "Ünvan ekle...";
+    opacity: 0.45;
+}
 /* #endregion */
 
 /* #region 3: 2. BÖLGE — ESNEK GÖVDE (BİO / ALINTI) */

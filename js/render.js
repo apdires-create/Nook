@@ -16,7 +16,6 @@ const RenderEngine = {
 
         const defaultBanner = "https://i.ibb.co/RTNFJZXT/banner-placeholder.png";
         const defaultAvatar = "https://i.ibb.co/8gvf4SNF/pfp-placeholder.png";
-        const defaultUnvan = "Nook Üyesi";
 
         if (bannerImg) {
             const safeBanner = this.getGorselUrl(front.banner_url);
@@ -29,7 +28,11 @@ const RenderEngine = {
             avatarImg.onerror = () => { avatarImg.src = defaultAvatar; };
         }
         if (profileName) profileName.textContent = isim;
-        if (profileTitle) profileTitle.textContent = front.unvan || defaultUnvan;
+        if (profileTitle) {
+            const temizUnvan = typeof front.unvan === 'string' ? front.unvan.trim() : '';
+            profileTitle.textContent = temizUnvan;
+            profileTitle.classList.toggle('is-empty', !temizUnvan);
+        }
         if (profileBio) {
             const temizBio = typeof front.aciklama === 'string' ? front.aciklama.trim() : '';
             profileBio.textContent = temizBio;
