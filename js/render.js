@@ -56,6 +56,43 @@ const RenderEngine = {
         }
     },
 
+    formatLinkDisplayUrl(url) {
+        if (!url || typeof url !== 'string') return 'Bağlantı';
+        let p = url.trim();
+        if (!p) return 'Bağlantı';
+        try {
+            if (!p.startsWith('http://') && !p.startsWith('https://')) p = 'https://' + p;
+            const parsed = new URL(p);
+            const host = parsed.hostname.replace(/^www\./, '');
+            const path = (parsed.pathname === '/' && !parsed.search && !parsed.hash) ? '' : parsed.pathname;
+            return host + path + parsed.search + parsed.hash;
+        } catch (e) {
+            return p.replace(/^https?:\/\/(www\.)?/i, '') || 'Bağlantı';
+        }
+    },
+
+    extractDomainName(url) {
+        if (!url || typeof url !== 'string') return 'Bağlantı';
+        let p = url.trim();
+        if (!p) return 'Bağlantı';
+        try {
+            if (!p.startsWith('http://') && !p.startsWith('https://')) p = 'https://' + p;
+            const host = new URL(p).hostname.replace(/^www\./, '').toLowerCase();
+            const parts = host.split('.').filter(Boolean);
+            let label = host;
+            if (parts.length >= 3 && /^(com|co|org|net|edu|gov)$/.test(parts[parts.length - 2])) {
+                label = parts[parts.length - 3];
+            } else if (parts.length >= 2) {
+                label = parts[parts.length - 2];
+            } else if (parts.length === 1) {
+                label = parts[0];
+            }
+            return (label.charAt(0).toUpperCase() + label.slice(1)).slice(0, 15) || 'Bağlantı';
+        } catch (e) {
+            return 'Bağlantı';
+        }
+    },
+
     // 1.2: Arka Yüz (Saf Linkler) Render Fonksiyonu
     linklerCiz(data) {
         const wrapper = document.getElementById('links-wrapper');
@@ -77,15 +114,8 @@ const RenderEngine = {
             wrapper.innerHTML = `<p class="placeholder-text" style="text-align: center; color: var(--text-tertiary); padding: 4cqh 0; font-size: var(--cq-fs-body);">Henüz bağlantı eklenmemiş.</p>`;
         } else {
             wrapper.innerHTML = links.map(link => {
-                const baslik = link.baslik || link.isim || 'Bağlantı';
-                let domain = 'Bağlantı';
-                try {
-                    let parsedUrl = link.url;
-                    if (parsedUrl && !parsedUrl.startsWith('http://') && !parsedUrl.startsWith('https://')) {
-                        parsedUrl = 'https://' + parsedUrl;
-                    }
-                    if (parsedUrl) domain = new URL(parsedUrl).hostname.replace(/^www\./, '');
-                } catch(e) {}
+                const baslik = (link.baslik || link.isim || '').trim() || this.extractDomainName(link.url);
+                const domain = this.formatLinkDisplayUrl(link.url);
 
                 return `
                     <a href="${this.safeUrl(link.url)}" target="_blank" rel="noopener noreferrer" class="nook-link-row">

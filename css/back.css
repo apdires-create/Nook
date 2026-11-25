@@ -271,9 +271,11 @@ body.is-owner .nook-link-main {
     display: flex;
 }
 
-.nook-link-edit-fields .edit-isim-input {
+.nook-link-edit-fields .edit-isim-input,
+.nook-link-edit-fields .edit-url-input {
     display: block !important;
     flex: 1;
+    min-width: 0;
 }
 
 /* Metin Alanı ve Link Başlıkları */
@@ -307,7 +309,8 @@ body.is-owner .nook-link-main {
     gap: 1.5cqw;
 }
 
-.nook-url-input-wrap .edit-url-input {
+.nook-url-input-wrap .edit-url-input,
+.nook-url-input-wrap .edit-isim-input {
     flex: 1;
     min-width: 0;
 }
