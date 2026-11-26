@@ -790,3 +790,39 @@
 }
 /* #endregion */
 
+/* #region 15: KOMPAKT / ZOOM'LU MASAÜSTÜ İKON MODU */
+@media (min-width: 900px) and (max-width: 1220px),
+       (min-width: 900px) and (max-height: 740px) {
+    .top-nav {
+        height: 52px;
+        padding: 0 clamp(14px, 2.2vw, 24px);
+    }
+
+    .nav-brand-text {
+        display: none;
+    }
+
+    .top-nav-actions {
+        gap: 8px;
+    }
+
+    .top-nav-btn {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        gap: 0;
+        border-radius: 50%;
+    }
+
+    .top-nav-btn .login-text,
+    #profile-user-trigger svg:last-of-type {
+        display: none;
+    }
+
+    .user-dropdown-panel {
+        top: calc(100% + 6px);
+        right: 0;
+    }
+}
+/* #endregion */
+

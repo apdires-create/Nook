@@ -513,7 +513,8 @@ html.is-profile-loading #landing-screen {
 /* 1. MASAÜSTÜ DUAL STAGE (Yan Yana Çift Kart) */
 @media (min-width: 900px) {
     .stage {
-        padding-block: clamp(18px, 3.2vh, 36px);
+        --desktop-stage-pad-y: clamp(18px, 3.2vh, 36px);
+        padding-block: var(--desktop-stage-pad-y);
         padding-inline: var(--stage-padding);
         box-sizing: border-box;
     }
@@ -524,7 +525,7 @@ html.is-profile-loading #landing-screen {
         align-items: center;
         justify-content: center;
         gap: var(--stage-gap);
-        padding-block: clamp(18px, 3.2vh, 36px);
+        padding-block: var(--desktop-stage-pad-y);
         padding-inline: var(--stage-padding);
         box-sizing: border-box;
         overflow: hidden;
@@ -542,7 +543,7 @@ html.is-profile-loading #landing-screen {
         flex-shrink: 0;
         aspect-ratio: var(--card-aspect-ratio);
         /* Duvarlar ve kartlar arası gap tam dengeli; 5:7 oran kilitli */
-        --desktop-avail-h: calc(100dvh - clamp(36px, 6.4vh, 72px));
+        --desktop-avail-h: calc(100dvh - (2 * var(--desktop-stage-pad-y)));
         --desktop-dual-avail-w: calc((100vw - (2 * var(--stage-padding)) - var(--stage-gap) - 42px) / 2);
         --effective-card-h: min(
             var(--card-height),
@@ -570,6 +571,14 @@ html.is-profile-loading #landing-screen {
     }
     .stage #addSectionCompanionCard {
         display: none !important;
+    }
+}
+
+/* Kompakt / Zoom'lu Masaüstünde Simetrik Güvenli Çerçeve (52px Üst = 52px Alt) */
+@media (min-width: 900px) and (max-width: 1220px),
+       (min-width: 900px) and (max-height: 740px) {
+    .stage {
+        --desktop-stage-pad-y: 52px;
     }
 }
 

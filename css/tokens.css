@@ -90,7 +90,7 @@
 /* #region 4: ORTAK KART VE COMPANION KONTEYNER STANDARTLARI */
 :root {
     --card-aspect-ratio: 5 / 7;
-    --card-height: clamp(480px, 88dvh, 1180px);
+    --card-height: clamp(480px, calc(480px + 28dvh), 900px);
     --card-width: calc(var(--card-height) * 5 / 7);
     --card-max-width: 94vw;
     --card-narrow-width: min(94vw, 480px);
