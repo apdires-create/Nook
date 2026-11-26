@@ -1414,7 +1414,11 @@ const RenderEngine = {
         if (temiz.startsWith('data:image/') || temiz.startsWith('blob:')) {
             return temiz;
         }
-        return this.safeUrl(temiz);
+        const safe = this.safeUrl(temiz);
+        if (safe && safe.includes('image.tmdb.org/t/p/')) {
+            return safe.replace(/\/t\/p\/w(?:92|154|185|342)\//, '/t/p/w500/');
+        }
+        return safe;
     },
 
     getLinkIcon(url) {

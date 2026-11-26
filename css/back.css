@@ -604,6 +604,10 @@ body.is-owner .top-item-unit:active {
     pointer-events: none;
     -webkit-user-drag: none;
     user-select: none;
+    image-rendering: -webkit-optimize-contrast;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
