@@ -112,7 +112,7 @@ html, body {
 }
 
 .card-container {
-    transform-style: preserve-3d;
+    perspective: 1200px;
 }
 
 @media (max-aspect-ratio: 5/7) {
@@ -183,10 +183,20 @@ body.is-pointer-dragging * {
 
 .card-front {
     transform: rotateY(0deg) translateZ(1px);
+    z-index: 2;
 }
 
 .card-back {
     transform: rotateY(180deg) translateZ(1px);
+    z-index: 1;
+}
+
+.card-container.is-flipped .card-front {
+    z-index: 1;
+}
+
+.card-container.is-flipped .card-back {
+    z-index: 2;
 }
 /* #endregion */
 
@@ -198,8 +208,7 @@ body.is-pointer-dragging * {
     width: var(--btn-icon-size);
     height: var(--btn-icon-size);
     border-radius: var(--radius-circle);
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.62);
     border: 1px solid var(--border-highlight);
     color: var(--text-primary);
     display: flex;
