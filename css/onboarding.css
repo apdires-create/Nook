@@ -17,35 +17,36 @@
     }
 }
 
-/* Masaüstünde mobil ipucu bileşenleri gizli */
+/* Masaüstünde mobil pagination noktaları gizli */
 @media (min-width: 900px) {
-    #mobileDeckDots,
-    .mobile-flip-hint {
+    #mobileDeckDots {
         display: none !important;
     }
 }
 
-/* Mobil: Alt Pagination Dots & Banner Üzeri Flip İkonu */
+/* Banner Üzeri Flip İkonu (Masaüstü + Mobil, yalnızca görsel ipucu) */
+.mobile-flip-hint {
+    position: absolute;
+    top: clamp(10px, 2cqh, 14px);
+    left: clamp(10px, 2.5cqw, 14px);
+    z-index: 12;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 12, 16, 0.48);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+    pointer-events: none;
+}
+
+/* Mobil: Alt Pagination Dots */
 @media (max-width: 899px) {
-    .mobile-flip-hint {
-        position: absolute;
-        top: clamp(10px, 2cqh, 14px);
-        left: clamp(10px, 2.5cqw, 14px);
-        z-index: 12;
-        width: 28px;
-        height: 28px;
-        border-radius: 999px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(10, 12, 16, 0.48);
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        color: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
-        pointer-events: none;
-    }
 
     #mobileDeckDots {
         position: absolute;
