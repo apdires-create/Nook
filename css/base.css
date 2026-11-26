@@ -182,18 +182,10 @@ body.is-pointer-dragging * {
 }
 
 .card-front {
-    transform: none;
-}
-
-.card-container.is-flipping .card-front {
-    transform: translateZ(1px);
+    transform: rotateY(0deg) translateZ(1px);
 }
 
 .card-back {
-    transform: rotateY(180deg);
-}
-
-.card-container.is-flipping .card-back {
     transform: rotateY(180deg) translateZ(1px);
 }
 /* #endregion */
