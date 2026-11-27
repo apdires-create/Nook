@@ -6,7 +6,9 @@
 
 /* 1. KÖK DEĞİŞKENLER VE TOKEN GEÇERSİZ KILMALARI (SCOPED OVERRIDES) */
 [data-theme="obsidian-minimal"],
-:root[data-theme="obsidian-minimal"] {
+:root[data-theme="obsidian-minimal"],
+[data-theme="obsidian-minimal"][data-mode="dark"],
+:root[data-theme="obsidian-minimal"][data-mode="dark"] {
     /* ----------------------------------------------------
        1. TİPOGRAFİ (EDITORIAL SERIF & PRECISION SANS)
        ---------------------------------------------------- */

@@ -1,6 +1,5 @@
 /* #region 1: TEMA VE RENK PALETİ (OKLCH DİNAMİK RENK & POLARİTE MOTORU) */
-:root,
-:root[data-mode="dark"] {
+:root {
     color-scheme: dark;
 
     --accent-color: #3b5bdb;
