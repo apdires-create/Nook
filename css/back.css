@@ -1680,9 +1680,9 @@ body.is-owner .top-item-unit:active {
     --lol-banner-fade-mid: 13%;
     --lol-banner-fade-end: 29%;
     position: relative;
-    background-color: var(--bg-card);
+    background-color: #090c14;
     background-image: 
-        linear-gradient(180deg, color-mix(in oklch, var(--bg-card) 28%, transparent) 0%, color-mix(in oklch, var(--bg-card) 72%, transparent) var(--lol-banner-fade-mid), var(--bg-card) var(--lol-banner-fade-end), var(--bg-card) 100%),
+        linear-gradient(180deg, transparent 0%, transparent 22%, rgba(9, 12, 20, 0.55) 25.5%, #090c14 var(--lol-banner-fade-end), #090c14 100%),
         url('../assets/images/lol-banner.jpg');
     background-position: top center;
     background-size: 100% auto;
@@ -2023,9 +2023,9 @@ body.is-owner .top-item-unit:active {
     --val-banner-fade-mid: 13%;
     --val-banner-fade-end: 29%;
     position: relative;
-    background-color: var(--bg-card);
+    background-color: #090c14;
     background-image:
-        linear-gradient(180deg, color-mix(in oklch, var(--bg-card) 28%, transparent) 0%, color-mix(in oklch, var(--bg-card) 72%, transparent) var(--val-banner-fade-mid), var(--bg-card) var(--val-banner-fade-end), var(--bg-card) 100%),
+        linear-gradient(180deg, transparent 0%, transparent 22%, rgba(9, 12, 20, 0.55) 25.5%, #090c14 var(--val-banner-fade-end), #090c14 100%),
         url('../assets/images/valo-banner.jpg');
     background-position: top center;
     background-size: 100% auto;
@@ -2327,9 +2327,9 @@ body.is-owner .top-item-unit:active {
     --cs2-banner-fade-mid: 13%;
     --cs2-banner-fade-end: 29%;
     position: relative;
-    background-color: var(--bg-card);
+    background-color: #090c14;
     background-image:
-        linear-gradient(180deg, color-mix(in oklch, var(--bg-card) 28%, transparent) 0%, color-mix(in oklch, var(--bg-card) 72%, transparent) var(--cs2-banner-fade-mid), var(--bg-card) var(--cs2-banner-fade-end), var(--bg-card) 100%),
+        linear-gradient(180deg, transparent 0%, transparent 22%, rgba(9, 12, 20, 0.55) 25.5%, #090c14 var(--cs2-banner-fade-end), #090c14 100%),
         url('../assets/images/cs-banner.jpg');
     background-position: top center;
     background-size: 100% auto;
@@ -2889,19 +2889,19 @@ body.is-owner .top-item-unit:active {
 
 :root[data-mode="light"] .trophies-companion-card.is-lol-view .companion-view-detail {
     background-image:
-        linear-gradient(180deg, rgba(9, 12, 20, 0.18) 0%, color-mix(in oklch, var(--bg-card) 68%, transparent) var(--lol-banner-fade-mid), var(--bg-card) var(--lol-banner-fade-end), var(--bg-card) 100%),
+        linear-gradient(180deg, transparent 0%, transparent 22%, color-mix(in oklch, var(--bg-card) 55%, transparent) 25.5%, var(--bg-card) var(--lol-banner-fade-end), var(--bg-card) 100%),
         url('../assets/images/lol-banner.jpg');
 }
 
 :root[data-mode="light"] .trophies-companion-card.is-valorant-view .companion-view-detail {
     background-image:
-        linear-gradient(180deg, rgba(9, 12, 20, 0.18) 0%, color-mix(in oklch, var(--bg-card) 68%, transparent) var(--val-banner-fade-mid), var(--bg-card) var(--val-banner-fade-end), var(--bg-card) 100%),
+        linear-gradient(180deg, transparent 0%, transparent 22%, color-mix(in oklch, var(--bg-card) 55%, transparent) 25.5%, var(--bg-card) var(--val-banner-fade-end), var(--bg-card) 100%),
         url('../assets/images/valo-banner.jpg');
 }
 
 :root[data-mode="light"] .trophies-companion-card.is-cs2-view .companion-view-detail {
     background-image:
-        linear-gradient(180deg, rgba(9, 12, 20, 0.18) 0%, color-mix(in oklch, var(--bg-card) 68%, transparent) var(--cs2-banner-fade-mid), var(--bg-card) var(--cs2-banner-fade-end), var(--bg-card) 100%),
+        linear-gradient(180deg, transparent 0%, transparent 22%, color-mix(in oklch, var(--bg-card) 55%, transparent) 25.5%, var(--bg-card) var(--cs2-banner-fade-end), var(--bg-card) 100%),
         url('../assets/images/cs-banner.jpg');
 }
 
