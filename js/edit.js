@@ -2461,7 +2461,7 @@ EditManager.BackViews = {
                             deleteRowWithAnim(row, index);
                         } else {
                             openAccordion(row, collapseEl);
-                            setTimeout(() => nameInput.focus(), 60);
+                            setTimeout(() => urlInput.focus(), 60);
                         }
                     });
                 }

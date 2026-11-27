@@ -202,6 +202,7 @@ const Router = {
                     '.view-add-btn',
                     '.nook-link-row',
                     '.top-item-card',
+                    '.card-flags-wrapper',
                     '.profile-edit-avatar-wrap',
                     '.profile-edit-banner-wrap'
                 ].join(', ');
