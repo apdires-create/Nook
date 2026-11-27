@@ -251,6 +251,48 @@ const Router = {
             });
         }
 
+        // Masaüstünde sahne dış boşluğuna tıklandığında açık eşlikçi kartı kapat (24px missclick koruma tamponu ile)
+        const stage = document.getElementById('profileStage');
+        if (stage) {
+            stage.addEventListener('click', (e) => {
+                if (window.innerWidth < 900) return;
+                if (e.target !== stage) return;
+                if (!stage.classList.contains('has-companion-open') || this._companionTransitioning) return;
+
+                if (window._suruklemeBitti && Date.now() - window._suruklemeBitti < 300) return;
+                if (window._frontEditingActive || (window._frontEditJustClosed && Date.now() - window._frontEditJustClosed < 450)) return;
+                if (window._linkAccordionJustClosed && Date.now() - window._linkAccordionJustClosed < 400) return;
+
+                const activeEl = document.activeElement;
+                if (activeEl && activeEl.matches('input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"]')) return;
+
+                if (document.querySelector('.image-cropper-modal.is-open, .tops-search-modal.is-open, .tops-setup-modal.is-open, .tag-picker-modal.is-open, .trophy-picker-modal.is-open, .block-delete-modal.is-open, .auth-modal.is-open')) {
+                    return;
+                }
+
+                const MISSCLICK_BUFFER_PX = 24;
+                const isNearRect = (rect) => (
+                    rect && rect.width > 0 && rect.height > 0 &&
+                    e.clientX >= rect.left - MISSCLICK_BUFFER_PX &&
+                    e.clientX <= rect.right + MISSCLICK_BUFFER_PX &&
+                    e.clientY >= rect.top - MISSCLICK_BUFFER_PX &&
+                    e.clientY <= rect.bottom + MISSCLICK_BUFFER_PX
+                );
+
+                const guardedEls = [
+                    this.cardContainer,
+                    document.getElementById('topsCompanionCard'),
+                    document.getElementById('trophiesCompanionCard'),
+                    document.getElementById('cardFlagsWrapper')
+                ];
+                if (guardedEls.some(el => el && el.offsetParent !== null && isNearRect(el.getBoundingClientRect()))) {
+                    return;
+                }
+
+                this.toggleCompanion(false);
+            });
+        }
+
         // Klavye Kısayolları (ESC)
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
