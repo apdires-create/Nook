@@ -1680,9 +1680,9 @@ body.is-owner .top-item-unit:active {
     --lol-banner-fade-mid: 13%;
     --lol-banner-fade-end: 29%;
     position: relative;
-    background-color: #090c14;
+    background-color: var(--bg-card);
     background-image: 
-        linear-gradient(180deg, rgba(9, 12, 20, 0.28) 0%, rgba(9, 12, 20, 0.68) var(--lol-banner-fade-mid), #090c14 var(--lol-banner-fade-end), #090c14 100%),
+        linear-gradient(180deg, color-mix(in oklch, var(--bg-card) 28%, transparent) 0%, color-mix(in oklch, var(--bg-card) 72%, transparent) var(--lol-banner-fade-mid), var(--bg-card) var(--lol-banner-fade-end), var(--bg-card) 100%),
         url('../assets/images/lol-banner.jpg');
     background-position: top center;
     background-size: 100% auto;
@@ -2023,9 +2023,9 @@ body.is-owner .top-item-unit:active {
     --val-banner-fade-mid: 13%;
     --val-banner-fade-end: 29%;
     position: relative;
-    background-color: #090c14;
+    background-color: var(--bg-card);
     background-image:
-        linear-gradient(180deg, rgba(9, 12, 20, 0.28) 0%, rgba(9, 12, 20, 0.68) var(--val-banner-fade-mid), #090c14 var(--val-banner-fade-end), #090c14 100%),
+        linear-gradient(180deg, color-mix(in oklch, var(--bg-card) 28%, transparent) 0%, color-mix(in oklch, var(--bg-card) 72%, transparent) var(--val-banner-fade-mid), var(--bg-card) var(--val-banner-fade-end), var(--bg-card) 100%),
         url('../assets/images/valo-banner.jpg');
     background-position: top center;
     background-size: 100% auto;
@@ -2327,9 +2327,9 @@ body.is-owner .top-item-unit:active {
     --cs2-banner-fade-mid: 13%;
     --cs2-banner-fade-end: 29%;
     position: relative;
-    background-color: #090c14;
+    background-color: var(--bg-card);
     background-image:
-        linear-gradient(180deg, rgba(9, 12, 20, 0.28) 0%, rgba(9, 12, 20, 0.68) var(--cs2-banner-fade-mid), #090c14 var(--cs2-banner-fade-end), #090c14 100%),
+        linear-gradient(180deg, color-mix(in oklch, var(--bg-card) 28%, transparent) 0%, color-mix(in oklch, var(--bg-card) 72%, transparent) var(--cs2-banner-fade-mid), var(--bg-card) var(--cs2-banner-fade-end), var(--bg-card) 100%),
         url('../assets/images/cs-banner.jpg');
     background-position: top center;
     background-size: 100% auto;
@@ -2878,4 +2878,217 @@ body.is-owner .top-item-unit:active {
     padding-top: clamp(6px, 1.2cqh, 10px);
     padding-bottom: clamp(12px, 2.4cqh, 18px);
     flex-shrink: 0;
+}
+
+/* =========================================================
+ * AYDINLIK MOD: OYUN KARTLARI UYUMU (LoL, Valorant, CS2)
+ * ========================================================= */
+:root[data-mode="light"] .trophies-companion-card:is(.is-lol-view, .is-valorant-view, .is-cs2-view) .companion-view-detail {
+    background-color: var(--bg-card);
+}
+
+:root[data-mode="light"] .trophies-companion-card.is-lol-view .companion-view-detail {
+    background-image:
+        linear-gradient(180deg, color-mix(in oklch, var(--bg-card) 62%, transparent) 0%, color-mix(in oklch, var(--bg-card) 86%, transparent) var(--lol-banner-fade-mid), var(--bg-card) var(--lol-banner-fade-end), var(--bg-card) 100%),
+        url('../assets/images/lol-banner.jpg');
+}
+
+:root[data-mode="light"] .trophies-companion-card.is-valorant-view .companion-view-detail {
+    background-image:
+        linear-gradient(180deg, color-mix(in oklch, var(--bg-card) 62%, transparent) 0%, color-mix(in oklch, var(--bg-card) 86%, transparent) var(--val-banner-fade-mid), var(--bg-card) var(--val-banner-fade-end), var(--bg-card) 100%),
+        url('../assets/images/valo-banner.jpg');
+}
+
+:root[data-mode="light"] .trophies-companion-card.is-cs2-view .companion-view-detail {
+    background-image:
+        linear-gradient(180deg, color-mix(in oklch, var(--bg-card) 62%, transparent) 0%, color-mix(in oklch, var(--bg-card) 86%, transparent) var(--cs2-banner-fade-mid), var(--bg-card) var(--cs2-banner-fade-end), var(--bg-card) 100%),
+        url('../assets/images/cs-banner.jpg');
+}
+
+:root[data-mode="light"] .trophies-companion-card:is(.is-lol-view, .is-valorant-view, .is-cs2-view) .companion-view-detail .companion-title {
+    color: var(--text-primary);
+    text-shadow: 0 1px 6px rgba(255, 255, 255, 0.75);
+}
+
+:root[data-mode="light"] .trophies-companion-card:is(.is-lol-view, .is-valorant-view, .is-cs2-view) .companion-view-detail :is(.companion-back-btn, .companion-action-btn, .companion-edit-toggle-btn, .companion-close-btn) {
+    filter: none;
+}
+
+/* LoL Aydınlık Mod */
+:root[data-mode="light"] .trophy-lol-user-capsule,
+:root[data-mode="light"] .trophy-lol-info-panel {
+    background: color-mix(in oklch, var(--bg-card-subtle) 88%, #ffffff);
+    border-color: color-mix(in oklch, #b48a1e 36%, var(--border-soft));
+    box-shadow: var(--shadow-row);
+}
+
+:root[data-mode="light"] .trophy-lol-elo-card,
+:root[data-mode="light"] .trophy-lol-wr-card {
+    background: var(--surface-1);
+    border-color: var(--border-soft);
+    box-shadow: var(--shadow-row);
+}
+
+:root[data-mode="light"] .trophy-lol-elo-card.is-peak {
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.14) 0%, rgba(217, 119, 6, 0.04) 100%);
+    border-color: rgba(217, 119, 6, 0.48);
+    box-shadow: var(--shadow-row);
+}
+
+:root[data-mode="light"] .trophy-lol-player-name,
+:root[data-mode="light"] .trophy-lol-elo-tier-text {
+    color: var(--text-primary);
+    text-shadow: none;
+}
+
+:root[data-mode="light"] .trophy-lol-player-tag,
+:root[data-mode="light"] .trophy-lol-elo-badge {
+    color: #9a6b08;
+}
+
+:root[data-mode="light"] .trophy-lol-elo-card.is-peak .trophy-lol-elo-badge,
+:root[data-mode="light"] .trophy-lol-server-badge {
+    color: #9a5b04;
+}
+
+:root[data-mode="light"] .trophy-lol-server-badge {
+    background: rgba(217, 119, 6, 0.14);
+    border-color: rgba(217, 119, 6, 0.4);
+}
+
+:root[data-mode="light"] .trophy-lol-elo-center .trophy-lol-rank-emblem {
+    filter: drop-shadow(0 2px 5px rgba(15, 23, 42, 0.28));
+}
+
+:root[data-mode="light"] .trophy-lol-wr-val {
+    color: #099268;
+}
+
+:root[data-mode="light"] .trophy-lol-art-box {
+    border-color: color-mix(in oklch, #b48a1e 38%, var(--border-soft));
+    box-shadow: var(--shadow-elevated);
+}
+
+/* Valorant Aydınlık Mod */
+:root[data-mode="light"] .trophy-val-user-capsule,
+:root[data-mode="light"] .trophy-val-stat-pill {
+    background: color-mix(in oklch, var(--bg-card-subtle) 90%, #ffffff);
+    border-color: rgba(225, 29, 72, 0.32);
+    box-shadow: var(--shadow-row);
+}
+
+:root[data-mode="light"] .trophy-val-stat-pill.is-peak {
+    border-color: rgba(217, 119, 6, 0.42);
+    border-left: 3px solid #d97706;
+}
+
+:root[data-mode="light"] .trophy-val-player-name,
+:root[data-mode="light"] .trophy-val-stat-text {
+    color: var(--text-primary);
+}
+
+:root[data-mode="light"] .trophy-val-player-tag {
+    color: #be123c;
+}
+
+:root[data-mode="light"] .trophy-val-server-badge {
+    color: #9f1239;
+    background: rgba(225, 29, 72, 0.12);
+    border-color: rgba(225, 29, 72, 0.35);
+}
+
+:root[data-mode="light"] .trophy-val-peak-tag {
+    color: #92400e;
+    background: rgba(217, 119, 6, 0.14);
+    border-color: rgba(217, 119, 6, 0.4);
+}
+
+:root[data-mode="light"] .trophy-val-stat-pill.is-peak .trophy-val-stat-text {
+    color: #b45309;
+}
+
+:root[data-mode="light"] .trophy-val-agent-card {
+    border-color: var(--border-soft);
+    box-shadow: var(--shadow-row);
+}
+
+:root[data-mode="light"] .trophy-val-agent-card.is-empty {
+    background: var(--surface-1);
+    border: 1px dashed var(--border-highlight);
+    box-shadow: none;
+}
+
+:root[data-mode="light"] .trophy-val-empty-svg,
+:root[data-mode="light"] .trophy-val-agent-name.is-empty-label {
+    color: var(--text-tertiary);
+}
+
+/* CS2 Aydınlık Mod */
+:root[data-mode="light"] .trophy-cs2-user-capsule,
+:root[data-mode="light"] .trophy-cs2-info-panel {
+    background: color-mix(in oklch, var(--bg-card-subtle) 90%, #ffffff);
+    border-color: color-mix(in oklch, #b45309 32%, var(--border-soft));
+    box-shadow: var(--shadow-row);
+}
+
+:root[data-mode="light"] .trophy-cs2-elo-card,
+:root[data-mode="light"] .trophy-cs2-weapon-card,
+:root[data-mode="light"] .trophy-cs2-active-faceit-card,
+:root[data-mode="light"] .trophy-cs2-metric-pill,
+:root[data-mode="light"] .trophy-cs2-wr-card {
+    background: var(--surface-1);
+    border-color: var(--border-soft);
+    box-shadow: var(--shadow-row);
+}
+
+:root[data-mode="light"] .trophy-cs2-elo-card.is-peak {
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.14) 0%, rgba(217, 119, 6, 0.04) 100%);
+    border-color: rgba(217, 119, 6, 0.45);
+    box-shadow: var(--shadow-row);
+}
+
+:root[data-mode="light"] .trophy-cs2-player-name,
+:root[data-mode="light"] .trophy-cs2-weapon-name,
+:root[data-mode="light"] .trophy-cs2-active-faceit-val,
+:root[data-mode="light"] .trophy-cs2-lvl-num,
+:root[data-mode="light"] .trophy-cs2-elo-tier-text,
+:root[data-mode="light"] .trophy-cs2-metric-val {
+    color: var(--text-primary);
+    text-shadow: none;
+}
+
+:root[data-mode="light"] .trophy-cs2-server-badge,
+:root[data-mode="light"] .trophy-cs2-elo-badge,
+:root[data-mode="light"] .trophy-cs2-weapon-skin,
+:root[data-mode="light"] .trophy-cs2-elo-card.is-peak .trophy-cs2-elo-badge {
+    color: #9a5b04;
+}
+
+:root[data-mode="light"] .trophy-cs2-mini-lvl {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+:root[data-mode="light"] .trophy-cs2-peak-switch {
+    background: var(--surface-2);
+    border-color: rgba(217, 119, 6, 0.45);
+    color: #9a5b04;
+}
+
+:root[data-mode="light"] .trophy-cs2-peak-switch:hover {
+    background: rgba(217, 119, 6, 0.22);
+    color: var(--text-primary);
+}
+
+:root[data-mode="light"] .trophy-cs2-weapon-showcase-img {
+    filter: drop-shadow(0 4px 10px rgba(15, 23, 42, 0.35));
+}
+
+:root[data-mode="light"] .trophy-cs2-wr-val {
+    color: #099268;
+}
+
+:root[data-mode="light"] .trophy-cs2-art-box {
+    border-color: color-mix(in oklch, #b45309 36%, var(--border-soft));
+    box-shadow: var(--shadow-elevated);
 }
