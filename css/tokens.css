@@ -89,11 +89,11 @@
     --accent-light: color-mix(in oklch, var(--accent-color) 65%, #0f172a);
     --accent-ink: color-mix(in oklch, var(--accent-color) 68%, #0f172a);
 
-    --bg-stage: color-mix(in oklch, var(--accent-color) 28%, #f4f6fb);
-    --bg-card: color-mix(in oklch, var(--accent-color) 11%, #ffffff);
-    --bg-card-subtle: color-mix(in oklch, var(--accent-color) 19%, #eef2f8);
-    --bg-pill: color-mix(in oklch, var(--accent-color) 18%, rgba(15, 23, 42, 0.04));
-    --bg-pill-hover: color-mix(in oklch, var(--accent-color) 30%, rgba(15, 23, 42, 0.08));
+    --bg-stage: color-mix(in oklch, var(--accent-color) 20%, #edf0f7);
+    --bg-card: color-mix(in oklch, var(--accent-color) 8%, #fafbfe);
+    --bg-card-subtle: color-mix(in oklch, var(--accent-color) 15%, #e9edf5);
+    --bg-pill: color-mix(in oklch, var(--accent-color) 15%, rgba(15, 23, 42, 0.04));
+    --bg-pill-hover: color-mix(in oklch, var(--accent-color) 26%, rgba(15, 23, 42, 0.08));
 
     --text-primary: color-mix(in oklch, var(--accent-color) 18%, #0f172a);
     --text-secondary: color-mix(in oklch, var(--accent-color) 16%, rgba(15, 23, 42, 0.76));
@@ -118,15 +118,15 @@
 
     --stage-gradient: radial-gradient(
         circle at 50% 30%,
-        color-mix(in oklch, var(--accent-color) 38%, transparent) 0%,
-        color-mix(in oklch, var(--accent-color) 15%, transparent) 46%,
+        color-mix(in oklch, var(--accent-color) 26%, transparent) 0%,
+        color-mix(in oklch, var(--accent-color) 10%, transparent) 46%,
         transparent 76%
     );
 
     --shadow-card: 
-        0 12px 34px -8px color-mix(in oklch, var(--accent-color) 28%, rgba(15, 23, 42, 0.14)),
+        0 12px 34px -8px color-mix(in oklch, var(--accent-color) 20%, rgba(15, 23, 42, 0.14)),
         0 24px 56px -16px rgba(15, 23, 42, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        inset 0 1px 0 rgba(255, 255, 255, 0.85);
     --shadow-avatar: 0 6px 18px color-mix(in oklch, var(--accent-color) 26%, rgba(15, 23, 42, 0.18));
     --shadow-elevated: 0 8px 24px color-mix(in oklch, var(--accent-color) 22%, rgba(15, 23, 42, 0.14));
     --shadow-row: 0 2px 8px color-mix(in oklch, var(--accent-color) 12%, rgba(15, 23, 42, 0.06));
