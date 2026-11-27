@@ -2973,8 +2973,33 @@ body.is-owner .top-item-unit:active {
 }
 
 :root[data-mode="light"] .trophy-lol-art-box {
+    background: var(--bg-card-subtle);
     border-color: color-mix(in oklch, #b48a1e 35%, var(--border-soft));
     box-shadow: 0 6px 18px rgba(15, 23, 42, 0.14);
+}
+
+:root[data-mode="light"] .trophy-lol-art-img {
+    filter: brightness(1.06) contrast(1.02);
+}
+
+:root[data-mode="light"] .trophy-lol-art-bottom-fade {
+    height: 46%;
+    background: linear-gradient(
+        to top,
+        color-mix(in oklch, var(--bg-card) 94%, #ffffff) 0%,
+        color-mix(in oklch, var(--bg-card) 72%, transparent) 48%,
+        transparent 100%
+    );
+}
+
+:root[data-mode="light"] .trophy-lol-champ-name {
+    color: var(--text-primary);
+    text-shadow: 0 1px 6px rgba(255, 255, 255, 0.8);
+}
+
+:root[data-mode="light"] .trophy-lol-champ-role {
+    color: #9a5b04;
+    text-shadow: none;
 }
 
 /* Valorant Aydınlık Mod */
@@ -3017,8 +3042,34 @@ body.is-owner .top-item-unit:active {
 }
 
 :root[data-mode="light"] .trophy-val-agent-card {
-    border-color: var(--border-soft);
-    box-shadow: var(--shadow-row);
+    background: linear-gradient(
+        115deg,
+        color-mix(in oklch, var(--val-c2, #94a3b8) 18%, var(--bg-card)) 0%,
+        color-mix(in oklch, var(--val-c2, #94a3b8) 28%, #ffffff) 58%,
+        color-mix(in oklch, var(--val-c1, #ff4655) 38%, #ffffff) 100%
+    );
+    border-color: color-mix(in oklch, var(--val-c1, #ff4655) 32%, var(--border-soft));
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-mode="light"] .trophy-val-agent-bg {
+    opacity: 0.14;
+    filter: brightness(0.75);
+}
+
+:root[data-mode="light"] .trophy-val-agent-portrait {
+    filter: drop-shadow(-4px 2px 10px rgba(15, 23, 42, 0.28));
+}
+
+:root[data-mode="light"] .trophy-val-agent-fade {
+    background:
+        linear-gradient(90deg, color-mix(in oklch, var(--bg-card) 88%, #ffffff) 0%, color-mix(in oklch, var(--bg-card) 52%, transparent) 44%, transparent 76%),
+        linear-gradient(0deg, color-mix(in oklch, var(--bg-card) 68%, transparent) 0%, transparent 52%);
+}
+
+:root[data-mode="light"] .trophy-val-agent-name {
+    color: var(--text-primary);
+    text-shadow: 0 1px 6px rgba(255, 255, 255, 0.85);
 }
 
 :root[data-mode="light"] .trophy-val-agent-card.is-empty {
@@ -3098,6 +3149,26 @@ body.is-owner .top-item-unit:active {
 }
 
 :root[data-mode="light"] .trophy-cs2-art-box {
+    background: var(--bg-card-subtle);
     border-color: color-mix(in oklch, #b45309 35%, var(--border-soft));
     box-shadow: 0 6px 18px rgba(15, 23, 42, 0.14);
+}
+
+:root[data-mode="light"] .trophy-cs2-art-img {
+    filter: brightness(1.08) contrast(1.02);
+}
+
+:root[data-mode="light"] .trophy-cs2-art-bottom-fade {
+    height: 48%;
+    background: linear-gradient(
+        to top,
+        color-mix(in oklch, var(--bg-card) 96%, #ffffff) 0%,
+        color-mix(in oklch, var(--bg-card) 78%, transparent) 46%,
+        transparent 100%
+    );
+}
+
+:root[data-mode="light"] .trophy-cs2-playstyle-tag {
+    color: #9a5b04;
+    text-shadow: 0 1px 6px rgba(255, 255, 255, 0.85);
 }
