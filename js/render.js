@@ -64,6 +64,7 @@ const RenderEngine = {
         if (!tagsGrid || tagsGrid.clientWidth === 0) return;
         const pills = [...tagsGrid.querySelectorAll('.tag-pill:not(.is-drag-clone), .tag-add-pill')].filter(el => el.offsetParent !== null);
         tagsGrid.classList.remove('is-2col', 'is-3col');
+        pills.forEach(p => { p.style.order = ''; });
         if (pills.length <= 1) return;
 
         const satirSayisi = () => {
@@ -72,6 +73,53 @@ const RenderEngine = {
             return tops.size;
         };
 
+        // 1. Doğal (kullanıcı) sıra zaten 2 satıra sığıyorsa hiç dokunma
+        if (satirSayisi() <= 2) return;
+
+        // 2. Tek seferde toplu okuma (Zero Thrashing)
+        const containerWidth = tagsGrid.clientWidth;
+        const computedStyle = getComputedStyle(tagsGrid);
+        const gap = parseFloat(computedStyle.columnGap || computedStyle.gap) || 0;
+        const widths = pills.map(p => p.offsetWidth);
+
+        // 3. Kullanıcı sırasını esas alan First-Fit sığdırma (O(N), maks. 6 eleman)
+        const normalItems = [];
+        const addItems = [];
+        pills.forEach((el, idx) => {
+            const item = { el, idx, width: widths[idx] };
+            if (el.classList.contains('tag-add-pill')) {
+                addItems.push(item);
+            } else {
+                normalItems.push(item);
+            }
+        });
+
+        const ordered = [];
+        const remaining = normalItems.slice();
+        while (remaining.length > 0) {
+            let rowWidth = 0;
+            let rowCount = 0;
+            for (let i = 0; i < remaining.length; ) {
+                const item = remaining[i];
+                const needed = rowCount === 0 ? item.width : item.width + gap;
+                if (rowCount === 0 || rowWidth + needed <= containerWidth) {
+                    ordered.push(item);
+                    rowWidth += needed;
+                    rowCount++;
+                    remaining.splice(i, 1);
+                } else {
+                    i++;
+                }
+            }
+        }
+        ordered.push(...addItems);
+
+        // 4. Sadece CSS order ile güncelleme (DOM sırası ve front_data.tags bozulmaz)
+        ordered.forEach((item, orderIdx) => {
+            item.el.style.order = String(orderIdx);
+        });
+
+        // 5. Mevcut fallback'i koru
         if (satirSayisi() <= 2) return;
         tagsGrid.classList.add('is-2col');
         if (satirSayisi() <= 2) return;

@@ -2071,6 +2071,7 @@ EditManager.Vitrin = {
                 return true;
             },
             onDragStart: () => {
+                tagsGrid.querySelectorAll('.tag-pill, .tag-add-pill').forEach(p => { p.style.order = ''; });
                 tagsGrid.classList.remove('is-2col');
                 tagsGrid.classList.add('is-3col');
             },
