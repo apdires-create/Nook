@@ -1,19 +1,43 @@
-/* #region 1: TEMA VE RENK PALETİ */
-:root {
-    --bg-stage: #0c0e14;
-    --bg-card: #151824;
-    --bg-card-subtle: #1c2030;
-    --bg-pill: rgba(255, 255, 255, 0.07);
-    --bg-pill-hover: rgba(255, 255, 255, 0.12);
+/* #region 1: TEMA VE RENK PALETİ (OKLCH DİNAMİK RENK & POLARİTE MOTORU) */
+:root,
+:root[data-mode="dark"] {
+    color-scheme: dark;
+
+    --accent-color: #3b5bdb;
+    --accent-contrast: #ffffff;
+    --accent-glow: color-mix(in oklch, var(--accent-color) 36%, transparent);
+    --accent-surface: color-mix(in oklch, var(--accent-color) 14%, transparent);
+    --accent-surface-hover: color-mix(in oklch, var(--accent-color) 24%, transparent);
+    --accent-light: color-mix(in oklch, var(--accent-color) 70%, #ffffff);
+    --accent-ink: color-mix(in oklch, var(--accent-color) 82%, #ffffff);
+
+    --bg-stage: color-mix(in oklch, var(--accent-color) 14%, #06070a);
+    --bg-card: color-mix(in oklch, var(--accent-color) 18%, #0b0d12);
+    --bg-card-subtle: color-mix(in oklch, var(--accent-color) 24%, #10131a);
+    --bg-pill: color-mix(in oklch, var(--accent-color) 14%, rgba(255, 255, 255, 0.05));
+    --bg-pill-hover: color-mix(in oklch, var(--accent-color) 26%, rgba(255, 255, 255, 0.1));
     
     --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.65);
-    --text-tertiary: rgba(255, 255, 255, 0.45);
+    --text-secondary: color-mix(in oklch, var(--accent-color) 12%, rgba(255, 255, 255, 0.72));
+    --text-tertiary: color-mix(in oklch, var(--accent-color) 10%, rgba(255, 255, 255, 0.48));
+    --text-muted: var(--text-tertiary);
     
-    --accent-color: #3b5bdb;
-    --accent-glow: rgba(59, 91, 219, 0.35);
-    --border-soft: rgba(255, 255, 255, 0.08);
-    --border-highlight: rgba(255, 255, 255, 0.16);
+    --border-soft: color-mix(in oklch, var(--accent-color) 20%, rgba(255, 255, 255, 0.08));
+    --border-highlight: color-mix(in oklch, var(--accent-color) 42%, rgba(255, 255, 255, 0.16));
+
+    /* Semantik Yüzey, Cam ve Etkileşim Tokenları */
+    --surface-1: color-mix(in oklch, var(--accent-color) 7%, rgba(255, 255, 255, 0.03));
+    --surface-2: color-mix(in oklch, var(--accent-color) 11%, rgba(255, 255, 255, 0.06));
+    --surface-hover: color-mix(in oklch, var(--accent-color) 18%, rgba(255, 255, 255, 0.09));
+    --surface-active: color-mix(in oklch, var(--accent-color) 24%, rgba(255, 255, 255, 0.12));
+    --surface-recessed: color-mix(in oklch, var(--accent-color) 10%, rgba(0, 0, 0, 0.42));
+    --surface-overlay-btn: color-mix(in oklch, var(--bg-stage) 72%, rgba(0, 0, 0, 0.45));
+    --surface-overlay-btn-hover: color-mix(in oklch, var(--accent-color) 24%, rgba(0, 0, 0, 0.72));
+    --nav-btn-bg: color-mix(in oklch, var(--bg-card) 78%, transparent);
+    --nav-btn-hover-bg: color-mix(in oklch, var(--accent-color) 22%, rgba(255, 255, 255, 0.1));
+    --scrollbar-thumb: color-mix(in oklch, var(--accent-color) 25%, rgba(255, 255, 255, 0.18));
+    --scrollbar-thumb-hover: color-mix(in oklch, var(--accent-color) 45%, rgba(255, 255, 255, 0.35));
+    --loading-bg: var(--bg-stage);
     
     --font-sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'Roboto Mono', monospace;
@@ -45,7 +69,89 @@
     --stage-pattern-height: 100%;
     --stage-pattern-transform: translate(-50%, -50%);
     --stage-pattern-opacity: 1;
-    --stage-gradient: radial-gradient(circle at 50% 30%, rgba(35, 45, 75, 0.4) 0%, rgba(12, 14, 20, 1) 75%);
+    --stage-gradient: radial-gradient(
+        circle at 50% 30%,
+        color-mix(in oklch, var(--accent-color) 30%, transparent) 0%,
+        color-mix(in oklch, var(--accent-color) 11%, transparent) 42%,
+        transparent 74%
+    );
+
+    --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --shadow-row: 0 2px 8px rgba(0, 0, 0, 0.28);
+    --shadow-row-hover: 0 6px 20px rgba(0, 0, 0, 0.42), 0 0 14px color-mix(in oklch, var(--accent-color) 22%, transparent);
+}
+
+:root[data-mode="light"] {
+    color-scheme: light;
+
+    --accent-glow: color-mix(in oklch, var(--accent-color) 28%, transparent);
+    --accent-surface: color-mix(in oklch, var(--accent-color) 12%, transparent);
+    --accent-surface-hover: color-mix(in oklch, var(--accent-color) 20%, transparent);
+    --accent-light: color-mix(in oklch, var(--accent-color) 62%, #0f172a);
+    --accent-ink: color-mix(in oklch, var(--accent-color) 62%, #0f172a);
+
+    --bg-stage: color-mix(in oklch, var(--accent-color) 13%, #f3f5fa);
+    --bg-card: color-mix(in oklch, var(--accent-color) 6%, #ffffff);
+    --bg-card-subtle: color-mix(in oklch, var(--accent-color) 11%, #f1f4f9);
+    --bg-pill: color-mix(in oklch, var(--accent-color) 12%, rgba(15, 23, 42, 0.04));
+    --bg-pill-hover: color-mix(in oklch, var(--accent-color) 22%, rgba(15, 23, 42, 0.08));
+
+    --text-primary: color-mix(in oklch, var(--accent-color) 14%, #0f172a);
+    --text-secondary: color-mix(in oklch, var(--accent-color) 12%, rgba(15, 23, 42, 0.74));
+    --text-tertiary: color-mix(in oklch, var(--accent-color) 10%, rgba(15, 23, 42, 0.54));
+    --text-muted: var(--text-tertiary);
+
+    --border-soft: color-mix(in oklch, var(--accent-color) 18%, rgba(15, 23, 42, 0.1));
+    --border-highlight: color-mix(in oklch, var(--accent-color) 42%, rgba(15, 23, 42, 0.2));
+
+    --surface-1: color-mix(in oklch, var(--accent-color) 7%, rgba(15, 23, 42, 0.03));
+    --surface-2: color-mix(in oklch, var(--accent-color) 11%, rgba(15, 23, 42, 0.05));
+    --surface-hover: color-mix(in oklch, var(--accent-color) 18%, rgba(15, 23, 42, 0.08));
+    --surface-active: color-mix(in oklch, var(--accent-color) 24%, rgba(15, 23, 42, 0.11));
+    --surface-recessed: color-mix(in oklch, var(--accent-color) 7%, rgba(15, 23, 42, 0.05));
+    --surface-overlay-btn: color-mix(in oklch, var(--bg-card) 86%, transparent);
+    --surface-overlay-btn-hover: var(--bg-card);
+    --nav-btn-bg: color-mix(in oklch, var(--bg-card) 84%, transparent);
+    --nav-btn-hover-bg: color-mix(in oklch, var(--accent-color) 16%, #ffffff);
+    --scrollbar-thumb: color-mix(in oklch, var(--accent-color) 26%, rgba(15, 23, 42, 0.2));
+    --scrollbar-thumb-hover: color-mix(in oklch, var(--accent-color) 45%, rgba(15, 23, 42, 0.36));
+    --loading-bg: var(--bg-stage);
+
+    --stage-gradient: radial-gradient(
+        circle at 50% 30%,
+        color-mix(in oklch, var(--accent-color) 24%, transparent) 0%,
+        color-mix(in oklch, var(--accent-color) 9%, transparent) 44%,
+        transparent 74%
+    );
+
+    --shadow-card: 
+        0 12px 32px -8px color-mix(in oklch, var(--accent-color) 16%, rgba(15, 23, 42, 0.14)),
+        0 24px 56px -16px rgba(15, 23, 42, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    --shadow-avatar: 0 6px 18px color-mix(in oklch, var(--accent-color) 20%, rgba(15, 23, 42, 0.18));
+    --shadow-elevated: 0 8px 24px color-mix(in oklch, var(--accent-color) 14%, rgba(15, 23, 42, 0.14));
+    --shadow-row: 0 2px 8px rgba(15, 23, 42, 0.06);
+    --shadow-row-hover: 0 6px 18px color-mix(in oklch, var(--accent-color) 16%, rgba(15, 23, 42, 0.1)), 0 0 12px color-mix(in oklch, var(--accent-color) 16%, transparent);
+
+    --modal-shadow: 0 20px 50px rgba(15, 23, 42, 0.2), 0 0 0 1px var(--border-soft);
+    --modal-backdrop: rgba(15, 23, 42, 0.45);
+    --modal-item-beta-bg: color-mix(in oklch, var(--accent-color) 6%, rgba(241, 245, 249, 0.85));
+    --modal-item-beta-border: 1px solid var(--border-soft);
+
+    --confirm-btn-cancel-bg: var(--surface-2);
+    --confirm-btn-cancel-hover: var(--surface-hover);
+
+    --color-tier-gold: #d97706;
+    --color-tier-silver: #475569;
+    --color-tier-bronze: #c2410c;
+
+    --skeleton-base-bg: var(--surface-1);
+    --skeleton-shimmer-bg: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--surface-hover) 50%,
+        transparent 100%
+    );
 }
 /* #endregion */
 
@@ -118,22 +224,22 @@
     --companion-body-gap: clamp(8px, 1.85cqh, 24px);
 
     /* Eşlikçi Kart Liste & Başarım Satırları Tokenları (.companion-row-item) */
-    --companion-row-bg: rgba(255, 255, 255, 0.03);
-    --companion-row-border: 1px solid rgba(255, 255, 255, 0.07);
-    --companion-row-border-color: rgba(255, 255, 255, 0.07);
+    --companion-row-bg: var(--surface-1);
+    --companion-row-border: 1px solid var(--border-soft);
+    --companion-row-border-color: var(--border-soft);
     --companion-row-radius: var(--radius-btn, 10px);
     --companion-row-padding: clamp(6px, 2.2cqh, 30px) 3.6cqw;
-    --companion-row-hover-bg: rgba(255, 255, 255, 0.07);
-    --companion-row-hover-border-color: rgba(255, 255, 255, 0.16);
+    --companion-row-hover-bg: var(--surface-hover);
+    --companion-row-hover-border-color: var(--border-highlight);
     --companion-row-hover-transform: translateY(-1px);
     --companion-row-active-transform: scale(0.99);
 
     /* Sürükleme / Taşınma (Drag & Drop) Tokenları */
     --companion-row-drag-opacity: 0.45;
     --companion-row-drag-transform: scale(0.97);
-    --companion-row-drag-bg: rgba(59, 91, 219, 0.08);
+    --companion-row-drag-bg: var(--accent-surface);
     --companion-row-drag-border: dashed 1px var(--accent-color);
-    --companion-row-drag-shadow: 0 0 12px rgba(59, 91, 219, 0.35);
+    --companion-row-drag-shadow: 0 0 12px var(--accent-glow);
 
 }
 /* #endregion */
@@ -164,15 +270,15 @@
     --modal-w-lg: min(520px, 92vw);
 
     /* Modal Liste & Seçici Eleman Tokenları */
-    --modal-item-bg: rgba(255, 255, 255, 0.03);
+    --modal-item-bg: var(--surface-1);
     --modal-item-border: 1px solid var(--border-soft);
     --modal-item-radius: 14px;
-    --modal-item-hover-bg: rgba(59, 91, 219, 0.12);
+    --modal-item-hover-bg: var(--accent-surface);
     --modal-item-hover-border: var(--accent-color);
     
     /* Beta / Devam Eden İçerik Tokenları */
-    --modal-item-beta-bg: rgba(12, 14, 20, 0.65);
-    --modal-item-beta-border: 1px solid rgba(255, 255, 255, 0.05);
+    --modal-item-beta-bg: color-mix(in oklch, var(--bg-stage) 75%, transparent);
+    --modal-item-beta-border: 1px solid var(--border-soft);
     --modal-item-beta-opacity: 0.45;
 
     /* Onay / Uyarı Pop-up Tokenları (Confirm Modal) */
@@ -184,9 +290,9 @@
     --confirm-btn-danger-hover: #dc2626;
     --confirm-btn-danger-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
     --confirm-btn-danger-hover-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
-    --confirm-btn-cancel-bg: rgba(255, 255, 255, 0.08);
+    --confirm-btn-cancel-bg: var(--surface-2);
     --confirm-btn-cancel-border: 1px solid var(--border-soft);
-    --confirm-btn-cancel-hover: rgba(255, 255, 255, 0.14);
+    --confirm-btn-cancel-hover: var(--surface-hover);
 }
 /* #endregion */
 

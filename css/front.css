@@ -134,31 +134,31 @@
 
 /* ➕ Alan Ekle Flag'i (Yalnızca sahip, nötr cam görünüm + kesik çizgili kenar) */
 .card-flag-btn.flag-add {
-    background: rgba(20, 22, 30, 0.55);
-    border: 1.5px dashed rgba(255, 255, 255, 0.28);
+    background: var(--nav-btn-bg);
+    border: 1.5px dashed var(--border-highlight);
     border-left: none;
-    box-shadow: 4px 4px 14px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow-row);
 }
 
 .card-flag-btn.flag-add .flag-icon {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-secondary);
     filter: none;
 }
 
 .card-flag-btn.flag-add:hover {
     transform: translateX(4px) scale(1.04);
-    background: rgba(40, 44, 58, 0.75);
-    border-color: rgba(255, 255, 255, 0.6);
-    box-shadow: 6px 4px 18px rgba(0, 0, 0, 0.45);
+    background: var(--surface-hover);
+    border-color: var(--accent-color);
+    box-shadow: var(--shadow-elevated);
 }
 
 .card-flag-btn.flag-add:hover .flag-icon {
-    color: #ffffff;
+    color: var(--text-primary);
     transform: rotate(90deg);
 }
 
 .stage:not(.has-companion-open) .card-container.is-flipped .card-flag-btn.flag-add {
-    border-left: 1.5px dashed rgba(255, 255, 255, 0.28);
+    border-left: 1.5px dashed var(--border-highlight);
 }
 
 /* Pasif alan flag'leri ve sahibe özel kontroller */

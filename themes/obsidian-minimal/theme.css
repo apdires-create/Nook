@@ -115,6 +115,52 @@
     --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+/* 1.1. OBSIDIAN MINIMAL — AYDINLIK MOD (ALABASTER EDITORIAL POLARİTE) */
+[data-theme="obsidian-minimal"][data-mode="light"],
+:root[data-theme="obsidian-minimal"][data-mode="light"] {
+    --accent-glow: color-mix(in oklch, var(--accent-color) 24%, transparent);
+    --accent-stage-glow: color-mix(in oklch, var(--accent-color) 16%, transparent);
+
+    --bg-stage: color-mix(in oklch, var(--accent-color) 9%, #f3f4f7);
+    --bg-card: color-mix(in oklch, var(--accent-color) 5%, #ffffff);
+    --bg-card-subtle: color-mix(in oklch, var(--accent-color) 9%, #eff1f6);
+    --bg-pill: color-mix(in oklch, var(--accent-color) 8%, rgba(15, 23, 42, 0.04));
+    --bg-pill-hover: color-mix(in oklch, var(--accent-color) 16%, rgba(15, 23, 42, 0.08));
+
+    --text-primary: color-mix(in oklch, var(--accent-color) 12%, #111318);
+    --text-secondary: color-mix(in oklch, var(--accent-color) 10%, rgba(17, 19, 24, 0.72));
+    --text-tertiary: color-mix(in oklch, var(--accent-color) 8%, rgba(17, 19, 24, 0.48));
+
+    --border-soft: color-mix(in oklch, var(--accent-color) 16%, rgba(17, 19, 24, 0.09));
+    --border-highlight: color-mix(in oklch, var(--accent-color) 36%, rgba(17, 19, 24, 0.18));
+
+    --stage-pattern-bg: color-mix(in oklch, var(--accent-color) 12%, #e9ecf2);
+    --stage-pattern:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.72) 0, rgba(255, 255, 255, 0.35) 1.5px, transparent 3px),
+        linear-gradient(to right, rgba(255, 255, 255, 0.65) 0, rgba(255, 255, 255, 0.25) 1.5px, transparent 3px),
+        linear-gradient(to top, rgba(15, 23, 42, 0.11) 0, rgba(15, 23, 42, 0.04) 2px, transparent 3.5px),
+        linear-gradient(to left, rgba(15, 23, 42, 0.11) 0, rgba(15, 23, 42, 0.04) 2px, transparent 3.5px),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, transparent 45%, rgba(15, 23, 42, 0.04) 100%);
+
+    --shadow-card:
+        0 14px 40px -10px color-mix(in oklch, var(--accent-color) 14%, rgba(15, 23, 42, 0.14)),
+        0 28px 68px -20px rgba(15, 23, 42, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        inset 0 0 0 1px rgba(15, 23, 42, 0.03);
+    --card-shadow: var(--shadow-card);
+    --card-border: 1px solid color-mix(in oklch, var(--accent-color) 22%, rgba(15, 23, 42, 0.1));
+
+    --modal-bg: color-mix(in oklch, var(--accent-color) 5%, #ffffff);
+    --modal-border: 1px solid color-mix(in oklch, var(--accent-color) 20%, rgba(15, 23, 42, 0.12));
+    --modal-shadow: 0 24px 60px -10px rgba(15, 23, 42, 0.2), 0 0 20px color-mix(in oklch, var(--accent-color) 12%, transparent);
+    --modal-item-bg: var(--surface-1);
+    --modal-item-border: 1px solid var(--border-soft);
+    --modal-item-hover-bg: color-mix(in oklch, var(--accent-color) 12%, rgba(15, 23, 42, 0.04));
+    --modal-item-hover-border: color-mix(in oklch, var(--accent-color) 45%, rgba(15, 23, 42, 0.2));
+
+    --theme-overlay-opacity: 0.25;
+}
+
 /* ----------------------------------------------------
    2. SAHNE & ATMOSFER (STAGE AMBIENCE)
    ---------------------------------------------------- */
@@ -244,7 +290,7 @@
     font-weight: 600 !important;
     letter-spacing: -0.015em !important;
     line-height: 1.15 !important;
-    color: #ffffff !important;
+    color: var(--text-primary) !important;
 }
 
 [data-theme="obsidian-minimal"] .profile-title {
@@ -262,7 +308,7 @@
     font-size: var(--cq-fs-body) !important;
     font-weight: 400 !important;
     line-height: 1.6 !important;
-    color: rgba(255, 255, 255, 0.72) !important;
+    color: var(--text-secondary) !important;
     letter-spacing: 0.01em !important;
 }
 
@@ -281,13 +327,13 @@
 [data-theme="obsidian-minimal"] .tag-pill,
 [data-theme="obsidian-minimal"] .nook-tag {
     border-radius: var(--radius-pill) !important;
-    background: rgba(255, 255, 255, 0.035) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: var(--surface-1) !important;
+    border: 1px solid var(--border-soft) !important;
     font-family: var(--font-body) !important;
     font-weight: 500 !important;
     letter-spacing: 0.03em !important;
     color: var(--text-secondary) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 6px rgba(0, 0, 0, 0.45) !important;
+    box-shadow: var(--shadow-row) !important;
     transition: background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
@@ -297,28 +343,27 @@
 
 [data-theme="obsidian-minimal"] .tag-pill:hover,
 [data-theme="obsidian-minimal"] .nook-tag:hover {
-    background: color-mix(in oklch, var(--accent-color) 12%, rgba(255, 255, 255, 0.06)) !important;
-    border-color: color-mix(in oklch, var(--accent-color) 45%, rgba(255, 255, 255, 0.2)) !important;
-    color: #ffffff !important;
+    background: var(--accent-surface) !important;
+    border-color: var(--border-highlight) !important;
+    color: var(--text-primary) !important;
     transform: translateY(-2px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15),
-                0 6px 16px rgba(0, 0, 0, 0.6),
+    box-shadow: var(--shadow-row-hover),
                 0 0 14px var(--accent-glow) !important;
 }
 
 [data-theme="obsidian-minimal"] .tag-pill:active,
 [data-theme="obsidian-minimal"] .nook-tag:active {
     transform: translateY(0) scale(0.97);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* 5.2. Arka Yüz Bağlantı Satırları (.nook-link-row / .link-item) */
 [data-theme="obsidian-minimal"] .nook-link-row,
 [data-theme="obsidian-minimal"] .link-item {
     border-radius: var(--radius-item) !important;
-    background: rgba(255, 255, 255, 0.025) !important;
-    border: 1px solid rgba(255, 255, 255, 0.07) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 3px 10px rgba(0, 0, 0, 0.4) !important;
+    background: var(--surface-1) !important;
+    border: 1px solid var(--border-soft) !important;
+    box-shadow: var(--shadow-row) !important;
     transition: background 0.24s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
                 transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
@@ -327,25 +372,24 @@
 
 [data-theme="obsidian-minimal"] .nook-link-icon {
     border-radius: 6px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-soft) !important;
     transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), background 0.24s ease !important;
 }
 
 [data-theme="obsidian-minimal"] .nook-link-row:hover,
 [data-theme="obsidian-minimal"] .link-item:hover {
-    background: color-mix(in oklch, var(--accent-color) 10%, rgba(255, 255, 255, 0.04)) !important;
-    border-color: color-mix(in oklch, var(--accent-color) 42%, rgba(255, 255, 255, 0.18)) !important;
+    background: var(--accent-surface) !important;
+    border-color: var(--border-highlight) !important;
     transform: translateY(-2px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14),
-                0 8px 22px rgba(0, 0, 0, 0.65),
+    box-shadow: var(--shadow-row-hover),
                 0 0 16px var(--accent-glow) !important;
 }
 
 [data-theme="obsidian-minimal"] .nook-link-row:hover .nook-link-icon {
     transform: scale(1.06);
-    background: color-mix(in oklch, var(--accent-color) 20%, rgba(255, 255, 255, 0.08)) !important;
-    border-color: color-mix(in oklch, var(--accent-color) 50%, rgba(255, 255, 255, 0.25)) !important;
+    background: var(--accent-surface-hover) !important;
+    border-color: var(--accent-color) !important;
 }
 
 [data-theme="obsidian-minimal"] .nook-link-row:active,
@@ -356,9 +400,9 @@
 /* 5.3. Showcase & Trophies Liste Satırları (.companion-row-item) */
 [data-theme="obsidian-minimal"] .companion-row-item {
     border-radius: var(--radius-item) !important;
-    background: rgba(255, 255, 255, 0.025) !important;
-    border: 1px solid rgba(255, 255, 255, 0.07) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 3px 10px rgba(0, 0, 0, 0.4) !important;
+    background: var(--surface-1) !important;
+    border: 1px solid var(--border-soft) !important;
+    box-shadow: var(--shadow-row) !important;
     transition: background 0.24s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
                 transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
@@ -367,25 +411,24 @@
 
 [data-theme="obsidian-minimal"] .companion-row-icon-wrap {
     border-radius: 6px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-soft) !important;
     transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), background 0.24s ease !important;
 }
 
 @media (hover: hover) and (pointer: fine) {
     [data-theme="obsidian-minimal"] body:not(.is-pointer-dragging) .companion-row-item:hover {
-        background: color-mix(in oklch, var(--accent-color) 10%, rgba(255, 255, 255, 0.04)) !important;
-        border-color: color-mix(in oklch, var(--accent-color) 42%, rgba(255, 255, 255, 0.18)) !important;
+        background: var(--accent-surface) !important;
+        border-color: var(--border-highlight) !important;
         transform: translateY(-2px);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14),
-                    0 8px 22px rgba(0, 0, 0, 0.65),
+        box-shadow: var(--shadow-row-hover),
                     0 0 16px var(--accent-glow) !important;
     }
 
     [data-theme="obsidian-minimal"] body:not(.is-pointer-dragging) .companion-row-item:hover .companion-row-icon-wrap {
         transform: scale(1.06);
-        background: color-mix(in oklch, var(--accent-color) 20%, rgba(255, 255, 255, 0.08)) !important;
-        border-color: color-mix(in oklch, var(--accent-color) 50%, rgba(255, 255, 255, 0.25)) !important;
+        background: var(--accent-surface-hover) !important;
+        border-color: var(--accent-color) !important;
     }
 }
 
@@ -450,6 +493,47 @@
     stroke: #000000 !important;
 }
 
+/* Aydınlık Modda Obsidian Minimal Ribbon Flags */
+[data-theme="obsidian-minimal"][data-mode="light"] .card-flag-btn {
+    border: 1px solid var(--border-soft) !important;
+    border-left: none !important;
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    box-shadow: var(--shadow-row) !important;
+}
+
+[data-theme="obsidian-minimal"][data-mode="light"] .card-flag-btn .flag-icon {
+    color: var(--text-primary) !important;
+    filter: none !important;
+}
+
+[data-theme="obsidian-minimal"][data-mode="light"] .card-flag-btn .flag-icon svg {
+    stroke: var(--text-primary) !important;
+}
+
+[data-theme="obsidian-minimal"][data-mode="light"] .stage:not(.has-companion-open) .card-container.is-flipped .card-flag-btn {
+    border-left: 1px solid var(--border-soft) !important;
+}
+
+[data-theme="obsidian-minimal"][data-mode="light"] .stage.has-companion-open.is-gaming-mode .card-flag-btn.flag-trophies,
+[data-theme="obsidian-minimal"][data-mode="light"] .stage.has-companion-open.is-widgets-mode .card-flag-btn.flag-widgets,
+[data-theme="obsidian-minimal"][data-mode="light"] .stage.has-companion-open.is-achievements-mode .card-flag-btn.flag-achievements,
+[data-theme="obsidian-minimal"][data-mode="light"] .stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase,
+[data-theme="obsidian-minimal"][data-mode="light"] .card-flag-btn:hover {
+    background: var(--text-primary) !important;
+    color: var(--bg-card) !important;
+    border-color: var(--text-primary) !important;
+    box-shadow: var(--shadow-elevated) !important;
+}
+
+[data-theme="obsidian-minimal"][data-mode="light"] .stage.has-companion-open.is-gaming-mode .card-flag-btn.flag-trophies .flag-icon svg,
+[data-theme="obsidian-minimal"][data-mode="light"] .stage.has-companion-open.is-widgets-mode .card-flag-btn.flag-widgets .flag-icon svg,
+[data-theme="obsidian-minimal"][data-mode="light"] .stage.has-companion-open.is-achievements-mode .card-flag-btn.flag-achievements .flag-icon svg,
+[data-theme="obsidian-minimal"][data-mode="light"] .stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase .flag-icon svg,
+[data-theme="obsidian-minimal"][data-mode="light"] .card-flag-btn:hover .flag-icon svg {
+    stroke: var(--bg-card) !important;
+}
+
 /* ----------------------------------------------------
    7. COMPANION KARTLAR (TROPHIES & SHOWCASE)
    ---------------------------------------------------- */
@@ -461,14 +545,14 @@
 }
 
 [data-theme="obsidian-minimal"] .companion-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+    border-bottom: 1px solid var(--border-soft) !important;
 }
 
 [data-theme="obsidian-minimal"] .icon-trophies,
 [data-theme="obsidian-minimal"] .icon-showcase {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: #ffffff !important;
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-soft) !important;
+    color: var(--text-primary) !important;
 }
 
 /* ----------------------------------------------------
@@ -476,12 +560,12 @@
    ---------------------------------------------------- */
 /* 8.1. Liste İçerik Kartı (Normal ve Büyük Genişlemiş Durum) */
 [data-theme="obsidian-minimal"] .top-item-card {
-    background: rgba(255, 255, 255, 0.025) !important;
+    background: var(--surface-1) !important;
     border-width: 1px !important;
     border-style: solid !important;
-    border-color: rgba(255, 255, 255, 0.07);
+    border-color: var(--border-soft);
     border-radius: var(--radius-item) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 3px 10px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: var(--shadow-row) !important;
 }
 
 /* 💎 Obsidian Hiyerarşi & Madalya Kenarlıkları (Cevher / Mineral Işıltısı) */
@@ -500,15 +584,14 @@
 
 /* 🥈 Gümüş (Silver / Platin): Buzul platin parlaklığı, soğuk titanyum aurası */
 [data-theme="obsidian-minimal"] .top-item-card.tier-silver {
-    border-color: rgba(203, 213, 225, 0.45) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
-                0 4px 16px rgba(0, 0, 0, 0.5),
-                0 0 14px rgba(148, 163, 184, 0.16) !important;
+    border-color: color-mix(in oklch, var(--color-tier-silver) 55%, transparent) !important;
+    box-shadow: var(--shadow-row),
+                0 0 14px var(--color-tier-silver-glow) !important;
 }
 [data-theme="obsidian-minimal"] .top-item-rank.tier-silver {
-    color: #f1f5f9 !important;
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    color: var(--color-tier-silver) !important;
+    background: var(--color-tier-silver-bg) !important;
+    border: 1px solid var(--color-tier-silver-border) !important;
 }
 
 /* 🥉 Bronz (Deep Copper / Amber): Derin kehribar bakır ışıltısı */
@@ -532,38 +615,37 @@
 
 /* Büyük Genişlemiş Kart Durumu */
 [data-theme="obsidian-minimal"] .top-item-card.is-expanded {
-    background: color-mix(in oklch, var(--accent-color) 6%, rgba(255, 255, 255, 0.03)) !important;
-    border-color: color-mix(in oklch, var(--accent-color) 45%, rgba(255, 255, 255, 0.15)) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12),
-                0 12px 32px rgba(0, 0, 0, 0.75),
-                0 0 20px color-mix(in oklch, var(--accent-color) 25%, transparent) !important;
+    background: var(--accent-surface) !important;
+    border-color: var(--border-highlight) !important;
+    box-shadow: var(--shadow-row-hover),
+                0 0 20px var(--accent-glow) !important;
 }
 
 /* 8.2. Kullanıcı Yorumu Çekmecesi (Editoryal Alıntı Bloğu) */
 [data-theme="obsidian-minimal"] .top-item-review-drawer {
-    background: color-mix(in oklch, var(--accent-color) 4%, #06070a) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: var(--surface-recessed) !important;
+    border: 1px solid var(--border-soft) !important;
     border-left: 2.5px solid var(--accent-color) !important;
     border-radius: var(--radius-item) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: var(--shadow-row) !important;
 }
 
 [data-theme="obsidian-minimal"] .user-review-header {
-    color: var(--accent-color) !important;
+    color: var(--accent-ink) !important;
     font-family: var(--font-body) !important;
     letter-spacing: 0.12em !important;
 }
 
 [data-theme="obsidian-minimal"] .user-review-text {
-    color: rgba(255, 255, 255, 0.75) !important;
+    color: var(--text-secondary) !important;
     font-family: var(--font-body) !important;
 }
 
 [data-theme="obsidian-minimal"] .user-review-textarea {
-    background: rgba(0, 0, 0, 0.55) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: var(--surface-recessed) !important;
+    border: 1px solid var(--border-soft) !important;
     border-radius: 6px !important;
-    color: #ffffff !important;
+    color: var(--text-primary) !important;
     font-family: var(--font-body) !important;
 }
 
@@ -586,43 +668,43 @@
 
 [data-theme="obsidian-minimal"] .tops-type-btn {
     border-radius: 6px !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: var(--surface-1) !important;
+    border: 1px solid var(--border-soft) !important;
 }
 
 [data-theme="obsidian-minimal"] .tops-type-btn:hover {
-    background: color-mix(in oklch, var(--accent-color) 12%, rgba(255, 255, 255, 0.05)) !important;
-    border-color: color-mix(in oklch, var(--accent-color) 45%, rgba(255, 255, 255, 0.2)) !important;
+    background: var(--accent-surface) !important;
+    border-color: var(--border-highlight) !important;
 }
 
 [data-theme="obsidian-minimal"] .tops-type-btn.is-active {
-    background: color-mix(in oklch, var(--accent-color) 20%, rgba(255, 255, 255, 0.08)) !important;
+    background: var(--accent-surface-hover) !important;
     border-color: var(--accent-color) !important;
-    color: #ffffff !important;
+    color: var(--text-primary) !important;
     box-shadow: 0 0 14px var(--accent-glow) !important;
 }
 
 [data-theme="obsidian-minimal"] .tops-search-item {
     border-radius: 6px !important;
-    background: rgba(255, 255, 255, 0.025) !important;
-    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    background: var(--surface-1) !important;
+    border: 1px solid var(--border-soft) !important;
 }
 
 [data-theme="obsidian-minimal"] .tops-search-item:hover {
-    background: color-mix(in oklch, var(--accent-color) 12%, rgba(255, 255, 255, 0.05)) !important;
-    border-color: color-mix(in oklch, var(--accent-color) 45%, rgba(255, 255, 255, 0.2)) !important;
+    background: var(--accent-surface) !important;
+    border-color: var(--border-highlight) !important;
 }
 
 /* ----------------------------------------------------
    9. AVATAR & BANNER DOKUNUŞLARI
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] .avatar-box {
-    border: 2px solid rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8) !important;
+    border: 2px solid var(--border-highlight) !important;
+    box-shadow: var(--shadow-avatar) !important;
 }
 
 [data-theme="obsidian-minimal"] .banner-box {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid var(--border-soft) !important;
 }
 
 /* ----------------------------------------------------

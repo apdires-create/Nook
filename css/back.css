@@ -83,12 +83,12 @@
 
 .nook-link-row:hover {
     border-color: var(--border-highlight);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-hover);
 }
 
 .nook-link-row.is-expanded {
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(0, 0, 0, 0.25);
+    border-color: var(--border-highlight);
+    background: var(--surface-recessed);
 }
 
 .nook-link-main {
@@ -108,7 +108,7 @@ body.is-owner .nook-link-main {
     width: 8.5cqw;
     height: 8.5cqw;
     border-radius: 2cqw;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -181,7 +181,7 @@ body.is-owner .nook-link-main {
     min-height: 24px;
     border-radius: 1.6cqw;
     border: 1px solid var(--border-soft);
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--surface-overlay-btn);
     backdrop-filter: blur(4px);
     color: var(--text-tertiary);
     display: flex;
@@ -204,10 +204,10 @@ body.is-owner .nook-link-main {
 }
 
 .nook-action-btn:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    background: var(--surface-hover);
+    border-color: var(--border-highlight);
+    box-shadow: var(--shadow-row);
 }
 
 .nook-action-btn.is-delete-mode {
@@ -243,15 +243,15 @@ body.is-owner .nook-link-main {
 }
 
 .nook-link-anchor:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-2);
 }
 
 .nook-link-anchor:hover .nook-link-name {
-    color: var(--accent-light, #38bdf8);
+    color: var(--accent-ink, var(--accent-color));
 }
 
 .nook-link-anchor:hover .nook-link-icon {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--accent-surface);
 }
 
 /* Akordeon Düzenleme Başlığı (İkon + İsim Inputu) */
@@ -322,7 +322,7 @@ body.is-owner .nook-link-main {
 
 /* Input Tasarımı */
 .nook-link-input {
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--surface-recessed);
     border: 1px solid var(--border-soft);
     border-radius: 1.8cqw;
     padding: 1.8cqw 2.5cqw;
@@ -351,7 +351,7 @@ body:not(.is-owner) .nook-link-row {
 }
 
 body:not(.is-owner) .nook-link-row:hover .nook-link-name {
-    color: var(--accent-light, #38bdf8);
+    color: var(--accent-ink, var(--accent-color));
 }
 
 body:not(.is-owner) .nook-link-row * {
@@ -396,7 +396,7 @@ body.is-owner .nook-link-row.is-expanded input {
 
 .nook-link-row.is-dragging {
     opacity: 0.5;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-1);
     border-color: var(--accent-color);
     transform: scale(0.98);
     transition: none !important;
@@ -512,9 +512,9 @@ body.is-owner .top-item-unit:active {
 /* Seçilen ve Genişleyen Kart (Seçenek A Düzeni) */
 .top-item-card.is-expanded {
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--surface-1);
     border-color: var(--accent-color, #3b5bdb);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 16px rgba(59, 91, 219, 0.25);
+    box-shadow: var(--shadow-row-hover);
     padding: 3cqw 3.5cqw;
     min-height: 28cqh;
     align-items: flex-start;
@@ -522,8 +522,8 @@ body.is-owner .top-item-unit:active {
 
 .top-item-card.is-expanded .top-item-thumb {
     width: 22cqw;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: var(--shadow-elevated);
+    border-color: var(--border-highlight);
     transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -571,15 +571,15 @@ body.is-owner .top-item-unit:active {
     gap: 1.4cqw;
     margin-top: clamp(4px, 1.2cqh, 14px);
     padding-top: clamp(3px, 0.8cqh, 10px);
-    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+    border-top: 1px dashed var(--border-soft);
 }
 
 .top-item-thumb {
     width: 15cqw;
     aspect-ratio: 2 / 3;
     border-radius: 1.5cqw;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--surface-2);
+    border: 1px solid var(--border-soft);
     background-size: cover;
     background-position: center;
     object-fit: cover;
@@ -592,7 +592,7 @@ body.is-owner .top-item-unit:active {
     pointer-events: none;
     -webkit-user-drag: none;
     user-select: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-row);
     transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -728,13 +728,13 @@ body.is-owner .top-item-unit:active {
     box-sizing: border-box;
     margin-top: 10px;
     padding: 12px 14px;
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--surface-recessed);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--border-soft);
     border-left: 2.5px solid var(--accent-color);
     border-radius: var(--radius-item, 8px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 16px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-row);
     cursor: default;
     position: relative;
 }
@@ -784,9 +784,9 @@ body.is-owner .top-item-unit:active {
     gap: 3px;
     padding: 3px 7px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    color: rgba(255, 255, 255, 0.78);
+    background: var(--surface-2);
+    border: 1px solid var(--border-soft);
+    color: var(--text-secondary);
     line-height: 1;
     flex-shrink: 0;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
@@ -798,15 +798,15 @@ body.is-owner .top-item-unit:active {
 }
 
 .top-item-card:hover .has-comment-badge {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.28);
-    color: #fff;
+    background: var(--surface-hover);
+    border-color: var(--border-highlight);
+    color: var(--text-primary);
 }
 
 .top-item-unit.is-expanded .has-comment-badge {
     border-color: var(--accent-color);
-    color: var(--accent-color);
-    background: rgba(255, 255, 255, 0.08);
+    color: var(--accent-ink);
+    background: var(--accent-surface);
 }
 
 .top-item-unit.is-expanded .has-comment-badge .comment-chevron {
@@ -823,7 +823,7 @@ body.is-owner .top-item-unit:active {
 .user-review-textarea {
     width: 100%;
     box-sizing: border-box;
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--surface-recessed);
     border: 1px solid var(--border-soft);
     border-radius: 8px;
     color: var(--text-primary);
@@ -853,8 +853,8 @@ body.is-owner .top-item-unit:active {
 .top-item-rank {
     font-size: var(--cq-fs-desc);
     font-weight: 700;
-    color: var(--accent-light, #748ffc);
-    background: rgba(59, 91, 219, 0.15);
+    color: var(--accent-ink);
+    background: var(--accent-surface);
     border-radius: 4px;
     padding: 1px 5px;
     flex-shrink: 0;
@@ -876,7 +876,7 @@ body.is-owner .top-item-unit:active {
     font-size: calc(var(--cq-fs-desc) * 0.92);
     font-weight: 500;
     color: var(--text-muted);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-2);
     padding: 1px 5px;
     border-radius: 4px;
     white-space: nowrap;
@@ -895,8 +895,8 @@ body.is-owner .top-item-unit:active {
 }
 
 .top-meta-badge.is-extra {
-    color: var(--accent-light, #748ffc);
-    background: rgba(59, 91, 219, 0.1);
+    color: var(--accent-ink);
+    background: var(--accent-surface);
 }
 
 .top-meta-badge.is-series {
@@ -922,8 +922,8 @@ body.is-owner .top-item-unit:active {
     align-items: center;
     gap: 3cqw;
     padding: 2cqw 2.5cqw;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1.5px dashed rgba(255, 255, 255, 0.16);
+    background: var(--surface-1);
+    border: 1.5px dashed var(--border-highlight);
     border-radius: var(--radius-item);
     cursor: pointer;
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
@@ -931,10 +931,10 @@ body.is-owner .top-item-unit:active {
 }
 
 .top-poster-add-card:hover {
-    background: rgba(59, 91, 219, 0.08);
+    background: var(--accent-surface);
     border-color: var(--accent-color, #3b5bdb);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(59, 91, 219, 0.15);
+    box-shadow: 0 4px 16px var(--accent-glow);
 }
 
 .top-poster-add-thumb {
@@ -942,8 +942,8 @@ body.is-owner .top-item-unit:active {
     width: 15cqw;
     aspect-ratio: 2 / 3;
     border-radius: 1.5cqw;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px dashed rgba(255, 255, 255, 0.2);
+    background: var(--surface-2);
+    border: 1px dashed var(--border-highlight);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -954,7 +954,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .top-poster-add-card:hover .top-poster-add-thumb {
-    background: rgba(59, 91, 219, 0.15);
+    background: var(--accent-surface-hover);
     border-color: var(--accent-color, #3b5bdb);
 }
 
@@ -967,7 +967,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .top-poster-add-card:hover .top-poster-add-icon-wrap {
-    color: #ffffff;
+    color: var(--text-primary);
     transform: scale(1.12);
 }
 
@@ -1042,10 +1042,10 @@ body.is-owner .top-item-unit:active {
 
 /* Monkeytype Üst Başlık / Profil Kartı */
 .mt-header-box {
-    background: linear-gradient(180deg, rgba(226, 183, 20, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%), var(--bg-card-subtle);
+    background: linear-gradient(180deg, rgba(226, 183, 20, 0.08) 0%, var(--surface-1) 100%), var(--bg-card-subtle);
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-card, 16px);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-row);
     padding: clamp(11px, 2.3cqh, 24px) clamp(12px, 3.6cqw, 24px);
     width: 100%;
     box-sizing: border-box;
@@ -1663,7 +1663,7 @@ body.is-owner .top-item-unit:active {
     font-size: clamp(10px, 2.4cqw, 15px);
     font-weight: 700;
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--surface-2);
     border: 1px solid var(--border-soft);
     border-radius: 6px;
     padding: clamp(2.5px, 0.5cqh, 5px) clamp(6px, 1.5cqw, 10px);

@@ -665,6 +665,7 @@ EditManager.Appearance = {
 
         this.modalEl = document.getElementById('theme-appearance-modal');
         this.themeCardsEl = document.getElementById('appearance-theme-cards');
+        this.modeToggleEl = document.getElementById('appearance-mode-toggle');
         this.colorPaletteEl = document.getElementById('appearance-color-palette');
         this.colorHexEl = document.getElementById('appearance-color-hex');
         this.colorInputEl = document.getElementById('appearance-color-input');
@@ -702,6 +703,16 @@ EditManager.Appearance = {
         if (saveBtn) saveBtn.onclick = () => this.kaydet();
         if (previewBtn) previewBtn.onclick = () => this.onizlemeBaslat();
 
+        // Aydınlık / Karanlık Mod Seçimi
+        if (this.modeToggleEl) {
+            this.modeToggleEl.querySelectorAll('.appearance-mode-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.modSec(btn.dataset.modeVal, true);
+                };
+            });
+        }
+
         // Renk Swatch Tıklamaları
         if (this.colorPaletteEl) {
             this.colorPaletteEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
@@ -736,17 +747,21 @@ EditManager.Appearance = {
         // Orijinal ve Geçici Durumları Başlat
         const currentThemeId = kartVerisi?.theme_config?.theme_id || 'default';
         const currentPrimaryColor = kartVerisi?.theme_config?.primary_color || '#a855f7';
+        const currentColorMode = kartVerisi?.theme_config?.color_mode === 'light' ? 'light' : 'dark';
 
         this.originalState = {
             themeId: currentThemeId,
-            primaryColor: currentPrimaryColor
+            primaryColor: currentPrimaryColor,
+            colorMode: currentColorMode
         };
         this.tempState = {
             themeId: currentThemeId,
-            primaryColor: currentPrimaryColor
+            primaryColor: currentPrimaryColor,
+            colorMode: currentColorMode
         };
 
         this.temalariCiz();
+        this.modSec(this.tempState.colorMode, false);
         this.renkSec(this.tempState.primaryColor, null, false);
 
         // Arka planda veritabanı envanterini de tazele ve kartları yeniden çiz
@@ -771,9 +786,9 @@ EditManager.Appearance = {
             }
         }
 
-        // Eğer geçici değişiklikler yapılmışsa ve kaydedilmemişse orijinal temaya/renge geri dön
+        // Eğer geçici değişiklikler yapılmışsa ve kaydedilmemişse orijinal temaya/renge/moda geri dön
         if (this.originalState) {
-            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor);
+            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor, this.originalState.colorMode, false);
         }
 
         const userDropdown = document.getElementById('profile-user-dropdown');
@@ -842,7 +857,22 @@ EditManager.Appearance = {
     temaSec(themeId) {
         this.tempState.themeId = themeId;
         this.temalariCiz();
-        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.colorMode, true);
+    },
+
+    modSec(mode, apply = true) {
+        const safeMode = mode === 'light' ? 'light' : 'dark';
+        this.tempState.colorMode = safeMode;
+
+        if (this.modeToggleEl) {
+            this.modeToggleEl.querySelectorAll('.appearance-mode-btn').forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.modeVal === safeMode);
+            });
+        }
+
+        if (apply) {
+            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.colorMode, true);
+        }
     },
 
     renkSec(color, presetName = null, apply = true) {
@@ -881,16 +911,18 @@ EditManager.Appearance = {
         if (themeDot) themeDot.style.background = color;
 
         if (apply) {
-            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
+            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.colorMode, true);
         }
     },
 
-    geciciUygula(themeId, color) {
+    geciciUygula(themeId, color, colorMode = this.tempState?.colorMode, ignoreVisitorOverride = true) {
         if (typeof ThemeManager !== 'undefined') {
             const themeObj = this.availableThemes.find(t => t.id === themeId);
             ThemeManager.applyTheme(themeId, {
                 fontUrl: themeObj?.font_url,
-                primaryColor: color
+                primaryColor: color,
+                colorMode: colorMode || 'dark',
+                ignoreVisitorOverride
             });
         }
     },
@@ -907,7 +939,7 @@ EditManager.Appearance = {
         this.freezeEditMode();
 
         // Temayı ve rengi geçici uygula
-        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.colorMode, true);
 
         // Önizleme barını göster ve yapılandır
         if (this.previewBarEl) {
@@ -944,9 +976,9 @@ EditManager.Appearance = {
         this.isPreviewActive = false;
         if (this.previewBarEl) this.previewBarEl.style.display = 'none';
 
-        // Orijinal temaya ve renge geri dön
+        // Orijinal temaya, renge ve moda geri dön
         if (this.originalState) {
-            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor);
+            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor, this.originalState.colorMode, false);
         }
 
         // Owner modunu tekrar aktive et
@@ -1069,13 +1101,15 @@ EditManager.Appearance = {
         if (!kartVerisi.theme_config) kartVerisi.theme_config = {};
         kartVerisi.theme_config.theme_id = this.tempState.themeId;
         kartVerisi.theme_config.primary_color = this.tempState.primaryColor;
+        kartVerisi.theme_config.color_mode = this.tempState.colorMode === 'light' ? 'light' : 'dark';
         // Eski veya geçersiz anahtarları temizle
         if ('palette_id' in kartVerisi.theme_config) delete kartVerisi.theme_config.palette_id;
 
         // Orijinal state'i güncelle
         this.originalState = {
             themeId: this.tempState.themeId,
-            primaryColor: this.tempState.primaryColor
+            primaryColor: this.tempState.primaryColor,
+            colorMode: kartVerisi.theme_config.color_mode
         };
 
         const client = (typeof supabaseClient !== 'undefined' && supabaseClient) || null;
@@ -1094,9 +1128,15 @@ EditManager.Appearance = {
                     if (!EditManager.state.orijinalVeri.theme_config) EditManager.state.orijinalVeri.theme_config = {};
                     EditManager.state.orijinalVeri.theme_config.theme_id = this.tempState.themeId;
                     EditManager.state.orijinalVeri.theme_config.primary_color = this.tempState.primaryColor;
+                    EditManager.state.orijinalVeri.theme_config.color_mode = kartVerisi.theme_config.color_mode;
                     if ('palette_id' in EditManager.state.orijinalVeri.theme_config) {
                         delete EditManager.state.orijinalVeri.theme_config.palette_id;
                     }
+                }
+
+                // Sahip kalıcı modu güncellediğinde mevcut oturum override'ını temizle
+                if (typeof ThemeManager !== 'undefined' && typeof ThemeManager.clearVisitorModeOverride === 'function') {
+                    ThemeManager.clearVisitorModeOverride(kartVerisi.kullanici_adi);
                 }
 
                 // Yerel önbelleği güncelle
@@ -1116,7 +1156,7 @@ EditManager.Appearance = {
         }
 
         // Temayı kalıcı uygula
-        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor);
+        this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, kartVerisi.theme_config.color_mode, true);
         if (this.modalEl) {
             this.modalEl.classList.remove('is-open');
             this.modalEl.style.display = 'none';
@@ -1271,13 +1311,15 @@ EditManager.Global = {
         // Vurgu rengini ve temayı orijinal haline döndür
         const originalColor = kartVerisi.theme_config?.primary_color || '#3b5bdb';
         const originalThemeId = kartVerisi.theme_config?.theme_id || 'default';
+        const originalMode = kartVerisi.theme_config?.color_mode || 'dark';
         document.documentElement.style.setProperty('--accent-color', originalColor);
         const themeDot = document.getElementById('nav-theme-dot');
         if (themeDot) themeDot.style.background = originalColor;
 
         if (typeof ThemeManager !== 'undefined') {
             ThemeManager.applyTheme(originalThemeId, {
-                primaryColor: originalColor
+                primaryColor: originalColor,
+                colorMode: originalMode
             });
         }
 

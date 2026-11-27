@@ -511,7 +511,11 @@ const ThemeMarket = {
 
         // Temayı geçici uygula
         if (typeof ThemeManager !== 'undefined') {
-            await ThemeManager.applyTheme(theme.id, { fontUrl: theme.font_url || theme.fontUrl });
+            await ThemeManager.applyTheme(theme.id, {
+                fontUrl: theme.font_url || theme.fontUrl,
+                primaryColor: kartVerisi?.theme_config?.primary_color,
+                colorMode: kartVerisi?.theme_config?.color_mode
+            });
         }
 
         // Yüzen Önizleme Barını Göster ve Güncelle
@@ -574,7 +578,8 @@ const ThemeMarket = {
                 const origTheme = this.themesCatalog.find(t => t.id === this.originalThemeId);
                 await ThemeManager.applyTheme(this.originalThemeId, { 
                     fontUrl: origTheme?.font_url || origTheme?.fontUrl,
-                    primaryColor: kartVerisi?.theme_config?.primary_color
+                    primaryColor: kartVerisi?.theme_config?.primary_color,
+                    colorMode: kartVerisi?.theme_config?.color_mode
                 });
             }
             if (typeof window.toastBildirimiGoster === 'function') {
@@ -650,7 +655,8 @@ const ThemeMarket = {
             if (typeof ThemeManager !== 'undefined') {
                 await ThemeManager.applyTheme(theme.id, { 
                     fontUrl: theme.font_url || theme.fontUrl,
-                    primaryColor: kartVerisi?.theme_config?.primary_color
+                    primaryColor: kartVerisi?.theme_config?.primary_color,
+                    colorMode: kartVerisi?.theme_config?.color_mode
                 });
             }
 

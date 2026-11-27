@@ -5,6 +5,8 @@
 
 const ThemeManager = {
     currentThemeId: null,
+    currentMode: 'dark',
+    sessionStoragePrefix: 'nook_visitor_mode_',
     basePath: 'themes/',
     linkElementId: 'nook-theme-stylesheet',
     fontLinkElementId: 'nook-theme-fonts',
@@ -27,10 +29,127 @@ const ThemeManager = {
         return typeof url === 'string' && url.startsWith('https://fonts.googleapis.com/');
     },
 
+    normalizeMode(mode) {
+        return mode === 'light' ? 'light' : 'dark';
+    },
+
+    _getTargetUsername(explicitUsername = null) {
+        const raw = explicitUsername
+            || (typeof kartVerisi !== 'undefined' && kartVerisi?.kullanici_adi)
+            || (typeof KULLANICI_ADI !== 'undefined' && KULLANICI_ADI)
+            || 'default';
+        return String(raw).trim().toLowerCase() || 'default';
+    },
+
+    getVisitorStorageKey(explicitUsername = null) {
+        return `${this.sessionStoragePrefix}${this._getTargetUsername(explicitUsername)}`;
+    },
+
+    getVisitorModeOverride(explicitUsername = null) {
+        try {
+            const val = sessionStorage.getItem(this.getVisitorStorageKey(explicitUsername));
+            return (val === 'light' || val === 'dark') ? val : null;
+        } catch (e) {
+            return null;
+        }
+    },
+
+    setVisitorModeOverride(mode, explicitUsername = null) {
+        try {
+            sessionStorage.setItem(this.getVisitorStorageKey(explicitUsername), this.normalizeMode(mode));
+        } catch (e) {}
+    },
+
+    clearVisitorModeOverride(explicitUsername = null) {
+        try {
+            sessionStorage.removeItem(this.getVisitorStorageKey(explicitUsername));
+        } catch (e) {}
+    },
+
+    resolveEffectiveMode(ownerMode, options = {}) {
+        if (options.ignoreVisitorOverride) {
+            return this.normalizeMode(ownerMode);
+        }
+        const override = this.getVisitorModeOverride(options.username);
+        return override || this.normalizeMode(ownerMode);
+    },
+
+    _syncAccentContrast(hexColor) {
+        if (!this.isValidHexColor(hexColor)) return;
+        let clean = hexColor.trim().slice(1);
+        if (clean.length === 3 || clean.length === 4) {
+            clean = clean.slice(0, 3).split('').map(c => c + c).join('');
+        } else if (clean.length >= 6) {
+            clean = clean.slice(0, 6);
+        } else {
+            return;
+        }
+        const r = parseInt(clean.slice(0, 2), 16) / 255;
+        const g = parseInt(clean.slice(2, 4), 16) / 255;
+        const b = parseInt(clean.slice(4, 6), 16) / 255;
+        const lin = c => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+        const luminance = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+        document.documentElement.style.setProperty('--accent-contrast', luminance > 0.36 ? '#0b0d12' : '#ffffff');
+    },
+
+    setMode(mode, options = {}) {
+        const safeMode = this.normalizeMode(mode);
+        document.documentElement.setAttribute('data-mode', safeMode);
+        this.currentMode = safeMode;
+
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeMeta) {
+            themeMeta.setAttribute('content', safeMode === 'light' ? '#f3f5fa' : '#0b0e14');
+        }
+
+        if (options.persistSession) {
+            this.setVisitorModeOverride(safeMode, options.username);
+        }
+
+        this._updateModeToggleBtn();
+
+        window.dispatchEvent(new CustomEvent('nook:mode-changed', {
+            detail: { mode: safeMode, isVisitorOverride: !!options.persistSession }
+        }));
+        return safeMode;
+    },
+
+    toggleVisitorMode() {
+        const current = document.documentElement.getAttribute('data-mode') === 'light' ? 'light' : 'dark';
+        const next = current === 'light' ? 'dark' : 'light';
+        return this.setMode(next, { persistSession: true });
+    },
+
+    _updateModeToggleBtn() {
+        const btn = document.getElementById('nav-mode-toggle');
+        if (!btn) return;
+        const isLight = this.currentMode === 'light';
+        const label = isLight ? 'Karanlık moda geç' : 'Aydınlık moda geç';
+        btn.setAttribute('title', label);
+        btn.setAttribute('aria-label', label);
+        btn.setAttribute('aria-pressed', isLight ? 'true' : 'false');
+    },
+
+    initModeToggle() {
+        const btn = document.getElementById('nav-mode-toggle');
+        if (!btn || btn.dataset.modeBound === '1') return;
+        btn.dataset.modeBound = '1';
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.toggleVisitorMode();
+        });
+        const attrMode = document.documentElement.getAttribute('data-mode');
+        if (attrMode === 'light' || attrMode === 'dark') {
+            this.currentMode = attrMode;
+        }
+        this._updateModeToggleBtn();
+    },
+
     /**
      * Tema stil ve fontlarını dinamik olarak sayfaya enjekte eder
      * @param {string} themeId - Tema kimliği (örn: 'obsidian-minimal', '_template', 'default')
-     * @param {Object} options - Ek tema yapılandırması (fontUrl, primaryColor vb.)
+     * @param {Object} options - Ek tema yapılandırması (fontUrl, primaryColor, colorMode vb.)
      * @returns {Promise<boolean>} Yükleme durumu
      */
     async applyTheme(themeId, options = {}) {
@@ -58,14 +177,19 @@ const ThemeManager = {
             // 3. CSS dosyasını yükle ve bekle
             await this._injectStylesheet(cssUrl, safeThemeId);
 
-            // 4. HTML üzerine data-theme ataması yap
+            // 4. HTML üzerine data-theme ve aydınlık/karanlık mod ataması yap
             document.documentElement.setAttribute('data-theme', safeThemeId);
             this.currentThemeId = safeThemeId;
+
+            const ownerMode = options.colorMode || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.color_mode) || 'dark';
+            this.setMode(this.resolveEffectiveMode(ownerMode, options));
 
             // 5. Vurgu rengini uygula (OKLCH formülü kök rengi otomatik türetir)
             const primaryColor = options.primaryColor || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.primary_color);
             if (this.isValidHexColor(primaryColor)) {
-                document.documentElement.style.setProperty('--accent-color', primaryColor.trim());
+                const trimmed = primaryColor.trim();
+                document.documentElement.style.setProperty('--accent-color', trimmed);
+                this._syncAccentContrast(trimmed);
             }
 
             // 6. Konsol veya event bildirimi
@@ -100,10 +224,16 @@ const ThemeManager = {
         document.documentElement.removeAttribute('data-palette');
         this.currentThemeId = null;
 
+        // Aydınlık/Karanlık modu uygula
+        const ownerMode = options.colorMode || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.color_mode) || 'dark';
+        this.setMode(this.resolveEffectiveMode(ownerMode, options));
+
         // Vurgu rengini koru / sıfırla
         const primaryColor = options.primaryColor || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.primary_color);
         if (this.isValidHexColor(primaryColor)) {
-            document.documentElement.style.setProperty('--accent-color', primaryColor.trim());
+            const trimmed = primaryColor.trim();
+            document.documentElement.style.setProperty('--accent-color', trimmed);
+            this._syncAccentContrast(trimmed);
         }
 
         window.dispatchEvent(new CustomEvent('nook:theme-cleared'));

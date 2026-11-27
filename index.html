@@ -18,6 +18,7 @@
                 var themeId = 'default';
                 var fontUrl = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap';
                 var primaryColor = null;
+                var ownerMode = 'dark';
 
                 if (user) {
                     var cached = localStorage.getItem('nook_profile_' + user) || localStorage.getItem('nook_profile_' + user.toLowerCase());
@@ -32,9 +33,21 @@
                             if (typeof rawColor === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(rawColor.trim())) {
                                 primaryColor = rawColor.trim();
                             }
+                            if (parsed.theme_config.color_mode === 'light' || parsed.theme_config.color_mode === 'dark') {
+                                ownerMode = parsed.theme_config.color_mode;
+                            }
                         }
                     }
                 }
+
+                var visitorOverride = null;
+                try {
+                    var vKey = 'nook_visitor_mode_' + (user ? user.trim().toLowerCase() : 'default');
+                    var vVal = sessionStorage.getItem(vKey);
+                    if (vVal === 'light' || vVal === 'dark') visitorOverride = vVal;
+                } catch(e) {}
+                var effectiveMode = visitorOverride || ownerMode;
+                document.documentElement.setAttribute('data-mode', effectiveMode);
 
                 if (themeId === 'obsidian-minimal') {
                     fontUrl = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap';
@@ -53,6 +66,17 @@
 
                 if (primaryColor) {
                     document.documentElement.style.setProperty('--accent-color', primaryColor);
+                    var hex = primaryColor.slice(1);
+                    if (hex.length === 3 || hex.length === 4) {
+                        hex = hex.slice(0, 3).split('').map(function(c) { return c + c; }).join('');
+                    }
+                    if (hex.length >= 6) {
+                        var r = parseInt(hex.slice(0, 2), 16) / 255;
+                        var g = parseInt(hex.slice(2, 4), 16) / 255;
+                        var b = parseInt(hex.slice(4, 6), 16) / 255;
+                        var lum = 0.2126 * Math.pow(r, 2.2) + 0.7152 * Math.pow(g, 2.2) + 0.0722 * Math.pow(b, 2.2);
+                        document.documentElement.style.setProperty('--accent-contrast', lum > 0.36 ? '#0b0d12' : '#ffffff');
+                    }
                 }
 
                 var fontLink = document.createElement('link');
@@ -366,6 +390,24 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Ziyaretçi / Genel Aydınlık-Karanlık Mod Geçiş Butonu (Oturum Bazlı) -->
+            <button type="button" class="top-nav-btn top-nav-mode-btn" id="nav-mode-toggle" title="Aydınlık moda geç" aria-label="Aydınlık moda geç">
+                <svg class="mode-icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <svg class="mode-icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            </button>
         </div>
     </header>
 
@@ -875,7 +917,34 @@
                     </div>
                 </div>
 
-                <!-- 2. Bölüm: Vurgu Rengi (Accent Color) -->
+                <!-- 2. Bölüm: Aydınlık / Karanlık Mod Seçimi -->
+                <div class="appearance-section">
+                    <label class="appearance-section-label">Görünüm Modu (Varsayılan Açılış)</label>
+                    <div class="appearance-mode-toggle" id="appearance-mode-toggle" role="group" aria-label="Görünüm Modu">
+                        <button type="button" class="appearance-mode-btn is-active" data-mode-val="dark">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                            <span>Karanlık</span>
+                        </button>
+                        <button type="button" class="appearance-mode-btn" data-mode-val="light">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                            </svg>
+                            <span>Aydınlık</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. Bölüm: Vurgu Rengi (Accent Color) -->
                 <div class="appearance-section">
                     <div class="appearance-section-header">
                         <label class="appearance-section-label">Vurgu Rengi</label>

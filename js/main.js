@@ -55,6 +55,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 2. İnteraktif Motorları Başlat
+    if (typeof ThemeManager !== 'undefined' && typeof ThemeManager.initModeToggle === 'function') {
+        ThemeManager.initModeToggle();
+    }
+
     if (typeof Router !== 'undefined') {
         Router.init();
     }
@@ -76,10 +80,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userThemeId = themeConfig.theme_id || themeConfig.theme || null;
         if (userThemeId && userThemeId !== 'default') {
             await ThemeManager.applyTheme(userThemeId, {
-                primaryColor: themeConfig.primary_color
+                primaryColor: themeConfig.primary_color,
+                colorMode: themeConfig.color_mode
             });
         } else {
-            ThemeManager.clearTheme({ primaryColor: themeConfig.primary_color });
+            ThemeManager.clearTheme({
+                primaryColor: themeConfig.primary_color,
+                colorMode: themeConfig.color_mode
+            });
         }
     }
 
