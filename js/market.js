@@ -511,10 +511,11 @@ const ThemeMarket = {
 
         // Temayı geçici uygula
         if (typeof ThemeManager !== 'undefined') {
+            const ownerMode = (kartVerisi?.theme_config?.preset === 'light' || kartVerisi?.theme_config?.color_mode === 'light') ? 'light' : 'dark';
             await ThemeManager.applyTheme(theme.id, {
                 fontUrl: theme.font_url || theme.fontUrl,
                 primaryColor: kartVerisi?.theme_config?.primary_color,
-                colorMode: kartVerisi?.theme_config?.color_mode
+                colorMode: ownerMode
             });
         }
 
@@ -579,7 +580,7 @@ const ThemeMarket = {
                 await ThemeManager.applyTheme(this.originalThemeId, { 
                     fontUrl: origTheme?.font_url || origTheme?.fontUrl,
                     primaryColor: kartVerisi?.theme_config?.primary_color,
-                    colorMode: kartVerisi?.theme_config?.color_mode
+                    colorMode: (kartVerisi?.theme_config?.preset === 'light' || kartVerisi?.theme_config?.color_mode === 'light') ? 'light' : 'dark'
                 });
             }
             if (typeof window.toastBildirimiGoster === 'function') {
@@ -656,7 +657,7 @@ const ThemeMarket = {
                 await ThemeManager.applyTheme(theme.id, { 
                     fontUrl: theme.font_url || theme.fontUrl,
                     primaryColor: kartVerisi?.theme_config?.primary_color,
-                    colorMode: kartVerisi?.theme_config?.color_mode
+                    colorMode: (kartVerisi?.theme_config?.preset === 'light' || kartVerisi?.theme_config?.color_mode === 'light') ? 'light' : 'dark'
                 });
             }
 

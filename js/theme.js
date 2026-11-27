@@ -181,7 +181,9 @@ const ThemeManager = {
             document.documentElement.setAttribute('data-theme', safeThemeId);
             this.currentThemeId = safeThemeId;
 
-            const ownerMode = options.colorMode || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.color_mode) || 'dark';
+            const ownerMode = options.colorMode
+                || (typeof kartVerisi !== 'undefined' && (kartVerisi?.theme_config?.preset === 'light' || kartVerisi?.theme_config?.color_mode === 'light' ? 'light' : 'dark'))
+                || 'dark';
             this.setMode(this.resolveEffectiveMode(ownerMode, options));
 
             // 5. Vurgu rengini uygula (OKLCH formülü kök rengi otomatik türetir)
@@ -225,7 +227,9 @@ const ThemeManager = {
         this.currentThemeId = null;
 
         // Aydınlık/Karanlık modu uygula
-        const ownerMode = options.colorMode || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.color_mode) || 'dark';
+        const ownerMode = options.colorMode
+            || (typeof kartVerisi !== 'undefined' && (kartVerisi?.theme_config?.preset === 'light' || kartVerisi?.theme_config?.color_mode === 'light' ? 'light' : 'dark'))
+            || 'dark';
         this.setMode(this.resolveEffectiveMode(ownerMode, options));
 
         // Vurgu rengini koru / sıfırla

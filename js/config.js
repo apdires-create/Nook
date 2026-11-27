@@ -82,9 +82,8 @@ let kartVerisi = {
     widgets: [],
     theme_config: {
         font: "inter",
-        preset: "default",
-        primary_color: "#3b5bdb",
-        color_mode: "dark"
+        preset: "dark",
+        primary_color: "#3b5bdb"
     },
     kullanici_notlari: {}
 };

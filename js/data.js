@@ -374,19 +374,18 @@ function yerelOnbellekYukle() {
         }
 
         // Tema ve rengini önbellekten hemen uygula (FOUC önleyici 0ms)
+        const cachedMode = (kartVerisi.theme_config?.preset === 'light' || kartVerisi.theme_config?.color_mode === 'light') ? 'light' : 'dark';
         if (typeof ThemeManager !== 'undefined') {
             const userThemeId = kartVerisi.theme_config?.theme_id || 'default';
             ThemeManager.applyTheme(userThemeId, {
                 primaryColor: kartVerisi.theme_config?.primary_color,
-                colorMode: kartVerisi.theme_config?.color_mode
+                colorMode: cachedMode
             });
         } else {
             if (kartVerisi.theme_config?.primary_color) {
                 document.documentElement.style.setProperty('--accent-color', kartVerisi.theme_config.primary_color);
             }
-            if (kartVerisi.theme_config?.color_mode) {
-                document.documentElement.setAttribute('data-mode', kartVerisi.theme_config.color_mode === 'light' ? 'light' : 'dark');
-            }
+            document.documentElement.setAttribute('data-mode', cachedMode);
         }
 
         const loadingUserEl = document.getElementById('app-loading-user');

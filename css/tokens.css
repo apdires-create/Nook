@@ -84,54 +84,54 @@
 :root[data-mode="light"] {
     color-scheme: light;
 
-    --accent-glow: color-mix(in oklch, var(--accent-color) 28%, transparent);
-    --accent-surface: color-mix(in oklch, var(--accent-color) 12%, transparent);
-    --accent-surface-hover: color-mix(in oklch, var(--accent-color) 20%, transparent);
-    --accent-light: color-mix(in oklch, var(--accent-color) 62%, #0f172a);
-    --accent-ink: color-mix(in oklch, var(--accent-color) 62%, #0f172a);
+    --accent-glow: color-mix(in oklch, var(--accent-color) 34%, transparent);
+    --accent-surface: color-mix(in oklch, var(--accent-color) 18%, transparent);
+    --accent-surface-hover: color-mix(in oklch, var(--accent-color) 28%, transparent);
+    --accent-light: color-mix(in oklch, var(--accent-color) 65%, #0f172a);
+    --accent-ink: color-mix(in oklch, var(--accent-color) 68%, #0f172a);
 
-    --bg-stage: color-mix(in oklch, var(--accent-color) 13%, #f3f5fa);
-    --bg-card: color-mix(in oklch, var(--accent-color) 6%, #ffffff);
-    --bg-card-subtle: color-mix(in oklch, var(--accent-color) 11%, #f1f4f9);
-    --bg-pill: color-mix(in oklch, var(--accent-color) 12%, rgba(15, 23, 42, 0.04));
-    --bg-pill-hover: color-mix(in oklch, var(--accent-color) 22%, rgba(15, 23, 42, 0.08));
+    --bg-stage: color-mix(in oklch, var(--accent-color) 28%, #f4f6fb);
+    --bg-card: color-mix(in oklch, var(--accent-color) 11%, #ffffff);
+    --bg-card-subtle: color-mix(in oklch, var(--accent-color) 19%, #eef2f8);
+    --bg-pill: color-mix(in oklch, var(--accent-color) 18%, rgba(15, 23, 42, 0.04));
+    --bg-pill-hover: color-mix(in oklch, var(--accent-color) 30%, rgba(15, 23, 42, 0.08));
 
-    --text-primary: color-mix(in oklch, var(--accent-color) 14%, #0f172a);
-    --text-secondary: color-mix(in oklch, var(--accent-color) 12%, rgba(15, 23, 42, 0.74));
-    --text-tertiary: color-mix(in oklch, var(--accent-color) 10%, rgba(15, 23, 42, 0.54));
+    --text-primary: color-mix(in oklch, var(--accent-color) 18%, #0f172a);
+    --text-secondary: color-mix(in oklch, var(--accent-color) 16%, rgba(15, 23, 42, 0.76));
+    --text-tertiary: color-mix(in oklch, var(--accent-color) 14%, rgba(15, 23, 42, 0.56));
     --text-muted: var(--text-tertiary);
 
-    --border-soft: color-mix(in oklch, var(--accent-color) 18%, rgba(15, 23, 42, 0.1));
-    --border-highlight: color-mix(in oklch, var(--accent-color) 42%, rgba(15, 23, 42, 0.2));
+    --border-soft: color-mix(in oklch, var(--accent-color) 28%, rgba(15, 23, 42, 0.1));
+    --border-highlight: color-mix(in oklch, var(--accent-color) 52%, rgba(15, 23, 42, 0.2));
 
-    --surface-1: color-mix(in oklch, var(--accent-color) 7%, rgba(15, 23, 42, 0.03));
-    --surface-2: color-mix(in oklch, var(--accent-color) 11%, rgba(15, 23, 42, 0.05));
-    --surface-hover: color-mix(in oklch, var(--accent-color) 18%, rgba(15, 23, 42, 0.08));
-    --surface-active: color-mix(in oklch, var(--accent-color) 24%, rgba(15, 23, 42, 0.11));
-    --surface-recessed: color-mix(in oklch, var(--accent-color) 7%, rgba(15, 23, 42, 0.05));
+    --surface-1: color-mix(in oklch, var(--accent-color) 12%, rgba(15, 23, 42, 0.03));
+    --surface-2: color-mix(in oklch, var(--accent-color) 18%, rgba(15, 23, 42, 0.05));
+    --surface-hover: color-mix(in oklch, var(--accent-color) 28%, rgba(15, 23, 42, 0.08));
+    --surface-active: color-mix(in oklch, var(--accent-color) 35%, rgba(15, 23, 42, 0.11));
+    --surface-recessed: color-mix(in oklch, var(--accent-color) 14%, rgba(15, 23, 42, 0.05));
     --surface-overlay-btn: color-mix(in oklch, var(--bg-card) 86%, transparent);
-    --surface-overlay-btn-hover: var(--bg-card);
-    --nav-btn-bg: color-mix(in oklch, var(--bg-card) 84%, transparent);
-    --nav-btn-hover-bg: color-mix(in oklch, var(--accent-color) 16%, #ffffff);
-    --scrollbar-thumb: color-mix(in oklch, var(--accent-color) 26%, rgba(15, 23, 42, 0.2));
-    --scrollbar-thumb-hover: color-mix(in oklch, var(--accent-color) 45%, rgba(15, 23, 42, 0.36));
+    --surface-overlay-btn-hover: color-mix(in oklch, var(--accent-color) 22%, #ffffff);
+    --nav-btn-bg: color-mix(in oklch, var(--accent-color) 16%, rgba(255, 255, 255, 0.84));
+    --nav-btn-hover-bg: color-mix(in oklch, var(--accent-color) 28%, #ffffff);
+    --scrollbar-thumb: color-mix(in oklch, var(--accent-color) 32%, rgba(15, 23, 42, 0.2));
+    --scrollbar-thumb-hover: color-mix(in oklch, var(--accent-color) 52%, rgba(15, 23, 42, 0.36));
     --loading-bg: var(--bg-stage);
 
     --stage-gradient: radial-gradient(
         circle at 50% 30%,
-        color-mix(in oklch, var(--accent-color) 24%, transparent) 0%,
-        color-mix(in oklch, var(--accent-color) 9%, transparent) 44%,
-        transparent 74%
+        color-mix(in oklch, var(--accent-color) 38%, transparent) 0%,
+        color-mix(in oklch, var(--accent-color) 15%, transparent) 46%,
+        transparent 76%
     );
 
     --shadow-card: 
-        0 12px 32px -8px color-mix(in oklch, var(--accent-color) 16%, rgba(15, 23, 42, 0.14)),
+        0 12px 34px -8px color-mix(in oklch, var(--accent-color) 28%, rgba(15, 23, 42, 0.14)),
         0 24px 56px -16px rgba(15, 23, 42, 0.12),
         inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    --shadow-avatar: 0 6px 18px color-mix(in oklch, var(--accent-color) 20%, rgba(15, 23, 42, 0.18));
-    --shadow-elevated: 0 8px 24px color-mix(in oklch, var(--accent-color) 14%, rgba(15, 23, 42, 0.14));
-    --shadow-row: 0 2px 8px rgba(15, 23, 42, 0.06);
-    --shadow-row-hover: 0 6px 18px color-mix(in oklch, var(--accent-color) 16%, rgba(15, 23, 42, 0.1)), 0 0 12px color-mix(in oklch, var(--accent-color) 16%, transparent);
+    --shadow-avatar: 0 6px 18px color-mix(in oklch, var(--accent-color) 26%, rgba(15, 23, 42, 0.18));
+    --shadow-elevated: 0 8px 24px color-mix(in oklch, var(--accent-color) 22%, rgba(15, 23, 42, 0.14));
+    --shadow-row: 0 2px 8px color-mix(in oklch, var(--accent-color) 12%, rgba(15, 23, 42, 0.06));
+    --shadow-row-hover: 0 6px 18px color-mix(in oklch, var(--accent-color) 24%, rgba(15, 23, 42, 0.1)), 0 0 14px color-mix(in oklch, var(--accent-color) 22%, transparent);
 
     --modal-shadow: 0 20px 50px rgba(15, 23, 42, 0.2), 0 0 0 1px var(--border-soft);
     --modal-backdrop: rgba(15, 23, 42, 0.45);
