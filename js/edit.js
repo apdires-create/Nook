@@ -741,24 +741,26 @@ EditManager.Appearance = {
         });
     },
 
-    ac() {
+    ac(options = {}) {
         if (!this.modalEl) return;
 
-        // Orijinal ve Geçici Durumları Başlat
-        const currentThemeId = kartVerisi?.theme_config?.theme_id || 'default';
-        const currentPrimaryColor = kartVerisi?.theme_config?.primary_color || '#a855f7';
-        const currentColorMode = (kartVerisi?.theme_config?.preset === 'light' || kartVerisi?.theme_config?.color_mode === 'light') ? 'light' : 'dark';
+        // Önizlemeden geri dönülmediyse orijinal ve geçici durumları kartVerisi'nden başlat
+        if (!options.preserveDraft || !this.originalState || !this.tempState) {
+            const currentThemeId = kartVerisi?.theme_config?.theme_id || 'default';
+            const currentPrimaryColor = kartVerisi?.theme_config?.primary_color || '#a855f7';
+            const currentColorMode = (kartVerisi?.theme_config?.preset === 'light' || kartVerisi?.theme_config?.color_mode === 'light') ? 'light' : 'dark';
 
-        this.originalState = {
-            themeId: currentThemeId,
-            primaryColor: currentPrimaryColor,
-            colorMode: currentColorMode
-        };
-        this.tempState = {
-            themeId: currentThemeId,
-            primaryColor: currentPrimaryColor,
-            colorMode: currentColorMode
-        };
+            this.originalState = {
+                themeId: currentThemeId,
+                primaryColor: currentPrimaryColor,
+                colorMode: currentColorMode
+            };
+            this.tempState = {
+                themeId: currentThemeId,
+                primaryColor: currentPrimaryColor,
+                colorMode: currentColorMode
+            };
+        }
 
         this.temalariCiz();
         this.modSec(this.tempState.colorMode, false);
@@ -976,16 +978,14 @@ EditManager.Appearance = {
         this.isPreviewActive = false;
         if (this.previewBarEl) this.previewBarEl.style.display = 'none';
 
-        // Orijinal temaya, renge ve moda geri dön
-        if (this.originalState) {
-            this.geciciUygula(this.originalState.themeId, this.originalState.primaryColor, this.originalState.colorMode, false);
-        }
-
         // Owner modunu tekrar aktive et
         this.unfreezeEditMode();
 
-        // Pop-up'ı geri aç
-        this.ac();
+        // Önizlenen geçici ayarları koruyarak pop-up'ı geri aç
+        if (this.tempState) {
+            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.colorMode, true);
+        }
+        this.ac({ preserveDraft: true });
     },
 
     async onizlemeKaydet() {
