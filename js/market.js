@@ -413,15 +413,11 @@ const ThemeMarket = {
         if (previewBtn) {
             previewBtn.onclick = async () => {
                 if (!(typeof isOwner !== 'undefined' && isOwner) && typeof aktifKullaniciAdi !== 'undefined' && aktifKullaniciAdi) {
-                    const onay = (typeof EditManager !== 'undefined' && EditManager.Global?.onayKutusuAc)
-                        ? await EditManager.Global.onayKutusuAc({
-                            baslik: 'Kendi Sayfana Dön',
-                            aciklama: 'Bu temayı canlı önizlemek için kendi sayfana dönmek ister misin?',
-                            onayMetni: 'Sayfama Dön',
-                            iptalMetni: 'İptal',
-                            tehlikeliMi: false
-                        })
-                        : window.confirm('Bu temayı canlı önizlemek için kendi sayfana dönmek ister misin?');
+                    const onay = await this.onayKutusuGoster(
+                        'Kendi Sayfana Dön',
+                        `"${theme.name}" temasını canlı önizlemek için kendi sayfana dönmek ister misin?`,
+                        'Sayfama Dön'
+                    );
 
                     if (!onay) return;
                     sessionStorage.setItem('nook_pending_preview_theme', theme.id);
@@ -438,6 +434,61 @@ const ThemeMarket = {
         if (buyBtn) {
             buyBtn.onclick = () => this.satinAl(theme);
         }
+    },
+
+    onayKutusuGoster(baslik, aciklama, onayMetni = 'Onayla') {
+        return new Promise((resolve) => {
+            let modal = document.getElementById('nook-market-confirm-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'nook-market-confirm-modal';
+                modal.className = 'nook-confirm-modal';
+                modal.innerHTML = `
+                    <div class="nook-confirm-backdrop"></div>
+                    <div class="nook-confirm-panel" role="dialog" aria-modal="true">
+                        <div class="nook-confirm-icon">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="nook-confirm-title"></h3>
+                            <p class="nook-confirm-desc"></p>
+                        </div>
+                        <div class="nook-confirm-actions">
+                            <button type="button" class="nook-confirm-btn is-cancel">İptal</button>
+                            <button type="button" class="nook-confirm-btn is-confirm"></button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            const titleEl = modal.querySelector('.nook-confirm-title');
+            const descEl = modal.querySelector('.nook-confirm-desc');
+            const confirmBtn = modal.querySelector('.nook-confirm-btn.is-confirm');
+            const cancelBtn = modal.querySelector('.nook-confirm-btn.is-cancel');
+            const backdrop = modal.querySelector('.nook-confirm-backdrop');
+
+            if (titleEl) titleEl.textContent = baslik;
+            if (descEl) descEl.textContent = aciklama;
+            if (confirmBtn) confirmBtn.textContent = onayMetni;
+
+            const closeWith = (result) => {
+                modal.classList.remove('is-open');
+                if (confirmBtn) confirmBtn.onclick = null;
+                if (cancelBtn) cancelBtn.onclick = null;
+                if (backdrop) backdrop.onclick = null;
+                resolve(result);
+            };
+
+            if (confirmBtn) confirmBtn.onclick = () => closeWith(true);
+            if (cancelBtn) cancelBtn.onclick = () => closeWith(false);
+            if (backdrop) backdrop.onclick = () => closeWith(false);
+
+            modal.classList.add('is-open');
+        });
     },
 
     /**
