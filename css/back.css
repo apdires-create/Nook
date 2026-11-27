@@ -1828,7 +1828,7 @@ body.is-owner .top-item-unit:active {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.035);
+    background: #121622;
     border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 9px;
     padding: clamp(4px, 0.7cqh, 6px) clamp(8px, 1.8cqw, 12px);
@@ -1842,7 +1842,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-lol-elo-card.is-peak {
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.16) 0%, rgba(180, 130, 30, 0.05) 100%);
+    background: linear-gradient(135deg, color-mix(in oklch, #d4af37 16%, #121622) 0%, #121622 100%);
     border: 1px solid rgba(212, 175, 55, 0.45);
     box-shadow: 0 3px 12px rgba(212, 175, 55, 0.15), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
@@ -1905,7 +1905,7 @@ body.is-owner .top-item-unit:active {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.035);
+    background: #121622;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
     padding: clamp(5px, 0.9cqh, 7px) clamp(8px, 1.8cqw, 11px);
@@ -2248,7 +2248,7 @@ body.is-owner .top-item-unit:active {
 
 .trophy-val-stat-pill {
     transform: skewX(-10deg);
-    background: linear-gradient(135deg, rgba(20, 26, 40, 0.92) 0%, rgba(13, 17, 27, 0.96) 100%);
+    background: #121724;
     border: 1px solid rgba(255, 70, 85, 0.35);
     border-left: 3px solid #ff4655;
     border-radius: 0;
@@ -2262,6 +2262,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-val-stat-pill.is-peak {
+    background: linear-gradient(135deg, color-mix(in oklch, #f59f00 14%, #121724) 0%, #121724 100%);
     border-color: rgba(245, 159, 0, 0.38);
     border-left: 3px solid #f59f00;
 }
@@ -2464,7 +2465,7 @@ body.is-owner .top-item-unit:active {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.035);
+    background: #121622;
     border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 9px;
     padding: clamp(5px, 0.8cqh, 7px) clamp(8px, 1.8cqw, 12px);
@@ -2482,7 +2483,7 @@ body.is-owner .top-item-unit:active {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.035);
+    background: #121622;
     border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 9px;
     padding: clamp(6px, 1cqh, 8px) clamp(8px, 1.8cqw, 12px);
@@ -2557,7 +2558,7 @@ body.is-owner .top-item-unit:active {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.035);
+    background: #121622;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
     padding: clamp(5px, 0.9cqh, 7px) clamp(8px, 1.8cqw, 11px);
@@ -2603,7 +2604,7 @@ body.is-owner .top-item-unit:active {
 }
 
 .trophy-cs2-elo-card.is-peak {
-    background: linear-gradient(135deg, rgba(222, 155, 53, 0.16) 0%, rgba(180, 120, 30, 0.05) 100%);
+    background: linear-gradient(135deg, color-mix(in oklch, #de9b35 16%, #121622) 0%, #121622 100%);
     border: 1px solid rgba(222, 155, 53, 0.45);
     box-shadow: 0 3px 12px rgba(222, 155, 53, 0.15), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
@@ -2749,7 +2750,7 @@ body.is-owner .top-item-unit:active {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.035);
+    background: #121622;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
     padding: clamp(5px, 0.9cqh, 7px) clamp(7px, 1.5cqw, 10px);
@@ -2775,7 +2776,7 @@ body.is-owner .top-item-unit:active {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.035);
+    background: #121622;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
     padding: clamp(5px, 0.9cqh, 7px) clamp(8px, 1.8cqw, 11px);
@@ -2956,13 +2957,13 @@ body.is-owner .top-item-unit:active {
 
 :root[data-mode="light"] .trophy-lol-elo-card,
 :root[data-mode="light"] .trophy-lol-wr-card {
-    background: rgba(255, 255, 255, 0.88);
+    background: #ffffff;
     border-color: var(--border-soft);
     box-shadow: none;
 }
 
 :root[data-mode="light"] .trophy-lol-elo-card.is-peak {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(255, 255, 255, 0.94) 100%);
+    background: linear-gradient(135deg, color-mix(in oklch, #f59e0b 14%, #ffffff) 0%, #ffffff 100%);
     border-color: rgba(217, 119, 6, 0.5);
     box-shadow: none;
 }
@@ -3024,13 +3025,13 @@ body.is-owner .top-item-unit:active {
 /* Valorant Aydınlık Mod */
 :root[data-mode="light"] .trophy-val-user-capsule,
 :root[data-mode="light"] .trophy-val-stat-pill {
-    background: rgba(255, 255, 255, 0.9);
+    background: #ffffff;
     border-color: rgba(225, 29, 72, 0.32);
     box-shadow: none;
 }
 
 :root[data-mode="light"] .trophy-val-stat-pill.is-peak {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(255, 255, 255, 0.94) 100%);
+    background: linear-gradient(135deg, color-mix(in oklch, #f59e0b 14%, #ffffff) 0%, #ffffff 100%);
     border-color: rgba(217, 119, 6, 0.45);
     border-left: 3px solid #d97706;
     box-shadow: none;
@@ -3123,13 +3124,13 @@ body.is-owner .top-item-unit:active {
 :root[data-mode="light"] .trophy-cs2-active-faceit-card,
 :root[data-mode="light"] .trophy-cs2-metric-pill,
 :root[data-mode="light"] .trophy-cs2-wr-card {
-    background: rgba(255, 255, 255, 0.88);
+    background: #ffffff;
     border-color: var(--border-soft);
     box-shadow: none;
 }
 
 :root[data-mode="light"] .trophy-cs2-elo-card.is-peak {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(255, 255, 255, 0.94) 100%);
+    background: linear-gradient(135deg, color-mix(in oklch, #f59e0b 14%, #ffffff) 0%, #ffffff 100%);
     border-color: rgba(217, 119, 6, 0.48);
     box-shadow: none;
 }
