@@ -960,10 +960,28 @@
                         <button type="button" class="color-swatch-btn" data-name="Sapphire Abyss" data-color="#3b5bdb" style="background: #3b5bdb;" title="Sapphire Abyss"></button>
                         <button type="button" class="color-swatch-btn" data-name="Electric Cyan" data-color="#1098ad" style="background: #1098ad;" title="Electric Cyan"></button>
                         <button type="button" class="color-swatch-btn" data-name="Titanium Monocle" data-color="#f4f4f5" style="background: #f4f4f5;" title="Titanium Monocle"></button>
-                        <label class="color-custom-label" title="Özel Renk Seç">
-                            <input type="color" id="appearance-color-input" value="#a855f7" class="color-native-input">
-                            <span class="color-custom-wheel">🎨</span>
-                        </label>
+                        <button type="button" class="color-custom-trigger" id="appearance-color-custom-btn" title="Özel Renk Seç" aria-expanded="false" aria-controls="appearance-custom-picker">
+                            <span class="color-custom-wheel" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    <div class="nook-color-drawer" id="appearance-custom-picker" aria-hidden="true">
+                        <div class="nook-color-drawer-inner">
+                            <div class="nook-color-sv" id="appearance-sv-pad" role="slider" aria-label="Renk doygunluğu ve parlaklığı">
+                                <div class="nook-color-sv-white"></div>
+                                <div class="nook-color-sv-black"></div>
+                                <div class="nook-color-sv-thumb" id="appearance-sv-thumb"></div>
+                            </div>
+                            <div class="nook-color-controls">
+                                <div class="nook-color-hue" id="appearance-hue-bar" role="slider" aria-label="Renk tonu">
+                                    <div class="nook-color-hue-thumb" id="appearance-hue-thumb"></div>
+                                </div>
+                                <div class="nook-color-hex-row">
+                                    <span class="nook-color-preview-dot" id="appearance-picker-dot"></span>
+                                    <label class="nook-color-hex-label" for="appearance-hex-input">HEX</label>
+                                    <input type="text" id="appearance-hex-input" class="nook-color-hex-input" value="#a855f7" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Hex renk kodu">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -986,11 +1004,43 @@
 
     <!-- 5. CANLI ÖNİZLEME YÜZEN BARI (FLOATING LIVE PREVIEW BAR) -->
     <aside class="theme-preview-bar" id="theme-preview-bar" style="display: none;" aria-label="Tema Önizleme Modu">
+        <div class="preview-color-popover" id="preview-color-popover" aria-hidden="true">
+            <div class="preview-popover-swatches" id="preview-popover-swatches">
+                <button type="button" class="color-swatch-btn" data-name="Void Violet" data-color="#a855f7" style="background: #a855f7;" title="Void Violet"></button>
+                <button type="button" class="color-swatch-btn" data-name="Blood Obsidian" data-color="#e03131" style="background: #e03131;" title="Blood Obsidian"></button>
+                <button type="button" class="color-swatch-btn" data-name="Cyber Emerald" data-color="#2f9e44" style="background: #2f9e44;" title="Cyber Emerald"></button>
+                <button type="button" class="color-swatch-btn" data-name="Amber Gold" data-color="#f59f00" style="background: #f59f00;" title="Amber Gold"></button>
+                <button type="button" class="color-swatch-btn" data-name="Sapphire Abyss" data-color="#3b5bdb" style="background: #3b5bdb;" title="Sapphire Abyss"></button>
+                <button type="button" class="color-swatch-btn" data-name="Electric Cyan" data-color="#1098ad" style="background: #1098ad;" title="Electric Cyan"></button>
+                <button type="button" class="color-swatch-btn" data-name="Titanium Monocle" data-color="#f4f4f5" style="background: #f4f4f5;" title="Titanium Monocle"></button>
+            </div>
+            <div class="nook-color-sv is-compact" id="preview-sv-pad" role="slider" aria-label="Renk doygunluğu ve parlaklığı">
+                <div class="nook-color-sv-white"></div>
+                <div class="nook-color-sv-black"></div>
+                <div class="nook-color-sv-thumb" id="preview-sv-thumb"></div>
+            </div>
+            <div class="nook-color-hue" id="preview-hue-bar" role="slider" aria-label="Renk tonu">
+                <div class="nook-color-hue-thumb" id="preview-hue-thumb"></div>
+            </div>
+            <div class="nook-color-hex-row">
+                <span class="nook-color-preview-dot" id="preview-picker-dot"></span>
+                <label class="nook-color-hex-label" for="preview-hex-input">HEX</label>
+                <input type="text" id="preview-hex-input" class="nook-color-hex-input" value="#a855f7" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Hex renk kodu">
+            </div>
+        </div>
         <div class="theme-preview-bar-inner">
             <div class="theme-preview-bar-info">
                 <span class="theme-preview-pulse-dot" aria-hidden="true"></span>
                 <span class="theme-preview-bar-title" id="preview-bar-theme-name">"Obsidian Minimal" Önizleniyor</span>
                 <span class="theme-preview-bar-hint">(Düzenleme donduruldu • İnceleme modu)</span>
+            </div>
+            <div class="theme-preview-bar-controls">
+                <button type="button" class="theme-preview-ctrl-btn" id="preview-mode-toggle" title="Görünüm Modunu Değiştir" aria-label="Görünüm Modunu Değiştir">
+                    <span id="preview-mode-icon" aria-hidden="true">🌙</span>
+                </button>
+                <button type="button" class="theme-preview-ctrl-btn" id="preview-color-btn" title="Vurgu Rengini Değiştir" aria-label="Vurgu Rengini Değiştir" aria-expanded="false" aria-controls="preview-color-popover">
+                    <span class="preview-color-dot" id="preview-color-dot"></span>
+                </button>
             </div>
             <div class="theme-preview-bar-actions">
                 <button type="button" class="theme-preview-btn is-cancel" id="preview-btn-cancel">

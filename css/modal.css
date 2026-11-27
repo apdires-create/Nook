@@ -481,6 +481,107 @@
 }
 
 
+/* Önizleme Barı Kontrolleri (Mod & Renk) */
+.theme-preview-bar-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-left: 4px;
+    border-left: 1px solid var(--border-soft);
+}
+
+.theme-preview-ctrl-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border-soft);
+    background: var(--surface-2);
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: transform 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.theme-preview-ctrl-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-highlight);
+    transform: translateY(-1px);
+}
+
+.theme-preview-ctrl-btn[aria-expanded="true"] {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.preview-color-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    border: 2px solid rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* Önizleme Barı Üstünde Açılan Mini Renk Popover'ı */
+.preview-color-popover {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    width: 264px;
+    padding: 12px;
+    border-radius: 16px;
+    background: color-mix(in oklch, var(--bg-card) 96%, transparent);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--border-highlight);
+    box-shadow: var(--modal-shadow), 0 0 24px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s var(--ease-spring);
+    z-index: 2;
+}
+
+.preview-color-popover.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+.preview-popover-swatches {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.preview-popover-swatches .color-swatch-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.16s ease, border-color 0.16s ease;
+    outline: none;
+    flex-shrink: 0;
+}
+
+.preview-popover-swatches .color-swatch-btn:hover {
+    transform: scale(1.12);
+}
+
+.preview-popover-swatches .color-swatch-btn.is-active {
+    border-color: var(--text-primary);
+    transform: scale(1.15);
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
 /* 📱 Mobil Boyutlandırma: Tema Önizleme Barı */
 @media (max-width: 640px) {
     .theme-preview-bar {
@@ -492,23 +593,33 @@
     }
 
     .theme-preview-bar-inner {
-        flex-direction: column;
-        align-items: stretch;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
         gap: 10px;
     }
 
     .theme-preview-bar-info {
-        justify-content: center;
+        flex: 1 1 auto;
+        min-width: 0;
+        justify-content: flex-start;
         gap: 8px;
     }
 
     .theme-preview-bar-title {
         font-size: 0.84rem;
-        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .theme-preview-bar-hint {
         display: none !important;
+    }
+
+    .theme-preview-bar-controls {
+        border-left: none;
+        padding-left: 0;
+        flex-shrink: 0;
     }
 
     .theme-preview-bar-actions {
@@ -523,6 +634,10 @@
         height: 38px;
         padding: 0 12px;
         font-size: 0.8rem;
+    }
+
+    .preview-color-popover {
+        width: min(320px, calc(100vw - 32px));
     }
 }
 
@@ -540,51 +655,6 @@
 .theme-preview-btn.is-apply-action:hover {
     filter: brightness(1.1);
     transform: translateY(-1px);
-}
-
-/* 📱 Mobil Boyutlandırma: Tema Önizleme Barı */
-@media (max-width: 640px) {
-    .theme-preview-bar {
-        width: calc(100% - 24px);
-        max-width: 420px;
-        padding: 10px 14px;
-        border-radius: 18px;
-        bottom: max(16px, env(safe-area-inset-bottom, 16px));
-    }
-
-    .theme-preview-bar-inner {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
-
-    .theme-preview-bar-info {
-        justify-content: center;
-        gap: 8px;
-    }
-
-    .theme-preview-bar-title {
-        font-size: 0.84rem;
-        text-align: center;
-    }
-
-    .theme-preview-bar-hint {
-        display: none !important;
-    }
-
-    .theme-preview-bar-actions {
-        width: 100%;
-        display: flex;
-        gap: 8px;
-    }
-
-    .theme-preview-btn {
-        flex: 1;
-        justify-content: center;
-        height: 38px;
-        padding: 0 12px;
-        font-size: 0.8rem;
-    }
 }
 
 .theme-preview-btn.is-action:hover {
@@ -879,6 +949,188 @@
     box-shadow: 0 0 10px var(--accent-glow);
 }
 
+.color-custom-trigger {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--border-soft);
+    background: transparent;
+    padding: 2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.color-custom-trigger:hover {
+    transform: scale(1.15);
+    border-color: var(--border-highlight);
+}
+
+.color-custom-trigger.is-open,
+.color-custom-trigger.is-active {
+    border-color: var(--text-primary);
+    transform: scale(1.15);
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.color-custom-wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(#ef4444, #f59e0b, #10b981, #06b6d4, #3b82f6, #a855f7, #ec4899, #ef4444);
+    display: block;
+}
+
+/* Nook Özel Renk Seçici (Akordeon & Ortak SV/Hue/Hex Bileşenleri) */
+.nook-color-drawer {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    margin-top: 0;
+    transition: grid-template-rows 0.26s var(--ease-spring), opacity 0.2s ease, margin-top 0.26s ease;
+}
+
+.nook-color-drawer.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-top: 10px;
+}
+
+.nook-color-drawer-inner {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--surface-recessed);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 0 14px;
+    transition: padding 0.26s ease, border-color 0.2s ease;
+}
+
+.nook-color-drawer.is-open .nook-color-drawer-inner {
+    padding: 12px 14px;
+    border-color: var(--border-soft);
+}
+
+.nook-color-sv {
+    position: relative;
+    width: 100%;
+    height: 128px;
+    border-radius: 10px;
+    background: #a855f7;
+    overflow: hidden;
+    cursor: crosshair;
+    touch-action: none;
+    user-select: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nook-color-sv.is-compact {
+    height: 110px;
+}
+
+.nook-color-sv-white {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, #ffffff, rgba(255, 255, 255, 0));
+    pointer-events: none;
+}
+
+.nook-color-sv-black {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #000000, rgba(0, 0, 0, 0));
+    pointer-events: none;
+}
+
+.nook-color-sv-thumb {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.45);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    left: 100%;
+    top: 0%;
+}
+
+.nook-color-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nook-color-hue {
+    position: relative;
+    width: 100%;
+    height: 12px;
+    border-radius: 999px;
+    background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nook-color-hue-thumb {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.4);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    left: 75%;
+}
+
+.nook-color-hex-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 5px 10px;
+}
+
+.nook-color-preview-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+}
+
+.nook-color-hex-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    user-select: none;
+}
+
+.nook-color-hex-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
 /* Footer Butonları */
 .theme-appearance-footer {
     display: flex;
@@ -994,9 +1246,14 @@
         justify-content: flex-start !important;
     }
 
-    .appearance-color-palette .color-swatch-btn {
+    .appearance-color-palette .color-swatch-btn,
+    .color-custom-trigger {
         width: 26px !important;
         height: 26px !important;
+    }
+
+    .nook-color-sv {
+        height: 112px;
     }
 
     .theme-appearance-footer {

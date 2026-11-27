@@ -251,6 +251,26 @@ const ThemeManager = {
     },
 
     /**
+     * Yalnızca vurgu rengini ve kontrastını hafifçe günceller (tam tema yeniden yüklemesi yapmaz)
+     */
+    setAccentColor(color) {
+        if (!this.isValidHexColor(color)) return false;
+        const trimmed = color.trim();
+        document.documentElement.style.setProperty('--accent-color', trimmed);
+        this._syncAccentContrast(trimmed);
+        return true;
+    },
+
+    /**
+     * Önizleme veya canlı düzenleme için yalnızca aydınlık/karanlık modu günceller
+     */
+    setPreviewMode(mode) {
+        const safeMode = mode === 'light' ? 'light' : 'dark';
+        this.setMode(safeMode);
+        return safeMode;
+    },
+
+    /**
      * CSS <link> elementini Promise ile güvenli bir şekilde ekler
      * @private
      */

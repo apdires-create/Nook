@@ -510,11 +510,14 @@ const ThemeMarket = {
         }
 
         // Temayı geçici uygula
+        const ownerMode = (kartVerisi?.theme_config?.preset === 'light' || kartVerisi?.theme_config?.color_mode === 'light') ? 'light' : 'dark';
+        const initialColor = kartVerisi?.theme_config?.primary_color || '#a855f7';
+        this._previewState = { mode: ownerMode, color: initialColor };
+
         if (typeof ThemeManager !== 'undefined') {
-            const ownerMode = (kartVerisi?.theme_config?.preset === 'light' || kartVerisi?.theme_config?.color_mode === 'light') ? 'light' : 'dark';
             await ThemeManager.applyTheme(theme.id, {
                 fontUrl: theme.font_url || theme.fontUrl,
-                primaryColor: kartVerisi?.theme_config?.primary_color,
+                primaryColor: initialColor,
                 colorMode: ownerMode
             });
         }
@@ -539,10 +542,15 @@ const ThemeMarket = {
                     actionBtn.textContent = 'Görünümde Düzenle';
                     actionBtn.className = 'theme-preview-btn is-apply-action';
                     actionBtn.onclick = async () => {
+                        const chosen = this._previewState ? { ...this._previewState } : null;
                         await this.onizlemeyiBitir(false);
                         if (typeof EditManager !== 'undefined' && EditManager.Appearance) {
                             EditManager.Appearance.ac();
                             EditManager.Appearance.temaSec(theme.id);
+                            if (chosen) {
+                                EditManager.Appearance.modSec(chosen.mode, true);
+                                EditManager.Appearance.renkSec(chosen.color, null, true);
+                            }
                         }
                     };
                 } else {
@@ -550,6 +558,21 @@ const ThemeMarket = {
                     actionBtn.className = 'theme-preview-btn is-action';
                     actionBtn.onclick = () => this.satinAl(theme);
                 }
+            }
+
+            if (typeof EditManager !== 'undefined' && EditManager.Appearance?.setupPreviewControls) {
+                EditManager.Appearance.setupPreviewControls({
+                    mode: this._previewState.mode,
+                    color: this._previewState.color,
+                    onModeChange: (nextMode) => {
+                        this._previewState.mode = nextMode;
+                        if (typeof ThemeManager !== 'undefined') ThemeManager.setPreviewMode(nextMode);
+                    },
+                    onColorChange: (nextColor) => {
+                        this._previewState.color = nextColor;
+                        if (typeof ThemeManager !== 'undefined') ThemeManager.setAccentColor(nextColor);
+                    }
+                });
             }
 
             this.previewBarEl.style.display = 'block';
@@ -565,6 +588,10 @@ const ThemeMarket = {
      */
     async onizlemeyiBitir(revertToOriginal = true) {
         document.body.classList.remove('is-theme-previewing');
+        this._previewState = null;
+        if (typeof EditManager !== 'undefined' && EditManager.Appearance?.closePreviewColorPopover) {
+            EditManager.Appearance.closePreviewColorPopover();
+        }
         if (this.previewBarEl) {
             this.previewBarEl.style.display = 'none';
         }

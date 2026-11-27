@@ -637,8 +637,12 @@ EditManager.Appearance = {
     themeCardsEl: null,
     colorPaletteEl: null,
     colorHexEl: null,
-    colorInputEl: null,
+    customTriggerBtn: null,
+    customDrawerEl: null,
+    modalPicker: null,
+    previewPicker: null,
     previewBarEl: null,
+    previewCallbacks: null,
     originalState: null,
     tempState: null,
     isPreviewActive: false,
@@ -668,7 +672,8 @@ EditManager.Appearance = {
         this.modeToggleEl = document.getElementById('appearance-mode-toggle');
         this.colorPaletteEl = document.getElementById('appearance-color-palette');
         this.colorHexEl = document.getElementById('appearance-color-hex');
-        this.colorInputEl = document.getElementById('appearance-color-input');
+        this.customTriggerBtn = document.getElementById('appearance-color-custom-btn');
+        this.customDrawerEl = document.getElementById('appearance-custom-picker');
         this.previewBarEl = document.getElementById('theme-preview-bar');
 
         const triggerBtn = document.getElementById('nav-item-appearance');
@@ -723,15 +728,45 @@ EditManager.Appearance = {
             });
         }
 
-        if (this.colorInputEl) {
-            this.colorInputEl.oninput = (e) => {
-                this.renkSec(e.target.value, null, true);
+        // Özel Renk Akordeonu ve Nook Renk Seçici
+        if (this.customTriggerBtn && this.customDrawerEl) {
+            this.customTriggerBtn.onclick = (e) => {
+                e.stopPropagation();
+                const isOpen = this.customDrawerEl.classList.toggle('is-open');
+                this.customTriggerBtn.classList.toggle('is-open', isOpen);
+                this.customTriggerBtn.setAttribute('aria-expanded', String(isOpen));
+                this.customDrawerEl.setAttribute('aria-hidden', String(!isOpen));
+
+                if (isOpen) {
+                    setTimeout(() => {
+                        this.customDrawerEl?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 270);
+                }
             };
         }
+
+        this.modalPicker = this._createColorPicker({
+            svPad: document.getElementById('appearance-sv-pad'),
+            svThumb: document.getElementById('appearance-sv-thumb'),
+            hueBar: document.getElementById('appearance-hue-bar'),
+            hueThumb: document.getElementById('appearance-hue-thumb'),
+            hexInput: document.getElementById('appearance-hex-input'),
+            previewDot: document.getElementById('appearance-picker-dot'),
+            onColorChange: (hex) => {
+                this.renkSec(hex, null, true);
+            }
+        });
+
+        this._bindPreviewControls();
 
         // ESC tuşu ile güvenli çıkış
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                const popover = document.getElementById('preview-color-popover');
+                if (popover && popover.classList.contains('is-open')) {
+                    this.closePreviewColorPopover();
+                    return;
+                }
                 if (this.isPreviewActive) {
                     this.onizlemeGeriDon();
                 } else if (this.modalEl && this.modalEl.classList.contains('is-open')) {
@@ -795,6 +830,14 @@ EditManager.Appearance = {
 
         const userDropdown = document.getElementById('profile-user-dropdown');
         if (userDropdown) userDropdown.style.display = '';
+
+        this.closePreviewColorPopover();
+        if (this.customDrawerEl && this.customTriggerBtn) {
+            this.customDrawerEl.classList.remove('is-open');
+            this.customDrawerEl.setAttribute('aria-hidden', 'true');
+            this.customTriggerBtn.classList.remove('is-open');
+            this.customTriggerBtn.setAttribute('aria-expanded', 'false');
+        }
 
         this.modalEl.classList.remove('is-open');
         this.modalEl.style.display = 'none';
@@ -873,7 +916,11 @@ EditManager.Appearance = {
         }
 
         if (apply) {
-            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.colorMode, true);
+            if (typeof ThemeManager !== 'undefined' && typeof ThemeManager.setPreviewMode === 'function') {
+                ThemeManager.setPreviewMode(safeMode);
+            } else {
+                this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.colorMode, true);
+            }
         }
     },
 
@@ -900,20 +947,29 @@ EditManager.Appearance = {
             }
         }
 
-        if (this.colorInputEl) this.colorInputEl.value = color;
+        if (this.modalPicker) this.modalPicker.setHex(color);
 
+        let matchedSwatch = false;
         if (this.colorPaletteEl) {
             this.colorPaletteEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
                 const isMatch = btn.dataset.color.toLowerCase() === normalizedHex;
+                if (isMatch) matchedSwatch = true;
                 btn.classList.toggle('is-active', isMatch);
             });
+        }
+        if (this.customTriggerBtn) {
+            this.customTriggerBtn.classList.toggle('is-active', !matchedSwatch);
         }
 
         const themeDot = document.getElementById('nav-theme-dot');
         if (themeDot) themeDot.style.background = color;
 
         if (apply) {
-            this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.colorMode, true);
+            if (typeof ThemeManager !== 'undefined' && typeof ThemeManager.setAccentColor === 'function') {
+                ThemeManager.setAccentColor(color);
+            } else {
+                this.geciciUygula(this.tempState.themeId, this.tempState.primaryColor, this.tempState.colorMode, true);
+            }
         }
     },
 
@@ -966,6 +1022,17 @@ EditManager.Appearance = {
                 actionBtn.onclick = () => this.onizlemeKaydet();
             }
 
+            this.setupPreviewControls({
+                mode: this.tempState.colorMode,
+                color: this.tempState.primaryColor,
+                onModeChange: (nextMode) => {
+                    this.modSec(nextMode, true);
+                },
+                onColorChange: (nextColor, presetName) => {
+                    this.renkSec(nextColor, presetName, true);
+                }
+            });
+
             this.previewBarEl.style.display = 'block';
         }
 
@@ -976,6 +1043,7 @@ EditManager.Appearance = {
 
     onizlemeGeriDon() {
         this.isPreviewActive = false;
+        this.closePreviewColorPopover();
         if (this.previewBarEl) this.previewBarEl.style.display = 'none';
 
         // Owner modunu tekrar aktive et
@@ -990,6 +1058,7 @@ EditManager.Appearance = {
 
     async onizlemeKaydet() {
         this.isPreviewActive = false;
+        this.closePreviewColorPopover();
         if (this.previewBarEl) this.previewBarEl.style.display = 'none';
 
         // Owner modunu tekrar aktive et
@@ -1000,6 +1069,287 @@ EditManager.Appearance = {
 
         // Pop-up'ı geri aç
         this.ac();
+    },
+
+    _createColorPicker({ svPad, svThumb, hueBar, hueThumb, hexInput, previewDot, onColorChange }) {
+        if (!svPad || !hueBar) return null;
+
+        let hsv = { h: 270, s: 0.65, v: 0.97 };
+
+        const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+
+        const hsvToHex = (h, s, v) => {
+            const c = v * s;
+            const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+            const m = v - c;
+            let r = 0, g = 0, b = 0;
+            if (h < 60) { r = c; g = x; }
+            else if (h < 120) { r = x; g = c; }
+            else if (h < 180) { g = c; b = x; }
+            else if (h < 240) { g = x; b = c; }
+            else if (h < 300) { r = x; b = c; }
+            else { r = c; b = x; }
+            const toHex = n => Math.round((n + m) * 255).toString(16).padStart(2, '0');
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        };
+
+        const hexToHsv = (hex) => {
+            if (!hex || typeof hex !== 'string') return null;
+            const clean = hex.trim().replace(/^#/, '');
+            if (!/^[0-9a-fA-F]{6}$/.test(clean)) return null;
+            const r = parseInt(clean.slice(0, 2), 16) / 255;
+            const g = parseInt(clean.slice(2, 4), 16) / 255;
+            const b = parseInt(clean.slice(4, 6), 16) / 255;
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            const d = max - min;
+            let h = 0;
+            if (d !== 0) {
+                if (max === r) h = ((g - b) / d) % 6;
+                else if (max === g) h = (b - r) / d + 2;
+                else h = (r - g) / d + 4;
+                h *= 60;
+                if (h < 0) h += 360;
+            }
+            const s = max === 0 ? 0 : d / max;
+            return { h, s, v: max };
+        };
+
+        const renderUI = (hexOverride = null) => {
+            const hex = hexOverride || hsvToHex(hsv.h, hsv.s, hsv.v);
+            svPad.style.backgroundColor = `hsl(${Math.round(hsv.h)}, 100%, 50%)`;
+            if (svThumb) {
+                svThumb.style.left = `${(hsv.s * 100).toFixed(2)}%`;
+                svThumb.style.top = `${((1 - hsv.v) * 100).toFixed(2)}%`;
+            }
+            if (hueThumb) {
+                hueThumb.style.left = `${((hsv.h / 360) * 100).toFixed(2)}%`;
+            }
+            if (previewDot) {
+                previewDot.style.background = hex;
+            }
+            if (hexInput && document.activeElement !== hexInput) {
+                hexInput.value = hex.toUpperCase();
+            }
+            return hex;
+        };
+
+        // Adaptive Throttle: hızlı sürüklemede ~36ms, yavaş ince ayarda anlık rAF tepkisi
+        let rafId = null;
+        let throttleTimer = null;
+        let lastEmitTime = 0;
+        let lastPointer = { x: 0, y: 0, t: 0 };
+        let pendingHex = null;
+
+        const flushEmit = () => {
+            if (pendingHex && typeof onColorChange === 'function') {
+                const hex = pendingHex;
+                pendingHex = null;
+                lastEmitTime = performance.now();
+                onColorChange(hex);
+            }
+        };
+
+        const scheduleEmit = (hex, clientX, clientY, immediate = false) => {
+            pendingHex = hex;
+            if (immediate) {
+                if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+                if (throttleTimer) { clearTimeout(throttleTimer); throttleTimer = null; }
+                flushEmit();
+                return;
+            }
+
+            const now = performance.now();
+            const dt = Math.max(1, now - lastPointer.t);
+            const dist = Math.hypot(clientX - lastPointer.x, clientY - lastPointer.y);
+            const speed = dist / dt;
+            lastPointer = { x: clientX, y: clientY, t: now };
+
+            const elapsed = now - lastEmitTime;
+            if (speed > 0.35 && elapsed < 36) {
+                if (!throttleTimer) {
+                    throttleTimer = setTimeout(() => {
+                        throttleTimer = null;
+                        flushEmit();
+                    }, 36 - elapsed);
+                }
+                return;
+            }
+
+            if (throttleTimer) { clearTimeout(throttleTimer); throttleTimer = null; }
+            if (!rafId) {
+                rafId = requestAnimationFrame(() => {
+                    rafId = null;
+                    flushEmit();
+                });
+            }
+        };
+
+        const bindDrag = (el, onMove) => {
+            el.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                el.setPointerCapture(e.pointerId);
+                lastPointer = { x: e.clientX, y: e.clientY, t: performance.now() };
+                onMove(e, true);
+            });
+            el.addEventListener('pointermove', (e) => {
+                if (!el.hasPointerCapture(e.pointerId)) return;
+                onMove(e, false);
+            });
+            el.addEventListener('pointerup', (e) => {
+                if (el.hasPointerCapture(e.pointerId)) {
+                    el.releasePointerCapture(e.pointerId);
+                }
+                onMove(e, true);
+            });
+        };
+
+        bindDrag(svPad, (e, immediate) => {
+            const rect = svPad.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+            hsv.s = clamp((e.clientX - rect.left) / rect.width, 0, 1);
+            hsv.v = clamp(1 - (e.clientY - rect.top) / rect.height, 0, 1);
+            const hex = renderUI();
+            scheduleEmit(hex, e.clientX, e.clientY, immediate);
+        });
+
+        bindDrag(hueBar, (e, immediate) => {
+            const rect = hueBar.getBoundingClientRect();
+            if (!rect.width) return;
+            hsv.h = clamp((e.clientX - rect.left) / rect.width, 0, 1) * 360;
+            const hex = renderUI();
+            scheduleEmit(hex, e.clientX, e.clientY, immediate);
+        });
+
+        if (hexInput) {
+            hexInput.addEventListener('input', () => {
+                const raw = hexInput.value.trim();
+                const normalized = raw.startsWith('#') ? raw : `#${raw}`;
+                const parsed = hexToHsv(normalized);
+                if (parsed) {
+                    hsv = parsed;
+                    const hex = renderUI(normalized.toLowerCase());
+                    if (typeof onColorChange === 'function') onColorChange(hex);
+                }
+            });
+            hexInput.addEventListener('blur', () => {
+                hexInput.value = hsvToHex(hsv.h, hsv.s, hsv.v).toUpperCase();
+            });
+        }
+
+        renderUI();
+
+        return {
+            setHex(hex) {
+                const parsed = hexToHsv(hex);
+                if (!parsed) return;
+                hsv = parsed;
+                renderUI(hex.trim().toLowerCase());
+            }
+        };
+    },
+
+    _bindPreviewControls() {
+        const modeBtn = document.getElementById('preview-mode-toggle');
+        const colorBtn = document.getElementById('preview-color-btn');
+        const popover = document.getElementById('preview-color-popover');
+        const swatchesEl = document.getElementById('preview-popover-swatches');
+
+        if (modeBtn) {
+            modeBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (!this.previewCallbacks) return;
+                const nextMode = this.previewCallbacks.mode === 'light' ? 'dark' : 'light';
+                this.previewCallbacks.mode = nextMode;
+                this._syncPreviewControlsUI();
+                this.previewCallbacks.onModeChange?.(nextMode);
+            };
+        }
+
+        if (colorBtn && popover) {
+            colorBtn.onclick = (e) => {
+                e.stopPropagation();
+                const isOpen = popover.classList.toggle('is-open');
+                colorBtn.setAttribute('aria-expanded', String(isOpen));
+                popover.setAttribute('aria-hidden', String(!isOpen));
+            };
+
+            document.addEventListener('pointerdown', (e) => {
+                if (!popover.classList.contains('is-open')) return;
+                if (!popover.contains(e.target) && !colorBtn.contains(e.target)) {
+                    this.closePreviewColorPopover();
+                }
+            });
+        }
+
+        if (swatchesEl) {
+            swatchesEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (!this.previewCallbacks) return;
+                    const c = btn.dataset.color;
+                    this.previewCallbacks.color = c;
+                    this._syncPreviewControlsUI();
+                    this.previewCallbacks.onColorChange?.(c, btn.dataset.name);
+                };
+            });
+        }
+
+        this.previewPicker = this._createColorPicker({
+            svPad: document.getElementById('preview-sv-pad'),
+            svThumb: document.getElementById('preview-sv-thumb'),
+            hueBar: document.getElementById('preview-hue-bar'),
+            hueThumb: document.getElementById('preview-hue-thumb'),
+            hexInput: document.getElementById('preview-hex-input'),
+            previewDot: document.getElementById('preview-picker-dot'),
+            onColorChange: (hex) => {
+                if (!this.previewCallbacks) return;
+                this.previewCallbacks.color = hex;
+                this._syncPreviewControlsUI(false);
+                this.previewCallbacks.onColorChange?.(hex, null);
+            }
+        });
+    },
+
+    _syncPreviewControlsUI(syncPicker = true) {
+        if (!this.previewCallbacks) return;
+        const { mode, color } = this.previewCallbacks;
+        const modeIcon = document.getElementById('preview-mode-icon');
+        if (modeIcon) modeIcon.textContent = mode === 'light' ? '☀️' : '🌙';
+
+        const colorDot = document.getElementById('preview-color-dot');
+        if (colorDot && color) colorDot.style.background = color;
+
+        const normalized = (color || '').trim().toLowerCase();
+        const swatchesEl = document.getElementById('preview-popover-swatches');
+        if (swatchesEl) {
+            swatchesEl.querySelectorAll('.color-swatch-btn').forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.color.toLowerCase() === normalized);
+            });
+        }
+
+        if (syncPicker && this.previewPicker && color) {
+            this.previewPicker.setHex(color);
+        }
+    },
+
+    setupPreviewControls({ mode = 'dark', color = '#a855f7', onModeChange, onColorChange }) {
+        this.previewCallbacks = { mode, color, onModeChange, onColorChange };
+        this.closePreviewColorPopover();
+        this._syncPreviewControlsUI(true);
+    },
+
+    closePreviewColorPopover() {
+        const popover = document.getElementById('preview-color-popover');
+        const colorBtn = document.getElementById('preview-color-btn');
+        if (popover) {
+            popover.classList.remove('is-open');
+            popover.setAttribute('aria-hidden', 'true');
+        }
+        if (colorBtn) {
+            colorBtn.setAttribute('aria-expanded', 'false');
+        }
     },
 
     freezeEditMode() {
