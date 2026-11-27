@@ -29,6 +29,7 @@ const ThemeMarket = {
 
     previewBarEl: null,
     originalThemeId: null,
+    ownActiveThemeId: 'default',
 
     init() {
         this.modalEl = document.getElementById('theme-market-modal');
@@ -80,6 +81,32 @@ const ThemeMarket = {
 
         // Ödeme sonrası geri dönüş kontrolü (?payment=success&theme=...)
         this.odemeSonrasiKontrol();
+
+        // Başka profilden "Canlı Önizle" ile kendi sayfasına dönen kullanıcı için bekleyen önizlemeyi başlat
+        this.bekleyenOnizlemeyiKontrolEt();
+    },
+
+    async bekleyenOnizlemeyiKontrolEt() {
+        const pendingId = sessionStorage.getItem('nook_pending_preview_theme');
+        if (!pendingId) return;
+
+        // Kendi profiline ulaştıktan sonra başlat
+        const checkAndStart = async (tries = 0) => {
+            if (typeof isOwner !== 'undefined' && isOwner) {
+                sessionStorage.removeItem('nook_pending_preview_theme');
+                await this.temalariVeritabanindanYukle();
+                await this.kullaniciEnvanteriniYukle();
+                const theme = this.themesCatalog.find(t => t.id === pendingId);
+                if (theme) {
+                    await this.onizlemeBaslat(theme);
+                }
+                return;
+            }
+            if (tries < 25) {
+                setTimeout(() => checkAndStart(tries + 1), 200);
+            }
+        };
+        checkAndStart();
     },
 
     /**
@@ -192,8 +219,19 @@ const ThemeMarket = {
         this.selectedTheme = null;
     },
 
+    getActiveThemeId() {
+        const isUserOwner = typeof isOwner !== 'undefined' && isOwner;
+        if (isUserOwner && typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.theme_id) {
+            return kartVerisi.theme_config.theme_id;
+        }
+        return this.ownActiveThemeId || 'default';
+    },
+
     async kullaniciEnvanteriniYukle() {
         this.userInventory = new Set(['default']);
+        this.ownActiveThemeId = (typeof isOwner !== 'undefined' && isOwner && typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.theme_id)
+            ? kartVerisi.theme_config.theme_id
+            : 'default';
 
         const client = (typeof supabaseClient !== 'undefined' && supabaseClient) || null;
 
@@ -213,6 +251,17 @@ const ThemeMarket = {
             if (!error && Array.isArray(data)) {
                 data.forEach(item => this.userInventory.add(item.theme_id));
             }
+
+            if (!(typeof isOwner !== 'undefined' && isOwner)) {
+                const { data: ownCard } = await client
+                    .from('kullanici_kartlari')
+                    .select('theme_config')
+                    .eq('user_id', userId)
+                    .maybeSingle();
+                if (ownCard?.theme_config?.theme_id) {
+                    this.ownActiveThemeId = ownCard.theme_config.theme_id;
+                }
+            }
         } catch (e) {
             console.warn('[ThemeMarket] Envanter çekilemedi:', e);
         }
@@ -221,8 +270,8 @@ const ThemeMarket = {
     katalogCiz() {
         if (!this.gridEl) return;
 
-        // Kullanıcının şu anki aktif temasını belirle
-        const activeThemeId = (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.theme_id) || 'default';
+        // Giriş yapmış kullanıcının kendi aktif temasını belirle
+        const activeThemeId = this.getActiveThemeId();
 
         // Sıralama: Kullanıcının kullandığı tema varsa EN YUKARI çıkar, yoksa standart sırada kalır
         const listToRender = [...this.themesCatalog].sort((a, b) => {
@@ -318,7 +367,7 @@ const ThemeMarket = {
         this.catalogViewEl.style.display = 'none';
         this.detailViewEl.style.display = 'flex';
 
-        const currentActiveTheme = (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.theme_id) || 'default';
+        const currentActiveTheme = this.getActiveThemeId();
         const isCurrentActive = currentActiveTheme === theme.id;
 
         let actionBtnHtml = '';
@@ -331,8 +380,9 @@ const ThemeMarket = {
             actionBtnHtml = `<button type="button" class="theme-detail-btn is-buy" id="theme-btn-buy">Satın Al — $${(theme.price_cents / 100).toFixed(2)}</button>`;
         }
 
-        // Önizleme butonu sadece sayfa sahibi kendi profilindeyken görünür (Landing ve ziyaretçilerde YOKTUR)
-        const canPreview = isUserOwner && !isLanding;
+        // Önizleme butonu giriş yapmış kullanıcılar için görünür (başka profildeyse kendi sayfasına dönme onayı ister)
+        const isAuthenticated = (typeof aktifKullaniciOturumu !== 'undefined' && Boolean(aktifKullaniciOturumu)) && (typeof aktifKullaniciAdi !== 'undefined' && Boolean(aktifKullaniciAdi));
+        const canPreview = isUserOwner ? !isLanding : isAuthenticated;
         const previewBtnHtml = canPreview ? `<button type="button" class="theme-detail-btn is-preview" id="theme-btn-preview">Canlı Önizle</button>` : '';
 
         const safeName = this.escapeHtml(theme.name);
@@ -361,7 +411,28 @@ const ThemeMarket = {
         const buyBtn = document.getElementById('theme-btn-buy');
 
         if (previewBtn) {
-            previewBtn.onclick = () => this.onizlemeBaslat(theme);
+            previewBtn.onclick = async () => {
+                if (!(typeof isOwner !== 'undefined' && isOwner) && typeof aktifKullaniciAdi !== 'undefined' && aktifKullaniciAdi) {
+                    const onay = (typeof EditManager !== 'undefined' && EditManager.Global?.onayKutusuAc)
+                        ? await EditManager.Global.onayKutusuAc({
+                            baslik: 'Kendi Sayfana Dön',
+                            aciklama: 'Bu temayı canlı önizlemek için kendi sayfana dönmek ister misin?',
+                            onayMetni: 'Sayfama Dön',
+                            iptalMetni: 'İptal',
+                            tehlikeliMi: false
+                        })
+                        : window.confirm('Bu temayı canlı önizlemek için kendi sayfana dönmek ister misin?');
+
+                    if (!onay) return;
+                    sessionStorage.setItem('nook_pending_preview_theme', theme.id);
+                    const targetUrl = (typeof buildProfileUrl === 'function')
+                        ? buildProfileUrl(aktifKullaniciAdi)
+                        : `?user=${encodeURIComponent(aktifKullaniciAdi)}`;
+                    window.location.href = targetUrl;
+                    return;
+                }
+                this.onizlemeBaslat(theme);
+            };
         }
 
         if (buyBtn) {

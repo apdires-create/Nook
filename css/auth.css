@@ -160,6 +160,11 @@
     background: rgba(229, 9, 20, 0.15);
     color: #ff8787;
 }
+
+body:not(.is-owner) #nav-item-sections,
+body:not(.is-owner) #nav-item-appearance {
+    display: none;
+}
 /* #endregion */
 
 

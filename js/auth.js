@@ -447,14 +447,21 @@ function authButonMetniniGuncelle() {
     const loginTrigger = document.getElementById('auth-login-trigger');
     const userMenu = document.getElementById('profile-user-menu');
     const profileUserName = document.getElementById('profile-user-name');
+    const navMarketBtn = document.getElementById('nav-market-trigger');
+    const landingMarketBtn = document.getElementById('landing-market-btn');
 
-    if (aktifKullaniciOturumu && aktifKullaniciAdi) {
+    const isAuthenticated = Boolean(aktifKullaniciOturumu && aktifKullaniciAdi);
+    if (isAuthenticated) {
         if (loginTrigger) loginTrigger.style.display = 'none';
         if (userMenu) userMenu.style.display = 'inline-block';
         if (profileUserName) profileUserName.textContent = `@${aktifKullaniciAdi}`;
+        if (navMarketBtn) navMarketBtn.style.display = 'inline-flex';
+        if (landingMarketBtn) landingMarketBtn.style.display = 'inline-flex';
     } else {
         if (loginTrigger) loginTrigger.style.display = 'inline-flex';
         if (userMenu) userMenu.style.display = 'none';
+        if (navMarketBtn) navMarketBtn.style.display = 'none';
+        if (landingMarketBtn) landingMarketBtn.style.display = 'none';
     }
 
     // Sahiplik değişmiş olabilir: "+" alan flag'inin görünürlüğünü güncelle
@@ -966,6 +973,14 @@ function authModaliniBaslat() {
     if (navAccountBtn) {
         navAccountBtn.addEventListener('click', () => {
             if (userDropdown) userDropdown.classList.remove('is-open');
+            const isUserOwner = (typeof isOwner !== 'undefined' && isOwner);
+            if (!isUserOwner && aktifKullaniciAdi) {
+                const targetUrl = (typeof buildProfileUrl === 'function')
+                    ? buildProfileUrl(aktifKullaniciAdi)
+                    : `?user=${encodeURIComponent(aktifKullaniciAdi)}`;
+                window.location.href = targetUrl;
+                return;
+            }
             modaliAc('account');
         });
     }
