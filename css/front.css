@@ -35,7 +35,10 @@
     height: clamp(40px, 6.2cqh, 50px);
     padding: 0;
     border-radius: 0 12px 12px 0;
-    border: none;
+    border: 1px solid var(--border-soft);
+    border-left: none;
+    background: color-mix(in oklch, var(--bg-card) 92%, transparent);
+    box-shadow: var(--shadow-row);
     cursor: pointer;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -55,81 +58,56 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
-    transition: transform 0.3s ease;
+    color: var(--flag-ink, var(--text-secondary));
+    transition: transform 0.3s ease, color 0.22s ease;
 }
 
-/* 🟥 Gaming Canlı Kırmızı/Yakut Ribbon */
+/* 🟥 Gaming (Yakut) */
 .card-flag-btn.flag-trophies {
-    background: linear-gradient(135deg, #ff3b56 0%, #e03131 65%, #c92a2a 100%);
-    box-shadow: 4px 4px 14px rgba(224, 49, 49, 0.45), 2px 2px 6px rgba(0, 0, 0, 0.4);
+    --flag-color: #e03131;
+    --flag-ink: #ff5c72;
 }
 
-.card-flag-btn.flag-trophies:hover {
-    transform: translateX(4px) scale(1.04);
-    box-shadow: 6px 4px 20px rgba(255, 59, 86, 0.65), 2px 2px 8px rgba(0, 0, 0, 0.4);
-    filter: brightness(1.1);
-}
-
-.stage.has-companion-open.is-gaming-mode .card-flag-btn.flag-trophies {
-    transform: translateX(3px);
-    box-shadow: 0 0 24px rgba(255, 59, 86, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
-    filter: brightness(1.15);
-}
-
-/* 🟩 Widgets Canlı Zümrüt Ribbon */
+/* 🟩 Widgets (Zümrüt) */
 .card-flag-btn.flag-widgets {
-    background: linear-gradient(135deg, #20c997 0%, #12b886 60%, #099268 100%);
-    box-shadow: 4px 4px 14px rgba(18, 184, 134, 0.45), 2px 2px 6px rgba(0, 0, 0, 0.4);
+    --flag-color: #12b886;
+    --flag-ink: #20c997;
 }
 
-.card-flag-btn.flag-widgets:hover {
-    transform: translateX(4px) scale(1.04);
-    box-shadow: 6px 4px 20px rgba(32, 201, 151, 0.65), 2px 2px 8px rgba(0, 0, 0, 0.4);
-    filter: brightness(1.1);
-}
-
-.stage.has-companion-open.is-widgets-mode .card-flag-btn.flag-widgets {
-    transform: translateX(3px);
-    box-shadow: 0 0 24px rgba(32, 201, 151, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
-    filter: brightness(1.15);
-}
-
-/* 🟨 Trophies (Başarılar) Altın/Kehribar Ribbon */
+/* 🟨 Trophies (Kehribar) */
 .card-flag-btn.flag-achievements {
-    background: linear-gradient(135deg, #fcc419 0%, #f59f00 60%, #e67700 100%);
-    box-shadow: 4px 4px 14px rgba(245, 159, 0, 0.45), 2px 2px 6px rgba(0, 0, 0, 0.4);
+    --flag-color: #e67700;
+    --flag-ink: #fcc419;
 }
 
-.card-flag-btn.flag-achievements:hover {
-    transform: translateX(4px) scale(1.04);
-    box-shadow: 6px 4px 20px rgba(252, 196, 25, 0.65), 2px 2px 8px rgba(0, 0, 0, 0.4);
-    filter: brightness(1.1);
-}
-
-.stage.has-companion-open.is-achievements-mode .card-flag-btn.flag-achievements {
-    transform: translateX(3px);
-    box-shadow: 0 0 24px rgba(252, 196, 25, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
-    filter: brightness(1.15);
-}
-
-/* 🟦 Showcase Canlı Mavi/Safir Ribbon */
+/* 🟦 Showcase (Safir) */
 .card-flag-btn.flag-showcase {
-    background: linear-gradient(135deg, #228be6 0%, #1c7ed6 60%, #1864ab 100%);
-    box-shadow: 4px 4px 14px rgba(34, 139, 230, 0.45), 2px 2px 6px rgba(0, 0, 0, 0.4);
+    --flag-color: #1c7ed6;
+    --flag-ink: #4dabf7;
 }
 
-.card-flag-btn.flag-showcase:hover {
-    transform: translateX(4px) scale(1.04);
-    box-shadow: 6px 4px 20px rgba(34, 139, 230, 0.65), 2px 2px 8px rgba(0, 0, 0, 0.4);
-    filter: brightness(1.1);
-}
+:root[data-mode="light"] .card-flag-btn.flag-trophies { --flag-ink: #c92a2a; }
+:root[data-mode="light"] .card-flag-btn.flag-widgets { --flag-ink: #099268; }
+:root[data-mode="light"] .card-flag-btn.flag-achievements { --flag-ink: #d97706; }
+:root[data-mode="light"] .card-flag-btn.flag-showcase { --flag-ink: #1864ab; }
 
+.card-flag-btn:not(.flag-add):hover,
+.stage.has-companion-open.is-gaming-mode .card-flag-btn.flag-trophies,
+.stage.has-companion-open.is-widgets-mode .card-flag-btn.flag-widgets,
+.stage.has-companion-open.is-achievements-mode .card-flag-btn.flag-achievements,
 .stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase {
-    transform: translateX(3px);
-    box-shadow: 0 0 24px rgba(34, 139, 230, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
-    filter: brightness(1.15);
+    background: var(--flag-color);
+    border-color: var(--flag-color);
+    box-shadow: 0 4px 14px color-mix(in oklch, var(--flag-color) 35%, transparent);
+    transform: translateX(4px) scale(1.03);
+}
+
+.card-flag-btn:not(.flag-add):hover .flag-icon,
+.stage.has-companion-open.is-gaming-mode .card-flag-btn.flag-trophies .flag-icon,
+.stage.has-companion-open.is-widgets-mode .card-flag-btn.flag-widgets .flag-icon,
+.stage.has-companion-open.is-achievements-mode .card-flag-btn.flag-achievements .flag-icon,
+.stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase .flag-icon {
+    color: #ffffff;
 }
 
 /* ➕ Alan Ekle Flag'i (Yalnızca sahip, nötr cam görünüm + kesik çizgili kenar) */
@@ -181,7 +159,8 @@ body:not(.is-owner) #nav-item-sections {
     width: clamp(40px, 8cqw, 50px);
     height: clamp(40px, 8cqw, 50px);
     border-radius: 50%;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    border-left: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-elevated);
 }
 
 .stage:not(.has-companion-open) .card-container.is-flipped .card-flag-btn:hover {
