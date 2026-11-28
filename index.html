@@ -7,16 +7,41 @@
     <title>Nook</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Erken Tema & Font Bootstrap (Zero Waste Critical Asset Loading) -->
+    <meta name="theme-color" content="#0b0e14">
+    <!-- Merkezi Tema Kaydı & Erken Bootstrap (Zero Waste Critical Asset Loading) -->
     <script>
+        window.NOOK_THEME_REGISTRY = {
+            'default': {
+                id: 'default',
+                name: 'Nook Orijinal',
+                description: 'Klasik, dengeli ve zarif varsayılan Nook kart deneyimi.',
+                banner_icon: '✨',
+                font: 'Montserrat & Roboto Mono',
+                font_url: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;700&display=swap',
+                price_cents: 0,
+                is_active: true
+            },
+            'obsidian-minimal': {
+                id: 'obsidian-minimal',
+                name: 'Obsidian Minimal',
+                description: 'Mat siyah zemin, monokrom tipografi, keskin hatlar ve lüks editoryal kart estetiği.',
+                banner_icon: '🖤',
+                font: 'Cormorant Garamond & Plus Jakarta Sans',
+                font_url: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap',
+                price_cents: 500,
+                is_active: true,
+                checkout_url: 'https://apdires.gumroad.com/l/obsidian-minimal'
+            }
+        };
+
         (function() {
             try {
                 var path = window.location.pathname;
                 var cleanPath = path.replace(/^\/Nook\/?/i, '/');
                 var match = cleanPath.match(/^\/@([a-zA-Z0-9_]{3,20})(?:\/.*)?$/);
                 var user = match ? match[1] : new URLSearchParams(window.location.search).get('user');
+                var registry = window.NOOK_THEME_REGISTRY || {};
                 var themeId = 'default';
-                var fontUrl = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap';
                 var primaryColor = null;
                 var ownerMode = 'dark';
 
@@ -51,19 +76,17 @@
                 var effectiveMode = visitorOverride || ownerMode;
                 document.documentElement.setAttribute('data-mode', effectiveMode);
 
-                if (themeId === 'obsidian-minimal') {
-                    fontUrl = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap';
+                var themeMeta = document.querySelector('meta[name="theme-color"]');
+                if (themeMeta) {
+                    themeMeta.setAttribute('content', effectiveMode === 'light' ? '#f3f5fa' : '#0b0e14');
                 }
+
+                var themeEntry = registry[themeId] || registry['default'];
+                var fontUrl = (themeEntry && themeEntry.font_url) || 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;700&display=swap';
 
                 if (themeId !== 'default') {
                     document.documentElement.setAttribute('data-theme', themeId);
-                    
-                    var themeLink = document.createElement('link');
-                    themeLink.id = 'nook-theme-stylesheet';
-                    themeLink.rel = 'stylesheet';
-                    themeLink.setAttribute('data-loaded-theme', themeId);
-                    themeLink.href = 'themes/' + themeId + '/theme.css';
-                    document.head.appendChild(themeLink);
+                    window.__nookBootThemeId = themeId;
                 }
 
                 if (primaryColor) {
@@ -76,7 +99,8 @@
                         var r = parseInt(hex.slice(0, 2), 16) / 255;
                         var g = parseInt(hex.slice(2, 4), 16) / 255;
                         var b = parseInt(hex.slice(4, 6), 16) / 255;
-                        var lum = 0.2126 * Math.pow(r, 2.2) + 0.7152 * Math.pow(g, 2.2) + 0.0722 * Math.pow(b, 2.2);
+                        var lin = function(c) { return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+                        var lum = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
                         document.documentElement.style.setProperty('--accent-contrast', lum > 0.36 ? '#0b0d12' : '#ffffff');
                     }
                 }
@@ -90,7 +114,6 @@
         })();
     </script>
     <meta name="description" content="Sana ait kişisel bir köşe: sevdiğin yapımları sırala, rekorlarını sergile ve kimliğini tek bir kartta paylaş.">
-    <meta name="theme-color" content="#0b0e14">
     <meta name="referrer" content="no-referrer-when-downgrade">
 
     <!-- Favicon & PWA İkonları -->
@@ -126,6 +149,16 @@
     <link rel="stylesheet" href="css/modal.css">
     <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="css/onboarding.css">
+    <script>
+        if (window.__nookBootThemeId) {
+            var themeLink = document.createElement('link');
+            themeLink.id = 'nook-theme-stylesheet';
+            themeLink.rel = 'stylesheet';
+            themeLink.setAttribute('data-loaded-theme', window.__nookBootThemeId);
+            themeLink.href = 'themes/' + window.__nookBootThemeId + '/theme.css';
+            document.head.appendChild(themeLink);
+        }
+    </script>
 
     <script>
         // Profil açılıyorsa ilk frame'den itibaren siyah yükleme ekranını hazırla

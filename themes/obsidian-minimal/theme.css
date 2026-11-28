@@ -295,8 +295,11 @@
 [data-theme="obsidian-minimal"] .bio-zone,
 [data-theme="obsidian-minimal"] .tags-zone,
 [data-theme="obsidian-minimal"] .avatar-box,
+[data-theme="obsidian-minimal"] .back-links-container,
 [data-theme="obsidian-minimal"] .companion-header,
-[data-theme="obsidian-minimal"] .companion-body {
+[data-theme="obsidian-minimal"] .companion-body,
+[data-theme="obsidian-minimal"] .companion-footer,
+[data-theme="obsidian-minimal"] .add-section-card-inner {
     position: relative;
     z-index: 5;
 }
@@ -310,111 +313,123 @@
 }
 
 [data-theme="obsidian-minimal"] .profile-name {
-    font-family: var(--font-display) !important;
-    font-size: var(--cq-fs-name) !important;
-    font-weight: 600 !important;
-    letter-spacing: -0.015em !important;
-    line-height: 1.15 !important;
-    color: var(--text-primary) !important;
+    font-family: var(--font-display);
+    font-size: var(--cq-fs-name);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    color: var(--text-primary);
 }
 
 [data-theme="obsidian-minimal"] .profile-title {
-    font-family: var(--font-body) !important;
-    font-size: var(--cq-fs-subtitle) !important;
-    letter-spacing: 0.18em !important;
-    text-transform: uppercase !important;
-    font-style: italic !important;
-    font-weight: 500 !important;
-    color: var(--text-secondary) !important;
+    font-family: var(--font-body);
+    font-size: var(--cq-fs-subtitle);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--text-secondary);
 }
 
 [data-theme="obsidian-minimal"] .profile-bio {
-    font-family: var(--font-body) !important;
-    font-size: var(--cq-fs-body) !important;
-    font-weight: 400 !important;
-    line-height: 1.6 !important;
-    color: var(--text-secondary) !important;
-    letter-spacing: 0.01em !important;
+    font-family: var(--font-body);
+    font-size: var(--cq-fs-body);
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    letter-spacing: 0.01em;
 }
 
 [data-theme="obsidian-minimal"] .back-links-title,
 [data-theme="obsidian-minimal"] .companion-title {
-    font-family: var(--font-display) !important;
-    font-size: var(--cq-fs-title) !important;
-    letter-spacing: 0.04em !important;
-    font-weight: 600 !important;
+    font-family: var(--font-display);
+    font-size: var(--cq-fs-title);
+    letter-spacing: 0.04em;
+    font-weight: 600;
 }
 
 /* ----------------------------------------------------
    5. BİLEŞENLER, TAG'LER & BUTONLAR (GÖMÜLÜ PLAKA DİLİ)
    ---------------------------------------------------- */
 /* 5.1. Tag Hapları -> Lüks Oyulmuş Dikdörtgen Plakalar */
-[data-theme="obsidian-minimal"] .tag-pill,
+[data-theme="obsidian-minimal"] .tag-pill:where(:not(.tag-add-pill)),
 [data-theme="obsidian-minimal"] .nook-tag {
-    border-radius: var(--radius-pill) !important;
-    background: var(--surface-1) !important;
-    border: 1px solid var(--border-soft) !important;
-    font-family: var(--font-body) !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.03em !important;
-    color: var(--text-secondary) !important;
-    box-shadow: var(--shadow-row) !important;
+    border-radius: var(--radius-pill);
+    background: var(--surface-1);
+    border: 1px solid var(--border-soft);
+    font-family: var(--font-body);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: var(--text-secondary);
+    box-shadow: var(--shadow-row);
     transition: background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-[data-theme="obsidian-minimal"] .tag-pill:hover,
+[data-theme="obsidian-minimal"] body.is-owner .tag-pill:not(.tag-add-pill) {
+    transition: background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="obsidian-minimal"] .tag-pill:where(:not(.tag-add-pill)):hover,
 [data-theme="obsidian-minimal"] .nook-tag:hover {
-    background: var(--accent-surface) !important;
-    border-color: var(--border-highlight) !important;
-    color: var(--text-primary) !important;
+    background: var(--accent-surface);
+    border-color: var(--border-highlight);
+    color: var(--text-primary);
     transform: translateY(-2px);
     box-shadow: var(--shadow-row-hover),
-                0 0 14px var(--accent-glow) !important;
+                0 0 14px var(--accent-glow);
 }
 
-[data-theme="obsidian-minimal"] .tag-pill:active,
+[data-theme="obsidian-minimal"] .tag-pill:where(:not(.tag-add-pill)):active,
 [data-theme="obsidian-minimal"] .nook-tag:active {
     transform: translateY(0) scale(0.97);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 /* 5.2. Arka Yüz Bağlantı Satırları (.nook-link-row / .link-item) */
 [data-theme="obsidian-minimal"] .nook-link-row,
 [data-theme="obsidian-minimal"] .link-item {
-    border-radius: var(--radius-item) !important;
-    background: var(--surface-1) !important;
-    border: 1px solid var(--border-soft) !important;
-    box-shadow: var(--shadow-row) !important;
+    border-radius: var(--radius-item);
+    box-shadow: var(--shadow-row);
     transition: background 0.24s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
                 transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="obsidian-minimal"] .nook-link-row:where(:not(.is-expanded):not(.is-dragging)),
+[data-theme="obsidian-minimal"] .link-item:where(:not(.is-expanded):not(.is-dragging)) {
+    background: var(--surface-1);
+    border: 1px solid var(--border-soft);
 }
 
 [data-theme="obsidian-minimal"] .nook-link-icon {
-    border-radius: 6px !important;
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-soft) !important;
-    transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), background 0.24s ease !important;
+    border-radius: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-soft);
+    transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), background 0.24s ease;
 }
 
 [data-theme="obsidian-minimal"] .nook-link-row:hover,
 [data-theme="obsidian-minimal"] .link-item:hover {
-    background: var(--accent-surface) !important;
-    border-color: var(--border-highlight) !important;
+    background: var(--accent-surface);
+    border-color: var(--border-highlight);
     transform: translateY(-2px);
     box-shadow: var(--shadow-row-hover),
-                0 0 16px var(--accent-glow) !important;
+                0 0 16px var(--accent-glow);
 }
 
 [data-theme="obsidian-minimal"] .nook-link-row:hover .nook-link-icon {
     transform: scale(1.06);
-    background: var(--accent-surface-hover) !important;
-    border-color: var(--accent-color) !important;
+    background: var(--accent-surface-hover);
+    border-color: var(--accent-color);
 }
 
 [data-theme="obsidian-minimal"] .nook-link-row:active,
@@ -424,36 +439,38 @@
 
 /* 5.3. Showcase & Trophies Liste Satırları (.companion-row-item) */
 [data-theme="obsidian-minimal"] .companion-row-item {
-    border-radius: var(--radius-item) !important;
-    background: var(--surface-1) !important;
-    border: 1px solid var(--border-soft) !important;
-    box-shadow: var(--shadow-row) !important;
+    border-radius: var(--radius-item);
+    background: var(--surface-1);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-row);
     transition: background 0.24s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
                 transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+[data-theme="obsidian-minimal"] #trophiesCompanionCard .companion-row-icon-wrap,
 [data-theme="obsidian-minimal"] .companion-row-icon-wrap {
-    border-radius: 6px !important;
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-soft) !important;
-    transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), background 0.24s ease !important;
+    border-radius: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-soft);
+    transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), background 0.24s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
     [data-theme="obsidian-minimal"] body:not(.is-pointer-dragging) .companion-row-item:hover {
-        background: var(--accent-surface) !important;
-        border-color: var(--border-highlight) !important;
+        background: var(--accent-surface);
+        border-color: var(--border-highlight);
         transform: translateY(-2px);
         box-shadow: var(--shadow-row-hover),
-                    0 0 16px var(--accent-glow) !important;
+                    0 0 16px var(--accent-glow);
     }
 
+    [data-theme="obsidian-minimal"] body:not(.is-pointer-dragging) #trophiesCompanionCard .companion-row-item:hover .companion-row-icon-wrap,
     [data-theme="obsidian-minimal"] body:not(.is-pointer-dragging) .companion-row-item:hover .companion-row-icon-wrap {
         transform: scale(1.06);
-        background: var(--accent-surface-hover) !important;
-        border-color: var(--accent-color) !important;
+        background: var(--accent-surface-hover);
+        border-color: var(--accent-color);
     }
 }
 
@@ -466,32 +483,32 @@
    6. SAĞ KENAR KULAKÇIKLARI (RIBBON FLAGS)
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] .card-flag-btn {
-    border-radius: 0 8px 8px 0 !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-left: none !important;
-    background: #13141b !important;
-    box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.6) !important;
+    border-radius: 0 8px 8px 0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: none;
+    background: #13141b;
+    box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.6);
 }
 
 [data-theme="obsidian-minimal"] .stage:not(.has-companion-open) .card-container.is-flipped .card-flag-btn {
-    border-radius: 50% !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 50%;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 [data-theme="obsidian-minimal"] .card-flag-btn.flag-add .flag-icon {
-    color: rgba(255, 255, 255, 0.6) !important;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 [data-theme="obsidian-minimal"] .card-flag-btn.flag-add:hover {
-    background: #ffffff !important;
-    border-color: #ffffff !important;
-    box-shadow: 0 0 16px rgba(255, 255, 255, 0.2) !important;
+    background: #ffffff;
+    border-color: #ffffff;
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="obsidian-minimal"] .card-flag-btn.flag-add:hover .flag-icon,
 [data-theme="obsidian-minimal"] .card-flag-btn.flag-add:hover .flag-icon svg {
-    color: #000000 !important;
-    stroke: #000000 !important;
+    color: #000000;
+    stroke: #000000;
 }
 
 /* Hover & Aktif Durumda Butonun Tamamı İkon Rengine Dönüşür */
@@ -500,9 +517,9 @@
 [data-theme="obsidian-minimal"] .stage.has-companion-open.is-widgets-mode .card-flag-btn.flag-widgets,
 [data-theme="obsidian-minimal"] .stage.has-companion-open.is-achievements-mode .card-flag-btn.flag-achievements,
 [data-theme="obsidian-minimal"] .stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase {
-    background: var(--flag-color) !important;
-    border-color: var(--flag-color) !important;
-    box-shadow: 0 4px 16px color-mix(in oklch, var(--flag-color) 38%, transparent) !important;
+    background: var(--flag-color);
+    border-color: var(--flag-color);
+    box-shadow: 0 4px 16px color-mix(in oklch, var(--flag-color) 38%, transparent);
 }
 
 [data-theme="obsidian-minimal"] .card-flag-btn:not(.flag-add):hover .flag-icon,
@@ -510,7 +527,7 @@
 [data-theme="obsidian-minimal"] .stage.has-companion-open.is-widgets-mode .card-flag-btn.flag-widgets .flag-icon,
 [data-theme="obsidian-minimal"] .stage.has-companion-open.is-achievements-mode .card-flag-btn.flag-achievements .flag-icon,
 [data-theme="obsidian-minimal"] .stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase .flag-icon {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 [data-theme="obsidian-minimal"] .card-flag-btn:not(.flag-add):hover .flag-icon svg,
@@ -518,56 +535,56 @@
 [data-theme="obsidian-minimal"] .stage.has-companion-open.is-widgets-mode .card-flag-btn.flag-widgets .flag-icon svg,
 [data-theme="obsidian-minimal"] .stage.has-companion-open.is-achievements-mode .card-flag-btn.flag-achievements .flag-icon svg,
 [data-theme="obsidian-minimal"] .stage.has-companion-open.is-showcase-active .card-flag-btn.flag-showcase .flag-icon svg {
-    stroke: #ffffff !important;
+    stroke: #ffffff;
 }
 
 /* Aydınlık Modda Obsidian Minimal Ribbon Flags */
 [data-theme="obsidian-minimal"][data-mode="light"] .card-flag-btn {
-    border: 1px solid var(--border-soft) !important;
-    border-left: none !important;
-    background: var(--bg-card) !important;
-    box-shadow: var(--shadow-row) !important;
+    border: 1px solid var(--border-soft);
+    border-left: none;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-row);
 }
 
 [data-theme="obsidian-minimal"][data-mode="light"] .card-flag-btn.flag-add .flag-icon {
-    color: var(--text-secondary) !important;
+    color: var(--text-secondary);
 }
 
 [data-theme="obsidian-minimal"][data-mode="light"] .card-flag-btn.flag-add:hover {
-    background: var(--surface-hover) !important;
-    border-color: var(--accent-color) !important;
-    box-shadow: var(--shadow-elevated) !important;
+    background: var(--surface-hover);
+    border-color: var(--accent-color);
+    box-shadow: var(--shadow-elevated);
 }
 
 [data-theme="obsidian-minimal"][data-mode="light"] .card-flag-btn.flag-add:hover .flag-icon,
 [data-theme="obsidian-minimal"][data-mode="light"] .card-flag-btn.flag-add:hover .flag-icon svg {
-    color: var(--text-primary) !important;
-    stroke: var(--text-primary) !important;
+    color: var(--text-primary);
+    stroke: var(--text-primary);
 }
 
 [data-theme="obsidian-minimal"][data-mode="light"] .stage:not(.has-companion-open) .card-container.is-flipped .card-flag-btn {
-    border-left: 1px solid var(--border-soft) !important;
+    border-left: 1px solid var(--border-soft);
 }
 
 /* ----------------------------------------------------
    7. COMPANION KARTLAR (TROPHIES & SHOWCASE)
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] .companion-card {
-    background: var(--bg-card) !important;
-    border: var(--card-border) !important;
-    border-radius: var(--card-radius) !important;
-    box-shadow: var(--card-shadow) !important;
+    background: var(--bg-card);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
 }
 
 [data-theme="obsidian-minimal"] .companion-header {
-    border-bottom: 1px solid var(--border-soft) !important;
+    border-bottom: 1px solid var(--border-soft);
 }
 
-[data-theme="obsidian-minimal"] .icon-trophies,
-[data-theme="obsidian-minimal"] .icon-showcase {
-    background: var(--surface-2) !important;
-    border: 1px solid var(--border-soft) !important;
-    color: var(--text-primary) !important;
+[data-theme="obsidian-minimal"] .companion-brand .icon-trophies,
+[data-theme="obsidian-minimal"] .companion-brand .icon-showcase {
+    background: var(--surface-2);
+    border: 1px solid var(--border-soft);
+    color: var(--text-primary);
 }
 
 /* ----------------------------------------------------
@@ -575,151 +592,151 @@
    ---------------------------------------------------- */
 /* 8.1. Liste İçerik Kartı (Normal ve Büyük Genişlemiş Durum) */
 [data-theme="obsidian-minimal"] .top-item-card {
-    background: var(--surface-1) !important;
-    border-width: 1px !important;
-    border-style: solid !important;
+    background: var(--surface-1);
+    border-width: 1px;
+    border-style: solid;
     border-color: var(--border-soft);
-    border-radius: var(--radius-item) !important;
-    box-shadow: var(--shadow-row) !important;
+    border-radius: var(--radius-item);
+    box-shadow: var(--shadow-row);
 }
 
 /* 💎 Obsidian Hiyerarşi & Madalya Kenarlıkları (Cevher / Mineral Işıltısı) */
 /* 🥇 Altın (Gold Obsidian): Sıcak şampanya altın cevheri ve ışıltısı */
 [data-theme="obsidian-minimal"] .top-item-card.tier-gold {
-    border-color: rgba(245, 158, 11, 0.55) !important;
+    border-color: rgba(245, 158, 11, 0.55);
     box-shadow: inset 0 1px 0 rgba(245, 158, 11, 0.25),
                 0 4px 16px rgba(0, 0, 0, 0.5),
-                0 0 14px rgba(245, 158, 11, 0.18) !important;
+                0 0 14px rgba(245, 158, 11, 0.18);
 }
 [data-theme="obsidian-minimal"] .top-item-rank.tier-gold {
-    color: #fbbf24 !important;
-    background: rgba(245, 158, 11, 0.12) !important;
-    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 /* 🥈 Gümüş (Silver / Platin): Buzul platin parlaklığı, soğuk titanyum aurası */
 [data-theme="obsidian-minimal"] .top-item-card.tier-silver {
-    border-color: color-mix(in oklch, var(--color-tier-silver) 55%, transparent) !important;
+    border-color: color-mix(in oklch, var(--color-tier-silver) 55%, transparent);
     box-shadow: var(--shadow-row),
-                0 0 14px var(--color-tier-silver-glow) !important;
+                0 0 14px var(--color-tier-silver-glow);
 }
 [data-theme="obsidian-minimal"] .top-item-rank.tier-silver {
-    color: var(--color-tier-silver) !important;
-    background: var(--color-tier-silver-bg) !important;
-    border: 1px solid var(--color-tier-silver-border) !important;
+    color: var(--color-tier-silver);
+    background: var(--color-tier-silver-bg);
+    border: 1px solid var(--color-tier-silver-border);
 }
 
 /* 🥉 Bronz (Deep Copper / Amber): Derin kehribar bakır ışıltısı */
 [data-theme="obsidian-minimal"] .top-item-card.tier-bronze {
-    border-color: rgba(249, 115, 22, 0.45) !important;
+    border-color: rgba(249, 115, 22, 0.45);
     box-shadow: inset 0 1px 0 rgba(249, 115, 22, 0.2),
                 0 4px 16px rgba(0, 0, 0, 0.5),
-                0 0 14px rgba(234, 88, 12, 0.15) !important;
+                0 0 14px rgba(234, 88, 12, 0.15);
 }
 [data-theme="obsidian-minimal"] .top-item-rank.tier-bronze {
-    color: #fb923c !important;
-    background: rgba(234, 88, 12, 0.12) !important;
-    border: 1px solid rgba(249, 115, 22, 0.28) !important;
+    color: #fb923c;
+    background: rgba(234, 88, 12, 0.12);
+    border: 1px solid rgba(249, 115, 22, 0.28);
 }
 
 [data-theme="obsidian-minimal"] .top-item-thumb {
-    border-radius: 6px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 /* Büyük Genişlemiş Kart Durumu */
 [data-theme="obsidian-minimal"] .top-item-card.is-expanded {
-    background: var(--accent-surface) !important;
-    border-color: var(--border-highlight) !important;
+    background: var(--accent-surface);
+    border-color: var(--border-highlight);
     box-shadow: var(--shadow-row-hover),
-                0 0 20px var(--accent-glow) !important;
+                0 0 20px var(--accent-glow);
 }
 
 /* 8.2. Kullanıcı Yorumu Çekmecesi (Editoryal Alıntı Bloğu) */
 [data-theme="obsidian-minimal"] .top-item-review-drawer {
-    background: var(--surface-recessed) !important;
-    border: 1px solid var(--border-soft) !important;
-    border-left: 2.5px solid var(--accent-color) !important;
-    border-radius: var(--radius-item) !important;
-    box-shadow: var(--shadow-row) !important;
+    background: var(--surface-recessed);
+    border: 1px solid var(--border-soft);
+    border-left: 2.5px solid var(--accent-color);
+    border-radius: var(--radius-item);
+    box-shadow: var(--shadow-row);
 }
 
 [data-theme="obsidian-minimal"] .user-review-header {
-    color: var(--accent-ink) !important;
-    font-family: var(--font-body) !important;
-    letter-spacing: 0.12em !important;
+    color: var(--accent-ink);
+    font-family: var(--font-body);
+    letter-spacing: 0.12em;
 }
 
 [data-theme="obsidian-minimal"] .user-review-text {
-    color: var(--text-secondary) !important;
-    font-family: var(--font-body) !important;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
 }
 
 [data-theme="obsidian-minimal"] .user-review-textarea {
-    background: var(--surface-recessed) !important;
-    border: 1px solid var(--border-soft) !important;
-    border-radius: 6px !important;
-    color: var(--text-primary) !important;
-    font-family: var(--font-body) !important;
+    background: var(--surface-recessed);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
 }
 
 [data-theme="obsidian-minimal"] .user-review-textarea:focus {
-    border-color: var(--accent-color) !important;
-    box-shadow: 0 0 12px var(--accent-glow) !important;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 12px var(--accent-glow);
 }
 
 /* 8.3. Düzenleme ve Kategori Ayar Formları (.tops-modal-panel) */
 [data-theme="obsidian-minimal"] .tops-modal-panel {
-    background: var(--modal-bg) !important;
-    border: var(--modal-border) !important;
-    border-radius: var(--radius-modal) !important;
+    background: var(--modal-bg);
+    border: var(--modal-border);
+    border-radius: var(--radius-modal);
 }
 
 [data-theme="obsidian-minimal"] .tops-modal-title {
-    font-family: var(--font-display) !important;
-    letter-spacing: 0.02em !important;
+    font-family: var(--font-display);
+    letter-spacing: 0.02em;
 }
 
 [data-theme="obsidian-minimal"] .tops-type-btn {
-    border-radius: 6px !important;
-    background: var(--surface-1) !important;
-    border: 1px solid var(--border-soft) !important;
+    border-radius: 6px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-soft);
 }
 
 [data-theme="obsidian-minimal"] .tops-type-btn:hover {
-    background: var(--accent-surface) !important;
-    border-color: var(--border-highlight) !important;
+    background: var(--accent-surface);
+    border-color: var(--border-highlight);
 }
 
 [data-theme="obsidian-minimal"] .tops-type-btn.is-active {
-    background: var(--accent-surface-hover) !important;
-    border-color: var(--accent-color) !important;
-    color: var(--text-primary) !important;
-    box-shadow: 0 0 14px var(--accent-glow) !important;
+    background: var(--accent-surface-hover);
+    border-color: var(--accent-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 14px var(--accent-glow);
 }
 
 [data-theme="obsidian-minimal"] .tops-search-item {
-    border-radius: 6px !important;
-    background: var(--surface-1) !important;
-    border: 1px solid var(--border-soft) !important;
+    border-radius: 6px;
+    background: var(--surface-1);
+    border: 1px solid var(--border-soft);
 }
 
 [data-theme="obsidian-minimal"] .tops-search-item:hover {
-    background: var(--accent-surface) !important;
-    border-color: var(--border-highlight) !important;
+    background: var(--accent-surface);
+    border-color: var(--border-highlight);
 }
 
 /* ----------------------------------------------------
    9. AVATAR & BANNER DOKUNUŞLARI
    ---------------------------------------------------- */
 [data-theme="obsidian-minimal"] .avatar-box {
-    border: 2px solid var(--border-highlight) !important;
-    box-shadow: var(--shadow-avatar) !important;
+    border: 2px solid var(--border-highlight);
+    box-shadow: var(--shadow-avatar);
 }
 
 [data-theme="obsidian-minimal"] .banner-box {
-    border-bottom: 1px solid var(--border-soft) !important;
+    border-bottom: 1px solid var(--border-soft);
 }
 
 /* ----------------------------------------------------

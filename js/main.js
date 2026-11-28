@@ -150,12 +150,17 @@ async function editModunuYukle() {
         document.head.appendChild(linkCropper);
     }
 
-    // 2. Owner CSS
+    // 2. Owner CSS (Tema cascade'ini bozmamak için theme.css varsa öncesine eklenir)
     if (!document.querySelector('link[href*="owner.css"]')) {
         const linkOwner = document.createElement('link');
         linkOwner.rel = 'stylesheet';
         linkOwner.href = 'css/owner.css';
-        document.head.appendChild(linkOwner);
+        const themeLink = document.getElementById('nook-theme-stylesheet');
+        if (themeLink && themeLink.parentNode === document.head) {
+            document.head.insertBefore(linkOwner, themeLink);
+        } else {
+            document.head.appendChild(linkOwner);
+        }
     }
 
     // 3. Cropper.js Script

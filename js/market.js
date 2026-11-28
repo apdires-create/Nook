@@ -12,20 +12,22 @@ const ThemeMarket = {
     selectedTheme: null,
     userInventory: new Set(['default']), // Varsayılan temaya herkes sahiptir
 
-    // Varsayılan / Fallback Katalog Verileri (Sadece gerçek tema ürünleri listelenir)
-    themesCatalog: [
-        {
-            id: 'obsidian-minimal',
-            name: 'Obsidian Minimal',
-            description: 'Mat siyah zemin, monokrom tipografi, keskin hatlar ve lüks editoryal kart estetiği.',
-            price_cents: 500,
-            is_active: true,
-            checkout_url: 'https://apdires.gumroad.com/l/obsidian-minimal',
-            banner_icon: '🖤',
-            font: 'Cormorant Garamond & Plus Jakarta Sans',
-            font_url: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
-        }
-    ],
+    // Merkezi ThemeManager kayıt defterinden başlatılan katalog (DB verisiyle güncellenir)
+    themesCatalog: (typeof ThemeManager !== 'undefined' && typeof ThemeManager.getThemeCatalog === 'function')
+        ? ThemeManager.getThemeCatalog({ excludeDefault: true })
+        : [
+            {
+                id: 'obsidian-minimal',
+                name: 'Obsidian Minimal',
+                description: 'Mat siyah zemin, monokrom tipografi, keskin hatlar ve lüks editoryal kart estetiği.',
+                price_cents: 500,
+                is_active: true,
+                checkout_url: 'https://apdires.gumroad.com/l/obsidian-minimal',
+                banner_icon: '🖤',
+                font: 'Cormorant Garamond & Plus Jakarta Sans',
+                font_url: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
+            }
+        ],
 
     previewBarEl: null,
     originalThemeId: null,
@@ -187,19 +189,25 @@ const ThemeMarket = {
             if (!error && Array.isArray(data) && data.length > 0) {
                 data.forEach(remoteTheme => {
                     const localIdx = this.themesCatalog.findIndex(t => t.id === remoteTheme.id);
+                    let mergedTheme;
                     if (localIdx >= 0) {
-                        this.themesCatalog[localIdx] = {
+                        mergedTheme = {
                             ...this.themesCatalog[localIdx],
                             ...remoteTheme,
                             checkout_url: this.themesCatalog[localIdx].checkout_url || remoteTheme.checkout_url,
                             variant_id: this.themesCatalog[localIdx].variant_id || remoteTheme.variant_id,
                             banner_icon: this.themesCatalog[localIdx].banner_icon
                         };
+                        this.themesCatalog[localIdx] = mergedTheme;
                     } else {
-                        this.themesCatalog.push({
+                        mergedTheme = {
                             ...remoteTheme,
                             banner_icon: '🎨'
-                        });
+                        };
+                        this.themesCatalog.push(mergedTheme);
+                    }
+                    if (typeof ThemeManager !== 'undefined' && typeof ThemeManager.registerThemeMeta === 'function') {
+                        ThemeManager.registerThemeMeta(mergedTheme);
                     }
                 });
             }
@@ -518,7 +526,8 @@ const ThemeMarket = {
             await ThemeManager.applyTheme(theme.id, {
                 fontUrl: theme.font_url || theme.fontUrl,
                 primaryColor: initialColor,
-                colorMode: ownerMode
+                colorMode: ownerMode,
+                ignoreVisitorOverride: true
             });
         }
 

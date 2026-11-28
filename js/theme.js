@@ -11,10 +11,79 @@ const ThemeManager = {
     linkElementId: 'nook-theme-stylesheet',
     fontLinkElementId: 'nook-theme-fonts',
 
-    // Bilinen temalar için font fallback haritası (DB'den fontUrl gelmese dahi sıçramayı önler)
-    knownThemeFonts: {
-        'default': 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;700&display=swap',
-        'obsidian-minimal': 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
+    // index.html <head> kayıt nesnesi yoksa kullanılacak yedek tema haritası
+    _fallbackRegistry: {
+        'default': {
+            id: 'default',
+            name: 'Nook Orijinal',
+            description: 'Klasik, dengeli ve zarif varsayılan Nook kart deneyimi.',
+            banner_icon: '✨',
+            font: 'Montserrat & Roboto Mono',
+            font_url: 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;700&display=swap',
+            price_cents: 0,
+            is_active: true
+        },
+        'obsidian-minimal': {
+            id: 'obsidian-minimal',
+            name: 'Obsidian Minimal',
+            description: 'Mat siyah zemin, monokrom tipografi, keskin hatlar ve lüks editoryal kart estetiği.',
+            banner_icon: '🖤',
+            font: 'Cormorant Garamond & Plus Jakarta Sans',
+            font_url: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap',
+            price_cents: 500,
+            is_active: true,
+            checkout_url: 'https://apdires.gumroad.com/l/obsidian-minimal'
+        }
+    },
+
+    getRegistry() {
+        if (typeof window !== 'undefined' && window.NOOK_THEME_REGISTRY && typeof window.NOOK_THEME_REGISTRY === 'object') {
+            return window.NOOK_THEME_REGISTRY;
+        }
+        return this._fallbackRegistry;
+    },
+
+    getThemeMeta(themeId) {
+        if (!themeId || typeof themeId !== 'string') return null;
+        return this.getRegistry()[themeId.trim()] || null;
+    },
+
+    getThemeCatalog(options = {}) {
+        const registry = this.getRegistry();
+        return Object.values(registry)
+            .filter(item => item && item.id && (!options.excludeDefault || item.id !== 'default'))
+            .map(item => ({ ...item }));
+    },
+
+    registerThemeMeta(themeMeta) {
+        if (!themeMeta || !this.isValidThemeId(themeMeta.id)) return;
+        const registry = this.getRegistry();
+        const existing = registry[themeMeta.id] || {};
+        registry[themeMeta.id] = {
+            ...existing,
+            ...themeMeta,
+            font_url: themeMeta.font_url || themeMeta.fontUrl || existing.font_url || null,
+            banner_icon: existing.banner_icon || themeMeta.banner_icon || '🎨'
+        };
+    },
+
+    get knownThemeFonts() {
+        const fonts = {};
+        Object.values(this.getRegistry()).forEach(item => {
+            if (item?.id && (item.font_url || item.fontUrl)) {
+                fonts[item.id] = item.font_url || item.fontUrl;
+            }
+        });
+        return fonts;
+    },
+
+    getFontUrl(themeId, candidateFontUrl = null) {
+        if (candidateFontUrl && this.isValidFontUrl(candidateFontUrl)) {
+            return candidateFontUrl;
+        }
+        const meta = this.getThemeMeta(themeId);
+        const registryFont = meta?.font_url || meta?.fontUrl || null;
+        return (registryFont && this.isValidFontUrl(registryFont)) ? registryFont : null;
     },
 
     isValidThemeId(themeId) {
@@ -162,11 +231,9 @@ const ThemeManager = {
         const safeThemeId = themeId.trim();
 
         try {
-            // 1. Font gereksinimi: options'ta güvenli Google Fonts URL'i varsa onu, yoksa bilinenler tablosunu kullan
+            // 1. Font gereksinimi: options'ta güvenli Google Fonts URL'i varsa onu, yoksa merkezi kayıt tablosunu kullan
             const candidateFontUrl = options.fontUrl || options.font_url || null;
-            const fontUrl = (candidateFontUrl && this.isValidFontUrl(candidateFontUrl))
-                ? candidateFontUrl
-                : (this.knownThemeFonts[safeThemeId] || null);
+            const fontUrl = this.getFontUrl(safeThemeId, candidateFontUrl);
             if (fontUrl) {
                 await this._injectFont(fontUrl);
             }
@@ -186,12 +253,17 @@ const ThemeManager = {
                 || 'dark';
             this.setMode(this.resolveEffectiveMode(ownerMode, options));
 
-            // 5. Vurgu rengini uygula (OKLCH formülü kök rengi otomatik türetir)
-            const primaryColor = options.primaryColor || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.primary_color);
+            // 5. Vurgu rengini uygula (belirtilmemişse temanın kendi varsayılanına dönmesi için inline stili temizle)
+            const primaryColor = ('primaryColor' in options)
+                ? options.primaryColor
+                : (typeof kartVerisi !== 'undefined' ? kartVerisi?.theme_config?.primary_color : null);
             if (this.isValidHexColor(primaryColor)) {
                 const trimmed = primaryColor.trim();
                 document.documentElement.style.setProperty('--accent-color', trimmed);
                 this._syncAccentContrast(trimmed);
+            } else {
+                document.documentElement.style.removeProperty('--accent-color');
+                document.documentElement.style.removeProperty('--accent-contrast');
             }
 
             // 6. Konsol veya event bildirimi
@@ -217,7 +289,7 @@ const ThemeManager = {
         }
 
         // Varsayılan Nook fontunu yükle
-        const defaultFontUrl = this.knownThemeFonts['default'];
+        const defaultFontUrl = this.getFontUrl('default');
         if (defaultFontUrl) {
             this._injectFont(defaultFontUrl);
         }
@@ -232,12 +304,17 @@ const ThemeManager = {
             || 'dark';
         this.setMode(this.resolveEffectiveMode(ownerMode, options));
 
-        // Vurgu rengini koru / sıfırla
-        const primaryColor = options.primaryColor || (typeof kartVerisi !== 'undefined' && kartVerisi?.theme_config?.primary_color);
+        // Vurgu rengini koru veya temanın bıraktığı inline değeri sıfırla
+        const primaryColor = ('primaryColor' in options)
+            ? options.primaryColor
+            : (typeof kartVerisi !== 'undefined' ? kartVerisi?.theme_config?.primary_color : null);
         if (this.isValidHexColor(primaryColor)) {
             const trimmed = primaryColor.trim();
             document.documentElement.style.setProperty('--accent-color', trimmed);
             this._syncAccentContrast(trimmed);
+        } else {
+            document.documentElement.style.removeProperty('--accent-color');
+            document.documentElement.style.removeProperty('--accent-contrast');
         }
 
         window.dispatchEvent(new CustomEvent('nook:theme-cleared'));
@@ -278,8 +355,8 @@ const ThemeManager = {
         return new Promise((resolve, reject) => {
             let link = document.getElementById(this.linkElementId);
 
-            // Zaten aynı URL yüklüyse tekrar bekleme
-            if (link && link.getAttribute('data-loaded-theme') === themeId) {
+            // Zaten aynı tema yüklüyse tekrar bekleme
+            if (link && link.getAttribute('data-loaded-theme') === themeId && link.getAttribute('href') === url) {
                 resolve();
                 return;
             }
@@ -291,12 +368,28 @@ const ThemeManager = {
                 document.head.appendChild(link);
             }
 
+            // Aynı URL zaten stylesheet olarak hazırsa anında çöz
+            if (link.getAttribute('href') === url && link.sheet) {
+                link.setAttribute('data-loaded-theme', themeId);
+                resolve();
+                return;
+            }
+
+            link.removeAttribute('data-loaded-theme');
+
+            const cleanup = () => {
+                link.onload = null;
+                link.onerror = null;
+            };
+
             link.onload = () => {
+                cleanup();
                 link.setAttribute('data-loaded-theme', themeId);
                 resolve();
             };
 
-            link.onerror = (err) => {
+            link.onerror = () => {
+                cleanup();
                 reject(new Error(`CSS yüklenemedi: ${url}`));
             };
 
@@ -321,6 +414,20 @@ const ThemeManager = {
             document.head.appendChild(fontLink);
         }
 
+        const loadPromise = new Promise((resolve) => {
+            if (!urlDegisti && fontLink.sheet) {
+                resolve();
+                return;
+            }
+            const done = () => {
+                fontLink.onload = null;
+                fontLink.onerror = null;
+                resolve();
+            };
+            fontLink.onload = done;
+            fontLink.onerror = done;
+        });
+
         if (urlDegisti) {
             fontLink.href = fontUrl;
         }
@@ -329,14 +436,7 @@ const ThemeManager = {
         try {
             await Promise.race([
                 Promise.all([
-                    new Promise((resolve) => {
-                        if (fontLink.sheet) {
-                            resolve();
-                        } else {
-                            fontLink.onload = () => resolve();
-                            fontLink.onerror = () => resolve();
-                        }
-                    }),
+                    loadPromise,
                     (document.fonts && typeof document.fonts.ready !== 'undefined')
                         ? document.fonts.ready
                         : Promise.resolve()

@@ -647,21 +647,36 @@ EditManager.Appearance = {
     tempState: null,
     isPreviewActive: false,
 
-    availableThemes: [
-        {
-            id: 'default',
-            name: 'Nook Orijinal',
-            description: 'Klasik, dengeli ve zarif varsayılan Nook kart deneyimi.',
-            banner_icon: '✨'
-        },
-        {
-            id: 'obsidian-minimal',
-            name: 'Obsidian Minimal',
-            description: 'Mat siyah zemin, monokrom tipografi, keskin hatlar ve lüks editoryal kart estetiği.',
-            banner_icon: '🖤',
-            font_url: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
-        }
-    ],
+    get availableThemes() {
+        const base = (typeof ThemeManager !== 'undefined' && typeof ThemeManager.getThemeCatalog === 'function')
+            ? ThemeManager.getThemeCatalog()
+            : [
+                {
+                    id: 'default',
+                    name: 'Nook Orijinal',
+                    description: 'Klasik, dengeli ve zarif varsayılan Nook kart deneyimi.',
+                    banner_icon: '✨'
+                },
+                {
+                    id: 'obsidian-minimal',
+                    name: 'Obsidian Minimal',
+                    description: 'Mat siyah zemin, monokrom tipografi, keskin hatlar ve lüks editoryal kart estetiği.',
+                    banner_icon: '🖤',
+                    font_url: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
+                }
+            ];
+
+        const extraCatalog = (typeof ThemeMarket !== 'undefined' && Array.isArray(ThemeMarket.themesCatalog))
+            ? ThemeMarket.themesCatalog
+            : [];
+        const byId = new Map(base.map(t => [t.id, t]));
+        extraCatalog.forEach(t => {
+            if (t?.id && !byId.has(t.id)) {
+                byId.set(t.id, t);
+            }
+        });
+        return Array.from(byId.values());
+    },
 
     init() {
         if (this._initialized) return;
